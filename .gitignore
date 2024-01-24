@@ -21,4 +21,8 @@ Thumbs.db
 # Composer
 composer.lock
 
+# phpDocumentor
 .phpdoc
+
+# Temp files
+tmp/

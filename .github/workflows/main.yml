@@ -1,0 +1,39 @@
+name: PHP Composer
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress
+
+    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
+    # Docs: https://getcomposer.org/doc/articles/scripts.md
+
+    # - name: Run test suite
+    #   run: composer run-script test
+
+    ## Check for PHPStan errors.
+    - name: Run PHPStan
+      run: composer run-script phpstan
+
+    ## Check for PHP syntax errors.
+    - name: PHP syntax check
+      run: find src/ -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+
+    ## Check for PHP code style errors.
+    - name: PHP code style check
+      run: composer run-script cs
