@@ -35,9 +35,9 @@ jobs:
         pages: write      # to deploy to Pages
         id-token: write   # to verify the deployment originates from an appropriate source
   
-      # Deploy to the github-pages environment
+      # Deploy to the Documentation environment
       environment:
-        name: github-pages
+        name: Documentation
         url: ${{ steps.deployment.outputs.page_url }}
   
       # Specify runner + deployment step
