@@ -23,7 +23,7 @@ jobs:
             uses: actions/upload-artifact@v4
             with:
               name: github-pages
-              path: ./docs/api
+              path: ./docs
   
     # Deploy job
     deploy:
