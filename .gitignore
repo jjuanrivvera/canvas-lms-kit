@@ -1,0 +1,24 @@
+/vendor/
+.env
+/cache/
+/logs/
+
+# OS and Editor folders
+.DS_Store
+Thumbs.db
+*.swp
+/.idea/
+/.vscode/
+
+# Testing and CI
+#/phpunit.xml
+/test-reports/
+
+# Build artifacts
+/build/
+/dist/
+
+# Composer
+composer.lock
+
+.phpdoc

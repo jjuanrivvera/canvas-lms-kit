@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: php-cli-canvas
+    restart: unless-stopped
+    entrypoint: bash -c "tail -f /dev/null"
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
