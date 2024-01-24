@@ -20,7 +20,7 @@ jobs:
     
           # Upload documentation as an artifact
           - name: Upload Documentation Artifact
-            uses: actions/upload-artifact@v2
+            uses: actions/upload-artifact@v4
             with:
               name: github-pages
               path: ./docs/api
