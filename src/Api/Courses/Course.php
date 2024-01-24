@@ -6,6 +6,7 @@ use CanvasLMS\Config;
 use CanvasLMS\Api\BaseApi;
 use CanvasLMS\Dto\Courses\CreateCourseDTO;
 use CanvasLMS\Dto\Courses\UpdateCourseDTO;
+use CanvasLMS\Exceptions\CanvasApiException;
 
 /**
  * Course Class
@@ -329,6 +330,7 @@ class Course extends BaseApi
      * Create a new Course instance from a CreateCourseDTO
      * @param CreateCourseDTO $dto
      * @return self
+     * @throws CanvasApiException
      */
     private static function createFromDTO(CreateCourseDTO $dto): self
     {
@@ -348,7 +350,6 @@ class Course extends BaseApi
      * @param int $id
      * @param $courseData
      * @return self
-     * @throws \Exception
      */
     public static function update(int $id, $courseData): self
     {
@@ -366,6 +367,7 @@ class Course extends BaseApi
      * @param int $id
      * @param UpdateCourseDTO $dto
      * @return self
+     * @throws CanvasApiException
      */
     private static function updateFromDTO(int $id, UpdateCourseDTO $dto): self
     {
@@ -384,6 +386,7 @@ class Course extends BaseApi
      * Find a course by ID
      * @param int $id
      * @return self
+     * @throws CanvasApiException
      */
     public static function find(int $id): self
     {
@@ -400,6 +403,7 @@ class Course extends BaseApi
      * Fetch all courses
      * @param array $params
      * @return array
+     * @throws CanvasApiException
      */
     public static function fetchAll(array $params = []): array
     {
@@ -424,10 +428,9 @@ class Course extends BaseApi
 
     /**
      * Save the course to the Canvas LMS system
-     * @return void
-     * @throws \Exception
+     * @return bool
      */
-    public function save(): void
+    public function save(): bool
     {
         self::checkApiClient();
 
@@ -440,36 +443,63 @@ class Course extends BaseApi
         $path = $data['id'] ? "/courses/{$this->id}" : "/accounts/{$accountId}/courses";
         $method = $data['id'] ? 'PUT' : 'POST';
 
-        $response = self::$apiClient->request($method, $path, [
-            'multipart' => $dto->toApiArray()
-        ]);
+        try {
+            $response = self::$apiClient->request($method, $path, [
+                'multipart' => $dto->toApiArray()
+            ]);
+        } catch (CanvasApiException $th) {
+            return false;
+        }
 
         $updatedCourseData = json_decode($response->getBody(), true);
         $this->populate($updatedCourseData);
+
+        return true;
     }
 
-    public function delete(): void
+    /**
+     * Delete the course from the Canvas LMS system
+     * @return bool
+     */
+    public function delete(): bool
     {
         self::checkApiClient();
 
-        self::$apiClient->delete("/courses/{$this->id}", [
-            "query" => [
-                "event" => "delete"
-            ]
-        ]);
+        try {
+            self::$apiClient->delete("/courses/{$this->id}", [
+                "query" => [
+                    "event" => "delete"
+                ]
+            ]);
+        } catch (CanvasApiException $th) {
+            return false;
+        }
     }
 
-    public function conclude(): void
+    /**
+     * Conclude the course in the Canvas LMS system
+     * @return bool
+     */
+    public function conclude(): bool
     {
         self::checkApiClient();
 
-        self::$apiClient->delete("/courses/{$this->id}", [
-            "query" => [
-                "event" => "conclude"
-            ]
-        ]);
+        try {
+            self::$apiClient->delete("/courses/{$this->id}", [
+                "query" => [
+                    "event" => "conclude"
+                ]
+            ]);
+        } catch (CanvasApiException $th) {
+            return false;
+        }
     }
 
+    /**
+     * Reset the course in the Canvas LMS system
+     * @return void
+     * @throws CanvasApiException
+     */
     public function reset(): void
     {
         self::checkApiClient();
