@@ -22,7 +22,7 @@ jobs:
           - name: Upload Documentation Artifact
             uses: actions/upload-artifact@v2
             with:
-              name: Documentation
+              name: github-pages
               path: ./docs/api
   
     # Deploy job
@@ -35,9 +35,9 @@ jobs:
         pages: write      # to deploy to Pages
         id-token: write   # to verify the deployment originates from an appropriate source
   
-      # Deploy to the Documentation environment
+      # Deploy to the github-pages environment
       environment:
-        name: Documentation
+        name: github-pages
         url: ${{ steps.deployment.outputs.page_url }}
   
       # Specify runner + deployment step
