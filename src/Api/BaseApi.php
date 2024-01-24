@@ -2,11 +2,10 @@
 
 namespace CanvasLMS\Api;
 
-use CanvasLMS\Http\HttpClient;
-use CanvasLMS\Interfaces\HttpClientInterface;
 use DateTime;
 use Exception;
-
+use CanvasLMS\Http\HttpClient;
+use CanvasLMS\Interfaces\HttpClientInterface;
 
 /**
  *
@@ -19,7 +18,8 @@ abstract class BaseApi
     protected static HttpClientInterface $apiClient;
 
     /**
-     * @param array $data
+     * BaseApi constructor.
+     * @param mixed[] $data
      */
     public function __construct(array $data)
     {
@@ -33,15 +33,17 @@ abstract class BaseApi
     }
 
     /**
-     * @param $apiClient
+     * Set the API client
+     * @param HttpClientInterface $apiClient
      * @return void
      */
-    public static function setApiClient($apiClient): void
+    public static function setApiClient(HttpClientInterface $apiClient): void
     {
         self::$apiClient = $apiClient;
     }
 
     /**
+     * Check if the API client is set, if not, instantiate a new one
      * @return void
      */
     protected static function checkApiClient(): void
@@ -52,30 +54,32 @@ abstract class BaseApi
     }
 
     /**
-     * @return array
+     * Convert the object to an array
+     * @return mixed[]
      */
     protected function toDtoArray(): array
     {
-        $courseData = get_object_vars($this);
+        $data = get_object_vars($this);
 
         // Format DateTime objects and handle other specific transformations
-        foreach ($courseData as $key => &$value) {
+        foreach ($data as $key => &$value) {
             if ($value instanceof DateTime) {
                 $value = $value->format('c'); // Convert DateTime to ISO 8601 string
             }
         }
 
-        return $courseData;
+        return $data;
     }
 
     /**
-     * @param array $courseData
+     * Populate the object with new data
+     * @param mixed[] $data
      * @return void
      * @throws Exception
      */
-    protected function populate(array $courseData): void
+    protected function populate(array $data): void
     {
-        foreach ($courseData as $key => $value) {
+        foreach ($data as $key => $value) {
             $key = str_to_snake_case($key);
             if (property_exists($this, $key)) {
                 $this->{$key} = $this->castValue($key, $value);
@@ -84,8 +88,9 @@ abstract class BaseApi
     }
 
     /**
+     * Cast a value to the correct type
      * @param string $key
-     * @param $value
+     * @param mixed $value
      * @return DateTime|mixed
      * @throws Exception
      */

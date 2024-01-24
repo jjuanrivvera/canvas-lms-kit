@@ -7,6 +7,7 @@ use Psr\Log\LoggerInterface;
 use GuzzleHttp\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\GuzzleException;
+use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Exceptions\MissingApiKeyException;
 use CanvasLMS\Exceptions\MissingBaseUrlException;
@@ -39,7 +40,7 @@ class HttpClient implements HttpClientInterface
     /**
      * Get request
      * @param string $url
-     * @param array $options
+     * @param mixed[] $options
      * @return ResponseInterface
      * @throws GuzzleException
      * @throws MissingApiKeyException
@@ -52,7 +53,7 @@ class HttpClient implements HttpClientInterface
     /**
      * Post request
      * @param string $url
-     * @param array $options
+     * @param mixed[] $options
      * @return ResponseInterface
      * @throws GuzzleException
      * @throws MissingApiKeyException
@@ -65,7 +66,7 @@ class HttpClient implements HttpClientInterface
     /**
      * Put request
      * @param string $url
-     * @param array $options
+     * @param mixed[] $options
      * @return ResponseInterface
      * @throws GuzzleException
      * @throws MissingApiKeyException
@@ -78,7 +79,7 @@ class HttpClient implements HttpClientInterface
     /**
      * Patch request
      * @param string $url
-     * @param array $options
+     * @param mixed[] $options
      * @return ResponseInterface
      * @throws GuzzleException
      * @throws MissingApiKeyException
@@ -91,7 +92,7 @@ class HttpClient implements HttpClientInterface
     /**
      * delete request
      * @param string $url
-     * @param array $options
+     * @param mixed[] $options
      * @return ResponseInterface
      * @throws GuzzleException
      * @throws MissingApiKeyException
@@ -105,7 +106,7 @@ class HttpClient implements HttpClientInterface
      * Make an HTTP request
      * @param string $method
      * @param string $url
-     * @param array $options
+     * @param mixed[] $options
      * @return ResponseInterface
      * @throws GuzzleException
      * @throws MissingApiKeyException
@@ -119,14 +120,14 @@ class HttpClient implements HttpClientInterface
             return $this->client->request($method, $url, $requestOptions);
         } catch (GuzzleException $e) {
             $this->logger->error($e->getMessage());
-            throw $e;
+            throw new CanvasApiException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * @param string $url
-     * @param array $options
-     * @return array
+     * @param mixed[] $options
+     * @return mixed[]
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
      */

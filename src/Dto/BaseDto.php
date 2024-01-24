@@ -11,7 +11,8 @@ use Exception;
 abstract class BaseDto
 {
     /**
-     * @param array $data
+     * BaseDto constructor.
+     * @param mixed[] $data
      * @throws Exception
      */
     public function __construct(array $data)
@@ -26,7 +27,8 @@ abstract class BaseDto
     }
 
     /**
-     * @param $value
+     * Cast the value to the correct type
+     * @param mixed $value
      * @param string $key
      * @return DateTime|mixed
      * @throws Exception
@@ -40,7 +42,8 @@ abstract class BaseDto
     }
 
     /**
-     * @return array
+     * Convert the DTO to an array
+     * @return mixed[]
      */
     public function toArray(): array
     {
@@ -60,7 +63,8 @@ abstract class BaseDto
     }
 
     /**
-     * @return array
+     * Convert the DTO to an array for API requests
+     * @return mixed[]
      */
     public function toApiArray(): array
     {

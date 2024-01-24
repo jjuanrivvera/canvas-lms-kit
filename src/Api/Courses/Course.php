@@ -16,7 +16,7 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * Objects (DTOs) for handling course creation and updates.
  *
  * Usage:
- * 
+ *
  * ```php
  * // Creating a new course
  * $courseData = [
@@ -25,7 +25,7 @@ use CanvasLMS\Exceptions\CanvasApiException;
  *     // ... other course data ...
  * ];
  * $course = Course::create($courseData);
- * 
+ *
  * // Updating an existing course statically
  * $updatedData = [
  *     'name' => 'Advanced Philosophy',
@@ -55,7 +55,7 @@ class Course extends BaseApi
     public int $id;
 
     /**
-     * The SIS identifier for the course, if defined. This field is only included if 
+     * The SIS identifier for the course, if defined. This field is only included if
      * the user has permission to view SIS information.
      * @var string|null
      */
@@ -115,7 +115,7 @@ class Course extends BaseApi
     public ?int $enrollmentTermId = null;
 
     /**
-     * @var array|null
+     * @var mixed[]|null
      */
     public ?array $gradingPeriods = [];
 
@@ -150,7 +150,7 @@ class Course extends BaseApi
     public ?string $locale = null;
 
     /**
-     * @var array|null
+     * @var mixed[]|null
      */
     public ?array $enrollments = [];
 
@@ -160,7 +160,7 @@ class Course extends BaseApi
     public ?int $totalStudents = null;
 
     /**
-     * @var array|null
+     * @var mixed[]|null
      */
     public ?array $calendar = [];
 
@@ -180,12 +180,12 @@ class Course extends BaseApi
     public ?int $needsGradingCount = null;
 
     /**
-     * @var array|null
+     * @var mixed[]|null
      */
     public ?array $term = [];
 
     /**
-     * @var array|null
+     * @var mixed[]|null
      */
     public ?array $courseProgress = [];
 
@@ -195,7 +195,7 @@ class Course extends BaseApi
     public bool $applyAssignmentGroupWeights = false;
 
     /**
-     * @var array|null
+     * @var mixed[]|null
      */
     public ?array $permissions = [];
 
@@ -295,12 +295,12 @@ class Course extends BaseApi
     public bool $blueprint = false;
 
     /**
-     * @var array|null
+     * @var mixed[]|null
      */
     public ?array $blueprintRestrictions = [];
 
     /**
-     * @var array|null
+     * @var mixed[]|null
      */
     public ?array $blueprintRestrictionsByObjectType = [];
 
@@ -311,7 +311,7 @@ class Course extends BaseApi
 
     /**
      * Create a new Course instance
-     * @param $courseData
+     * @param mixed[]|CreateCourseDTO $courseData
      * @return self
      * @throws \Exception
      */
@@ -348,7 +348,7 @@ class Course extends BaseApi
     /**
      * Update an existing course
      * @param int $id
-     * @param $courseData
+     * @param mixed[]|CreateCourseDTO $courseData
      * @return self
      */
     public static function update(int $id, $courseData): self
@@ -401,8 +401,8 @@ class Course extends BaseApi
 
     /**
      * Fetch all courses
-     * @param array $params
-     * @return array
+     * @param mixed[] $params
+     * @return object[]
      * @throws CanvasApiException
      */
     public static function fetchAll(array $params = []): array
@@ -474,6 +474,8 @@ class Course extends BaseApi
         } catch (CanvasApiException $th) {
             return false;
         }
+
+        return true;
     }
 
     /**
@@ -493,6 +495,8 @@ class Course extends BaseApi
         } catch (CanvasApiException $th) {
             return false;
         }
+
+        return true;
     }
 
     /**
