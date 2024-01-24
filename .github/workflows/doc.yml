@@ -12,7 +12,10 @@ jobs:
         steps:
           # Checkout the repository
           - name: Checkout Repository
-            uses: actions/checkout@v2
+            uses: actions/checkout@v4
+
+          - name: Configure GitHub Pages
+            uses: actions/configure-pages@v1
 
           # Generate Documentation
           - name: Generate Documentation
