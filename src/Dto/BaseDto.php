@@ -61,34 +61,4 @@ abstract class BaseDto
 
         return $properties;
     }
-
-    /**
-     * Convert the DTO to an array for API requests
-     * @return mixed[]
-     */
-    public function toApiArray(): array
-    {
-        $properties = get_object_vars($this);
-
-        $modifiedProperties = [];
-
-        foreach ($properties as $key => &$value) {
-            if ($value instanceof DateTime) {
-                $value = $value->format('c'); // Convert DateTime to ISO 8601 string
-            }
-
-            if (empty($value)) {
-                unset($properties[$key]);
-                continue;
-            }
-
-            // Rename keys to this format course[{key}]
-            $modifiedProperties[] = [
-                "name" => 'course[' . str_to_snake_case($key) . ']',
-                "contents" => $value
-            ];
-        }
-
-        return $modifiedProperties;
-    }
 }

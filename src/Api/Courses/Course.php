@@ -402,7 +402,7 @@ class Course extends BaseApi
     /**
      * Fetch all courses
      * @param mixed[] $params
-     * @return object[]
+     * @return Course[]
      * @throws CanvasApiException
      */
     public static function fetchAll(array $params = []): array
@@ -415,15 +415,11 @@ class Course extends BaseApi
             'query' => $params
         ]);
 
-        $coursesData = json_decode($response->getBody(), true);
+        $courses = json_decode($response->getBody(), true);
 
-        $courses = [];
-
-        foreach ($coursesData as $courseData) {
-            $courses[] = new self($courseData);
-        }
-
-        return $courses;
+        return array_map(function ($course) {
+            return new self($course);
+        }, $courses);
     }
 
     /**

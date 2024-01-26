@@ -120,7 +120,8 @@ class HttpClient implements HttpClientInterface
             return $this->client->request($method, $url, $requestOptions);
         } catch (GuzzleException $e) {
             $this->logger->error($e->getMessage());
-            throw new CanvasApiException($e->getMessage(), $e->getCode(), $e);
+            $response = json_decode($e->getResponse()->getBody()->getContents(), true);
+            throw new CanvasApiException($e->getMessage(), $e->getCode(), $response['errors'] ?? []);
         }
     }
 
