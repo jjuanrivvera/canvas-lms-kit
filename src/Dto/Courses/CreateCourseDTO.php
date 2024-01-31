@@ -3,10 +3,10 @@
 namespace CanvasLMS\Dto\Courses;
 
 use DateTime;
-use CanvasLMS\Dto\BaseDto;
+use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
 
-class CreateCourseDTO extends BaseDto implements DTOInterface
+class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
 {
     public string $name = 'Unnamed Course';
     public string $courseCode = '';
@@ -51,7 +51,7 @@ class CreateCourseDTO extends BaseDto implements DTOInterface
 
         foreach ($properties as $key => &$value) {
             if ($value instanceof DateTime) {
-                $value = $value->format('c'); // Convert DateTime to ISO 8601 string
+                $value = $value->format('c');
             }
 
             if (empty($value)) {

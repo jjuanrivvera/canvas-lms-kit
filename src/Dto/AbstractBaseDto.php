@@ -8,7 +8,7 @@ use Exception;
 /**
  *
  */
-abstract class BaseDto
+abstract class AbstractBaseDto
 {
     /**
      * BaseDto constructor.

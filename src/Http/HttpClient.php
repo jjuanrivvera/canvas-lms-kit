@@ -3,6 +3,7 @@
 namespace CanvasLMS\Http;
 
 use CanvasLMS\Config;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
 use GuzzleHttp\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -18,12 +19,12 @@ use CanvasLMS\Exceptions\MissingBaseUrlException;
 class HttpClient implements HttpClientInterface
 {
     /**
-     * @var ClientInterface|\GuzzleHttp\Client
+     * @var ClientInterface
      */
     private ClientInterface $client;
 
     /**
-     * @var LoggerInterface|\Psr\Log\NullLogger
+     * @var LoggerInterface
      */
     private LoggerInterface $logger;
 
@@ -42,8 +43,9 @@ class HttpClient implements HttpClientInterface
      * @param string $url
      * @param mixed[] $options
      * @return ResponseInterface
-     * @throws GuzzleException
+     * @throws CanvasApiException
      * @throws MissingApiKeyException
+     * @throws MissingBaseUrlException
      */
     public function get(string $url, array $options = []): ResponseInterface
     {
@@ -55,8 +57,9 @@ class HttpClient implements HttpClientInterface
      * @param string $url
      * @param mixed[] $options
      * @return ResponseInterface
-     * @throws GuzzleException
+     * @throws CanvasApiException
      * @throws MissingApiKeyException
+     * @throws MissingBaseUrlException
      */
     public function post(string $url, array $options = []): ResponseInterface
     {
@@ -68,8 +71,9 @@ class HttpClient implements HttpClientInterface
      * @param string $url
      * @param mixed[] $options
      * @return ResponseInterface
-     * @throws GuzzleException
+     * @throws CanvasApiException
      * @throws MissingApiKeyException
+     * @throws MissingBaseUrlException
      */
     public function put(string $url, array $options = []): ResponseInterface
     {
@@ -81,8 +85,9 @@ class HttpClient implements HttpClientInterface
      * @param string $url
      * @param mixed[] $options
      * @return ResponseInterface
-     * @throws GuzzleException
+     * @throws CanvasApiException
      * @throws MissingApiKeyException
+     * @throws MissingBaseUrlException
      */
     public function patch(string $url, array $options = []): ResponseInterface
     {
@@ -94,8 +99,9 @@ class HttpClient implements HttpClientInterface
      * @param string $url
      * @param mixed[] $options
      * @return ResponseInterface
-     * @throws GuzzleException
+     * @throws CanvasApiException
      * @throws MissingApiKeyException
+     * @throws MissingBaseUrlException
      */
     public function delete(string $url, array $options = []): ResponseInterface
     {
@@ -108,9 +114,9 @@ class HttpClient implements HttpClientInterface
      * @param string $url
      * @param mixed[] $options
      * @return ResponseInterface
-     * @throws GuzzleException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     * @throws CanvasApiException
      */
     public function request(string $method, string $url, array $options = []): ResponseInterface
     {
@@ -118,10 +124,12 @@ class HttpClient implements HttpClientInterface
             $requestOptions = $this->prepareDefaultOptions($url, $options);
 
             return $this->client->request($method, $url, $requestOptions);
-        } catch (GuzzleException $e) {
+        } catch (RequestException $e) {
             $this->logger->error($e->getMessage());
             $response = json_decode($e->getResponse()->getBody()->getContents(), true);
             throw new CanvasApiException($e->getMessage(), $e->getCode(), $response['errors'] ?? []);
+        } catch (GuzzleException $e) {
+            throw new CanvasApiException($e->getMessage(), $e->getCode(), []);
         }
     }
 

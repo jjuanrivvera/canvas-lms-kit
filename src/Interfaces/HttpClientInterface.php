@@ -2,6 +2,7 @@
 
 namespace CanvasLMS\Interfaces;
 
+use CanvasLMS\Exceptions\CanvasApiException;
 use Psr\Http\Message\ResponseInterface;
 
 interface HttpClientInterface
@@ -10,6 +11,7 @@ interface HttpClientInterface
      * Get request
      * @param string $url
      * @param mixed[] $options
+     * @throws CanvasApiException
      * @return ResponseInterface
      */
     public function get(string $url, array $options = []): ResponseInterface;
@@ -18,6 +20,7 @@ interface HttpClientInterface
      * Post request
      * @param string $url
      * @param mixed[] $options
+     * @throws CanvasApiException
      * @return ResponseInterface
      */
     public function post(string $url, array $options = []): ResponseInterface;
@@ -26,6 +29,7 @@ interface HttpClientInterface
      * Put request
      * @param string $url
      * @param mixed[] $options
+     * @throws CanvasApiException
      * @return ResponseInterface
      */
     public function put(string $url, array $options = []): ResponseInterface;
@@ -34,6 +38,7 @@ interface HttpClientInterface
      * Patch request
      * @param string $url
      * @param mixed[] $options
+     * @throws CanvasApiException
      * @return ResponseInterface
      */
     public function patch(string $url, array $options = []): ResponseInterface;
@@ -42,6 +47,7 @@ interface HttpClientInterface
      * Delete request
      * @param string $url
      * @param mixed[] $options
+     * @throws CanvasApiException
      * @return ResponseInterface
      */
     public function delete(string $url, array $options = []): ResponseInterface;
@@ -51,6 +57,7 @@ interface HttpClientInterface
      * @param string $method
      * @param string $url
      * @param mixed[] $options
+     * @throws CanvasApiException
      * @return ResponseInterface
      */
     public function request(string $method, string $url, array $options = []): ResponseInterface;

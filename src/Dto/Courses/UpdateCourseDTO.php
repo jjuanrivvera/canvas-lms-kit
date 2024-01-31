@@ -3,10 +3,10 @@
 namespace CanvasLMS\Dto\Courses;
 
 use DateTime;
-use CanvasLMS\Dto\BaseDto;
+use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
 
-class UpdateCourseDTO extends BaseDto implements DTOInterface
+class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
 {
     /**
      * @var int|null The unique ID of the account to move the course to.
@@ -24,16 +24,17 @@ class UpdateCourseDTO extends BaseDto implements DTOInterface
     public ?string $courseCode = null;
 
     /**
-     * @var \DateTime|null Course start date in ISO8601 format, e.g. 2011-01-01T01:00Z.
-     * This value is ignored unless ‘restrict_enrollments_to_course_dates’ is set to true, or the course is already published.
+     * @var DateTime|null Course start date in ISO8601 format, e.g. 2011-01-01T01:00Z.
+     * This value is ignored unless ‘restrict_enrollments_to_course_dates’ is set to true,
+     * or the course is already published.
      */
-    public ?\DateTime $startAt = null;
+    public ?DateTime $startAt = null;
 
     /**
-     * @var \DateTime|null Course end date in ISO8601 format, e.g. 2011-01-01T01:00Z.
+     * @var DateTime|null Course end date in ISO8601 format, e.g. 2011-01-01T01:00Z.
      * This value is ignored unless ‘restrict_enrollments_to_course_dates’ is set to true.
      */
-    public ?\DateTime $endAt = null;
+    public ?DateTime $endAt = null;
 
     /**
      * @var string|null The name of the licensing.
@@ -101,7 +102,8 @@ class UpdateCourseDTO extends BaseDto implements DTOInterface
 
     /**
      * @var bool|null Set to true to restrict user enrollments to the start and end dates of the course.
-     * Setting this value to false will remove the course end date (if it exists), as well as the course start date (if the course is unpublished).
+     * Setting this value to false will remove the course end date (if it exists),
+     * as well as the course start date (if the course is unpublished).
      */
     public ?bool $restrictEnrollmentsToCourseDates = null;
 
@@ -126,7 +128,8 @@ class UpdateCourseDTO extends BaseDto implements DTOInterface
     public ?bool $hideFinalGrades = null;
 
     /**
-     * @var string|null The time zone for the course. Allowed time zones are IANA time zones or friendlier Ruby on Rails time zones.
+     * @var string|null The time zone for the course.
+     * Allowed time zones are IANA time zones or friendlier Ruby on Rails time zones.
      */
     public ?string $timeZone = null;
 
@@ -136,7 +139,8 @@ class UpdateCourseDTO extends BaseDto implements DTOInterface
     public ?bool $applyAssignmentGroupWeights = null;
 
     /**
-     * @var int|null Set the storage quota for the course, in megabytes. The caller must have the “Manage storage quotas” account permission.
+     * @var int|null Set the storage quota for the course, in megabytes.
+     * The caller must have the “Manage storage quotas” account permission.
      */
     public ?int $storageQuotaMb = null;
 
@@ -163,7 +167,8 @@ class UpdateCourseDTO extends BaseDto implements DTOInterface
     public ?string $syllabusBody = null;
 
     /**
-     * @var bool|null Indicates whether the Course Summary (consisting of the course’s assignments and calendar events) is displayed on the syllabus page. Defaults to true.
+     * @var bool|null Indicates whether the Course Summary (consisting of the course’s assignments and calendar events)
+     * is displayed on the syllabus page. Defaults to true.
      */
     public ?bool $syllabusCourseSummary = null;
 
@@ -184,8 +189,8 @@ class UpdateCourseDTO extends BaseDto implements DTOInterface
     public ?string $courseFormat = null;
 
     /**
-     * @var int|null This is a file ID corresponding to an image file in the course that will be used as the course image.
-     * This will clear the course’s image_url setting if set.
+     * @var int|null This is a file ID corresponding to an image file in the course that will be used
+     * as the course image. This will clear the course’s image_url setting if set.
      * If you attempt to provide image_url and image_id in a request it will fail.
      */
     public ?int $imageId = null;
@@ -203,7 +208,8 @@ class UpdateCourseDTO extends BaseDto implements DTOInterface
     public ?bool $removeImage = null;
 
     /**
-     * @var bool|null If this option is set to true, the course banner image url and course banner image ID are both set to nil.
+     * @var bool|null If this option is set to true,
+     * the course banner image url and course banner image ID are both set to nil.
      */
     public ?bool $removeBannerImage = null;
 
@@ -213,12 +219,14 @@ class UpdateCourseDTO extends BaseDto implements DTOInterface
     public ?bool $blueprint = null;
 
     /**
-     * @var bool|null When enabled, the blueprint_restrictions parameter will be ignored in favor of the blueprint_restrictions_by_object_type parameter.
+     * @var bool|null When enabled, the blueprint_restrictions parameter
+     * will be ignored in favor of the blueprint_restrictions_by_object_type parameter.
      */
     public ?bool $useBlueprintRestrictionsByObjectType = null;
 
     /**
-     * @var array|null Allows setting multiple Blueprint Restriction to apply to blueprint course objects of the matching type when restricted.
+     * @var mixed[]|null Allows setting multiple Blueprint Restriction to
+     * apply to blueprint course objects of the matching type when restricted.
      * The possible object types are “assignment”, “attachment”, “discussion_topic”, “quiz” and “wiki_page”.
      */
     public ?array $blueprintRestrictionsByObjectType = null;
@@ -231,13 +239,15 @@ class UpdateCourseDTO extends BaseDto implements DTOInterface
 
     /**
      * @var string|null Syncs enrollments from the homeroom that is set in homeroom_course_id.
-     * The setting only takes effect when the course is associated with a Canvas for Elementary-enabled account and sync_enrollments_from_homeroom is enabled.
+     * The setting only takes effect when the course is associated with a Canvas for
+     * Elementary-enabled account and sync_enrollments_from_homeroom is enabled.
      */
     public ?string $syncEnrollmentsFromHomeroom = null;
 
     /**
      * @var string|null Sets the Homeroom Course id to be used with sync_enrollments_from_homeroom.
-     * The setting only takes effect when the course is associated with a Canvas for Elementary-enabled account and sync_enrollments_from_homeroom is enabled.
+     * The setting only takes effect when the course is associated with a
+     * Canvas for Elementary-enabled account and sync_enrollments_from_homeroom is enabled.
      */
     public ?string $homeroomCourseId = null;
 
