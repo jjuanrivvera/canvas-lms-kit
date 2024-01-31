@@ -2,10 +2,11 @@
 
 namespace CanvasLMS\Dto\Users;
 
-use CanvasLMS\Dto\BaseDto;
+use DateTimeInterface;
+use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
 
-class CreateUserDTO extends BaseDto implements DTOInterface
+class CreateUserDTO extends AbstractBaseDto implements DTOInterface
 {
     public string $name;
     public ?string $shortName;
@@ -39,7 +40,7 @@ class CreateUserDTO extends BaseDto implements DTOInterface
 
         foreach ($properties as $key => $value) {
             if ($value instanceof \DateTime) {
-                $value = $value->format(\DateTime::ATOM); // Convert DateTime to ISO 8601 string
+                $value = $value->format(DateTimeInterface::ATOM); // Convert DateTime to ISO 8601 string
             }
 
             if (empty($value)) {
@@ -48,11 +49,22 @@ class CreateUserDTO extends BaseDto implements DTOInterface
 
             // The user-related properties need to be wrapped under the 'user' key
             // The pseudonym and communication channel properties will be wrapped under their respective keys
-            $apiKeyName = match($key) {
-                'uniqueId', 'password', 'sisUserId', 'integrationId', 
-                'sendConfirmation', 'forceSelfRegistration', 'authenticationProviderId' => 'pseudonym[' . str_to_snake_case($key) . ']',
-                'communicationType', 'communicationAddress', 'confirmationUrl', 'skipConfirmation' => 'communication_channel[' . str_to_snake_case(substr($key, strlen('communication'))) . ']',
-                'destination', 'initialEnrollmentType', 'pairingCode' => str_to_snake_case($key),
+            $apiKeyName = match ($key) {
+                'uniqueId',
+                'password',
+                'sisUserId',
+                'integrationId',
+                'sendConfirmation',
+                'forceSelfRegistration',
+                'authenticationProviderId' => 'pseudonym[' . str_to_snake_case($key) . ']',
+                'communicationType',
+                'communicationAddress',
+                'confirmationUrl',
+                'skipConfirmation' =>
+                'communication_channel[' . str_to_snake_case(substr($key, strlen('communication'))) . ']',
+                'destination',
+                'initialEnrollmentType',
+                'pairingCode' => str_to_snake_case($key),
                 default => 'user[' . str_to_snake_case($key) . ']'
             };
 

@@ -2,9 +2,12 @@
 
 namespace CanvasLMS\Api\Users;
 
-use CanvasLMS\Api\BaseApi;
-use CanvasLMS\Dto\Users\CreateUserDTO;
+use Exception;
+use CanvasLMS\Config;
+use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Dto\Users\UpdateUserDTO;
+use CanvasLMS\Dto\Users\CreateUserDTO;
+use CanvasLMS\Exceptions\CanvasApiException;
 
 /**
  * User Class
@@ -35,7 +38,7 @@ use CanvasLMS\Dto\Users\UpdateUserDTO;
  *
  * @package CanvasLMS\Api
  */
-class User extends BaseApi
+class User extends AbstractBaseApi
 {
     /**
      * The ID of the user.
@@ -121,7 +124,7 @@ class User extends BaseApi
      * Optional: This field can be requested with certain API calls, and will return
      * a list of the users active enrollments. See the List enrollments API for more
      * details about the format of these records.
-     * @var array|null
+     * @var mixed[]|null
      */
     public ?array $enrollments;
 
@@ -161,8 +164,9 @@ class User extends BaseApi
 
     /**
      * Create a new User instance.
-     * @param array $userData
+     * @param mixed[] $userData
      * @return self
+     * @throws Exception
      */
     public static function create(array $userData): self
     {
@@ -175,6 +179,7 @@ class User extends BaseApi
      * Create a User from a CreateUserDTO.
      * @param CreateUserDTO $dto
      * @return self
+     * @throws CanvasApiException
      */
     private static function createFromDTO(CreateUserDTO $dto): self
     {
@@ -186,6 +191,9 @@ class User extends BaseApi
         return new self(json_decode($response->getBody(), true));
     }
 
+    /**
+     * @throws CanvasApiException
+     */
     public static function find(int $id): self
     {
         self::checkApiClient();
@@ -204,13 +212,16 @@ class User extends BaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get('/accounts/1/users', [
+        $accountId = Config::getAccountId();
+
+        $response = self::$apiClient->get("/accounts/{$accountId}/users", [
             'query' => $params
         ]);
+
         $users = json_decode($response->getBody(), true);
 
-        return array_map(function($user) {
-            new self($user);
+        return array_map(function ($user) {
+            return new self($user);
         }, $users);
     }
 }
