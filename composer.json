@@ -40,8 +40,8 @@
     "type": "library",
     "scripts": {
         "test": "phpunit tests --testdox",
-        "cs": "phpcs --standard=PSR2 src",
-        "cs-fix": "phpcbf --standard=PSR2 src",
+        "cs": "phpcs --standard=PSR12 src",
+        "cs-fix": "phpcbf --standard=PSR12 src",
         "phpstan": "phpstan"
     },
     "require-dev": {
