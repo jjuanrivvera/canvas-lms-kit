@@ -431,7 +431,6 @@ class Course extends AbstractBaseApi
         self::checkApiClient();
 
         $data = $this->toDtoArray();
-
         $accountId = Config::getAccountId();
 
         // If the course has an ID, update it. Otherwise, create it.
@@ -443,12 +442,12 @@ class Course extends AbstractBaseApi
             $response = self::$apiClient->request($method, $path, [
                 'multipart' => $dto->toApiArray()
             ]);
+
+            $updatedCourseData = json_decode($response->getBody(), true);
+            $this->populate($updatedCourseData);
         } catch (CanvasApiException $th) {
             return false;
         }
-
-        $updatedCourseData = json_decode($response->getBody(), true);
-        $this->populate($updatedCourseData);
 
         return true;
     }

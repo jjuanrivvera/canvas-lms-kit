@@ -257,4 +257,54 @@ class User extends AbstractBaseApi
             return new self($user);
         }, $users);
     }
+
+    /**
+     * Save the user to the Canvas LMS.
+     * @return bool
+     */
+    public function save(): bool
+    {
+        self::checkApiClient();
+
+        $data = $this->toDtoArray();
+        $accountId = Config::getAccountId();
+
+        // If the user has an ID, update it. Otherwise, create a new user.
+        $dto = $this->id ? new UpdateUserDTO($data) : new CreateUserDTO($data);
+        $path = $this->id ? "/users/{$this->id}" : "/accounts/{$accountId}/users";
+        $method = $this->id ? 'PUT' : 'POST';
+
+        try {
+            $response = self::$apiClient->request($method, $path, [
+                'multipart' => $dto->toApiArray()
+            ]);
+
+            $updatedUserData = json_decode($response->getBody(), true);
+            $this->populate($updatedUserData);
+        } catch (CanvasApiException $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Merge current user into another one
+     * @param int $destinationUserId The ID of the user to merge into
+     * @return bool
+     */
+    public function mergeInto(int $destinationUserId): bool
+    {
+        self::checkApiClient();
+
+        try {
+            $response = self::$apiClient->put("/users/{$this->id}/merge_into/{$destinationUserId}");
+
+            $this->populate(json_decode($response->getBody(), true));
+        } catch (CanvasApiException $e) {
+            return false;
+        }
+
+        return true;
+    }
 }
