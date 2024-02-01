@@ -1,4 +1,4 @@
-# CanvasLMS PHP SDK Library
+# CanvasLMS PHP Tool Kit
 
 This library provides a PHP SDK for the Canvas Learning Management System (Canvas LMS). It's designed to facilitate developers in integrating with the Canvas LMS API, enabling efficient management of courses, users, and other features provided by the Canvas LMS API.
 
@@ -13,7 +13,7 @@ This library provides a PHP SDK for the Canvas Learning Management System (Canva
 Install the library via Composer:
 
 ```bash
-composer require jjuanrivvera/canvaslms-php-sdk
+composer require jjuanrivvera/canvas-lms-kit
 ```
 
 Ensure your `composer.json` file includes the necessary dependencies.
