@@ -356,11 +356,7 @@ class Course extends AbstractBaseApi
      */
     public static function update(int $id, array | UpdateCourseDTO $courseData): self
     {
-        self::checkApiClient();
-
-        if (is_array($courseData)) {
-            $courseData = new UpdateCourseDTO($courseData);
-        }
+        $courseData = is_array($courseData) ? new UpdateCourseDTO($courseData) : $courseData;
 
         return self::updateFromDTO($id, $courseData);
     }

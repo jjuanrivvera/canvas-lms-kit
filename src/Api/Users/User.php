@@ -203,6 +203,39 @@ class User extends AbstractBaseApi
     }
 
     /**
+     * Update an existing user.
+     * @param int $id
+     * @param UpdateUserDTO|mixed[] $userData
+     * @return self
+     * @throws CanvasApiException
+     * @throws Exception
+     */
+    public static function update(int $id, array | UpdateUserDTO $userData): self
+    {
+        $userData = is_array($userData) ? new UpdateUserDTO($userData) : $userData;
+
+        return self::updateFromDTO($id, $userData);
+    }
+
+    /**
+     * Update a user from a UpdateUserDTO.
+     * @param int $id
+     * @param UpdateUserDTO $dto
+     * @return self
+     * @throws CanvasApiException
+     */
+    private static function updateFromDTO(int $id, UpdateUserDTO $dto): self
+    {
+        self::checkApiClient();
+
+        $response = self::$apiClient->put("/users/{$id}", [
+            'multipart' => $dto->toApiArray()
+        ]);
+
+        return new self(json_decode($response->getBody(), true));
+    }
+
+    /**
      * Fetch all courses
      * @param mixed[] $params
      * @return User[]
