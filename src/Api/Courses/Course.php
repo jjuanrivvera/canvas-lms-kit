@@ -320,9 +320,7 @@ class Course extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (is_array($courseData)) {
-            $courseData = new CreateCourseDTO($courseData);
-        }
+        $courseData = is_array($courseData) ? new CreateCourseDTO($courseData) : $courseData;
 
         return self::createFromDTO($courseData);
     }

@@ -33,17 +33,36 @@ class CourseTest extends TestCase
     }
 
     /**
+     * Course data provider
+     * @return array
+     */
+    public static function courseDataProvider(): array
+    {
+        return [
+            [
+                [
+                    'name' => 'Test Course',
+                    'courseCode' => 'TC101',
+                ],
+                [
+                    'id' => 1,
+                    'name' => 'Test Course',
+                    'courseCode' => 'TC101',
+                ]
+            ],
+        ];
+    }
+
+    /**
      * Test the create course method
+     * @dataProvider courseDataProvider
+     * @param array $courseData
+     * @param array $expectedResult
      * @return void
      */
-    public function testCreateCourse(): void
+    public function testCreateCourse(array $courseData, array $expectedResult): void
     {
-        $courseData = [
-            'name' => 'Test Course',
-            'courseCode' => 'TC101',
-        ];
-
-        $response = new Response(200, [], json_encode(['id' => 1, 'name' => 'Test Course']));
+        $response = new Response(200, [], json_encode($expectedResult));
         
         $this->httpClientMock
             ->method('post')
@@ -57,20 +76,31 @@ class CourseTest extends TestCase
 
     /**
      * Test the create course method with DTO
+     * @dataProvider courseDataProvider
+     * @param array $courseData
+     * @param array $expectedResult
      * @return void
      */
-    public function testCreateCourseWithDto(): void
+    public function testCreateCourseWithDto(array $courseData, array $expectedResult): void
     {
-        $courseData = new CreateCourseDTO(['name' => 'Test Course', 'courseCode' => 'TC101']);
-
-        $response = new Response(200, [], json_encode(['id' => 1, 'name' => 'Test Course']));
-        
+        $courseData = new CreateCourseDTO($courseData);
+        $expectedPayload = $courseData->toApiArray();
+    
+        $response = new Response(200, [], json_encode($expectedResult));
+    
         $this->httpClientMock
+            ->expects($this->once())
             ->method('post')
+            ->with(
+                $this->equalTo('/accounts/1/courses'),
+                $this->callback(function ($subject) use ($expectedPayload) {
+                    return $subject['multipart'] === $expectedPayload;
+                })
+            )
             ->willReturn($response);
-
+    
         $course = Course::create($courseData);
-        
+    
         $this->assertInstanceOf(Course::class, $course);
         $this->assertEquals('Test Course', $course->getName());
     }
@@ -138,7 +168,37 @@ class CourseTest extends TestCase
      * Test the save course method
      * @return void
      */
-    public function testSaveCourseReturnsFalseOnException(): void
+    public function testSaveCourse(): void
+    {
+        $this->course->setId(1);
+        $this->course->setName('Test Course');
+
+        $responseBody = json_encode(['id' => 1, 'name' => 'Test Course']);
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with(
+                $this->equalTo('PUT'),
+                $this->stringContains("/courses/{$this->course->getId()}"),
+                $this->callback(function ($options) {
+                    return true;
+                })
+            )
+            ->willReturn($response);
+
+        $result = $this->course->save();
+
+        $this->assertTrue($result, 'The save method should return true on successful save.');
+        $this->assertEquals('Test Course', $this->course->getName(), 'The course name should be updated after saving.');
+    }
+
+    /**
+     * Test the save course method
+     * @return void
+     */
+    public function testSaveCourseShouldReturnFalseWhenApiThrowsException(): void
     {
         $this->course->setId(1);
         $this->course->setName('Test Course');

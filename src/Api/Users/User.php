@@ -164,14 +164,16 @@ class User extends AbstractBaseApi
 
     /**
      * Create a new User instance.
-     * @param mixed[] $userData
+     * @param mixed[]|CreateUserDTO $userData
      * @return self
      * @throws Exception
      */
-    public static function create(array $userData): self
+    public static function create(array | CreateUserDTO $userData): self
     {
         self::checkApiClient();
-        $userData = new CreateUserDTO($userData);
+
+        $userData = is_array($userData) ? new CreateUserDTO($userData) : $userData;
+
         return self::createFromDTO($userData);
     }
 
