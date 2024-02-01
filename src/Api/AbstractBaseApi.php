@@ -10,7 +10,7 @@ use CanvasLMS\Interfaces\HttpClientInterface;
 /**
  *
  */
-abstract class BaseApi
+abstract class AbstractBaseApi
 {
     /**
      * @var HttpClientInterface
@@ -94,7 +94,7 @@ abstract class BaseApi
      * @return DateTime|mixed
      * @throws Exception
      */
-    protected function castValue(string $key, $value)
+    protected function castValue(string $key, mixed $value): mixed
     {
         if (in_array($key, ['startAt', 'endAt']) && is_string($value)) {
             return new DateTime($value);

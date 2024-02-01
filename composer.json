@@ -39,9 +39,15 @@
     "version": "0.0.1",
     "type": "library",
     "scripts": {
-        "test": "phpunit --bootstrap vendor/autoload.php tests",
-        "cs": "phpcs --standard=PSR2 src",
-        "cs-fix": "phpcbf --standard=PSR2 src",
+        "check": [
+            "@cs-fix",
+            "@cs",
+            "@phpstan",
+            "@test"
+        ],
+        "test": "phpunit tests --testdox",
+        "cs": "phpcs --standard=PSR12 src",
+        "cs-fix": "phpcbf --standard=PSR12 src",
         "phpstan": "phpstan"
     },
     "require-dev": {
@@ -49,6 +55,12 @@
         "squizlabs/php_codesniffer": "^3.6",
         "phpstan/phpstan": "^1.10"
     },
+    "config": {
+		"sort-packages": true,
+        "platform": {
+            "php": "8.1"
+        }
+	},
     "license": "MIT",
     "authors": [
         {
@@ -59,7 +71,8 @@
     "require": {
         "guzzlehttp/guzzle": "^7.3",
         "psr/log": "^3.0",
-        "ext-json": "*"
+        "ext-json": "*",
+        "php": "^8.1"
     },
     "autoload": {
         "psr-4": {
@@ -68,5 +81,10 @@
         "files": [
             "src/Utilities/Helpers.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
     }
 }
