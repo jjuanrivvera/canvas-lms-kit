@@ -53,7 +53,7 @@ class User extends AbstractBaseApi
     public string $name;
 
     /**
-     * The name of the user that is should be used for sorting groups of users, such
+     * The name of the user that it should be used for sorting groups of users, such
      * as in the gradebook.
      * @var string
      */
@@ -261,6 +261,7 @@ class User extends AbstractBaseApi
     /**
      * Save the user to the Canvas LMS.
      * @return bool
+     * @throws Exception
      */
     public function save(): bool
     {
@@ -292,6 +293,7 @@ class User extends AbstractBaseApi
      * Merge current user into another one
      * @param int $destinationUserId The ID of the user to merge into
      * @return bool
+     * @throws Exception
      */
     public function mergeInto(int $destinationUserId): bool
     {
@@ -306,5 +308,293 @@ class User extends AbstractBaseApi
         }
 
         return true;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSortableName(): string
+    {
+        return $this->sortableName;
+    }
+
+    /**
+     * @param string $sortableName
+     */
+    public function setSortableName(string $sortableName): void
+    {
+        $this->sortableName = $sortableName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLastName(): string
+    {
+        return $this->lastName;
+    }
+
+    /**
+     * @param string $lastName
+     */
+    public function setLastName(string $lastName): void
+    {
+        $this->lastName = $lastName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFirstName(): string
+    {
+        return $this->firstName;
+    }
+
+    /**
+     * @param string $firstName
+     */
+    public function setFirstName(string $firstName): void
+    {
+        $this->firstName = $firstName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getShortName(): string
+    {
+        return $this->shortName;
+    }
+
+    /**
+     * @param string $shortName
+     */
+    public function setShortName(string $shortName): void
+    {
+        $this->shortName = $shortName;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSisUserId(): ?string
+    {
+        return $this->sisUserId;
+    }
+
+    /**
+     * @param string|null $sisUserId
+     */
+    public function setSisUserId(?string $sisUserId): void
+    {
+        $this->sisUserId = $sisUserId;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getSisImportId(): ?int
+    {
+        return $this->sisImportId;
+    }
+
+    /**
+     * @param int|null $sisImportId
+     */
+    public function setSisImportId(?int $sisImportId): void
+    {
+        $this->sisImportId = $sisImportId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getIntegrationId(): ?string
+    {
+        return $this->integrationId;
+    }
+
+    /**
+     * @param string|null $integrationId
+     */
+    public function setIntegrationId(?string $integrationId): void
+    {
+        $this->integrationId = $integrationId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLoginId(): string
+    {
+        return $this->loginId;
+    }
+
+    /**
+     * @param string $loginId
+     */
+    public function setLoginId(string $loginId): void
+    {
+        $this->loginId = $loginId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAvatarUrl(): ?string
+    {
+        return $this->avatarUrl;
+    }
+
+    /**
+     * @param string|null $avatarUrl
+     */
+    public function setAvatarUrl(?string $avatarUrl): void
+    {
+        $this->avatarUrl = $avatarUrl;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAvatarState(): ?string
+    {
+        return $this->avatarState;
+    }
+
+    /**
+     * @param string|null $avatarState
+     */
+    public function setAvatarState(?string $avatarState): void
+    {
+        $this->avatarState = $avatarState;
+    }
+
+    /**
+     * @return mixed[]|null
+     */
+    public function getEnrollments(): ?array
+    {
+        return $this->enrollments;
+    }
+
+    /**
+     * @param mixed[]|null $enrollments
+     */
+    public function setEnrollments(?array $enrollments): void
+    {
+        $this->enrollments = $enrollments;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    /**
+     * @param string|null $email
+     */
+    public function setEmail(?string $email): void
+    {
+        $this->email = $email;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getLocale(): ?string
+    {
+        return $this->locale;
+    }
+
+    /**
+     * @param string|null $locale
+     */
+    public function setLocale(?string $locale): void
+    {
+        $this->locale = $locale;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getLastLogin(): ?string
+    {
+        return $this->lastLogin;
+    }
+
+    /**
+     * @param string|null $lastLogin
+     */
+    public function setLastLogin(?string $lastLogin): void
+    {
+        $this->lastLogin = $lastLogin;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTimeZone(): ?string
+    {
+        return $this->timeZone;
+    }
+
+    /**
+     * @param string|null $timeZone
+     */
+    public function setTimeZone(?string $timeZone): void
+    {
+        $this->timeZone = $timeZone;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBio(): ?string
+    {
+        return $this->bio;
+    }
+
+    /**
+     * @param string|null $bio
+     */
+    public function setBio(?string $bio): void
+    {
+        $this->bio = $bio;
     }
 }

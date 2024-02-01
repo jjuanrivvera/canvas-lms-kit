@@ -129,4 +129,228 @@ class UpdateUserDTO extends AbstractBaseDto implements DTOInterface
 
         return $modifiedProperties;
     }
+
+    /**
+     * @return string|null
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string|null $name
+     */
+    public function setName(?string $name): void
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getShortName(): ?string
+    {
+        return $this->shortName;
+    }
+
+    /**
+     * @param string|null $shortName
+     */
+    public function setShortName(?string $shortName): void
+    {
+        $this->shortName = $shortName;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSortableName(): ?string
+    {
+        return $this->sortableName;
+    }
+
+    /**
+     * @param string|null $sortableName
+     */
+    public function setSortableName(?string $sortableName): void
+    {
+        $this->sortableName = $sortableName;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTimeZone(): ?string
+    {
+        return $this->timeZone;
+    }
+
+    /**
+     * @param string|null $timeZone
+     */
+    public function setTimeZone(?string $timeZone): void
+    {
+        $this->timeZone = $timeZone;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    /**
+     * @param string|null $email
+     */
+    public function setEmail(?string $email): void
+    {
+        $this->email = $email;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getLocale(): ?string
+    {
+        return $this->locale;
+    }
+
+    /**
+     * @param string|null $locale
+     */
+    public function setLocale(?string $locale): void
+    {
+        $this->locale = $locale;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAvatarToken(): ?string
+    {
+        return $this->avatarToken;
+    }
+
+    /**
+     * @param string|null $avatarToken
+     */
+    public function setAvatarToken(?string $avatarToken): void
+    {
+        $this->avatarToken = $avatarToken;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAvatarUrl(): ?string
+    {
+        return $this->avatarUrl;
+    }
+
+    /**
+     * @param string|null $avatarUrl
+     */
+    public function setAvatarUrl(?string $avatarUrl): void
+    {
+        $this->avatarUrl = $avatarUrl;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAvatarState(): ?string
+    {
+        return $this->avatarState;
+    }
+
+    /**
+     * @param string|null $avatarState
+     */
+    public function setAvatarState(?string $avatarState): void
+    {
+        $this->avatarState = $avatarState;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param string|null $title
+     */
+    public function setTitle(?string $title): void
+    {
+        $this->title = $title;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBio(): ?string
+    {
+        return $this->bio;
+    }
+
+    /**
+     * @param string|null $bio
+     */
+    public function setBio(?string $bio): void
+    {
+        $this->bio = $bio;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPronouns(): ?string
+    {
+        return $this->pronouns;
+    }
+
+    /**
+     * @param string|null $pronouns
+     */
+    public function setPronouns(?string $pronouns): void
+    {
+        $this->pronouns = $pronouns;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEvent(): ?string
+    {
+        return $this->event;
+    }
+
+    /**
+     * @param string|null $event
+     */
+    public function setEvent(?string $event): void
+    {
+        $this->event = $event;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getOverrideSisStickiness(): ?bool
+    {
+        return $this->overrideSisStickiness;
+    }
+
+    /**
+     * @param bool|null $overrideSisStickiness
+     */
+    public function setOverrideSisStickiness(?bool $overrideSisStickiness): void
+    {
+        $this->overrideSisStickiness = $overrideSisStickiness;
+    }
 }

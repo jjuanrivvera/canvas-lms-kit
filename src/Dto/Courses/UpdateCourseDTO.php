@@ -319,4 +319,772 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
 
         return $modifiedProperties;
     }
+
+    /**
+     * @return int|null
+     */
+    public function getAccountId(): ?int
+    {
+        return $this->accountId;
+    }
+
+    /**
+     * @param int|null $accountId
+     */
+    public function setAccountId(?int $accountId): void
+    {
+        $this->accountId = $accountId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string|null $name
+     */
+    public function setName(?string $name): void
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCourseCode(): ?string
+    {
+        return $this->courseCode;
+    }
+
+    /**
+     * @param string|null $courseCode
+     */
+    public function setCourseCode(?string $courseCode): void
+    {
+        $this->courseCode = $courseCode;
+    }
+
+    /**
+     * @return DateTime|null
+     */
+    public function getStartAt(): ?DateTime
+    {
+        return $this->startAt;
+    }
+
+    /**
+     * @param DateTime|null $startAt
+     */
+    public function setStartAt(?DateTime $startAt): void
+    {
+        $this->startAt = $startAt;
+    }
+
+    /**
+     * @return DateTime|null
+     */
+    public function getEndAt(): ?DateTime
+    {
+        return $this->endAt;
+    }
+
+    /**
+     * @param DateTime|null $endAt
+     */
+    public function setEndAt(?DateTime $endAt): void
+    {
+        $this->endAt = $endAt;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getLicense(): ?string
+    {
+        return $this->license;
+    }
+
+    /**
+     * @param string|null $license
+     */
+    public function setLicense(?string $license): void
+    {
+        $this->license = $license;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getIsPublic(): ?bool
+    {
+        return $this->isPublic;
+    }
+
+    /**
+     * @param bool|null $isPublic
+     */
+    public function setIsPublic(?bool $isPublic): void
+    {
+        $this->isPublic = $isPublic;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getIsPublicToAuthUsers(): ?bool
+    {
+        return $this->isPublicToAuthUsers;
+    }
+
+    /**
+     * @param bool|null $isPublicToAuthUsers
+     */
+    public function setIsPublicToAuthUsers(?bool $isPublicToAuthUsers): void
+    {
+        $this->isPublicToAuthUsers = $isPublicToAuthUsers;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getPublicSyllabus(): ?bool
+    {
+        return $this->publicSyllabus;
+    }
+
+    /**
+     * @param bool|null $publicSyllabus
+     */
+    public function setPublicSyllabus(?bool $publicSyllabus): void
+    {
+        $this->publicSyllabus = $publicSyllabus;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getPublicSyllabusToAuth(): ?bool
+    {
+        return $this->publicSyllabusToAuth;
+    }
+
+    /**
+     * @param bool|null $publicSyllabusToAuth
+     */
+    public function setPublicSyllabusToAuth(?bool $publicSyllabusToAuth): void
+    {
+        $this->publicSyllabusToAuth = $publicSyllabusToAuth;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPublicDescription(): ?string
+    {
+        return $this->publicDescription;
+    }
+
+    /**
+     * @param string|null $publicDescription
+     */
+    public function setPublicDescription(?string $publicDescription): void
+    {
+        $this->publicDescription = $publicDescription;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getAllowStudentWikiEdits(): ?bool
+    {
+        return $this->allowStudentWikiEdits;
+    }
+
+    /**
+     * @param bool|null $allowStudentWikiEdits
+     */
+    public function setAllowStudentWikiEdits(?bool $allowStudentWikiEdits): void
+    {
+        $this->allowStudentWikiEdits = $allowStudentWikiEdits;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getAllowWikiComments(): ?bool
+    {
+        return $this->allowWikiComments;
+    }
+
+    /**
+     * @param bool|null $allowWikiComments
+     */
+    public function setAllowWikiComments(?bool $allowWikiComments): void
+    {
+        $this->allowWikiComments = $allowWikiComments;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getAllowStudentForumAttachments(): ?bool
+    {
+        return $this->allowStudentForumAttachments;
+    }
+
+    /**
+     * @param bool|null $allowStudentForumAttachments
+     */
+    public function setAllowStudentForumAttachments(?bool $allowStudentForumAttachments): void
+    {
+        $this->allowStudentForumAttachments = $allowStudentForumAttachments;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getOpenEnrollment(): ?bool
+    {
+        return $this->openEnrollment;
+    }
+
+    /**
+     * @param bool|null $openEnrollment
+     */
+    public function setOpenEnrollment(?bool $openEnrollment): void
+    {
+        $this->openEnrollment = $openEnrollment;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getSelfEnrollment(): ?bool
+    {
+        return $this->selfEnrollment;
+    }
+
+    /**
+     * @param bool|null $selfEnrollment
+     */
+    public function setSelfEnrollment(?bool $selfEnrollment): void
+    {
+        $this->selfEnrollment = $selfEnrollment;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getRestrictEnrollmentsToCourseDates(): ?bool
+    {
+        return $this->restrictEnrollmentsToCourseDates;
+    }
+
+    /**
+     * @param bool|null $restrictEnrollmentsToCourseDates
+     */
+    public function setRestrictEnrollmentsToCourseDates(?bool $restrictEnrollmentsToCourseDates): void
+    {
+        $this->restrictEnrollmentsToCourseDates = $restrictEnrollmentsToCourseDates;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getTermId(): ?int
+    {
+        return $this->termId;
+    }
+
+    /**
+     * @param int|null $termId
+     */
+    public function setTermId(?int $termId): void
+    {
+        $this->termId = $termId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSisCourseId(): ?string
+    {
+        return $this->sisCourseId;
+    }
+
+    /**
+     * @param string|null $sisCourseId
+     */
+    public function setSisCourseId(?string $sisCourseId): void
+    {
+        $this->sisCourseId = $sisCourseId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getIntegrationId(): ?string
+    {
+        return $this->integrationId;
+    }
+
+    /**
+     * @param string|null $integrationId
+     */
+    public function setIntegrationId(?string $integrationId): void
+    {
+        $this->integrationId = $integrationId;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getHideFinalGrades(): ?bool
+    {
+        return $this->hideFinalGrades;
+    }
+
+    /**
+     * @param bool|null $hideFinalGrades
+     */
+    public function setHideFinalGrades(?bool $hideFinalGrades): void
+    {
+        $this->hideFinalGrades = $hideFinalGrades;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTimeZone(): ?string
+    {
+        return $this->timeZone;
+    }
+
+    /**
+     * @param string|null $timeZone
+     */
+    public function setTimeZone(?string $timeZone): void
+    {
+        $this->timeZone = $timeZone;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getApplyAssignmentGroupWeights(): ?bool
+    {
+        return $this->applyAssignmentGroupWeights;
+    }
+
+    /**
+     * @param bool|null $applyAssignmentGroupWeights
+     */
+    public function setApplyAssignmentGroupWeights(?bool $applyAssignmentGroupWeights): void
+    {
+        $this->applyAssignmentGroupWeights = $applyAssignmentGroupWeights;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getStorageQuotaMb(): ?int
+    {
+        return $this->storageQuotaMb;
+    }
+
+    /**
+     * @param int|null $storageQuotaMb
+     */
+    public function setStorageQuotaMb(?int $storageQuotaMb): void
+    {
+        $this->storageQuotaMb = $storageQuotaMb;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getOffer(): ?bool
+    {
+        return $this->offer;
+    }
+
+    /**
+     * @param bool|null $offer
+     */
+    public function setOffer(?bool $offer): void
+    {
+        $this->offer = $offer;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEvent(): ?string
+    {
+        return $this->event;
+    }
+
+    /**
+     * @param string|null $event
+     */
+    public function setEvent(?string $event): void
+    {
+        $this->event = $event;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultView(): string
+    {
+        return $this->defaultView;
+    }
+
+    /**
+     * @param string $defaultView
+     */
+    public function setDefaultView(string $defaultView): void
+    {
+        $this->defaultView = $defaultView;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSyllabusBody(): ?string
+    {
+        return $this->syllabusBody;
+    }
+
+    /**
+     * @param string|null $syllabusBody
+     */
+    public function setSyllabusBody(?string $syllabusBody): void
+    {
+        $this->syllabusBody = $syllabusBody;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getSyllabusCourseSummary(): ?bool
+    {
+        return $this->syllabusCourseSummary;
+    }
+
+    /**
+     * @param bool|null $syllabusCourseSummary
+     */
+    public function setSyllabusCourseSummary(?bool $syllabusCourseSummary): void
+    {
+        $this->syllabusCourseSummary = $syllabusCourseSummary;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getGradingStandardId(): ?int
+    {
+        return $this->gradingStandardId;
+    }
+
+    /**
+     * @param int|null $gradingStandardId
+     */
+    public function setGradingStandardId(?int $gradingStandardId): void
+    {
+        $this->gradingStandardId = $gradingStandardId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getGradePassbackSetting(): ?string
+    {
+        return $this->gradePassbackSetting;
+    }
+
+    /**
+     * @param string|null $gradePassbackSetting
+     */
+    public function setGradePassbackSetting(?string $gradePassbackSetting): void
+    {
+        $this->gradePassbackSetting = $gradePassbackSetting;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCourseFormat(): ?string
+    {
+        return $this->courseFormat;
+    }
+
+    /**
+     * @param string|null $courseFormat
+     */
+    public function setCourseFormat(?string $courseFormat): void
+    {
+        $this->courseFormat = $courseFormat;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getImageId(): ?int
+    {
+        return $this->imageId;
+    }
+
+    /**
+     * @param int|null $imageId
+     */
+    public function setImageId(?int $imageId): void
+    {
+        $this->imageId = $imageId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getImageUrl(): ?string
+    {
+        return $this->imageUrl;
+    }
+
+    /**
+     * @param string|null $imageUrl
+     */
+    public function setImageUrl(?string $imageUrl): void
+    {
+        $this->imageUrl = $imageUrl;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getRemoveImage(): ?bool
+    {
+        return $this->removeImage;
+    }
+
+    /**
+     * @param bool|null $removeImage
+     */
+    public function setRemoveImage(?bool $removeImage): void
+    {
+        $this->removeImage = $removeImage;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getRemoveBannerImage(): ?bool
+    {
+        return $this->removeBannerImage;
+    }
+
+    /**
+     * @param bool|null $removeBannerImage
+     */
+    public function setRemoveBannerImage(?bool $removeBannerImage): void
+    {
+        $this->removeBannerImage = $removeBannerImage;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getBlueprint(): ?bool
+    {
+        return $this->blueprint;
+    }
+
+    /**
+     * @param bool|null $blueprint
+     */
+    public function setBlueprint(?bool $blueprint): void
+    {
+        $this->blueprint = $blueprint;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getUseBlueprintRestrictionsByObjectType(): ?bool
+    {
+        return $this->useBlueprintRestrictionsByObjectType;
+    }
+
+    /**
+     * @param bool|null $useBlueprintRestrictionsByObjectType
+     */
+    public function setUseBlueprintRestrictionsByObjectType(?bool $useBlueprintRestrictionsByObjectType): void
+    {
+        $this->useBlueprintRestrictionsByObjectType = $useBlueprintRestrictionsByObjectType;
+    }
+
+    /**
+     * @return mixed[]|null
+     */
+    public function getBlueprintRestrictionsByObjectType(): ?array
+    {
+        return $this->blueprintRestrictionsByObjectType;
+    }
+
+    /**
+     * @param mixed[]|null $blueprintRestrictionsByObjectType
+     */
+    public function setBlueprintRestrictionsByObjectType(?array $blueprintRestrictionsByObjectType): void
+    {
+        $this->blueprintRestrictionsByObjectType = $blueprintRestrictionsByObjectType;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getHomeroomCourse(): ?bool
+    {
+        return $this->homeroomCourse;
+    }
+
+    /**
+     * @param bool|null $homeroomCourse
+     */
+    public function setHomeroomCourse(?bool $homeroomCourse): void
+    {
+        $this->homeroomCourse = $homeroomCourse;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSyncEnrollmentsFromHomeroom(): ?string
+    {
+        return $this->syncEnrollmentsFromHomeroom;
+    }
+
+    /**
+     * @param string|null $syncEnrollmentsFromHomeroom
+     */
+    public function setSyncEnrollmentsFromHomeroom(?string $syncEnrollmentsFromHomeroom): void
+    {
+        $this->syncEnrollmentsFromHomeroom = $syncEnrollmentsFromHomeroom;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getHomeroomCourseId(): ?string
+    {
+        return $this->homeroomCourseId;
+    }
+
+    /**
+     * @param string|null $homeroomCourseId
+     */
+    public function setHomeroomCourseId(?string $homeroomCourseId): void
+    {
+        $this->homeroomCourseId = $homeroomCourseId;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getTemplate(): ?bool
+    {
+        return $this->template;
+    }
+
+    /**
+     * @param bool|null $template
+     */
+    public function setTemplate(?bool $template): void
+    {
+        $this->template = $template;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCourseColor(): ?string
+    {
+        return $this->courseColor;
+    }
+
+    /**
+     * @param string|null $courseColor
+     */
+    public function setCourseColor(?string $courseColor): void
+    {
+        $this->courseColor = $courseColor;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getFriendlyName(): ?string
+    {
+        return $this->friendlyName;
+    }
+
+    /**
+     * @param string|null $friendlyName
+     */
+    public function setFriendlyName(?string $friendlyName): void
+    {
+        $this->friendlyName = $friendlyName;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getEnableCoursePaces(): ?bool
+    {
+        return $this->enableCoursePaces;
+    }
+
+    /**
+     * @param bool|null $enableCoursePaces
+     */
+    public function setEnableCoursePaces(?bool $enableCoursePaces): void
+    {
+        $this->enableCoursePaces = $enableCoursePaces;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getConditionalRelease(): ?bool
+    {
+        return $this->conditionalRelease;
+    }
+
+    /**
+     * @param bool|null $conditionalRelease
+     */
+    public function setConditionalRelease(?bool $conditionalRelease): void
+    {
+        $this->conditionalRelease = $conditionalRelease;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getOverrideSisStickiness(): ?bool
+    {
+        return $this->overrideSisStickiness;
+    }
+
+    /**
+     * @param bool|null $overrideSisStickiness
+     */
+    public function setOverrideSisStickiness(?bool $overrideSisStickiness): void
+    {
+        $this->overrideSisStickiness = $overrideSisStickiness;
+    }
 }
