@@ -3,11 +3,11 @@
 namespace CanvasLMS\Http;
 
 use CanvasLMS\Config;
-use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
 use GuzzleHttp\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Exceptions\MissingApiKeyException;
@@ -152,7 +152,12 @@ class HttpClient implements HttpClientInterface
             throw new MissingBaseUrlException();
         }
 
-        $fullUrl = rtrim($baseUrl, '/') . '/' . ltrim($url, '/');
+        $fullUrl = $baseUrl .
+            'api/' .
+            rtrim(Config::getApiVersion(), '/') .
+            '/' .
+            ltrim($url, '/');
+
         $options['headers']['Authorization'] = 'Bearer ' . $appKey;
         $url = $fullUrl;
 
