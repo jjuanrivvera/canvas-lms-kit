@@ -157,7 +157,7 @@ class HttpClient implements HttpClientInterface
             rtrim(Config::getApiVersion(), '/') .
             '/' .
             ltrim($url, '/');
-        
+
         $options['headers']['Authorization'] = 'Bearer ' . $appKey;
         $url = $fullUrl;
 
