@@ -4,18 +4,29 @@ namespace CanvasLMS\Api;
 
 use DateTime;
 use Exception;
+use InvalidArgumentException;
 use CanvasLMS\Http\HttpClient;
+use CanvasLMS\Interfaces\ApiInterface;
 use CanvasLMS\Interfaces\HttpClientInterface;
 
 /**
  *
  */
-abstract class AbstractBaseApi
+abstract class AbstractBaseApi implements ApiInterface
 {
     /**
      * @var HttpClientInterface
      */
     protected static HttpClientInterface $apiClient;
+
+    /**
+     * Define method aliases
+     * @var mixed[]
+     */
+    protected static array $methodAliases = [
+        'fetchAll' => ['all', 'get', 'getAll'],
+        'find' => ['one', 'getOne']
+    ];
 
     /**
      * BaseApi constructor.
@@ -100,5 +111,22 @@ abstract class AbstractBaseApi
             return new DateTime($value);
         }
         return $value;
+    }
+
+    /**
+     * Magic method to handle function aliases
+     * @param string $name
+     * @param mixed[] $arguments
+     * @return mixed
+     */
+    public static function __callStatic($name, $arguments)
+    {
+        foreach (static::$methodAliases as $method => $aliases) {
+            if (in_array($name, $aliases)) {
+                return static::$method(...$arguments);
+            }
+        }
+
+        throw new InvalidArgumentException("Method $name does not exist");
     }
 }
