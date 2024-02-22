@@ -4,12 +4,19 @@ namespace CanvasLMS\Dto;
 
 use DateTime;
 use Exception;
+use DateTimeInterface;
 
 /**
  *
  */
 abstract class AbstractBaseDto
 {
+    /**
+     * The name of the property in the API
+     * @var string
+     */
+    protected string $apiPropertyName = '';
+
     /**
      * BaseDto constructor.
      * @param mixed[] $data
@@ -60,5 +67,57 @@ abstract class AbstractBaseDto
         }
 
         return $properties;
+    }
+
+    /**
+     * Convert the DTO to an array for API requests
+     * @return mixed[]
+     */
+    public function toApiArray(): array
+    {
+        $properties = get_object_vars($this);
+
+        $modifiedProperties = [];
+
+        foreach ($properties as $property => $value) {
+            if ($this->apiPropertyName === '') {
+                throw new Exception('The API property name must be set in the DTO');
+            }
+
+            $propertyName = $this->apiPropertyName . '[' . str_to_snake_case($property) . ']';
+
+            // Directly handle null values to continue to the next iteration.
+            if (is_null($value)) {
+                continue;
+            }
+
+            // For DateTimeInterface values, format them as ISO 8601 strings.
+            if ($value instanceof DateTimeInterface) {
+                $modifiedProperties[] = [
+                    "name" => $propertyName,
+                    "contents" => $value->format(DateTimeInterface::ATOM)
+                ];
+                continue;
+            }
+
+            // For arrays, handle each element as a separate field with the same name.
+            if (is_array($value)) {
+                foreach ($value as $arrayValue) {
+                    $modifiedProperties[] = [
+                        "name" => $propertyName . '[]',
+                        "contents" => $arrayValue
+                    ];
+                }
+                continue;
+            }
+
+            // Handle scalar values (int, string, bool) as they don't need special treatment.
+            $modifiedProperties[] = [
+                "name" => $propertyName,
+                "contents" => $value
+            ];
+        }
+
+        return $modifiedProperties;
     }
 }
