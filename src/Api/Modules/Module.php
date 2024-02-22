@@ -2,6 +2,7 @@
 
 namespace CanvasLMS\Api\Modules;
 
+use Exception;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Dto\Modules\CreateModuleDTO;
@@ -123,7 +124,7 @@ class Module extends AbstractBaseApi
      * @param Course $course
      * @return void
      */
-    public static function setCourse(Course $course)
+    public static function setCourse(Course $course): void
     {
         self::$course = $course;
     }
@@ -131,8 +132,9 @@ class Module extends AbstractBaseApi
     /**
      * Check if course exits and has id
      * @return bool
+     * @throws CanvasApiException
      */
-    public static function checkCourse()
+    public static function checkCourse(): bool
     {
         if (!isset(self::$course) || !isset(self::$course->id)) {
             throw new CanvasApiException('Course is required');
@@ -145,6 +147,8 @@ class Module extends AbstractBaseApi
      * Create a new module
      * @param CreateModuleDTO|mixed[] $data
      * @return self
+     * @throws CanvasApiException
+     * @throws Exception
      */
     public static function create(array | CreateModuleDTO $data): self
     {
@@ -169,6 +173,8 @@ class Module extends AbstractBaseApi
      * @param int $id
      * @param UpdateModuleDTO|mixed[] $data
      * @return self
+     * @throws CanvasApiException
+     * @throws Exception
      */
     public static function update(int $id, array | UpdateModuleDTO $data): self
     {
@@ -192,6 +198,7 @@ class Module extends AbstractBaseApi
      * Find a module by its ID.
      * @param int $id
      * @return self
+     * @throws CanvasApiException
      */
     public static function find(int $id): self
     {
@@ -209,6 +216,7 @@ class Module extends AbstractBaseApi
      * Get all modules for a course.
      * @param mixed[] $params
      * @return mixed[]
+     * @throws CanvasApiException
      */
     public static function fetchAll(array $params = []): array
     {
@@ -232,6 +240,8 @@ class Module extends AbstractBaseApi
     /**
      * Save the module
      * @return bool
+     * @throws CanvasApiException
+     * @throws Exception
      */
     public function save(): bool
     {
@@ -263,6 +273,7 @@ class Module extends AbstractBaseApi
     /**
      * Delete a module
      * @return bool
+     * @throws CanvasApiException
      */
     public function delete(): bool
     {
@@ -276,5 +287,229 @@ class Module extends AbstractBaseApi
         }
 
         return true;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getWorkflowState(): string
+    {
+        return $this->workflowState;
+    }
+
+    /**
+     * @param string $workflowState
+     */
+    public function setWorkflowState(string $workflowState): void
+    {
+        $this->workflowState = $workflowState;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPosition(): int
+    {
+        return $this->position;
+    }
+
+    /**
+     * @param int $position
+     */
+    public function setPosition(int $position): void
+    {
+        $this->position = $position;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getUnlockAt(): ?string
+    {
+        return $this->unlockAt;
+    }
+
+    /**
+     * @param string|null $unlockAt
+     */
+    public function setUnlockAt(?string $unlockAt): void
+    {
+        $this->unlockAt = $unlockAt;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRequireSequentialProgress(): bool
+    {
+        return $this->requireSequentialProgress;
+    }
+
+    /**
+     * @param bool $requireSequentialProgress
+     */
+    public function setRequireSequentialProgress(bool $requireSequentialProgress): void
+    {
+        $this->requireSequentialProgress = $requireSequentialProgress;
+    }
+
+    /**
+     * @return mixed[]
+     */
+    public function getPrerequisiteModuleIds(): array
+    {
+        return $this->prerequisiteModuleIds;
+    }
+
+    /**
+     * @param mixed[] $prerequisiteModuleIds
+     */
+    public function setPrerequisiteModuleIds(array $prerequisiteModuleIds): void
+    {
+        $this->prerequisiteModuleIds = $prerequisiteModuleIds;
+    }
+
+    /**
+     * @return int
+     */
+    public function getItemsCount(): int
+    {
+        return $this->itemsCount;
+    }
+
+    /**
+     * @param int $itemsCount
+     */
+    public function setItemsCount(int $itemsCount): void
+    {
+        $this->itemsCount = $itemsCount;
+    }
+
+    /**
+     * @return string
+     */
+    public function getItemsUrl(): string
+    {
+        return $this->itemsUrl;
+    }
+
+    /**
+     * @param string $itemsUrl
+     */
+    public function setItemsUrl(string $itemsUrl): void
+    {
+        $this->itemsUrl = $itemsUrl;
+    }
+
+    /**
+     * @return mixed[]
+     */
+    public function getItems(): array
+    {
+        return $this->items;
+    }
+
+    /**
+     * @param mixed[] $items
+     */
+    public function setItems(array $items): void
+    {
+        $this->items = $items;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getState(): ?string
+    {
+        return $this->state;
+    }
+
+    /**
+     * @param string|null $state
+     */
+    public function setState(?string $state): void
+    {
+        $this->state = $state;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCompletedAt(): ?string
+    {
+        return $this->completedAt;
+    }
+
+    /**
+     * @param string|null $completedAt
+     */
+    public function setCompletedAt(?string $completedAt): void
+    {
+        $this->completedAt = $completedAt;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getPublishFinalGrade(): ?bool
+    {
+        return $this->publishFinalGrade;
+    }
+
+    /**
+     * @param bool|null $publishFinalGrade
+     */
+    public function setPublishFinalGrade(?bool $publishFinalGrade): void
+    {
+        $this->publishFinalGrade = $publishFinalGrade;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getPublished(): ?bool
+    {
+        return $this->published;
+    }
+
+    /**
+     * @param bool|null $published
+     */
+    public function setPublished(?bool $published): void
+    {
+        $this->published = $published;
     }
 }
