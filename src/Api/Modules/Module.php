@@ -9,6 +9,49 @@ use CanvasLMS\Dto\Modules\CreateModuleDTO;
 use CanvasLMS\Dto\Modules\UpdateModuleDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 
+/**
+ * Module Class
+ *
+ * Modules are collections of learning materials useful for organizing courses and optionally
+ * providing a linear flow through them. Module items can be accessed linearly or sequentially
+ * depending on module configuration. Items can be unlocked by various criteria such as reading a page or achieving
+ * a minimum score on a quiz. Modules themselves can be unlocked by the completion of other Modules.
+ *
+ * Usage:
+ * ```php
+ * $course = Course::find(1); // or $course = new Course(['id' => 1]); to avoid making an API request
+ * Module::setCourse($course);
+ *
+ * // Get all modules for a course
+ * $modules = Module::fetchAll();
+ *
+ * // Create a new module
+ * $module = Module::create([
+ *    'name' => 'Module 1',
+ *    'position' => 1,
+ *    'requireSequentialProgress' => true,
+ *    'prerequisiteModuleIds' => [1, 2],
+ *    'publishFinalGrade' => true
+ * ]);
+ *
+ * // Update a module
+ * $module->setName('Module 1 Updated');
+ * $module->save();
+ *
+ * // Update staticaly
+ * $module = Module::update(1, [
+ *   'name' => 'Module 1 Updated',
+ *   'position' => 1,
+ *   'requireSequentialProgress' => true,
+ *   'prerequisiteModuleIds' => [1, 2],
+ *   'publishFinalGrade' => true
+ * ]);
+ *
+ * // Delete a module
+ * $module = Module::find(1);
+ * $module->delete();
+ * ```
+ */
 class Module extends AbstractBaseApi
 {
     /**
