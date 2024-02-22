@@ -262,7 +262,6 @@ class Module extends AbstractBaseApi
 
     /**
      * Delete a module
-     * @param int $id
      * @return bool
      */
     public function delete(): bool
