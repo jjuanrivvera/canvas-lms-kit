@@ -18,6 +18,7 @@ use CanvasLMS\Exceptions\CanvasApiException;
  *
  * Usage Examples:
  *
+ * ```php
  * // Creating a new user
  * $userData = [
  *     'username' => 'john_doe',
@@ -35,6 +36,7 @@ use CanvasLMS\Exceptions\CanvasApiException;
  *
  * // Finding a user by ID
  * $user = User::find(123);
+ * ```
  *
  * @package CanvasLMS\Api
  */
@@ -194,6 +196,9 @@ class User extends AbstractBaseApi
     }
 
     /**
+     * Find a single user by ID.
+     * @param int $id
+     * @return self
      * @throws CanvasApiException
      */
     public static function find(int $id): self
