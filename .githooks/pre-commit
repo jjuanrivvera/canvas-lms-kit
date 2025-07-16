@@ -1,0 +1,43 @@
+#!/bin/sh
+#
+# Canvas LMS Kit Pre-commit Hook
+# Runs composer check script to ensure code quality before commits
+#
+
+echo "🔍 Running pre-commit checks..."
+
+# Check if composer exists
+if ! command -v composer &> /dev/null; then
+    # If composer is not available, try using Docker
+    if command -v docker-compose &> /dev/null; then
+        echo "📦 Using Docker to run composer check..."
+        if docker-compose exec php composer check; then
+            echo "✅ All checks passed!"
+            exit 0
+        else
+            echo "❌ Pre-commit checks failed. Please fix the issues before committing."
+            echo "💡 Run 'docker-compose exec php composer check' to see detailed errors."
+            exit 1
+        fi
+    else
+        echo "⚠️  Neither composer nor docker-compose found. Skipping pre-commit checks."
+        echo "💡 Please install composer or use Docker to run quality checks."
+        exit 0
+    fi
+fi
+
+# Run composer check script
+if composer check; then
+    echo "✅ All checks passed!"
+    exit 0
+else
+    echo "❌ Pre-commit checks failed. Please fix the issues before committing."
+    echo "💡 Run 'composer check' to see detailed errors."
+    echo ""
+    echo "The check script runs:"
+    echo "  - Code style fixes (cs-fix)"
+    echo "  - PSR-12 coding standards (cs)"
+    echo "  - PHPStan static analysis (phpstan)"
+    echo "  - Unit tests (test)"
+    exit 1
+fi
