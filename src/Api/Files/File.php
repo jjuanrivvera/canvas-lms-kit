@@ -254,10 +254,16 @@ class File extends AbstractBaseApi
 
         // Add file data as last parameter
         $fileResource = $dto->getFileResource();
+
+        // Ensure we have a valid filename
+        if (empty($dto->name)) {
+            throw new CanvasApiException('File name is required for upload');
+        }
+
         $multipartData[] = [
             'name' => 'file',
             'contents' => $fileResource,
-            'filename' => $dto->name ?? 'file'
+            'filename' => $dto->name
         ];
 
         $uploadResponse = self::$apiClient->post($uploadUrl, [
@@ -294,18 +300,27 @@ class File extends AbstractBaseApi
     }
 
     /**
-     * Fetch all files (this method is required by ApiInterface but files are context-specific)
-     * Note: Files in Canvas are always associated with a context (course, user, etc.)
-     * Use specific methods like fetchCourseFiles() instead
+     * Fetch all files from current user's personal files
+     * Note: Files in Canvas are usually context-specific. For specific contexts,
+     * use fetchCourseFiles(), fetchUserFiles(), etc.
      * @param mixed[] $params
      * @return File[]
      * @throws CanvasApiException
      */
     public static function fetchAll(array $params = []): array
     {
-        throw new CanvasApiException(
-            'Files must be fetched within a context. Use fetchCourseFiles(), fetchUserFiles(), etc. instead.'
-        );
+        self::checkApiClient();
+
+        // Fetch files from current user's personal files as default
+        $response = self::$apiClient->get('/users/self/files', [
+            'query' => $params
+        ]);
+
+        $files = json_decode($response->getBody(), true);
+
+        return array_map(function ($file) {
+            return new self($file);
+        }, $files);
     }
 
     /**

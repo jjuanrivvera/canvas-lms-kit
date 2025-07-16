@@ -384,9 +384,14 @@ class FileTest extends TestCase
         $this->expectExceptionMessage('Invalid upload response from Canvas API');
 
         $courseId = 123;
+        
+        // Create a temporary file for testing
+        $tempFile = tempnam(sys_get_temp_dir(), 'upload_test');
+        file_put_contents($tempFile, 'content');
+        
         $fileData = [
             'name' => 'invalid-response.txt',
-            'file' => 'content'
+            'file' => $tempFile
         ];
 
         $invalidResponse = [
@@ -397,7 +402,60 @@ class FileTest extends TestCase
             ->method('post')
             ->willReturn(new Response(200, [], json_encode($invalidResponse)));
 
-        File::uploadToCourse($courseId, $fileData);
+        try {
+            File::uploadToCourse($courseId, $fileData);
+        } finally {
+            // Clean up
+            unlink($tempFile);
+        }
+    }
+
+    /**
+     * Test fetchAll method (fetches current user's files)
+     */
+    public function testFetchAll(): void
+    {
+        $filesResponse = [
+            [
+                'id' => 123,
+                'display_name' => 'user-file-1.txt',
+                'filename' => 'user-file-1.txt',
+                'size' => 1024,
+                'folder_id' => 456,
+                'uuid' => 'user-uuid-123',
+                'created_at' => '2023-01-01T00:00:00Z',
+                'updated_at' => '2023-01-01T00:00:00Z',
+                'locked' => false,
+                'hidden' => false
+            ],
+            [
+                'id' => 124,
+                'display_name' => 'user-file-2.pdf',
+                'filename' => 'user-file-2.pdf',
+                'size' => 2048,
+                'folder_id' => 456,
+                'uuid' => 'user-uuid-124',
+                'created_at' => '2023-01-01T00:00:00Z',
+                'updated_at' => '2023-01-01T00:00:00Z',
+                'locked' => false,
+                'hidden' => false
+            ]
+        ];
+
+        $this->httpClientMock->expects($this->once())
+            ->method('get')
+            ->with('/users/self/files', ['query' => []])
+            ->willReturn(new Response(200, [], json_encode($filesResponse)));
+
+        $files = File::fetchAll();
+
+        $this->assertCount(2, $files);
+        $this->assertInstanceOf(File::class, $files[0]);
+        $this->assertEquals(123, $files[0]->getId());
+        $this->assertEquals('user-file-1.txt', $files[0]->getDisplayName());
+        $this->assertInstanceOf(File::class, $files[1]);
+        $this->assertEquals(124, $files[1]->getId());
+        $this->assertEquals('user-file-2.pdf', $files[1]->getDisplayName());
     }
 
     /**

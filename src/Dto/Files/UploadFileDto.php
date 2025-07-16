@@ -134,13 +134,20 @@ class UploadFileDto extends AbstractBaseDto
             throw new Exception('File is required for upload');
         }
 
-        // If it's a file path, open it as a resource
+        // If it's a file path, validate and open it as a resource
         if (is_string($this->file)) {
-            if (!file_exists($this->file)) {
+            // Security check: prevent path traversal attacks
+            if (str_contains($this->file, '..')) {
+                throw new Exception("Invalid file path: directory traversal not allowed");
+            }
+
+            // Validate file path
+            $realPath = realpath($this->file);
+            if ($realPath === false || !file_exists($realPath)) {
                 throw new Exception("Unable to open file: {$this->file}");
             }
 
-            $resource = fopen($this->file, 'r');
+            $resource = fopen($realPath, 'r');
             if ($resource === false) {
                 throw new Exception("Unable to open file: {$this->file}");
             }

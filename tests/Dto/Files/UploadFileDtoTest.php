@@ -132,6 +132,30 @@ class UploadFileDtoTest extends TestCase
     }
 
     /**
+     * Test getFileResource with path traversal attack
+     */
+    public function testGetFileResourceWithPathTraversal(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Invalid file path: directory traversal not allowed');
+
+        $dto = new UploadFileDto(['file' => '../../../etc/passwd']);
+        $dto->getFileResource();
+    }
+
+    /**
+     * Test getFileResource with relative path containing ..
+     */
+    public function testGetFileResourceWithRelativePathAttack(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Invalid file path: directory traversal not allowed');
+
+        $dto = new UploadFileDto(['file' => './test/../../../sensitive/file.txt']);
+        $dto->getFileResource();
+    }
+
+    /**
      * Test getFileResource with null file
      */
     public function testGetFileResourceWithNullFile(): void
