@@ -204,11 +204,17 @@ class File extends AbstractBaseApi
      * @return self
      * @throws Exception
      */
-    public static function uploadToAssignmentSubmission(int $courseId, int $assignmentId, array | UploadFileDto $fileData): self
-    {
+    public static function uploadToAssignmentSubmission(
+        int $courseId,
+        int $assignmentId,
+        array | UploadFileDto $fileData
+    ): self {
         $fileData = is_array($fileData) ? new UploadFileDto($fileData) : $fileData;
 
-        return self::performUpload("/courses/{$courseId}/assignments/{$assignmentId}/submissions/self/files", $fileData);
+        return self::performUpload(
+            "/courses/{$courseId}/assignments/{$assignmentId}/submissions/self/files",
+            $fileData
+        );
     }
 
     /**
@@ -297,7 +303,9 @@ class File extends AbstractBaseApi
      */
     public static function fetchAll(array $params = []): array
     {
-        throw new CanvasApiException('Files must be fetched within a context. Use fetchCourseFiles(), fetchUserFiles(), etc. instead.');
+        throw new CanvasApiException(
+            'Files must be fetched within a context. Use fetchCourseFiles(), fetchUserFiles(), etc. instead.'
+        );
     }
 
     /**
