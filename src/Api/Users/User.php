@@ -8,6 +8,8 @@ use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Dto\Users\UpdateUserDTO;
 use CanvasLMS\Dto\Users\CreateUserDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Pagination\PaginationResult;
+use CanvasLMS\Pagination\PaginatedResponse;
 
 /**
  * User Class
@@ -36,6 +38,22 @@ use CanvasLMS\Exceptions\CanvasApiException;
  *
  * // Finding a user by ID
  * $user = User::find(123);
+ *
+ * // Fetching all users (first page only)
+ * $users = User::fetchAll();
+ *
+ * // Fetching users with pagination support
+ * $paginatedResponse = User::fetchAllPaginated(['per_page' => 10]);
+ * $users = $paginatedResponse->getJsonData();
+ * $pagination = $paginatedResponse->toPaginationResult($users);
+ *
+ * // Fetching a specific page of users
+ * $paginationResult = User::fetchPage(['page' => 2, 'per_page' => 10]);
+ * $users = $paginationResult->getData();
+ * $hasNext = $paginationResult->hasNext();
+ *
+ * // Fetching all users from all pages
+ * $allUsers = User::fetchAllPages(['per_page' => 50]);
  * ```
  *
  * @package CanvasLMS\Api
@@ -243,7 +261,7 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * Fetch all courses
+     * Fetch all users
      * @param mixed[] $params
      * @return User[]
      * @throws CanvasApiException
@@ -263,6 +281,42 @@ class User extends AbstractBaseApi
         return array_map(function ($user) {
             return new self($user);
         }, $users);
+    }
+
+    /**
+     * Fetch users with pagination support
+     * @param mixed[] $params Query parameters for the request
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     */
+    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    {
+        $accountId = Config::getAccountId();
+        return self::getPaginatedResponse("/accounts/{$accountId}/users", $params);
+    }
+
+    /**
+     * Fetch users from a specific page
+     * @param mixed[] $params Query parameters for the request
+     * @return PaginationResult
+     * @throws CanvasApiException
+     */
+    public static function fetchPage(array $params = []): PaginationResult
+    {
+        $paginatedResponse = self::fetchAllPaginated($params);
+        return self::createPaginationResult($paginatedResponse);
+    }
+
+    /**
+     * Fetch all users from all pages
+     * @param mixed[] $params Query parameters for the request
+     * @return User[]
+     * @throws CanvasApiException
+     */
+    public static function fetchAllPages(array $params = []): array
+    {
+        $accountId = Config::getAccountId();
+        return self::fetchAllPagesAsModels("/accounts/{$accountId}/users", $params);
     }
 
     /**

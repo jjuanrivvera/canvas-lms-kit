@@ -3,6 +3,7 @@
 namespace CanvasLMS\Interfaces;
 
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Pagination\PaginatedResponse;
 use Psr\Http\Message\ResponseInterface;
 
 interface HttpClientInterface
@@ -61,4 +62,23 @@ interface HttpClientInterface
      * @return ResponseInterface
      */
     public function request(string $method, string $url, array $options = []): ResponseInterface;
+
+    /**
+     * Get request with pagination support
+     * @param string $url
+     * @param mixed[] $options
+     * @throws CanvasApiException
+     * @return PaginatedResponse
+     */
+    public function getPaginated(string $url, array $options = []): PaginatedResponse;
+
+    /**
+     * Make a request with pagination support
+     * @param string $method
+     * @param string $url
+     * @param mixed[] $options
+     * @throws CanvasApiException
+     * @return PaginatedResponse
+     */
+    public function requestPaginated(string $method, string $url, array $options = []): PaginatedResponse;
 }

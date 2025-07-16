@@ -7,6 +7,8 @@ use CanvasLMS\Config;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Dto\Files\UploadFileDto;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Pagination\PaginationResult;
+use CanvasLMS\Pagination\PaginatedResponse;
 
 /**
  * File Class
@@ -40,6 +42,22 @@ use CanvasLMS\Exceptions\CanvasApiException;
  *
  * // Get file download URL
  * $downloadUrl = $file->getDownloadUrl();
+ *
+ * // Fetch all files from current user (first page only)
+ * $files = File::fetchAll();
+ *
+ * // Fetch files with pagination support
+ * $paginatedResponse = File::fetchAllPaginated(['per_page' => 10]);
+ * $files = $paginatedResponse->getJsonData();
+ * $pagination = $paginatedResponse->toPaginationResult($files);
+ *
+ * // Fetch a specific page of files
+ * $paginationResult = File::fetchPage(['page' => 2, 'per_page' => 10]);
+ * $files = $paginationResult->getData();
+ * $hasNext = $paginationResult->hasNext();
+ *
+ * // Fetch all files from all pages
+ * $allFiles = File::fetchAllPages(['per_page' => 50]);
  * ```
  *
  * @package CanvasLMS\Api\Files
@@ -346,6 +364,40 @@ class File extends AbstractBaseApi
         return array_map(function ($file) {
             return new self($file);
         }, $files);
+    }
+
+    /**
+     * Fetch files with pagination support from current user's personal files
+     * @param mixed[] $params Query parameters for the request
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     */
+    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    {
+        return self::getPaginatedResponse('/users/self/files', $params);
+    }
+
+    /**
+     * Fetch files from a specific page from current user's personal files
+     * @param mixed[] $params Query parameters for the request
+     * @return PaginationResult
+     * @throws CanvasApiException
+     */
+    public static function fetchPage(array $params = []): PaginationResult
+    {
+        $paginatedResponse = self::fetchAllPaginated($params);
+        return self::createPaginationResult($paginatedResponse);
+    }
+
+    /**
+     * Fetch all files from all pages from current user's personal files
+     * @param mixed[] $params Query parameters for the request
+     * @return File[]
+     * @throws CanvasApiException
+     */
+    public static function fetchAllPages(array $params = []): array
+    {
+        return self::fetchAllPagesAsModels('/users/self/files', $params);
     }
 
     /**

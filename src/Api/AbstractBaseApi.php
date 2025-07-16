@@ -8,6 +8,8 @@ use InvalidArgumentException;
 use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Interfaces\ApiInterface;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use CanvasLMS\Pagination\PaginationResult;
+use CanvasLMS\Pagination\PaginatedResponse;
 
 /**
  *
@@ -25,7 +27,10 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     protected static array $methodAliases = [
         'fetchAll' => ['all', 'get', 'getAll'],
-        'find' => ['one', 'getOne']
+        'find' => ['one', 'getOne'],
+        'fetchAllPaginated' => ['allPaginated', 'getPaginated'],
+        'fetchAllPages' => ['allPages', 'getPages'],
+        'fetchPage' => ['page', 'getPage']
     ];
 
     /**
@@ -111,6 +116,64 @@ abstract class AbstractBaseApi implements ApiInterface
             return new DateTime($value);
         }
         return $value;
+    }
+
+    /**
+     * Helper method to get paginated response from API endpoint
+     * @param string $endpoint The API endpoint path
+     * @param mixed[] $params Query parameters for the request
+     * @return PaginatedResponse
+     */
+    protected static function getPaginatedResponse(string $endpoint, array $params = []): PaginatedResponse
+    {
+        self::checkApiClient();
+
+        return self::$apiClient->getPaginated($endpoint, [
+            'query' => $params
+        ]);
+    }
+
+    /**
+     * Helper method to convert paginated response data to model instances
+     * @param PaginatedResponse $paginatedResponse
+     * @return static[]
+     */
+    protected static function convertPaginatedResponseToModels(PaginatedResponse $paginatedResponse): array
+    {
+        $data = $paginatedResponse->getJsonData();
+
+        return array_map(function ($item) {
+            /** @phpstan-ignore-next-line */
+            return new static($item);
+        }, $data);
+    }
+
+    /**
+     * Helper method to fetch all pages and convert to model instances
+     * @param string $endpoint The API endpoint path
+     * @param mixed[] $params Query parameters for the request
+     * @return static[]
+     */
+    protected static function fetchAllPagesAsModels(string $endpoint, array $params = []): array
+    {
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->fetchAllPages();
+
+        return array_map(function ($item) {
+            /** @phpstan-ignore-next-line */
+            return new static($item);
+        }, $allData);
+    }
+
+    /**
+     * Helper method to create PaginationResult from paginated response
+     * @param PaginatedResponse $paginatedResponse
+     * @return PaginationResult
+     */
+    protected static function createPaginationResult(PaginatedResponse $paginatedResponse): PaginationResult
+    {
+        $models = self::convertPaginatedResponseToModels($paginatedResponse);
+        return $paginatedResponse->toPaginationResult($models);
     }
 
     /**
