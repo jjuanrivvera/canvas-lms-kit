@@ -8,6 +8,8 @@ use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Dto\Courses\CreateCourseDTO;
 use CanvasLMS\Dto\Courses\UpdateCourseDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Pagination\PaginationResult;
+use CanvasLMS\Pagination\PaginatedResponse;
 
 /**
  * Course Class
@@ -42,8 +44,21 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * // Finding a course by ID
  * $course = Course::find(123);
  *
- * // Fetching all courses
+ * // Fetching all courses (first page only)
  * $courses = Course::fetchAll();
+ *
+ * // Fetching courses with pagination support
+ * $paginatedResponse = Course::fetchAllPaginated(['per_page' => 10]);
+ * $courses = $paginatedResponse->getJsonData();
+ * $pagination = $paginatedResponse->toPaginationResult($courses);
+ *
+ * // Fetching a specific page of courses
+ * $paginationResult = Course::fetchPage(['page' => 2, 'per_page' => 10]);
+ * $courses = $paginationResult->getData();
+ * $hasNext = $paginationResult->hasNext();
+ *
+ * // Fetching all courses from all pages
+ * $allCourses = Course::fetchAllPages(['per_page' => 50]);
  *```
  * @package CanvasLMS\Api
  */
@@ -417,6 +432,42 @@ class Course extends AbstractBaseApi
         return array_map(function ($course) {
             return new self($course);
         }, $courses);
+    }
+
+    /**
+     * Fetch courses with pagination support
+     * @param mixed[] $params Query parameters for the request
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     */
+    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    {
+        $accountId = Config::getAccountId();
+        return self::getPaginatedResponse("/accounts/{$accountId}/courses", $params);
+    }
+
+    /**
+     * Fetch courses from a specific page
+     * @param mixed[] $params Query parameters for the request
+     * @return PaginationResult
+     * @throws CanvasApiException
+     */
+    public static function fetchPage(array $params = []): PaginationResult
+    {
+        $paginatedResponse = self::fetchAllPaginated($params);
+        return self::createPaginationResult($paginatedResponse);
+    }
+
+    /**
+     * Fetch all courses from all pages
+     * @param mixed[] $params Query parameters for the request
+     * @return Course[]
+     * @throws CanvasApiException
+     */
+    public static function fetchAllPages(array $params = []): array
+    {
+        $accountId = Config::getAccountId();
+        return self::fetchAllPagesAsModels("/accounts/{$accountId}/courses", $params);
     }
 
     /**

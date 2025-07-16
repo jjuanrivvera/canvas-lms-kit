@@ -12,6 +12,7 @@ use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Exceptions\MissingApiKeyException;
 use CanvasLMS\Exceptions\MissingBaseUrlException;
+use CanvasLMS\Pagination\PaginatedResponse;
 
 /**
  *
@@ -106,6 +107,37 @@ class HttpClient implements HttpClientInterface
     public function delete(string $url, array $options = []): ResponseInterface
     {
         return $this->request('DELETE', $url, $options);
+    }
+
+    /**
+     * Get request with pagination support
+     * @param string $url
+     * @param mixed[] $options
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     * @throws MissingApiKeyException
+     * @throws MissingBaseUrlException
+     */
+    public function getPaginated(string $url, array $options = []): PaginatedResponse
+    {
+        $response = $this->get($url, $options);
+        return new PaginatedResponse($response, $this);
+    }
+
+    /**
+     * Make an HTTP request with pagination support
+     * @param string $method
+     * @param string $url
+     * @param mixed[] $options
+     * @return PaginatedResponse
+     * @throws MissingApiKeyException
+     * @throws MissingBaseUrlException
+     * @throws CanvasApiException
+     */
+    public function requestPaginated(string $method, string $url, array $options = []): PaginatedResponse
+    {
+        $response = $this->request($method, $url, $options);
+        return new PaginatedResponse($response, $this);
     }
 
     /**
