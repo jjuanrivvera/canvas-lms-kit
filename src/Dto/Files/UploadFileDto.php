@@ -98,6 +98,12 @@ class UploadFileDto extends AbstractBaseDto
 
     /**
      * Convert the DTO to an array for API requests
+     *
+     * NOTE: This method intentionally differs from AbstractBaseDto::toApiArray()
+     * because file uploads require multipart/form-data format without the
+     * apiPropertyName prefix (e.g., 'file[name]'). Canvas file upload API
+     * expects flat field names in multipart requests.
+     *
      * @return mixed[]
      * @throws Exception
      */
@@ -125,7 +131,13 @@ class UploadFileDto extends AbstractBaseDto
 
     /**
      * Get the file resource for upload
-     * @return mixed
+     *
+     * IMPORTANT: When this method returns a file resource (from fopen),
+     * the caller is responsible for closing it after use to prevent
+     * resource leaks. The File API class handles this automatically
+     * during the upload process.
+     *
+     * @return mixed File resource, string path, or other file object
      * @throws Exception
      */
     public function getFileResource(): mixed
@@ -216,13 +228,45 @@ class UploadFileDto extends AbstractBaseDto
 
     /**
      * Auto-detect all file properties
+     *
+     * This method optimizes file system access by checking file existence
+     * once and reusing that information for all auto-detection operations.
+     *
      * @return void
      */
     public function autoDetectFileProperties(): void
     {
-        $this->autoDetectName();
-        $this->autoDetectSize();
-        $this->autoDetectContentType();
+        // Only proceed if file is a string path and exists
+        if (!is_string($this->file) || !file_exists($this->file)) {
+            return;
+        }
+
+        // Get file info once to minimize filesystem calls
+        $fileInfo = new \SplFileInfo($this->file);
+
+        // Auto-detect name if not set
+        if (is_null($this->name)) {
+            $this->name = $fileInfo->getBasename();
+        }
+
+        // Auto-detect size if not set
+        if (is_null($this->size)) {
+            $this->size = $fileInfo->getSize();
+        }
+
+        // Auto-detect content type if not set
+        // This still requires a separate call as SplFileInfo doesn't provide MIME type
+        if (is_null($this->contentType)) {
+            if (function_exists('mime_content_type')) {
+                $this->contentType = mime_content_type($this->file);
+            } elseif (function_exists('finfo_file')) {
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                if ($finfo !== false) {
+                    $this->contentType = finfo_file($finfo, $this->file);
+                    finfo_close($finfo);
+                }
+            }
+        }
     }
 
     /**

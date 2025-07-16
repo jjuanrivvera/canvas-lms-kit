@@ -266,9 +266,25 @@ class File extends AbstractBaseApi
             'filename' => $dto->name
         ];
 
-        $uploadResponse = self::$apiClient->post($uploadUrl, [
-            'multipart' => $multipartData
-        ]);
+        try {
+            $uploadResponse = self::$apiClient->post($uploadUrl, [
+                'multipart' => $multipartData
+            ]);
+
+            // Check for HTTP errors in external storage upload
+            $statusCode = $uploadResponse->getStatusCode();
+            if ($statusCode >= 400) {
+                throw new CanvasApiException(
+                    "External storage upload failed with status {$statusCode}: " .
+                    $uploadResponse->getReasonPhrase()
+                );
+            }
+        } finally {
+            // Close file resource if it was opened by getFileResource()
+            if (is_resource($fileResource)) {
+                fclose($fileResource);
+            }
+        }
 
         // Step 3: Confirm upload (follow redirect if present)
         $location = $uploadResponse->getHeader('Location')[0] ?? '';
@@ -301,9 +317,18 @@ class File extends AbstractBaseApi
 
     /**
      * Fetch all files from current user's personal files
-     * Note: Files in Canvas are usually context-specific. For specific contexts,
-     * use fetchCourseFiles(), fetchUserFiles(), etc.
-     * @param mixed[] $params
+     *
+     * NOTE: Unlike other API classes (Course, User) that fetch from the account
+     * level, File::fetchAll() returns the current user's personal files. This is
+     * because files in Canvas are inherently context-specific and there is no
+     * global "all files" endpoint.
+     *
+     * For specific contexts, use:
+     * - fetchCourseFiles() for course files
+     * - fetchUserFiles() for a specific user's files
+     * - fetchGroupFiles() for group files
+     *
+     * @param mixed[] $params Query parameters for filtering/pagination
      * @return File[]
      * @throws CanvasApiException
      */
