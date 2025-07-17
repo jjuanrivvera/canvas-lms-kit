@@ -8,7 +8,6 @@ use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Dto\Tabs\UpdateTabDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Interfaces\ApiInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
 
@@ -46,9 +45,9 @@ use CanvasLMS\Pagination\PaginationResult;
  *
  * @package CanvasLMS\Api\Tabs
  */
-class Tab extends AbstractBaseApi implements ApiInterface
+class Tab extends AbstractBaseApi
 {
-    protected static ?Course $course = null;
+    protected static Course $course;
 
     /**
      * HTML URL of the tab
@@ -116,7 +115,7 @@ class Tab extends AbstractBaseApi implements ApiInterface
      */
     public static function checkCourse(): bool
     {
-        if (self::$course === null || !isset(self::$course->id)) {
+        if (!isset(self::$course->id)) {
             throw new CanvasApiException('Course is required');
         }
         return true;
@@ -373,10 +372,20 @@ class Tab extends AbstractBaseApi implements ApiInterface
         self::checkCourse();
         self::checkApiClient();
 
+        // Validate tab ID
+        if (empty(trim($id))) {
+            throw new CanvasApiException('Tab ID cannot be empty');
+        }
+
         $endpoint = sprintf('courses/%d/tabs/%s', self::$course->id, $id);
 
         if ($data instanceof UpdateTabDTO) {
             $data = $data->toApiArray();
+        } elseif (is_array($data)) {
+            // Validate position if provided
+            if (isset($data['position']) && (!is_int($data['position']) || $data['position'] < 1)) {
+                throw new CanvasApiException('Position must be a positive integer');
+            }
         }
 
         $response = self::$apiClient->put($endpoint, ['multipart' => $data]);
@@ -401,6 +410,10 @@ class Tab extends AbstractBaseApi implements ApiInterface
             $updateData = [];
 
             if ($this->position !== null) {
+                // Validate position
+                if ($this->position < 1) {
+                    throw new CanvasApiException('Position must be a positive integer');
+                }
                 $updateData['position'] = $this->position;
             }
 
@@ -437,5 +450,25 @@ class Tab extends AbstractBaseApi implements ApiInterface
             'visibility' => $this->visibility,
             'position' => $this->position,
         ];
+    }
+
+    /**
+     * Convert tab to DTO array format
+     *
+     * @return array<string, mixed>
+     */
+    public function toDtoArray(): array
+    {
+        $data = [];
+
+        if ($this->position !== null) {
+            $data['position'] = $this->position;
+        }
+
+        if ($this->hidden !== null) {
+            $data['hidden'] = $this->hidden;
+        }
+
+        return $data;
     }
 }

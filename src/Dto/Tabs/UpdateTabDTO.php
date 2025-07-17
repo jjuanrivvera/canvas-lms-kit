@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CanvasLMS\Dto\Tabs;
 
 use CanvasLMS\Dto\AbstractBaseDto;
+use CanvasLMS\Exceptions\CanvasApiException;
 
 /**
  * Data Transfer Object for updating a Canvas Tab
@@ -27,11 +28,15 @@ class UpdateTabDTO extends AbstractBaseDto
      *
      * @param int|null $position Position of the tab (1-based)
      * @param bool|null $hidden Whether the tab should be hidden
+     * @throws CanvasApiException If position is invalid
      */
     public function __construct(
         public ?int $position = null,
         public ?bool $hidden = null
     ) {
+        if ($position !== null && $position < 1) {
+            throw new CanvasApiException('Position must be a positive integer');
+        }
         parent::__construct([]);
     }
 
@@ -50,9 +55,13 @@ class UpdateTabDTO extends AbstractBaseDto
      *
      * @param int|null $position
      * @return void
+     * @throws CanvasApiException If position is invalid
      */
     public function setPosition(?int $position): void
     {
+        if ($position !== null && $position < 1) {
+            throw new CanvasApiException('Position must be a positive integer');
+        }
         $this->position = $position;
     }
 

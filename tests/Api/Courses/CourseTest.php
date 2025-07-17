@@ -63,13 +63,13 @@ class CourseTest extends TestCase
     public function testCreateCourse(array $courseData, array $expectedResult): void
     {
         $response = new Response(200, [], json_encode($expectedResult));
-        
+
         $this->httpClientMock
             ->method('post')
             ->willReturn($response);
 
         $course = Course::create($courseData);
-        
+
         $this->assertInstanceOf(Course::class, $course);
         $this->assertEquals('Test Course', $course->getName());
     }
@@ -85,9 +85,9 @@ class CourseTest extends TestCase
     {
         $courseData = new CreateCourseDTO($courseData);
         $expectedPayload = $courseData->toApiArray();
-    
+
         $response = new Response(200, [], json_encode($expectedResult));
-    
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('post')
@@ -98,9 +98,9 @@ class CourseTest extends TestCase
                 })
             )
             ->willReturn($response);
-    
+
         $course = Course::create($courseData);
-    
+
         $this->assertInstanceOf(Course::class, $course);
         $this->assertEquals('Test Course', $course->getName());
     }
@@ -112,13 +112,13 @@ class CourseTest extends TestCase
     public function testFindCourse(): void
     {
         $response = new Response(200, [], json_encode(['id' => 123, 'name' => 'Found Course']));
-        
+
         $this->httpClientMock
             ->method('get')
             ->willReturn($response);
 
         $course = Course::find(123);
-        
+
         $this->assertInstanceOf(Course::class, $course);
         $this->assertEquals(123, $course->getId());
     }
@@ -134,13 +134,13 @@ class CourseTest extends TestCase
         ];
 
         $response = new Response(200, [], json_encode(['id' => 1, 'name' => 'Updated Course']));
-        
+
         $this->httpClientMock
             ->method('put')
             ->willReturn($response);
 
         $course = Course::update(1, $courseData);
-        
+
         $this->assertEquals('Updated Course', $course->getName());
     }
 
@@ -153,14 +153,14 @@ class CourseTest extends TestCase
         $courseData = new UpdateCourseDTO(['name' => 'Updated Course']);
 
         $response = new Response(200, [], json_encode(['id' => 1, 'name' => 'Updated Course']));
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
             ->willReturn($response);
 
         $course = Course::update(1, $courseData);
-        
+
         $this->assertEquals('Updated Course', $course->getName());
     }
 
@@ -218,7 +218,7 @@ class CourseTest extends TestCase
     public function testDeleteCourse(): void
     {
         $response = new Response(200, [], json_encode(['id' => 123, 'name' => 'Found Course']));
-        
+
         $this->httpClientMock
             ->method('get')
             ->willReturn($response);
@@ -226,7 +226,7 @@ class CourseTest extends TestCase
         $course = Course::find(123);
 
         $response = new Response(200, [], json_encode(['deleted' => true]));
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('delete')
@@ -243,7 +243,7 @@ class CourseTest extends TestCase
     public function testConcludeCourse(): void
     {
         $response = new Response(200, [], json_encode(['id' => 123, 'name' => 'Found Course']));
-        
+
         $this->httpClientMock
             ->method('get')
             ->willReturn($response);
@@ -251,7 +251,7 @@ class CourseTest extends TestCase
         $course = Course::find(123);
 
         $response = new Response(200, [], json_encode(['conclude' => true]));
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('delete')
@@ -268,7 +268,7 @@ class CourseTest extends TestCase
     public function testResetCourse(): void
     {
         $response = new Response(200, [], json_encode(['id' => 123, 'name' => 'Found Course']));
-        
+
         $this->httpClientMock
             ->method('get')
             ->willReturn($response);
@@ -276,14 +276,14 @@ class CourseTest extends TestCase
         $course = Course::find(123);
 
         $response = new Response(200, [], json_encode(['id' => 123, 'name' => 'Reset Course']));
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('post')
             ->willReturn($response);
 
         $resetCourse = $course->reset();
-        
+
         $this->assertInstanceOf(Course::class, $resetCourse);
         $this->assertEquals('Reset Course', $resetCourse->getName());
     }

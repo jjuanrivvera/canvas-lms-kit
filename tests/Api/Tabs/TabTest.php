@@ -25,7 +25,7 @@ class TabTest extends TestCase
     {
         $this->httpClientMock = $this->createMock(HttpClientInterface::class);
         $this->course = new Course(['id' => 123]);
-        
+
         Tab::setApiClient($this->httpClientMock);
         Tab::setCourse($this->course);
     }
@@ -36,14 +36,14 @@ class TabTest extends TestCase
         $reflection = new \ReflectionClass(Tab::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, null);
+        $property->setValue(null, new Course(['id' => 0]));
     }
 
     public function testSetCourse(): void
     {
         $course = new Course(['id' => 456]);
         Tab::setCourse($course);
-        
+
         // We can't directly test the course is set since it's protected,
         // but we can test that checkCourse doesn't throw an exception
         $this->assertTrue(Tab::checkCourse());
@@ -53,13 +53,13 @@ class TabTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course is required');
-        
-        // Reset course to null
+
+        // Reset course to one without ID
         $reflection = new \ReflectionClass(Tab::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, null);
-        
+        $property->setValue(null, new Course([]));
+
         Tab::checkCourse();
     }
 
@@ -74,9 +74,9 @@ class TabTest extends TestCase
             'visibility' => 'public',
             'position' => 2
         ];
-        
+
         $tab = new Tab($data);
-        
+
         $this->assertEquals('assignments', $tab->getId());
         $this->assertEquals('Assignments', $tab->getLabel());
         $this->assertEquals('/courses/123/assignments', $tab->getHtmlUrl());
@@ -89,25 +89,25 @@ class TabTest extends TestCase
     public function testGettersAndSetters(): void
     {
         $tab = new Tab();
-        
+
         $tab->setId('home');
         $this->assertEquals('home', $tab->getId());
-        
+
         $tab->setLabel('Home');
         $this->assertEquals('Home', $tab->getLabel());
-        
+
         $tab->setHtmlUrl('/courses/123');
         $this->assertEquals('/courses/123', $tab->getHtmlUrl());
-        
+
         $tab->setType('internal');
         $this->assertEquals('internal', $tab->getType());
-        
+
         $tab->setHidden(true);
         $this->assertTrue($tab->getHidden());
-        
+
         $tab->setVisibility('members');
         $this->assertEquals('members', $tab->getVisibility());
-        
+
         $tab->setPosition(1);
         $this->assertEquals(1, $tab->getPosition());
     }
@@ -137,11 +137,11 @@ class TabTest extends TestCase
 
         $responseMock = $this->createMock(ResponseInterface::class);
         $streamMock = $this->createMock(StreamInterface::class);
-        
+
         $streamMock->expects($this->once())
             ->method('getContents')
             ->willReturn(json_encode($responseData));
-            
+
         $responseMock->expects($this->once())
             ->method('getBody')
             ->willReturn($streamMock);
@@ -152,7 +152,7 @@ class TabTest extends TestCase
             ->willReturn($responseMock);
 
         $tabs = Tab::fetchAll();
-        
+
         $this->assertCount(2, $tabs);
         $this->assertInstanceOf(Tab::class, $tabs[0]);
         $this->assertEquals('home', $tabs[0]->getId());
@@ -166,11 +166,11 @@ class TabTest extends TestCase
 
         $responseMock = $this->createMock(ResponseInterface::class);
         $streamMock = $this->createMock(StreamInterface::class);
-        
+
         $streamMock->expects($this->once())
             ->method('getContents')
             ->willReturn(json_encode($responseData));
-            
+
         $responseMock->expects($this->once())
             ->method('getBody')
             ->willReturn($streamMock);
@@ -181,14 +181,14 @@ class TabTest extends TestCase
             ->willReturn($responseMock);
 
         $tabs = Tab::fetchAll($params);
-        
+
         $this->assertCount(0, $tabs);
     }
 
     public function testFetchAllPaginated(): void
     {
         $paginatedResponseMock = $this->createMock(PaginatedResponse::class);
-        
+
         // Mock the getPaginatedResponse method
         $tabClass = new class extends Tab {
             public static function testGetPaginatedResponse(string $endpoint, array $params): PaginatedResponse
@@ -196,7 +196,7 @@ class TabTest extends TestCase
                 return parent::getPaginatedResponse($endpoint, $params);
             }
         };
-        
+
         // Since we can't easily mock static methods, we'll test that the method exists
         // and returns the expected type from the parent class
         $this->assertTrue(method_exists(Tab::class, 'fetchAllPaginated'));
@@ -215,11 +215,11 @@ class TabTest extends TestCase
 
         $responseMock = $this->createMock(ResponseInterface::class);
         $streamMock = $this->createMock(StreamInterface::class);
-        
+
         $streamMock->expects($this->once())
             ->method('getContents')
             ->willReturn(json_encode($responseData));
-            
+
         $responseMock->expects($this->once())
             ->method('getBody')
             ->willReturn($streamMock);
@@ -230,7 +230,7 @@ class TabTest extends TestCase
             ->willReturn($responseMock);
 
         $updatedTab = Tab::update($tabId, $updateData);
-        
+
         $this->assertInstanceOf(Tab::class, $updatedTab);
         $this->assertEquals('assignments', $updatedTab->getId());
         $this->assertEquals(3, $updatedTab->getPosition());
@@ -250,11 +250,11 @@ class TabTest extends TestCase
 
         $responseMock = $this->createMock(ResponseInterface::class);
         $streamMock = $this->createMock(StreamInterface::class);
-        
+
         $streamMock->expects($this->once())
             ->method('getContents')
             ->willReturn(json_encode($responseData));
-            
+
         $responseMock->expects($this->once())
             ->method('getBody')
             ->willReturn($streamMock);
@@ -265,7 +265,7 @@ class TabTest extends TestCase
             ->willReturn($responseMock);
 
         $updatedTab = Tab::update($tabId, $updateDto);
-        
+
         $this->assertInstanceOf(Tab::class, $updatedTab);
         $this->assertEquals('home', $updatedTab->getId());
         $this->assertEquals(1, $updatedTab->getPosition());
@@ -280,11 +280,11 @@ class TabTest extends TestCase
             'position' => 2,
             'hidden' => false
         ]);
-        
+
         // Change some properties
         $tab->setPosition(5);
         $tab->setHidden(true);
-        
+
         $responseData = [
             'id' => 'assignments',
             'label' => 'Assignments',
@@ -294,11 +294,11 @@ class TabTest extends TestCase
 
         $responseMock = $this->createMock(ResponseInterface::class);
         $streamMock = $this->createMock(StreamInterface::class);
-        
+
         $streamMock->expects($this->once())
             ->method('getContents')
             ->willReturn(json_encode($responseData));
-            
+
         $responseMock->expects($this->once())
             ->method('getBody')
             ->willReturn($streamMock);
@@ -310,7 +310,7 @@ class TabTest extends TestCase
             ->willReturn($responseMock);
 
         $result = $tab->save();
-        
+
         $this->assertTrue($result);
         $this->assertEquals(5, $tab->getPosition());
         $this->assertTrue($tab->getHidden());
@@ -320,7 +320,7 @@ class TabTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Tab ID is required for save operation');
-        
+
         $tab = new Tab();
         $tab->save();
     }
@@ -329,7 +329,7 @@ class TabTest extends TestCase
     {
         $tab = new Tab(['id' => 'home']);
         $result = $tab->save();
-        
+
         $this->assertTrue($result);
     }
 
@@ -345,7 +345,7 @@ class TabTest extends TestCase
             ->willThrowException(new CanvasApiException('API Error'));
 
         $result = $tab->save();
-        
+
         $this->assertFalse($result);
     }
 
@@ -360,10 +360,10 @@ class TabTest extends TestCase
             'visibility' => 'public',
             'position' => 2
         ];
-        
+
         $tab = new Tab($data);
         $result = $tab->toArray();
-        
+
         $this->assertEquals($data, $result);
     }
 
@@ -371,7 +371,7 @@ class TabTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Canvas API does not support finding individual tabs by ID. Use fetchAll() to retrieve all tabs.');
-        
+
         Tab::find(123);
     }
 }
