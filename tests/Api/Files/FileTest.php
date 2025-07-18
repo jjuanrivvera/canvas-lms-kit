@@ -25,11 +25,11 @@ class FileTest extends TestCase
     public function testUploadToCourse(): void
     {
         $courseId = 123;
-        
+
         // Create a temporary file for testing
         $tempFile = tempnam(sys_get_temp_dir(), 'upload_test');
         file_put_contents($tempFile, 'test content');
-        
+
         $fileData = [
             'name' => 'test-file.pdf',
             'size' => 1024,
@@ -80,7 +80,7 @@ class FileTest extends TestCase
         $this->assertEquals('test-file.pdf', $file->getDisplayName());
         $this->assertEquals('application/pdf', $file->getContentType());
         $this->assertEquals(1024, $file->getSize());
-        
+
         // Clean up
         unlink($tempFile);
     }
@@ -91,11 +91,11 @@ class FileTest extends TestCase
     public function testUploadToUser(): void
     {
         $userId = 123;
-        
+
         // Create a temporary file for testing
         $tempFile = tempnam(sys_get_temp_dir(), 'upload_test');
         file_put_contents($tempFile, 'user content');
-        
+
         $fileDto = new UploadFileDto([
             'name' => 'user-file.txt',
             'size' => 512,
@@ -134,7 +134,7 @@ class FileTest extends TestCase
         $this->assertInstanceOf(File::class, $file);
         $this->assertEquals(101, $file->getId());
         $this->assertEquals('user-file.txt', $file->getDisplayName());
-        
+
         // Clean up
         unlink($tempFile);
     }
@@ -145,11 +145,11 @@ class FileTest extends TestCase
     public function testUploadToGroup(): void
     {
         $groupId = 456;
-        
+
         // Create a temporary file for testing
         $tempFile = tempnam(sys_get_temp_dir(), 'upload_test');
         file_put_contents($tempFile, 'group content');
-        
+
         $fileData = [
             'name' => 'group-file.docx',
             'size' => 2048,
@@ -188,7 +188,7 @@ class FileTest extends TestCase
         $this->assertInstanceOf(File::class, $file);
         $this->assertEquals(202, $file->getId());
         $this->assertEquals('group-file.docx', $file->getDisplayName());
-        
+
         // Clean up
         unlink($tempFile);
     }
@@ -203,7 +203,7 @@ class FileTest extends TestCase
         // Create a temporary file for testing
         $tempFile = tempnam(sys_get_temp_dir(), 'upload_test');
         file_put_contents($tempFile, 'submission content');
-        
+
         $fileData = [
             'name' => 'submission.pdf',
             'size' => 4096,
@@ -242,7 +242,7 @@ class FileTest extends TestCase
         $this->assertInstanceOf(File::class, $file);
         $this->assertEquals(303, $file->getId());
         $this->assertEquals('submission.pdf', $file->getDisplayName());
-        
+
         // Clean up
         unlink($tempFile);
     }
@@ -384,11 +384,11 @@ class FileTest extends TestCase
         $this->expectExceptionMessage('Invalid upload response from Canvas API');
 
         $courseId = 123;
-        
+
         // Create a temporary file for testing
         $tempFile = tempnam(sys_get_temp_dir(), 'upload_test');
         file_put_contents($tempFile, 'content');
-        
+
         $fileData = [
             'name' => 'invalid-response.txt',
             'file' => $tempFile

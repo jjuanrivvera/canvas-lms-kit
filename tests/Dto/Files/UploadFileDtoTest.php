@@ -123,7 +123,7 @@ class UploadFileDtoTest extends TestCase
     {
         // Use a path that definitely doesn't exist
         $nonExistentFile = '/absolutely/non/existent/path/file.txt';
-        
+
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Unable to open file: {$nonExistentFile}");
 

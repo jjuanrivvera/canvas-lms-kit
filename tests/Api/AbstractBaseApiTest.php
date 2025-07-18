@@ -38,7 +38,7 @@ class AbstractBaseApiTest extends TestCase
     {
         // Create a concrete test class that extends AbstractBaseApi
         $this->testApiClass = $this->createTestApiClass();
-        
+
         $this->mockHttpClient = $this->createMock(HttpClientInterface::class);
         $this->testApiClass::setApiClient($this->mockHttpClient);
     }
@@ -49,7 +49,7 @@ class AbstractBaseApiTest extends TestCase
     private function createTestApiClass(): string
     {
         $className = 'TestApi' . uniqid();
-        
+
         eval("
             class {$className} extends \\CanvasLMS\\Api\\AbstractBaseApi
             {
@@ -90,7 +90,7 @@ class AbstractBaseApiTest extends TestCase
                 }
             }
         ");
-        
+
         return $className;
     }
 
@@ -100,7 +100,7 @@ class AbstractBaseApiTest extends TestCase
     public function testGetPaginatedResponse(): void
     {
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('getPaginated')
             ->with('/test/endpoint', ['query' => ['per_page' => 10]])
@@ -131,7 +131,7 @@ class AbstractBaseApiTest extends TestCase
 
         $this->assertIsArray($models);
         $this->assertCount(3, $models);
-        
+
         foreach ($models as $index => $model) {
             $this->assertInstanceOf($this->testApiClass, $model);
             $this->assertEquals($responseData[$index]['id'], $model->id);
@@ -165,7 +165,7 @@ class AbstractBaseApiTest extends TestCase
 
         $this->assertIsArray($models);
         $this->assertCount(4, $models);
-        
+
         foreach ($models as $index => $model) {
             $this->assertInstanceOf($this->testApiClass, $model);
             $this->assertEquals($allPagesData[$index]['id'], $model->id);
@@ -185,7 +185,7 @@ class AbstractBaseApiTest extends TestCase
 
         $mockPaginationResult = $this->createMock(PaginationResult::class);
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        
+
         $mockPaginatedResponse->expects($this->once())
             ->method('getJsonData')
             ->willReturn($responseData);
@@ -196,13 +196,13 @@ class AbstractBaseApiTest extends TestCase
                 // Verify that models are correctly created
                 $this->assertIsArray($models);
                 $this->assertCount(2, $models);
-                
+
                 foreach ($models as $index => $model) {
                     $this->assertInstanceOf($this->testApiClass, $model);
                     $this->assertEquals($responseData[$index]['id'], $model->id);
                     $this->assertEquals($responseData[$index]['name'], $model->name);
                 }
-                
+
                 return true;
             }))
             ->willReturn($mockPaginationResult);
@@ -218,16 +218,16 @@ class AbstractBaseApiTest extends TestCase
     public function testMethodAliases(): void
     {
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        
+
         // Test that aliases are registered
         $aliases = $this->getMethodAliases();
-        
+
         $this->assertArrayHasKey('fetchAll', $aliases);
         $this->assertArrayHasKey('find', $aliases);
         $this->assertArrayHasKey('fetchAllPaginated', $aliases);
         $this->assertArrayHasKey('fetchAllPages', $aliases);
         $this->assertArrayHasKey('fetchPage', $aliases);
-        
+
         // Test specific alias mappings
         $this->assertEquals(['all', 'get', 'getAll'], $aliases['fetchAll']);
         $this->assertEquals(['one', 'getOne'], $aliases['find']);
@@ -243,19 +243,19 @@ class AbstractBaseApiTest extends TestCase
     {
         // Create a test class that implements fetchAll like existing API classes
         $testClass = $this->createTestApiClassWithFetchAll();
-        
+
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockStream = $this->createMock(StreamInterface::class);
-        
+
         $responseData = [
             ['id' => 1, 'name' => 'Item 1'],
             ['id' => 2, 'name' => 'Item 2'],
         ];
-        
+
         $mockStream->expects($this->once())
             ->method('getContents')
             ->willReturn(json_encode($responseData));
-            
+
         $mockResponse->expects($this->once())
             ->method('getBody')
             ->willReturn($mockStream);
@@ -270,7 +270,7 @@ class AbstractBaseApiTest extends TestCase
 
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
-        
+
         foreach ($result as $index => $model) {
             $this->assertInstanceOf($testClass, $model);
             $this->assertEquals($responseData[$index]['id'], $model->id);
@@ -284,7 +284,7 @@ class AbstractBaseApiTest extends TestCase
     private function createTestApiClassWithFetchAll(): string
     {
         $className = 'TestApiWithFetchAll' . uniqid();
-        
+
         eval("
             class {$className} extends \\CanvasLMS\\Api\\AbstractBaseApi
             {
@@ -309,7 +309,7 @@ class AbstractBaseApiTest extends TestCase
                 }
             }
         ");
-        
+
         return $className;
     }
 
@@ -321,7 +321,7 @@ class AbstractBaseApiTest extends TestCase
         $reflection = new \ReflectionClass($this->testApiClass);
         $property = $reflection->getProperty('methodAliases');
         $property->setAccessible(true);
-        
+
         return $property->getValue();
     }
 
@@ -332,7 +332,7 @@ class AbstractBaseApiTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Method invalidMethod does not exist');
-        
+
         $this->testApiClass::invalidMethod();
     }
 
@@ -346,9 +346,9 @@ class AbstractBaseApiTest extends TestCase
             'name' => 'Test Name',
             'non_existent_property' => 'should be ignored'
         ];
-        
+
         $instance = new $this->testApiClass($data);
-        
+
         $this->assertEquals(123, $instance->id);
         $this->assertEquals('Test Name', $instance->name);
         $this->assertFalse(property_exists($instance, 'non_existent_property'));
@@ -361,7 +361,7 @@ class AbstractBaseApiTest extends TestCase
     {
         // Create a test class with camelCase property
         $className = 'TestApiCamelCase' . uniqid();
-        
+
         eval("
             class {$className} extends \\CanvasLMS\\Api\\AbstractBaseApi
             {
@@ -378,13 +378,13 @@ class AbstractBaseApiTest extends TestCase
                 }
             }
         ");
-        
+
         $data = [
             'some_property' => 'test value'
         ];
-        
+
         $instance = new $className($data);
-        
+
         $this->assertEquals('test value', $instance->someProperty);
     }
 }

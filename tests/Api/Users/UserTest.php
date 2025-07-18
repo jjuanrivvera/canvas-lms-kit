@@ -61,13 +61,13 @@ class UserTest extends TestCase
     public function testCreateUser(array $userData, array $expectedResult): void
     {
         $response = new Response(200, [], json_encode($expectedResult));
-        
+
         $this->httpClientMock
             ->method('post')
             ->willReturn($response);
 
         $user = User::create($userData);
-        
+
         $this->assertInstanceOf(User::class, $user);
         $this->assertEquals('Test User', $user->getName());
     }
@@ -83,9 +83,9 @@ class UserTest extends TestCase
     {
         $userData = new CreateUserDTO($userData);
         $expectedPayload = $userData->toApiArray();
-    
+
         $response = new Response(200, [], json_encode($expectedResult));
-    
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('post')
@@ -96,9 +96,9 @@ class UserTest extends TestCase
                 })
             )
             ->willReturn($response);
-    
+
         $user = User::create($userData);
-    
+
         $this->assertInstanceOf(User::class, $user);
         $this->assertEquals('Test User', $user->getName());
     }
@@ -110,13 +110,13 @@ class UserTest extends TestCase
     public function testFindUser(): void
     {
         $response = new Response(200, [], json_encode(['id' => 123, 'name' => 'Found User']));
-        
+
         $this->httpClientMock
             ->method('get')
             ->willReturn($response);
 
         $user = User::find(123);
-        
+
         $this->assertInstanceOf(User::class, $user);
         $this->assertEquals(123, $user->getId());
     }
@@ -132,13 +132,13 @@ class UserTest extends TestCase
         ];
 
         $response = new Response(200, [], json_encode(['id' => 1, 'name' => 'Updated User']));
-        
+
         $this->httpClientMock
             ->method('put')
             ->willReturn($response);
 
         $user = User::update(1, $userData);
-        
+
         $this->assertEquals('Updated User', $user->getName());
     }
 
@@ -151,14 +151,14 @@ class UserTest extends TestCase
         $userData = new UpdateUserDTO(['name' => 'Updated User']);
 
         $response = new Response(200, [], json_encode(['id' => 1, 'name' => 'Updated User']));
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
             ->willReturn($response);
 
         $user = User::update(1, $userData);
-        
+
         $this->assertEquals('Updated User', $user->getName());
     }
 

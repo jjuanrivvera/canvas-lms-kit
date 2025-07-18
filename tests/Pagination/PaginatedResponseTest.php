@@ -528,7 +528,7 @@ class PaginatedResponseTest extends TestCase
         // Mock the current response
         $currentResponseBody = json_encode([['id' => 1, 'name' => 'Course 1']]);
         $currentMockStream = $this->createMock(StreamInterface::class);
-        
+
         $currentMockStream->expects($this->once())
             ->method('getContents')
             ->willReturn($currentResponseBody);
@@ -584,7 +584,7 @@ class PaginatedResponseTest extends TestCase
     {
         $responseBody = json_encode($this->sampleData);
         $mockStream = $this->createMock(StreamInterface::class);
-        
+
         $mockStream->expects($this->once())
             ->method('getContents')
             ->willReturn($responseBody);
