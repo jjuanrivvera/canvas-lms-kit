@@ -103,7 +103,7 @@ class UpdateTabDTOTest extends TestCase
     public function testConstructorThrowsExceptionForInvalidPosition(): void
     {
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage('Position must be a positive integer');
+        $this->expectExceptionMessage('Position must be a positive integer between 1 and 50');
 
         new UpdateTabDTO(position: 0);
     }
@@ -111,7 +111,7 @@ class UpdateTabDTOTest extends TestCase
     public function testConstructorThrowsExceptionForNegativePosition(): void
     {
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage('Position must be a positive integer');
+        $this->expectExceptionMessage('Position must be a positive integer between 1 and 50');
 
         new UpdateTabDTO(position: -1);
     }
@@ -119,7 +119,7 @@ class UpdateTabDTOTest extends TestCase
     public function testSetPositionThrowsExceptionForInvalidPosition(): void
     {
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage('Position must be a positive integer');
+        $this->expectExceptionMessage('Position must be a positive integer between 1 and 50');
 
         $dto = new UpdateTabDTO();
         $dto->setPosition(0);
@@ -128,7 +128,7 @@ class UpdateTabDTOTest extends TestCase
     public function testSetPositionThrowsExceptionForNegativePosition(): void
     {
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage('Position must be a positive integer');
+        $this->expectExceptionMessage('Position must be a positive integer between 1 and 50');
 
         $dto = new UpdateTabDTO();
         $dto->setPosition(-5);
@@ -148,5 +148,41 @@ class UpdateTabDTOTest extends TestCase
         $dto->setPosition(null);
 
         $this->assertNull($dto->getPosition());
+    }
+
+    public function testConstructorThrowsExceptionForPositionTooHigh(): void
+    {
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Position must be a positive integer between 1 and 50');
+
+        new UpdateTabDTO(position: 51);
+    }
+
+    public function testSetPositionThrowsExceptionForPositionTooHigh(): void
+    {
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Position must be a positive integer between 1 and 50');
+
+        $dto = new UpdateTabDTO();
+        $dto->setPosition(100);
+    }
+
+    public function testValidPositionBoundaries(): void
+    {
+        // Test position 1 (minimum valid)
+        $dto1 = new UpdateTabDTO(position: 1);
+        $this->assertEquals(1, $dto1->getPosition());
+
+        // Test position 50 (maximum valid)
+        $dto50 = new UpdateTabDTO(position: 50);
+        $this->assertEquals(50, $dto50->getPosition());
+
+        // Test setting boundary values
+        $dto = new UpdateTabDTO();
+        $dto->setPosition(1);
+        $this->assertEquals(1, $dto->getPosition());
+
+        $dto->setPosition(50);
+        $this->assertEquals(50, $dto->getPosition());
     }
 }

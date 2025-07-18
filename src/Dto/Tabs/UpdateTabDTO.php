@@ -26,7 +26,7 @@ class UpdateTabDTO extends AbstractBaseDto
     /**
      * Create a new UpdateTabDTO instance
      *
-     * @param int|null $position Position of the tab (1-based)
+     * @param int|null $position Position of the tab (1-based, max 50)
      * @param bool|null $hidden Whether the tab should be hidden
      * @throws CanvasApiException If position is invalid
      */
@@ -34,8 +34,8 @@ class UpdateTabDTO extends AbstractBaseDto
         public ?int $position = null,
         public ?bool $hidden = null
     ) {
-        if ($position !== null && $position < 1) {
-            throw new CanvasApiException('Position must be a positive integer');
+        if ($position !== null && ($position < 1 || $position > 50)) {
+            throw new CanvasApiException('Position must be a positive integer between 1 and 50');
         }
         parent::__construct([]);
     }
@@ -53,14 +53,14 @@ class UpdateTabDTO extends AbstractBaseDto
     /**
      * Set the position
      *
-     * @param int|null $position
+     * @param int|null $position Position (1-based, max 50)
      * @return void
      * @throws CanvasApiException If position is invalid
      */
     public function setPosition(?int $position): void
     {
-        if ($position !== null && $position < 1) {
-            throw new CanvasApiException('Position must be a positive integer');
+        if ($position !== null && ($position < 1 || $position > 50)) {
+            throw new CanvasApiException('Position must be a positive integer between 1 and 50');
         }
         $this->position = $position;
     }

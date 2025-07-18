@@ -370,7 +370,9 @@ class TabTest extends TestCase
     public function testFindThrowsException(): void
     {
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage('Canvas API does not support finding individual tabs by ID. Use fetchAll() to retrieve all tabs.');
+        $this->expectExceptionMessage(
+            'Canvas API does not support finding individual tabs by ID. Use fetchAll() to retrieve all tabs.'
+        );
 
         Tab::find(123);
     }

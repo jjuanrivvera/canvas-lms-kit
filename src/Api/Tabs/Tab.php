@@ -115,7 +115,7 @@ class Tab extends AbstractBaseApi
      */
     public static function checkCourse(): bool
     {
-        if (!isset(self::$course->id)) {
+        if (!isset(self::$course) || !isset(self::$course->id)) {
             throw new CanvasApiException('Course is required');
         }
         return true;
@@ -382,9 +382,12 @@ class Tab extends AbstractBaseApi
         if ($data instanceof UpdateTabDTO) {
             $data = $data->toApiArray();
         } elseif (is_array($data)) {
-            // Validate position if provided
-            if (isset($data['position']) && (!is_int($data['position']) || $data['position'] < 1)) {
-                throw new CanvasApiException('Position must be a positive integer');
+            // Validate position if provided (Canvas API typically supports positions 1-50)
+            if (isset($data['position'])) {
+                $position = $data['position'];
+                if (!is_int($position) || $position < 1 || $position > 50) {
+                    throw new CanvasApiException('Position must be a positive integer between 1 and 50');
+                }
             }
         }
 
@@ -410,9 +413,9 @@ class Tab extends AbstractBaseApi
             $updateData = [];
 
             if ($this->position !== null) {
-                // Validate position
-                if ($this->position < 1) {
-                    throw new CanvasApiException('Position must be a positive integer');
+                // Validate position (Canvas API typically supports positions 1-50)
+                if ($this->position < 1 || $this->position > 50) {
+                    throw new CanvasApiException('Position must be a positive integer between 1 and 50');
                 }
                 $updateData['position'] = $this->position;
             }
