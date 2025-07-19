@@ -142,7 +142,7 @@ class Assignment extends AbstractBaseApi
 
     /**
      * All date variations for the assignment
-     * @var array<mixed>|null
+     * @var array<string, mixed>|null
      */
     public ?array $allDates = null;
 
@@ -538,7 +538,7 @@ class Assignment extends AbstractBaseApi
     /**
      * Get all dates
      *
-     * @return array<mixed>|null
+     * @return array<string, mixed>|null
      */
     public function getAllDates(): ?array
     {
@@ -548,7 +548,7 @@ class Assignment extends AbstractBaseApi
     /**
      * Set all dates
      *
-     * @param array<mixed>|null $allDates
+     * @param array<string, mixed>|null $allDates
      * @return void
      */
     public function setAllDates(?array $allDates): void
@@ -853,59 +853,36 @@ class Assignment extends AbstractBaseApi
      */
     public function toDtoArray(): array
     {
-        $data = [];
-
-        if ($this->name !== null) {
-            $data['name'] = $this->name;
-        }
-
-        if ($this->description !== null) {
-            $data['description'] = $this->description;
-        }
-
-        if ($this->pointsPossible !== null) {
-            $data['points_possible'] = $this->pointsPossible;
-        }
-
-        if ($this->gradingType !== null) {
-            $data['grading_type'] = $this->gradingType;
-        }
-
-        if ($this->submissionTypes !== null) {
-            $data['submission_types'] = $this->submissionTypes;
-        }
-
-        if ($this->dueAt !== null) {
-            $data['due_at'] = $this->dueAt;
-        }
-
-        if ($this->lockAt !== null) {
-            $data['lock_at'] = $this->lockAt;
-        }
-
-        if ($this->unlockAt !== null) {
-            $data['unlock_at'] = $this->unlockAt;
-        }
-
-        if ($this->published !== null) {
-            $data['published'] = $this->published;
-        }
-
-        if ($this->assignmentGroupId !== null) {
-            $data['assignment_group_id'] = $this->assignmentGroupId;
-        }
-
-        return $data;
+        return array_filter([
+            'name' => $this->name,
+            'description' => $this->description,
+            'points_possible' => $this->pointsPossible,
+            'grading_type' => $this->gradingType,
+            'submission_types' => $this->submissionTypes,
+            'allowed_extensions' => $this->allowedExtensions,
+            'allowed_attempts' => $this->allowedAttempts,
+            'due_at' => $this->dueAt,
+            'lock_at' => $this->lockAt,
+            'unlock_at' => $this->unlockAt,
+            'published' => $this->published,
+            'assignment_group_id' => $this->assignmentGroupId,
+            'position' => $this->position,
+            'only_visible_to_overrides' => $this->onlyVisibleToOverrides,
+            'peer_reviews' => $this->peerReviews,
+            'anonymous_grading' => $this->anonymousGrading,
+            'moderated_grading' => $this->moderatedGrading,
+            'group_category_id' => $this->groupCategoryId,
+        ], fn($value) => $value !== null);
     }
 
     /**
      * Find a single assignment by ID
      *
      * @param int $id Assignment ID
-     * @return static
+     * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): static
+    public static function find(int $id): self
     {
         self::checkCourse();
         self::checkApiClient();
@@ -914,7 +891,7 @@ class Assignment extends AbstractBaseApi
         $response = self::$apiClient->get($endpoint);
         $assignmentData = json_decode($response->getBody()->getContents(), true);
 
-        return new static($assignmentData);
+        return new self($assignmentData);
     }
 
     /**
@@ -1049,6 +1026,44 @@ class Assignment extends AbstractBaseApi
         // Check for required fields before trying to save
         if (!$this->id && empty($this->name)) {
             throw new CanvasApiException('Assignment name is required');
+        }
+
+        // Validate points possible
+        if ($this->pointsPossible !== null && $this->pointsPossible < 0) {
+            throw new CanvasApiException('Points possible must be non-negative');
+        }
+
+        // Validate grading type
+        if ($this->gradingType !== null) {
+            $validGradingTypes = ['pass_fail', 'percent', 'letter_grade', 'gpa_scale', 'points'];
+            if (!in_array($this->gradingType, $validGradingTypes, true)) {
+                throw new CanvasApiException(
+                    'Invalid grading type. Must be one of: ' . implode(', ', $validGradingTypes)
+                );
+            }
+        }
+
+        // Validate submission types
+        if ($this->submissionTypes !== null && !empty($this->submissionTypes)) {
+            $validSubmissionTypes = [
+                'discussion_topic', 'online_quiz', 'on_paper', 'none', 'external_tool',
+                'online_text_entry', 'online_url', 'online_upload', 'media_recording'
+            ];
+            foreach ($this->submissionTypes as $type) {
+                if (!in_array($type, $validSubmissionTypes, true)) {
+                    throw new CanvasApiException("Invalid submission type: {$type}");
+                }
+            }
+        }
+
+        // Validate allowed file extensions
+        if ($this->allowedExtensions !== null && !empty($this->allowedExtensions)) {
+            foreach ($this->allowedExtensions as $extension) {
+                // Basic validation for file extensions
+                if (!is_string($extension) || !preg_match('/^[a-zA-Z0-9]+$/', $extension)) {
+                    throw new CanvasApiException("Invalid file extension: {$extension}");
+                }
+            }
         }
 
         try {

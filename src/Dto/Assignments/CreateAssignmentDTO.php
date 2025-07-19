@@ -25,7 +25,7 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Assignment name (required)
      */
-    public string $name = '';
+    public ?string $name = null;
 
     /**
      * Assignment description (HTML content)
@@ -65,6 +65,7 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Allowed file extensions for submissions
+     * @var array<string>|null
      */
     public ?array $allowedExtensions = null;
 
@@ -175,11 +176,13 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * External tool tag attributes
+     * @var array<string, mixed>|null
      */
     public ?array $externalToolTagAttributes = null;
 
     /**
      * Assignment integration data
+     * @var array<string, mixed>|null
      */
     public ?array $integrationData = null;
 
@@ -201,7 +204,7 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Get assignment name
      */
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -209,7 +212,7 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Set assignment name
      */
-    public function setName(string $name): void
+    public function setName(?string $name): void
     {
         $this->name = $name;
     }
@@ -312,6 +315,7 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get submission types
+     * @return array<string>|null
      */
     public function getSubmissionTypes(): ?array
     {
@@ -320,6 +324,7 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set submission types
+     * @param array<string>|null $submissionTypes
      */
     public function setSubmissionTypes(?array $submissionTypes): void
     {
@@ -328,6 +333,7 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get allowed extensions
+     * @return array<string>|null
      */
     public function getAllowedExtensions(): ?array
     {
@@ -336,6 +342,7 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set allowed extensions
+     * @param array<string>|null $allowedExtensions
      */
     public function setAllowedExtensions(?array $allowedExtensions): void
     {
@@ -680,6 +687,7 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get external tool tag attributes
+     * @return array<string, mixed>|null
      */
     public function getExternalToolTagAttributes(): ?array
     {
@@ -688,6 +696,7 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set external tool tag attributes
+     * @param array<string, mixed>|null $externalToolTagAttributes
      */
     public function setExternalToolTagAttributes(?array $externalToolTagAttributes): void
     {
@@ -696,6 +705,7 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get integration data
+     * @return array<string, mixed>|null
      */
     public function getIntegrationData(): ?array
     {
@@ -704,6 +714,7 @@ class CreateAssignmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set integration data
+     * @param array<string, mixed>|null $integrationData
      */
     public function setIntegrationData(?array $integrationData): void
     {
