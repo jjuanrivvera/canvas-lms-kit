@@ -216,7 +216,7 @@ class ConfigTest extends TestCase
     public function testInvalidUrlThrowsException(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid URL provided for base URL.');
+        $this->expectExceptionMessage('Invalid URL provided for base URL: not-a-valid-url');
 
         Config::setBaseUrl('not-a-valid-url');
     }
@@ -290,5 +290,139 @@ class ConfigTest extends TestCase
         $this->assertEquals('prod-key', Config::getApiKey('production'));
         $this->assertEquals('staging-key', Config::getApiKey('staging'));
         $this->assertEquals('test-key', Config::getApiKey('test'));
+    }
+
+    public function testEnvironmentValidationEmptyApiKey(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('CANVAS_API_KEY environment variable is empty');
+
+        // Clean environment first
+        unset($_ENV['CANVAS_BASE_URL'], $_ENV['CANVAS_ACCOUNT_ID'], $_ENV['CANVAS_API_VERSION'], $_ENV['CANVAS_TIMEOUT']);
+        $_ENV['CANVAS_API_KEY'] = '   '; // Empty after trim
+        Config::autoDetect();
+
+        unset($_ENV['CANVAS_API_KEY']);
+    }
+
+    public function testEnvironmentValidationEmptyBaseUrl(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('CANVAS_BASE_URL environment variable is empty');
+
+        // Clean environment first
+        unset($_ENV['CANVAS_API_KEY'], $_ENV['CANVAS_ACCOUNT_ID'], $_ENV['CANVAS_API_VERSION'], $_ENV['CANVAS_TIMEOUT']);
+        $_ENV['CANVAS_BASE_URL'] = '';
+        Config::autoDetect();
+
+        unset($_ENV['CANVAS_BASE_URL']);
+    }
+
+    public function testEnvironmentValidationInvalidAccountId(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('CANVAS_ACCOUNT_ID must be a positive integer, got: invalid');
+
+        // Clean environment first
+        unset($_ENV['CANVAS_API_KEY'], $_ENV['CANVAS_BASE_URL'], $_ENV['CANVAS_API_VERSION'], $_ENV['CANVAS_TIMEOUT']);
+        $_ENV['CANVAS_ACCOUNT_ID'] = 'invalid';
+        Config::autoDetect();
+
+        unset($_ENV['CANVAS_ACCOUNT_ID']);
+    }
+
+    public function testEnvironmentValidationNegativeAccountId(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('CANVAS_ACCOUNT_ID must be a positive integer, got: -1');
+
+        // Clean environment first
+        unset($_ENV['CANVAS_API_KEY'], $_ENV['CANVAS_BASE_URL'], $_ENV['CANVAS_API_VERSION'], $_ENV['CANVAS_TIMEOUT']);
+        $_ENV['CANVAS_ACCOUNT_ID'] = '-1';
+        Config::autoDetect();
+
+        unset($_ENV['CANVAS_ACCOUNT_ID']);
+    }
+
+    public function testEnvironmentValidationInvalidTimeout(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('CANVAS_TIMEOUT must be a positive integer, got: abc');
+
+        // Clean environment first
+        unset($_ENV['CANVAS_API_KEY'], $_ENV['CANVAS_BASE_URL'], $_ENV['CANVAS_ACCOUNT_ID'], $_ENV['CANVAS_API_VERSION']);
+        $_ENV['CANVAS_TIMEOUT'] = 'abc';
+        Config::autoDetect();
+
+        unset($_ENV['CANVAS_TIMEOUT']);
+    }
+
+    public function testHttpsUrlValidation(): void
+    {
+        // Should work with HTTPS
+        Config::setBaseUrl('https://canvas.instructure.com');
+        $this->assertEquals('https://canvas.instructure.com/', Config::getBaseUrl());
+    }
+
+    public function testHttpUrlRejectedForProduction(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Canvas URL must use HTTPS for security');
+
+        Config::setBaseUrl('http://canvas.instructure.com');
+    }
+
+    public function testHttpUrlAllowedForLocalhost(): void
+    {
+        // Should allow HTTP for localhost
+        Config::setBaseUrl('http://localhost:3000');
+        $this->assertEquals('http://localhost:3000/', Config::getBaseUrl());
+
+        Config::setBaseUrl('http://127.0.0.1:3000');
+        $this->assertEquals('http://127.0.0.1:3000/', Config::getBaseUrl());
+
+        Config::setBaseUrl('http://canvas.local');
+        $this->assertEquals('http://canvas.local/', Config::getBaseUrl());
+    }
+
+    public function testUrlWithoutHostRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid URL provided for base URL: https://');
+
+        Config::setBaseUrl('https://');
+    }
+
+    public function testConfigurationSynchronization(): void
+    {
+        // Set up context with values
+        Config::setContext('sync-test');
+        Config::setApiKey('sync-key');
+        Config::setBaseUrl('https://sync.canvas.com');
+
+        // Switch to different context
+        Config::setContext('other');
+        Config::setApiKey('other-key');
+
+        // Switch back to sync-test - legacy values should sync
+        Config::setContext('sync-test');
+        
+        // Verify legacy values are synchronized
+        $this->assertEquals('sync-key', Config::getApiKey());
+        $this->assertEquals('https://sync.canvas.com/', Config::getBaseUrl());
+    }
+
+    public function testHasAccountIdConfigured(): void
+    {
+        // Fresh context should not have account ID configured
+        Config::setContext('account-test');
+        $this->assertFalse(Config::hasAccountIdConfigured());
+
+        // After setting account ID, should be configured
+        Config::setAccountId(123);
+        $this->assertTrue(Config::hasAccountIdConfigured());
+
+        // Different context should not be configured
+        $this->assertFalse(Config::hasAccountIdConfigured('other-context'));
     }
 }

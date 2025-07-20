@@ -161,6 +161,86 @@ print_r($debug);
 // ]
 ```
 
+## Troubleshooting
+
+### Common Configuration Issues
+
+#### Invalid URL Errors
+```
+Canvas URL must use HTTPS for security: http://canvas.example.com
+```
+**Solution**: Use HTTPS URLs for production Canvas instances. HTTP is only allowed for localhost/development:
+```php
+// ✅ Correct
+Config::setBaseUrl('https://canvas.instructure.com');
+
+// ❌ Incorrect (production)
+Config::setBaseUrl('http://canvas.instructure.com');
+
+// ✅ Allowed for development
+Config::setBaseUrl('http://localhost:3000');
+```
+
+#### Environment Variable Validation Errors
+```
+CANVAS_ACCOUNT_ID must be a positive integer, got: invalid
+```
+**Solution**: Ensure environment variables contain valid values:
+```bash
+# ✅ Correct
+export CANVAS_ACCOUNT_ID=123
+export CANVAS_TIMEOUT=30
+
+# ❌ Incorrect
+export CANVAS_ACCOUNT_ID=invalid
+export CANVAS_TIMEOUT=abc
+```
+
+#### Configuration Not Found
+```
+API key not set for context: production
+```
+**Solution**: Ensure all required configuration is set for each context:
+```php
+Config::setContext('production');
+Config::setApiKey('your-api-key');
+Config::setBaseUrl('https://canvas.example.com');
+
+// Validate configuration
+Config::validate(); // Throws exception if incomplete
+```
+
+#### Context Isolation Issues
+If tests are interfering with each other, ensure proper context cleanup:
+```php
+// In test tearDown
+Config::resetContext('test');
+
+// Or use unique context names per test
+Config::setContext('test-' . uniqid());
+```
+
+### Debugging Configuration
+
+Use the debug method to inspect current configuration:
+```php
+$debug = Config::debugConfig();
+print_r($debug);
+```
+
+Enable notices to see when default values are used:
+```php
+// This will trigger a notice if account ID isn't explicitly set
+$accountId = Config::getAccountId();
+```
+
+### Performance Considerations
+
+For applications with many contexts:
+- Clean up unused contexts periodically
+- Consider using context prefixes for organization
+- Avoid frequent context switching in hot paths
+
 ## Contributing
 
 We welcome contributions to the SDK. Please adhere to the PHP coding standards and include tests for new features or bug fixes.

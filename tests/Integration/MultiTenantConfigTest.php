@@ -142,6 +142,9 @@ class MultiTenantConfigTest extends TestCase
 
     public function testEnvironmentBasedMultiTenant(): void
     {
+        // Clean environment first to avoid interference from other tests
+        unset($_ENV['CANVAS_API_KEY'], $_ENV['CANVAS_BASE_URL'], $_ENV['CANVAS_ACCOUNT_ID'], $_ENV['CANVAS_API_VERSION'], $_ENV['CANVAS_TIMEOUT']);
+        
         // Simulate different environments with different Canvas instances
         
         // Development environment

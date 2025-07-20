@@ -97,8 +97,29 @@ class Config
      */
     public static function setBaseUrl(string $url, ?string $context = null): void
     {
+        // Validate URL format
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new \InvalidArgumentException("Invalid URL provided for base URL.");
+            throw new \InvalidArgumentException("Invalid URL provided for base URL: {$url}");
+        }
+
+        // Parse URL components for Canvas-specific validation
+        $parsedUrl = parse_url($url);
+
+        // Require HTTPS for security (allow HTTP only for localhost/development)
+        if (isset($parsedUrl['scheme']) && $parsedUrl['scheme'] !== 'https') {
+            if (
+                !isset($parsedUrl['host']) ||
+                (!str_contains($parsedUrl['host'], 'localhost') &&
+                 !str_contains($parsedUrl['host'], '127.0.0.1') &&
+                 !str_contains($parsedUrl['host'], '.local'))
+            ) {
+                throw new \InvalidArgumentException("Canvas URL must use HTTPS for security: {$url}");
+            }
+        }
+
+        // Ensure host is present
+        if (empty($parsedUrl['host'])) {
+            throw new \InvalidArgumentException("URL must include a valid host: {$url}");
         }
 
         $context ??= self::$activeContext;
@@ -255,8 +276,40 @@ class Config
             return self::$accountId;
         }
 
+        // Warn about using default value if no configuration was explicitly set
+        if (!self::hasAccountIdConfigured($context)) {
+            trigger_error(
+                "No account ID configured for context '{$context}', using default value 1. " .
+                "Consider setting explicitly with Config::setAccountId().",
+                E_USER_NOTICE
+            );
+        }
+
         // Return default if nothing else found
         return 1;
+    }
+
+    /**
+     * Check if an account ID has been explicitly configured for a context.
+     *
+     * @param string|null $context The context to check. If null, uses active context.
+     * @return bool True if account ID is explicitly configured, false if using default.
+     */
+    public static function hasAccountIdConfigured(?string $context = null): bool
+    {
+        $context ??= self::$activeContext;
+
+        // Check if explicitly set in context
+        if (isset(self::$contexts[$context]['account_id'])) {
+            return true;
+        }
+
+        // Check if explicitly set in legacy (for active context only)
+        if ($context === self::$activeContext && self::$accountId !== 1) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -267,6 +320,25 @@ class Config
     public static function setContext(string $context): void
     {
         self::$activeContext = $context;
+
+        // Sync legacy values with the new active context for backward compatibility
+        self::syncLegacyValues();
+    }
+
+    /**
+     * Synchronize legacy static properties with active context values.
+     * This ensures backward compatibility when switching contexts.
+     */
+    private static function syncLegacyValues(): void
+    {
+        $context = self::$activeContext;
+
+        // Update legacy values to match active context (if set)
+        self::$appKey = self::$contexts[$context]['app_key'] ?? self::$appKey;
+        self::$baseUrl = self::$contexts[$context]['base_url'] ?? self::$baseUrl;
+        self::$apiVersion = self::$contexts[$context]['api_version'] ?? self::$apiVersion;
+        self::$timeout = self::$contexts[$context]['timeout'] ?? self::$timeout;
+        self::$accountId = self::$contexts[$context]['account_id'] ?? self::$accountId;
     }
 
     /**
@@ -312,30 +384,51 @@ class Config
      * Auto-detect configuration from environment variables.
      *
      * @param string|null $context The context to set configuration for. If null, uses active context.
+     * @throws ConfigurationException If environment variables contain invalid values.
      */
     public static function autoDetect(?string $context = null): void
     {
         $context ??= self::$activeContext;
 
-        // Check for Canvas-specific environment variables
+        // Check for Canvas-specific environment variables with validation
         if (isset($_ENV['CANVAS_API_KEY'])) {
-            self::setAppKey($_ENV['CANVAS_API_KEY'], $context);
+            $apiKey = trim($_ENV['CANVAS_API_KEY']);
+            if (empty($apiKey)) {
+                throw new ConfigurationException("CANVAS_API_KEY environment variable is empty");
+            }
+            self::setAppKey($apiKey, $context);
         }
 
         if (isset($_ENV['CANVAS_BASE_URL'])) {
-            self::setBaseUrl($_ENV['CANVAS_BASE_URL'], $context);
+            $baseUrl = trim($_ENV['CANVAS_BASE_URL']);
+            if (empty($baseUrl)) {
+                throw new ConfigurationException("CANVAS_BASE_URL environment variable is empty");
+            }
+            self::setBaseUrl($baseUrl, $context);
         }
 
         if (isset($_ENV['CANVAS_ACCOUNT_ID'])) {
-            self::setAccountId((int) $_ENV['CANVAS_ACCOUNT_ID'], $context);
+            $accountId = trim($_ENV['CANVAS_ACCOUNT_ID']);
+            if (!is_numeric($accountId) || (int) $accountId < 1) {
+                throw new ConfigurationException("CANVAS_ACCOUNT_ID must be a positive integer, got: {$accountId}");
+            }
+            self::setAccountId((int) $accountId, $context);
         }
 
         if (isset($_ENV['CANVAS_API_VERSION'])) {
-            self::setApiVersion($_ENV['CANVAS_API_VERSION'], $context);
+            $apiVersion = trim($_ENV['CANVAS_API_VERSION']);
+            if (empty($apiVersion)) {
+                throw new ConfigurationException("CANVAS_API_VERSION environment variable is empty");
+            }
+            self::setApiVersion($apiVersion, $context);
         }
 
         if (isset($_ENV['CANVAS_TIMEOUT'])) {
-            self::setTimeout((int) $_ENV['CANVAS_TIMEOUT'], $context);
+            $timeout = trim($_ENV['CANVAS_TIMEOUT']);
+            if (!is_numeric($timeout) || (int) $timeout < 1) {
+                throw new ConfigurationException("CANVAS_TIMEOUT must be a positive integer, got: {$timeout}");
+            }
+            self::setTimeout((int) $timeout, $context);
         }
     }
 
