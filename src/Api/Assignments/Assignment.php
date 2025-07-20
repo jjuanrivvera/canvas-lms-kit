@@ -20,6 +20,7 @@ use CanvasLMS\Pagination\PaginationResult;
  *
  * Usage Examples:
  *
+ * ```php
  * // Set course context (required for all operations)
  * $course = Course::find(123);
  * Assignment::setCourse($course);
@@ -61,6 +62,7 @@ use CanvasLMS\Pagination\PaginationResult;
  *
  * // Duplicate an assignment
  * $duplicatedAssignment = Assignment::duplicate(456);
+ * ```
  *
  * @package CanvasLMS\Api\Assignments
  */

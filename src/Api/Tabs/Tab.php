@@ -19,6 +19,7 @@ use CanvasLMS\Pagination\PaginationResult;
  *
  * Usage Examples:
  *
+ * ```php
  * // Set course context (required for all operations)
  * $course = Course::find(123);
  * Tab::setCourse($course);
@@ -42,6 +43,7 @@ use CanvasLMS\Pagination\PaginationResult;
  * $tab->position = 5;
  * $tab->hidden = true;
  * $success = $tab->save();
+ * ```
  *
  * @package CanvasLMS\Api\Tabs
  */
