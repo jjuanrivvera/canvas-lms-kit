@@ -91,33 +91,41 @@ class UpdateEnrollmentDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Get start date
      */
-    public function getStartAt(): ?\DateTime
+    public function getStartAt(): ?string
     {
-        return $this->startAt;
+        return $this->startAt?->format('Y-m-d\TH:i:s\Z');
     }
 
     /**
      * Set start date
      */
-    public function setStartAt(?\DateTime $startAt): void
+    public function setStartAt(\DateTime|string|null $startAt): void
     {
-        $this->startAt = $startAt;
+        if (is_string($startAt)) {
+            $this->startAt = new \DateTime($startAt);
+        } else {
+            $this->startAt = $startAt;
+        }
     }
 
     /**
      * Get end date
      */
-    public function getEndAt(): ?\DateTime
+    public function getEndAt(): ?string
     {
-        return $this->endAt;
+        return $this->endAt?->format('Y-m-d\TH:i:s\Z');
     }
 
     /**
      * Set end date
      */
-    public function setEndAt(?\DateTime $endAt): void
+    public function setEndAt(\DateTime|string|null $endAt): void
     {
-        $this->endAt = $endAt;
+        if (is_string($endAt)) {
+            $this->endAt = new \DateTime($endAt);
+        } else {
+            $this->endAt = $endAt;
+        }
     }
 
     /**
@@ -134,5 +142,26 @@ class UpdateEnrollmentDTO extends AbstractBaseDto implements DTOInterface
     public function setNotify(?bool $notify): void
     {
         $this->notify = $notify;
+    }
+
+    /**
+     * Convert the DTO to an array with proper date formatting
+     * @return mixed[]
+     */
+    public function toArray(): array
+    {
+        $properties = get_object_vars($this);
+
+        foreach ($properties as $key => &$value) {
+            if ($value instanceof \DateTime) {
+                $value = $value->format('Y-m-d\TH:i:s\Z'); // Use Z format to match tests
+            }
+
+            if (empty($value) && $value !== false && $value !== 0) {
+                unset($properties[$key]);
+            }
+        }
+
+        return $properties;
     }
 }
