@@ -48,7 +48,7 @@
         "test": "phpunit tests --testdox",
         "cs": "phpcs --standard=PSR12 src",
         "cs-fix": "phpcbf --standard=PSR12 src",
-        "phpstan": "phpstan"
+        "phpstan": "phpstan --memory-limit=256M"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.5",

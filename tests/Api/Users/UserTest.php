@@ -3,6 +3,7 @@
 namespace Tests\Api\Users;
 
 use CanvasLMS\Api\Users\User;
+use CanvasLMS\Api\Enrollments\Enrollment;
 use GuzzleHttp\Psr7\Response;
 use CanvasLMS\Http\HttpClient;
 use PHPUnit\Framework\TestCase;
@@ -207,6 +208,40 @@ class UserTest extends TestCase
             ->will($this->throwException(new CanvasApiException()));
 
         $this->assertFalse($this->user->save());
+    }
+
+    // Relationship Method Tests
+
+    /**
+     * Test method alias for user enrollments with parameters
+     */
+    public function testUserEnrollmentsMethodAlias(): void
+    {
+        $userData = ['id' => 123, 'name' => 'Test User'];
+        $user = new User($userData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 123,
+                'course_id' => 456,
+                'type' => 'StudentEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('users/123/enrollments', ['query' => ['state[]' => ['active']]])
+            ->willReturn($response);
+
+        $enrollments = $user->enrollments(['state[]' => ['active']]); // Method access with params
+
+        $this->assertCount(1, $enrollments);
+        $this->assertInstanceOf(Enrollment::class, $enrollments[0]);
     }
 
     protected function tearDown(): void

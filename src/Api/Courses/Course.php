@@ -5,6 +5,7 @@ namespace CanvasLMS\Api\Courses;
 use Exception;
 use CanvasLMS\Config;
 use CanvasLMS\Api\AbstractBaseApi;
+use CanvasLMS\Api\Enrollments\Enrollment;
 use CanvasLMS\Dto\Courses\CreateCourseDTO;
 use CanvasLMS\Dto\Courses\UpdateCourseDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -561,6 +562,252 @@ class Course extends AbstractBaseApi
         $this->populate($courseData);
 
         return $this;
+    }
+
+    // Relationship Method Aliases
+
+    /**
+     * Get enrollments for this course (relationship method alias with parameter support)
+     *
+     * This method provides a clean, explicit way to access course enrollments
+     * without conflicts with Canvas API data structure. Supports all Canvas API
+     * enrollment parameters for filtering.
+     *
+     * @example
+     * ```php
+     * $course = Course::find(123);
+     *
+     * // Get all enrollments
+     * $enrollments = $course->enrollments();
+     *
+     * // Get active student enrollments
+     * $activeStudents = $course->enrollments([
+     *     'type[]' => ['StudentEnrollment'],
+     *     'state[]' => ['active']
+     * ]);
+     *
+     * // Get enrollments with user data included
+     * $enrollmentsWithUsers = $course->enrollments([
+     *     'include[]' => ['user']
+     * ]);
+     * ```
+     *
+     * @param mixed[] $params Query parameters for filtering enrollments:
+     *   - type[]: Filter by enrollment type (e.g., ['StudentEnrollment', 'TeacherEnrollment'])
+     *   - role[]: Filter by enrollment role
+     *   - state[]: Filter by enrollment state (e.g., ['active', 'invited'])
+     *   - user_id: Filter by specific user ID
+     *   - include[]: Include additional data (e.g., ['user', 'avatar_url'])
+     * @return Enrollment[] Array of Enrollment objects
+     * @throws CanvasApiException If the course ID is not set or API request fails
+     */
+    public function enrollments(array $params = []): array
+    {
+        return $this->getEnrollmentsAsObjects($params);
+    }
+
+    // Enrollment Relationship Methods
+
+    /**
+     * Get all enrollments for this course as Enrollment objects
+     *
+     * This method fetches all enrollments in the current course.
+     * Use the $params array to filter enrollments by type, state, or other Canvas API parameters.
+     *
+     * @param mixed[] $params Query parameters for filtering enrollments (e.g., ['type[]' => ['StudentEnrollment']]
+     * @return Enrollment[] Array of Enrollment objects
+     * @throws CanvasApiException If the course ID is not set or API request fails
+     */
+    public function getEnrollmentsAsObjects(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch enrollments');
+        }
+
+        // Set this course as the context and fetch enrollments
+        Enrollment::setCourse($this);
+        return Enrollment::fetchAll($params);
+    }
+
+    /**
+     * Get active enrollments for this course
+     *
+     * Convenience method to get only active enrollments in the current course.
+     *
+     * @param mixed[] $params Additional query parameters
+     * @return Enrollment[] Array of active Enrollment objects
+     * @throws CanvasApiException If course ID is not set or API request fails
+     */
+    public function getActiveEnrollments(array $params = []): array
+    {
+        $params = array_merge($params, ['state[]' => ['active']]);
+        return $this->getEnrollmentsAsObjects($params);
+    }
+
+    /**
+     * Get student enrollments for this course
+     *
+     * Convenience method to get only student enrollments in the current course.
+     *
+     * @param mixed[] $params Additional query parameters
+     * @return Enrollment[] Array of student Enrollment objects
+     * @throws CanvasApiException If course ID is not set or API request fails
+     */
+    public function getStudentEnrollments(array $params = []): array
+    {
+        $params = array_merge($params, ['type[]' => ['StudentEnrollment']]);
+        return $this->getEnrollmentsAsObjects($params);
+    }
+
+    /**
+     * Get teacher enrollments for this course
+     *
+     * Convenience method to get only teacher enrollments in the current course.
+     *
+     * @param mixed[] $params Additional query parameters
+     * @return Enrollment[] Array of teacher Enrollment objects
+     * @throws CanvasApiException If course ID is not set or API request fails
+     */
+    public function getTeacherEnrollments(array $params = []): array
+    {
+        $params = array_merge($params, ['type[]' => ['TeacherEnrollment']]);
+        return $this->getEnrollmentsAsObjects($params);
+    }
+
+    /**
+     * Get TA enrollments for this course
+     *
+     * Convenience method to get only TA enrollments in the current course.
+     *
+     * @param mixed[] $params Additional query parameters
+     * @return Enrollment[] Array of TA Enrollment objects
+     * @throws CanvasApiException If course ID is not set or API request fails
+     */
+    public function getTaEnrollments(array $params = []): array
+    {
+        $params = array_merge($params, ['type[]' => ['TaEnrollment']]);
+        return $this->getEnrollmentsAsObjects($params);
+    }
+
+    /**
+     * Get observer enrollments for this course
+     *
+     * Convenience method to get only observer enrollments in the current course.
+     *
+     * @param mixed[] $params Additional query parameters
+     * @return Enrollment[] Array of observer Enrollment objects
+     * @throws CanvasApiException If course ID is not set or API request fails
+     */
+    public function getObserverEnrollments(array $params = []): array
+    {
+        $params = array_merge($params, ['type[]' => ['ObserverEnrollment']]);
+        return $this->getEnrollmentsAsObjects($params);
+    }
+
+    /**
+     * Get designer enrollments for this course
+     *
+     * Convenience method to get only designer enrollments in the current course.
+     *
+     * @param mixed[] $params Additional query parameters
+     * @return Enrollment[] Array of designer Enrollment objects
+     * @throws CanvasApiException If course ID is not set or API request fails
+     */
+    public function getDesignerEnrollments(array $params = []): array
+    {
+        $params = array_merge($params, ['type[]' => ['DesignerEnrollment']]);
+        return $this->getEnrollmentsAsObjects($params);
+    }
+
+    /**
+     * Check if a specific user is enrolled in this course
+     *
+     * @param int $userId The user ID to check enrollment for
+     * @param string|null $enrollmentType Optional: specific enrollment type to check for
+     * @return bool True if user is enrolled in the course (with optional type filter)
+     * @throws CanvasApiException If course ID is not set or API request fails
+     */
+    public function hasUserEnrolled(int $userId, ?string $enrollmentType = null): bool
+    {
+        $params = ['user_id' => $userId];
+        if ($enrollmentType) {
+            $params['type[]'] = [$enrollmentType];
+        }
+
+        $enrollments = $this->getEnrollmentsAsObjects($params);
+        return count($enrollments) > 0;
+    }
+
+    /**
+     * Check if a specific user is a student in this course
+     *
+     * @param int $userId The user ID to check
+     * @return bool True if user has a student enrollment in the course
+     * @throws CanvasApiException If course ID is not set or API request fails
+     */
+    public function hasStudentEnrolled(int $userId): bool
+    {
+        return $this->hasUserEnrolled($userId, 'StudentEnrollment');
+    }
+
+    /**
+     * Check if a specific user is a teacher in this course
+     *
+     * @param int $userId The user ID to check
+     * @return bool True if user has a teacher enrollment in the course
+     * @throws CanvasApiException If course ID is not set or API request fails
+     */
+    public function hasTeacherEnrolled(int $userId): bool
+    {
+        return $this->hasUserEnrolled($userId, 'TeacherEnrollment');
+    }
+
+    /**
+     * Get the count of student enrollments in this course
+     *
+     * @return int Number of student enrollments
+     * @throws CanvasApiException If course ID is not set or API request fails
+     */
+    public function getStudentCount(): int
+    {
+        return count($this->getStudentEnrollments());
+    }
+
+    /**
+     * Get the count of teacher enrollments in this course
+     *
+     * @return int Number of teacher enrollments
+     * @throws CanvasApiException If course ID is not set or API request fails
+     */
+    public function getTeacherCount(): int
+    {
+        return count($this->getTeacherEnrollments());
+    }
+
+    /**
+     * Get the count of total enrollments in this course
+     *
+     * @param mixed[] $params Optional parameters to filter the count
+     * @return int Total number of enrollments (with optional filters)
+     * @throws CanvasApiException If course ID is not set or API request fails
+     */
+    public function getTotalEnrollmentCount(array $params = []): int
+    {
+        return count($this->getEnrollmentsAsObjects($params));
+    }
+
+    /**
+     * Get the course's enrollment data array (legacy method - uses embedded data)
+     *
+     * This returns the raw enrollments array that may be embedded in the course object
+     * from certain Canvas API calls. For fetching current enrollments from the API,
+     * use getEnrollmentsAsObjects() instead.
+     *
+     * @return mixed[]|null Raw enrollments data array or null
+     */
+    public function getEnrollmentsData(): ?array
+    {
+        return $this->enrollments;
     }
 
     /**

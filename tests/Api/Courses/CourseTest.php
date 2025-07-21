@@ -6,6 +6,7 @@ use GuzzleHttp\Psr7\Response;
 use CanvasLMS\Http\HttpClient;
 use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Enrollments\Enrollment;
 use CanvasLMS\Dto\Courses\CreateCourseDTO;
 use CanvasLMS\Dto\Courses\UpdateCourseDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -28,6 +29,11 @@ class CourseTest extends TestCase
     protected function setUp(): void
     {
         $this->httpClientMock = $this->createMock(HttpClient::class);
+        Course::setApiClient($this->httpClientMock);
+        Enrollment::setApiClient($this->httpClientMock);
+        
+        // Set up a test course for enrollments if needed
+        $testCourse = new Course(['id' => 123, 'name' => 'Test Course']);
         Course::setApiClient($this->httpClientMock);
         $this->course = new Course([]);
     }
@@ -286,6 +292,559 @@ class CourseTest extends TestCase
 
         $this->assertInstanceOf(Course::class, $resetCourse);
         $this->assertEquals('Reset Course', $resetCourse->getName());
+    }
+
+    // Enrollment Relationship Tests
+
+    /**
+     * Test getting enrollments as objects for a course
+     */
+    public function testGetEnrollmentsAsObjects(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'StudentEnrollment',
+                'enrollment_state' => 'active'
+            ],
+            [
+                'id' => 2,
+                'user_id' => 102,
+                'course_id' => 123,
+                'type' => 'TeacherEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => []])
+            ->willReturn($response);
+
+        $enrollments = $course->getEnrollmentsAsObjects();
+
+        $this->assertCount(2, $enrollments);
+        $this->assertInstanceOf(Enrollment::class, $enrollments[0]);
+        $this->assertInstanceOf(Enrollment::class, $enrollments[1]);
+        $this->assertEquals(101, $enrollments[0]->getUserId());
+        $this->assertEquals(102, $enrollments[1]->getUserId());
+    }
+
+    /**
+     * Test getting active enrollments for a course
+     */
+    public function testGetActiveEnrollments(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'StudentEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['state[]' => ['active']]])
+            ->willReturn($response);
+
+        $enrollments = $course->getActiveEnrollments();
+
+        $this->assertCount(1, $enrollments);
+        $this->assertEquals('active', $enrollments[0]->getEnrollmentState());
+    }
+
+    /**
+     * Test getting student enrollments for a course
+     */
+    public function testGetStudentEnrollments(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'StudentEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['type[]' => ['StudentEnrollment']]])
+            ->willReturn($response);
+
+        $enrollments = $course->getStudentEnrollments();
+
+        $this->assertCount(1, $enrollments);
+        $this->assertEquals('StudentEnrollment', $enrollments[0]->getType());
+    }
+
+    /**
+     * Test getting teacher enrollments for a course
+     */
+    public function testGetTeacherEnrollments(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'TeacherEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['type[]' => ['TeacherEnrollment']]])
+            ->willReturn($response);
+
+        $enrollments = $course->getTeacherEnrollments();
+
+        $this->assertCount(1, $enrollments);
+        $this->assertEquals('TeacherEnrollment', $enrollments[0]->getType());
+    }
+
+    /**
+     * Test getting TA enrollments for a course
+     */
+    public function testGetTaEnrollments(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'TaEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['type[]' => ['TaEnrollment']]])
+            ->willReturn($response);
+
+        $enrollments = $course->getTaEnrollments();
+
+        $this->assertCount(1, $enrollments);
+        $this->assertEquals('TaEnrollment', $enrollments[0]->getType());
+    }
+
+    /**
+     * Test getting observer enrollments for a course
+     */
+    public function testGetObserverEnrollments(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'ObserverEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['type[]' => ['ObserverEnrollment']]])
+            ->willReturn($response);
+
+        $enrollments = $course->getObserverEnrollments();
+
+        $this->assertCount(1, $enrollments);
+        $this->assertEquals('ObserverEnrollment', $enrollments[0]->getType());
+    }
+
+    /**
+     * Test getting designer enrollments for a course
+     */
+    public function testGetDesignerEnrollments(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'DesignerEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['type[]' => ['DesignerEnrollment']]])
+            ->willReturn($response);
+
+        $enrollments = $course->getDesignerEnrollments();
+
+        $this->assertCount(1, $enrollments);
+        $this->assertEquals('DesignerEnrollment', $enrollments[0]->getType());
+    }
+
+    /**
+     * Test checking if a user is enrolled in course
+     */
+    public function testHasUserEnrolled(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'StudentEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['user_id' => 101]])
+            ->willReturn($response);
+
+        $hasUser = $course->hasUserEnrolled(101);
+
+        $this->assertTrue($hasUser);
+    }
+
+    /**
+     * Test checking if a user is enrolled in course with specific type
+     */
+    public function testHasUserEnrolledWithType(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'StudentEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['user_id' => 101, 'type[]' => ['StudentEnrollment']]])
+            ->willReturn($response);
+
+        $hasStudent = $course->hasUserEnrolled(101, 'StudentEnrollment');
+
+        $this->assertTrue($hasStudent);
+    }
+
+    /**
+     * Test checking if a user is not enrolled in course
+     */
+    public function testHasUserEnrolledReturnsFalse(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $response = new Response(200, [], json_encode([]));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['user_id' => 101]])
+            ->willReturn($response);
+
+        $hasUser = $course->hasUserEnrolled(101);
+
+        $this->assertFalse($hasUser);
+    }
+
+    /**
+     * Test checking if a student is enrolled in course
+     */
+    public function testHasStudentEnrolled(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'StudentEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['user_id' => 101, 'type[]' => ['StudentEnrollment']]])
+            ->willReturn($response);
+
+        $hasStudent = $course->hasStudentEnrolled(101);
+
+        $this->assertTrue($hasStudent);
+    }
+
+    /**
+     * Test checking if a teacher is enrolled in course
+     */
+    public function testHasTeacherEnrolled(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'TeacherEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['user_id' => 101, 'type[]' => ['TeacherEnrollment']]])
+            ->willReturn($response);
+
+        $hasTeacher = $course->hasTeacherEnrolled(101);
+
+        $this->assertTrue($hasTeacher);
+    }
+
+    /**
+     * Test getting student count
+     */
+    public function testGetStudentCount(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'StudentEnrollment',
+                'enrollment_state' => 'active'
+            ],
+            [
+                'id' => 2,
+                'user_id' => 102,
+                'course_id' => 123,
+                'type' => 'StudentEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['type[]' => ['StudentEnrollment']]])
+            ->willReturn($response);
+
+        $count = $course->getStudentCount();
+
+        $this->assertEquals(2, $count);
+    }
+
+    /**
+     * Test getting teacher count
+     */
+    public function testGetTeacherCount(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'TeacherEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['type[]' => ['TeacherEnrollment']]])
+            ->willReturn($response);
+
+        $count = $course->getTeacherCount();
+
+        $this->assertEquals(1, $count);
+    }
+
+    /**
+     * Test getting total enrollment count
+     */
+    public function testGetTotalEnrollmentCount(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'StudentEnrollment',
+                'enrollment_state' => 'active'
+            ],
+            [
+                'id' => 2,
+                'user_id' => 102,
+                'course_id' => 123,
+                'type' => 'TeacherEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => []])
+            ->willReturn($response);
+
+        $count = $course->getTotalEnrollmentCount();
+
+        $this->assertEquals(2, $count);
+    }
+
+    /**
+     * Test getting enrollments data (embedded data)
+     */
+    public function testGetEnrollmentsData(): void
+    {
+        $enrollmentsData = [
+            ['id' => 1, 'user_id' => 101, 'type' => 'StudentEnrollment'],
+            ['id' => 2, 'user_id' => 102, 'type' => 'TeacherEnrollment']
+        ];
+
+        $courseData = ['id' => 123, 'name' => 'Test Course', 'enrollments' => $enrollmentsData];
+        $course = new Course($courseData);
+
+        $data = $course->getEnrollmentsData();
+
+        $this->assertEquals($enrollmentsData, $data);
+    }
+
+    /**
+     * Test getting enrollments as objects throws exception when course ID not set
+     */
+    public function testGetEnrollmentsAsObjectsThrowsExceptionWhenCourseIdNotSet(): void
+    {
+        $course = new Course([]);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Course ID is required to fetch enrollments');
+
+        $course->getEnrollmentsAsObjects();
+    }
+
+    // Relationship Method Tests
+
+    /**
+     * Test method alias for enrollments with parameters
+     */
+    public function testEnrollmentsMethodAlias(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $enrollmentData = [
+            [
+                'id' => 1,
+                'user_id' => 101,
+                'course_id' => 123,
+                'type' => 'StudentEnrollment',
+                'enrollment_state' => 'active'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($enrollmentData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments', ['query' => ['type[]' => ['StudentEnrollment']]])
+            ->willReturn($response);
+
+        $enrollments = $course->enrollments(['type[]' => ['StudentEnrollment']]); // Method access with params
+
+        $this->assertCount(1, $enrollments);
+        $this->assertInstanceOf(Enrollment::class, $enrollments[0]);
     }
 
     protected function tearDown(): void
