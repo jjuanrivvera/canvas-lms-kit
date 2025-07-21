@@ -439,7 +439,9 @@ class ModuleItem extends AbstractBaseApi
 
             $moduleItemData = json_decode($response->getBody()->getContents(), true);
             $this->populate($moduleItemData);
-        } catch (CanvasApiException $th) {
+        } catch (CanvasApiException $exception) {
+            // Log the error for debugging
+            error_log('ModuleItem operation failed: ' . $exception->getMessage());
             return false;
         }
 
@@ -460,7 +462,9 @@ class ModuleItem extends AbstractBaseApi
         try {
             $endpoint = sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $this->id);
             self::$apiClient->delete($endpoint);
-        } catch (CanvasApiException $th) {
+        } catch (CanvasApiException $exception) {
+            // Log the error for debugging
+            error_log('ModuleItem operation failed: ' . $exception->getMessage());
             return false;
         }
 
@@ -487,7 +491,9 @@ class ModuleItem extends AbstractBaseApi
                 $this->id
             );
             self::$apiClient->post($endpoint);
-        } catch (CanvasApiException $th) {
+        } catch (CanvasApiException $exception) {
+            // Log the error for debugging
+            error_log('ModuleItem operation failed: ' . $exception->getMessage());
             return false;
         }
 
@@ -508,7 +514,9 @@ class ModuleItem extends AbstractBaseApi
         try {
             $endpoint = sprintf('courses/%d/modules/%d/items/%d/done', self::$course->id, self::$module->id, $this->id);
             self::$apiClient->put($endpoint);
-        } catch (CanvasApiException $th) {
+        } catch (CanvasApiException $exception) {
+            // Log the error for debugging
+            error_log('ModuleItem operation failed: ' . $exception->getMessage());
             return false;
         }
 
@@ -529,7 +537,9 @@ class ModuleItem extends AbstractBaseApi
         try {
             $endpoint = sprintf('courses/%d/modules/%d/items/%d/done', self::$course->id, self::$module->id, $this->id);
             self::$apiClient->delete($endpoint);
-        } catch (CanvasApiException $th) {
+        } catch (CanvasApiException $exception) {
+            // Log the error for debugging
+            error_log('ModuleItem operation failed: ' . $exception->getMessage());
             return false;
         }
 

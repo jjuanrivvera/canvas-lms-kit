@@ -125,9 +125,14 @@ class UpdateModuleItemDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * @param string|null $type
+     * @throws \InvalidArgumentException If module item type is invalid
      */
     public function setType(?string $type): void
     {
+        $validTypes = ['File', 'Page', 'Discussion', 'Assignment', 'Quiz', 'SubHeader', 'ExternalUrl', 'ExternalTool'];
+        if ($type !== null && !in_array($type, $validTypes)) {
+            throw new \InvalidArgumentException("Invalid module item type: $type");
+        }
         $this->type = $type;
     }
 
@@ -173,9 +178,13 @@ class UpdateModuleItemDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * @param string|null $externalUrl
+     * @throws \InvalidArgumentException If URL format is invalid
      */
     public function setExternalUrl(?string $externalUrl): void
     {
+        if ($externalUrl !== null && !filter_var($externalUrl, FILTER_VALIDATE_URL)) {
+            throw new \InvalidArgumentException('Invalid URL format for externalUrl');
+        }
         $this->externalUrl = $externalUrl;
     }
 

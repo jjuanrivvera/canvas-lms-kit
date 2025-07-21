@@ -272,4 +272,49 @@ class CreateModuleItemDTOTest extends TestCase
         
         $this->assertEquals('module_item', $property->getValue($dto));
     }
+
+    public function testInvalidUrlValidation(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid URL format for externalUrl');
+        
+        $dto = new CreateModuleItemDTO(['type' => 'ExternalTool']);
+        $dto->setExternalUrl('not-a-valid-url');
+    }
+
+    public function testValidUrlValidation(): void
+    {
+        $dto = new CreateModuleItemDTO(['type' => 'ExternalTool']);
+        $dto->setExternalUrl('https://example.com/tool');
+        
+        $this->assertEquals('https://example.com/tool', $dto->getExternalUrl());
+    }
+
+    public function testNullUrlValidation(): void
+    {
+        $dto = new CreateModuleItemDTO(['type' => 'Assignment']);
+        $dto->setExternalUrl(null);
+        
+        $this->assertNull($dto->getExternalUrl());
+    }
+
+    public function testInvalidTypeValidation(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid module item type: InvalidType');
+        
+        $dto = new CreateModuleItemDTO([]);
+        $dto->setType('InvalidType');
+    }
+
+    public function testValidTypeValidation(): void
+    {
+        $dto = new CreateModuleItemDTO([]);
+        $validTypes = ['File', 'Page', 'Discussion', 'Assignment', 'Quiz', 'SubHeader', 'ExternalUrl', 'ExternalTool'];
+        
+        foreach ($validTypes as $type) {
+            $dto->setType($type);
+            $this->assertEquals($type, $dto->getType());
+        }
+    }
 }

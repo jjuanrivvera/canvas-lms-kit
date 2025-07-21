@@ -308,4 +308,57 @@ class UpdateModuleItemDTOTest extends TestCase
         $this->assertContains(['name' => 'module_item[new_tab]', 'contents' => false], $apiArray);
         $this->assertContains(['name' => 'module_item[title]', 'contents' => 'Test Title'], $apiArray);
     }
+
+    public function testInvalidUrlValidation(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid URL format for externalUrl');
+        
+        $dto = new UpdateModuleItemDTO(['type' => 'ExternalTool']);
+        $dto->setExternalUrl('not-a-valid-url');
+    }
+
+    public function testValidUrlValidation(): void
+    {
+        $dto = new UpdateModuleItemDTO(['type' => 'ExternalTool']);
+        $dto->setExternalUrl('https://example.com/tool');
+        
+        $this->assertEquals('https://example.com/tool', $dto->getExternalUrl());
+    }
+
+    public function testNullUrlValidation(): void
+    {
+        $dto = new UpdateModuleItemDTO(['type' => 'Assignment']);
+        $dto->setExternalUrl(null);
+        
+        $this->assertNull($dto->getExternalUrl());
+    }
+
+    public function testInvalidTypeValidation(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid module item type: InvalidType');
+        
+        $dto = new UpdateModuleItemDTO([]);
+        $dto->setType('InvalidType');
+    }
+
+    public function testValidTypeValidation(): void
+    {
+        $dto = new UpdateModuleItemDTO([]);
+        $validTypes = ['File', 'Page', 'Discussion', 'Assignment', 'Quiz', 'SubHeader', 'ExternalUrl', 'ExternalTool'];
+        
+        foreach ($validTypes as $type) {
+            $dto->setType($type);
+            $this->assertEquals($type, $dto->getType());
+        }
+    }
+
+    public function testNullTypeValidation(): void
+    {
+        $dto = new UpdateModuleItemDTO([]);
+        $dto->setType(null);
+        
+        $this->assertNull($dto->getType());
+    }
 }
