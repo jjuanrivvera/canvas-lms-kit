@@ -202,7 +202,7 @@ class ModuleItem extends AbstractBaseApi
      * Completion requirement structure.
      * Format: ['type' => 'must_view|must_contribute|must_submit|min_score|must_mark_done', 'min_score' => int, 'completed' => bool]
      *
-     * @var array|null
+     * @var array<string, mixed>|null
      */
     public ?array $completionRequirement;
 
@@ -210,7 +210,7 @@ class ModuleItem extends AbstractBaseApi
      * Type-specific details.
      * Format: ['points_possible' => int, 'due_at' => string, 'unlock_at' => string, 'lock_at' => string, 'locked_for_user' => bool]
      *
-     * @var array|null
+     * @var array<string, mixed>|null
      */
     public ?array $contentDetails;
 
@@ -218,7 +218,7 @@ class ModuleItem extends AbstractBaseApi
      * External tool iframe configuration (when type = ExternalTool).
      * Format: ['width' => int, 'height' => int]
      *
-     * @var array|null
+     * @var array<string, int>|null
      */
     public ?array $iframe;
 
@@ -730,7 +730,7 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @return array|null
+     * @return array<string, mixed>|null
      */
     public function getCompletionRequirement(): ?array
     {
@@ -738,7 +738,7 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @param array|null $completionRequirement
+     * @param array<string, mixed>|null $completionRequirement
      */
     public function setCompletionRequirement(?array $completionRequirement): void
     {
@@ -746,7 +746,7 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @return array|null
+     * @return array<string, mixed>|null
      */
     public function getContentDetails(): ?array
     {
@@ -754,7 +754,7 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @param array|null $contentDetails
+     * @param array<string, mixed>|null $contentDetails
      */
     public function setContentDetails(?array $contentDetails): void
     {
@@ -762,7 +762,7 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @return array|null
+     * @return array<string, int>|null
      */
     public function getIframe(): ?array
     {
@@ -770,7 +770,7 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @param array|null $iframe
+     * @param array<string, int>|null $iframe
      */
     public function setIframe(?array $iframe): void
     {

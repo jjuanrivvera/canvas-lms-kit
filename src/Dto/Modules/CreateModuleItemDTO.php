@@ -123,7 +123,7 @@ class CreateModuleItemDTO extends AbstractBaseDto implements DTOInterface
      * Completion requirement configuration.
      * Structure: ['type' => 'must_view|must_contribute|must_submit|min_score|must_mark_done', 'min_score' => int]
      *
-     * @var array|null
+     * @var array<string, mixed>|null
      */
     public ?array $completionRequirement = null;
 
@@ -131,7 +131,7 @@ class CreateModuleItemDTO extends AbstractBaseDto implements DTOInterface
      * External tool iframe configuration.
      * ExternalTool only. Structure: ['width' => int, 'height' => int]
      *
-     * @var array|null
+     * @var array<string, int>|null
      */
     public ?array $iframe = null;
 
@@ -264,7 +264,7 @@ class CreateModuleItemDTO extends AbstractBaseDto implements DTOInterface
     }
 
     /**
-     * @return array|null
+     * @return array<string, mixed>|null
      */
     public function getCompletionRequirement(): ?array
     {
@@ -272,7 +272,7 @@ class CreateModuleItemDTO extends AbstractBaseDto implements DTOInterface
     }
 
     /**
-     * @param array|null $completionRequirement
+     * @param array<string, mixed>|null $completionRequirement
      */
     public function setCompletionRequirement(?array $completionRequirement): void
     {
@@ -280,7 +280,7 @@ class CreateModuleItemDTO extends AbstractBaseDto implements DTOInterface
     }
 
     /**
-     * @return array|null
+     * @return array<string, int>|null
      */
     public function getIframe(): ?array
     {
@@ -288,7 +288,7 @@ class CreateModuleItemDTO extends AbstractBaseDto implements DTOInterface
     }
 
     /**
-     * @param array|null $iframe
+     * @param array<string, int>|null $iframe
      */
     public function setIframe(?array $iframe): void
     {
