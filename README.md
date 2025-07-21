@@ -241,6 +241,17 @@ For applications with many contexts:
 - Consider using context prefixes for organization
 - Avoid frequent context switching in hot paths
 
+## 🗺️ Project Roadmap
+
+This SDK is actively developed with a clear strategic roadmap. See [STRATEGIC_ROADMAP.md](STRATEGIC_ROADMAP.md) for:
+
+- **Current Canvas API coverage** (~15%) and target coverage (85%+)
+- **5-phase development plan** over 9 months to production readiness
+- **Prioritized feature development** based on real-world Canvas usage
+- **Enterprise readiness requirements** for production deployments
+
+**Current Phase**: Foundation completion (Enrollments, Grades, Submissions APIs)
+
 ## Contributing
 
 We welcome contributions to the SDK. Please adhere to the PHP coding standards and include tests for new features or bug fixes.
