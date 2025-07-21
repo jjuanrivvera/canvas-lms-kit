@@ -3,4 +3,3 @@ parameters:
 	paths:
 		- src
 	tmpDir: tmp
-	memoryLimit: 256M

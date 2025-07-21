@@ -154,7 +154,7 @@ class Enrollment extends AbstractBaseApi
      * Find a specific enrollment by ID
      */
     /**
-     * @return static
+     * @return self
      */
     public static function find(int $id): self
     {
@@ -173,7 +173,11 @@ class Enrollment extends AbstractBaseApi
      */
     /**
      * @param mixed[] $params
-     * @return static[]
+     * @return self[]
+     */
+    /**
+     * @param array<string, mixed> $params
+     * @return array<self>
      */
     public static function fetchAll(array $params = []): array
     {
@@ -224,7 +228,7 @@ class Enrollment extends AbstractBaseApi
      */
     /**
      * @param mixed[] $params
-     * @return static[]
+     * @return self[]
      */
     public static function fetchAllPages(array $params = []): array
     {
@@ -232,14 +236,18 @@ class Enrollment extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('courses/%d/enrollments', self::$course->id);
-        return self::fetchAllPagesAsModels($endpoint, $params, self::class);
+        return self::fetchAllPagesAsModels($endpoint, $params);
     }
 
     /**
      * Create a new enrollment
      */
     /**
-     * @return static
+     * @return self
+     */
+    /**
+     * @param array<string, mixed>|CreateEnrollmentDTO $data
+     * @return self
      */
     public static function create(array|CreateEnrollmentDTO $data): self
     {
@@ -261,7 +269,11 @@ class Enrollment extends AbstractBaseApi
      * Update an existing enrollment
      */
     /**
-     * @return static
+     * @return self
+     */
+    /**
+     * @param array<string, mixed>|UpdateEnrollmentDTO $data
+     * @return self
      */
     public static function update(int $id, array|UpdateEnrollmentDTO $data): self
     {
@@ -283,7 +295,7 @@ class Enrollment extends AbstractBaseApi
      * Accept an enrollment invitation
      */
     /**
-     * @return static
+     * @return self
      */
     public static function accept(int $enrollmentId): self
     {
@@ -301,7 +313,7 @@ class Enrollment extends AbstractBaseApi
      * Reject an enrollment invitation
      */
     /**
-     * @return static
+     * @return self
      */
     public static function reject(int $enrollmentId): self
     {
@@ -319,7 +331,7 @@ class Enrollment extends AbstractBaseApi
      * Reactivate a deleted enrollment
      */
     /**
-     * @return static
+     * @return self
      */
     public static function reactivate(int $enrollmentId): self
     {
@@ -338,7 +350,11 @@ class Enrollment extends AbstractBaseApi
      */
     /**
      * @param mixed[] $params
-     * @return static[]
+     * @return self[]
+     */
+    /**
+     * @param array<string, mixed> $params
+     * @return array<self>
      */
     public static function fetchAllBySection(int $sectionId, array $params = []): array
     {
@@ -361,7 +377,11 @@ class Enrollment extends AbstractBaseApi
      */
     /**
      * @param mixed[] $params
-     * @return static[]
+     * @return self[]
+     */
+    /**
+     * @param array<string, mixed> $params
+     * @return array<self>
      */
     public static function fetchAllByUser(int $userId, array $params = []): array
     {
@@ -863,7 +883,7 @@ class Enrollment extends AbstractBaseApi
         }
 
         // If we have embedded user data from the API response, use it
-        if (isset($this->user) && is_array($this->user)) {
+        if (is_array($this->user ?? null)) {
             return new User($this->user);
         }
 
