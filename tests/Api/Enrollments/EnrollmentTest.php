@@ -87,9 +87,9 @@ class EnrollmentTest extends TestCase
         $this->assertEquals(855.0, $enrollment->getCurrentPoints());
         $this->assertEquals(850.0, $enrollment->getUnpostedCurrentPoints());
         $this->assertEquals(3600, $enrollment->getTotalActivityTime());
-        $this->assertEquals('2023-01-03T00:00:00Z', $enrollment->getLastActivityAt());
-        $this->assertEquals('2023-01-01T00:00:00Z', $enrollment->getStartAt());
-        $this->assertEquals('2023-06-01T00:00:00Z', $enrollment->getEndAt());
+        $this->assertEquals('2023-01-03T00:00:00Z', $enrollment->getLastActivityAt()->format('Y-m-d\TH:i:s\Z'));
+        $this->assertEquals('2023-01-01T00:00:00Z', $enrollment->getStartAt()->format('Y-m-d\TH:i:s\Z'));
+        $this->assertEquals('2023-06-01T00:00:00Z', $enrollment->getEndAt()->format('Y-m-d\TH:i:s\Z'));
         $this->assertTrue($enrollment->canBeRemoved());
         $this->assertFalse($enrollment->isLocked());
         $this->assertEquals('account123', $enrollment->getSisAccountId());
@@ -634,8 +634,8 @@ class EnrollmentTest extends TestCase
         $this->assertEquals(456, $enrollment->getSectionId());
         $this->assertEquals(789, $enrollment->getRoleId());
         $this->assertTrue($enrollment->isLimitPrivilegesToCourseSection());
-        $this->assertEquals('2023-01-01T00:00:00Z', $enrollment->getStartAt());
-        $this->assertEquals('2023-06-01T00:00:00Z', $enrollment->getEndAt());
+        $this->assertEquals('2023-01-01T00:00:00Z', $enrollment->getStartAt()->format('Y-m-d\TH:i:s\Z'));
+        $this->assertEquals('2023-06-01T00:00:00Z', $enrollment->getEndAt()->format('Y-m-d\TH:i:s\Z'));
         $this->assertEquals('user123', $enrollment->getSisUserId());
     }
 
@@ -715,7 +715,7 @@ class EnrollmentTest extends TestCase
             ->willThrowException(new \Exception('User not found'));
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage('Could not load user with ID 999');
+        $this->expectExceptionMessage('Failed to load user for enrollment relationship');
 
         $enrollment->getUser();
     }
@@ -790,7 +790,7 @@ class EnrollmentTest extends TestCase
             ->willThrowException(new \Exception('Course not found'));
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage('Could not load course with ID 999');
+        $this->expectExceptionMessage('Failed to load course for enrollment relationship');
 
         $enrollment->getCourse();
     }

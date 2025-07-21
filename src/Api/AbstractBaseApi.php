@@ -43,9 +43,30 @@ abstract class AbstractBaseApi implements ApiInterface
             $key = lcfirst(str_replace('_', '', ucwords($key, '_')));
 
             if (property_exists($this, $key) && !is_null($value)) {
-                $this->{$key} = $value;
+                $this->{$key} = $this->castToPropertyType($key, $value);
             }
         }
+    }
+
+    /**
+     * Cast value to the appropriate property type
+     * @param string $key
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function castToPropertyType(string $key, $value)
+    {
+        // Handle DateTime fields
+        if (in_array($key, ['startAt', 'endAt', 'lastActivityAt', 'startedAt', 'finishedAt']) && is_string($value)) {
+            try {
+                return new \DateTime($value);
+            } catch (\Exception $e) {
+                // Return null if date parsing fails
+                return null;
+            }
+        }
+
+        return $value;
     }
 
     /**

@@ -90,17 +90,17 @@ class QuizSubmission extends AbstractBaseApi
     /**
      * When the submission was started
      */
-    public ?string $startedAt = null;
+    public ?\DateTime $startedAt = null;
 
     /**
      * When the submission was finished
      */
-    public ?string $finishedAt = null;
+    public ?\DateTime $finishedAt = null;
 
     /**
      * When the submission will end (time limit)
      */
-    public ?string $endAt = null;
+    public ?\DateTime $endAt = null;
 
     /**
      * Attempt number (1-based)
@@ -318,7 +318,7 @@ class QuizSubmission extends AbstractBaseApi
     /**
      * Get started at timestamp
      */
-    public function getStartedAt(): ?string
+    public function getStartedAt(): ?\DateTime
     {
         return $this->startedAt;
     }
@@ -326,15 +326,23 @@ class QuizSubmission extends AbstractBaseApi
     /**
      * Set started at timestamp
      */
-    public function setStartedAt(?string $startedAt): void
+    public function setStartedAt(\DateTime|string|null $startedAt): void
     {
-        $this->startedAt = $startedAt;
+        if (is_string($startedAt)) {
+            try {
+                $this->startedAt = new \DateTime($startedAt);
+            } catch (\Exception $e) {
+                $this->startedAt = null;
+            }
+        } else {
+            $this->startedAt = $startedAt;
+        }
     }
 
     /**
      * Get finished at timestamp
      */
-    public function getFinishedAt(): ?string
+    public function getFinishedAt(): ?\DateTime
     {
         return $this->finishedAt;
     }
@@ -342,15 +350,23 @@ class QuizSubmission extends AbstractBaseApi
     /**
      * Set finished at timestamp
      */
-    public function setFinishedAt(?string $finishedAt): void
+    public function setFinishedAt(\DateTime|string|null $finishedAt): void
     {
-        $this->finishedAt = $finishedAt;
+        if (is_string($finishedAt)) {
+            try {
+                $this->finishedAt = new \DateTime($finishedAt);
+            } catch (\Exception $e) {
+                $this->finishedAt = null;
+            }
+        } else {
+            $this->finishedAt = $finishedAt;
+        }
     }
 
     /**
      * Get end at timestamp
      */
-    public function getEndAt(): ?string
+    public function getEndAt(): ?\DateTime
     {
         return $this->endAt;
     }
@@ -358,9 +374,17 @@ class QuizSubmission extends AbstractBaseApi
     /**
      * Set end at timestamp
      */
-    public function setEndAt(?string $endAt): void
+    public function setEndAt(\DateTime|string|null $endAt): void
     {
-        $this->endAt = $endAt;
+        if (is_string($endAt)) {
+            try {
+                $this->endAt = new \DateTime($endAt);
+            } catch (\Exception $e) {
+                $this->endAt = null;
+            }
+        } else {
+            $this->endAt = $endAt;
+        }
     }
 
     /**
@@ -904,7 +928,9 @@ class QuizSubmission extends AbstractBaseApi
 
             // Update current instance with response data
             $this->workflowState = $submissionData['workflow_state'] ?? $this->workflowState;
-            $this->finishedAt = $submissionData['finished_at'] ?? $this->finishedAt;
+            if (isset($submissionData['finished_at'])) {
+                $this->setFinishedAt($submissionData['finished_at']);
+            }
             $this->score = $submissionData['score'] ?? $this->score;
 
             return true;
@@ -994,7 +1020,7 @@ class QuizSubmission extends AbstractBaseApi
             return null;
         }
 
-        $endTime = strtotime($this->endAt);
+        $endTime = $this->endAt->getTimestamp();
         $currentTime = time();
 
         return max(0, $endTime - $currentTime);
@@ -1028,9 +1054,9 @@ class QuizSubmission extends AbstractBaseApi
             'quizId' => $this->quizId,
             'userId' => $this->userId,
             'submissionId' => $this->submissionId,
-            'startedAt' => $this->startedAt,
-            'finishedAt' => $this->finishedAt,
-            'endAt' => $this->endAt,
+            'startedAt' => $this->startedAt?->format('Y-m-d\TH:i:s\Z'),
+            'finishedAt' => $this->finishedAt?->format('Y-m-d\TH:i:s\Z'),
+            'endAt' => $this->endAt?->format('Y-m-d\TH:i:s\Z'),
             'attempt' => $this->attempt,
             'extraAttempts' => $this->extraAttempts,
             'extraTime' => $this->extraTime,
@@ -1061,9 +1087,9 @@ class QuizSubmission extends AbstractBaseApi
             'quiz_id' => $this->quizId,
             'user_id' => $this->userId,
             'submission_id' => $this->submissionId,
-            'started_at' => $this->startedAt,
-            'finished_at' => $this->finishedAt,
-            'end_at' => $this->endAt,
+            'started_at' => $this->startedAt?->format('Y-m-d\TH:i:s\Z'),
+            'finished_at' => $this->finishedAt?->format('Y-m-d\TH:i:s\Z'),
+            'end_at' => $this->endAt?->format('Y-m-d\TH:i:s\Z'),
             'attempt' => $this->attempt,
             'extra_attempts' => $this->extraAttempts,
             'extra_time' => $this->extraTime,

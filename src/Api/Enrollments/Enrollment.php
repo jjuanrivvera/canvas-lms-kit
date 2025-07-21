@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Api\Enrollments;
 
+use DateTime;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Users\User;
@@ -94,9 +95,9 @@ class Enrollment extends AbstractBaseApi
     public ?float $unpostedFinalScore = null;
     public ?string $unpostedFinalGrade = null;
     public ?int $totalActivityTime = null;
-    public ?string $lastActivityAt = null;
-    public ?string $startAt = null;
-    public ?string $endAt = null;
+    public ?\DateTime $lastActivityAt = null;
+    public ?\DateTime $startAt = null;
+    public ?\DateTime $endAt = null;
     /** @var mixed[]|null */
     public ?array $observedUsers = null;
     public ?bool $canBeRemoved = null;
@@ -527,9 +528,9 @@ class Enrollment extends AbstractBaseApi
             'unposted_final_score' => $this->unpostedFinalScore,
             'unposted_final_grade' => $this->unpostedFinalGrade,
             'total_activity_time' => $this->totalActivityTime,
-            'last_activity_at' => $this->lastActivityAt,
-            'start_at' => $this->startAt,
-            'end_at' => $this->endAt,
+            'last_activity_at' => $this->lastActivityAt?->format('Y-m-d\TH:i:s\Z'),
+            'start_at' => $this->startAt?->format('Y-m-d\TH:i:s\Z'),
+            'end_at' => $this->endAt?->format('Y-m-d\TH:i:s\Z'),
             'observed_users' => $this->observedUsers,
             'can_be_removed' => $this->canBeRemoved,
             'locked' => $this->locked,
@@ -703,17 +704,17 @@ class Enrollment extends AbstractBaseApi
         return $this->totalActivityTime;
     }
 
-    public function getLastActivityAt(): ?string
+    public function getLastActivityAt(): ?\DateTime
     {
         return $this->lastActivityAt;
     }
 
-    public function getStartAt(): ?string
+    public function getStartAt(): ?\DateTime
     {
         return $this->startAt;
     }
 
-    public function getEndAt(): ?string
+    public function getEndAt(): ?\DateTime
     {
         return $this->endAt;
     }
@@ -805,14 +806,36 @@ class Enrollment extends AbstractBaseApi
         $this->limitPrivilegesToCourseSection = $limitPrivilegesToCourseSection;
     }
 
-    public function setStartAt(?string $startAt): void
+    /**
+     * @param \DateTime|string|null $startAt
+     */
+    public function setStartAt($startAt): void
     {
-        $this->startAt = $startAt;
+        if (is_string($startAt)) {
+            try {
+                $this->startAt = new DateTime($startAt);
+            } catch (\Exception $e) {
+                $this->startAt = null;
+            }
+        } else {
+            $this->startAt = $startAt;
+        }
     }
 
-    public function setEndAt(?string $endAt): void
+    /**
+     * @param \DateTime|string|null $endAt
+     */
+    public function setEndAt($endAt): void
     {
-        $this->endAt = $endAt;
+        if (is_string($endAt)) {
+            try {
+                $this->endAt = new DateTime($endAt);
+            } catch (\Exception $e) {
+                $this->endAt = null;
+            }
+        } else {
+            $this->endAt = $endAt;
+        }
     }
 
     public function setSisUserId(?string $sisUserId): void
@@ -891,7 +914,17 @@ class Enrollment extends AbstractBaseApi
         try {
             return User::find($this->userId);
         } catch (\Exception $e) {
-            throw new CanvasApiException("Could not load user with ID {$this->userId}: " . $e->getMessage());
+            throw new CanvasApiException(
+                "Failed to load user for enrollment relationship",
+                0,
+                [
+                    'enrollment_id' => $this->id,
+                    'user_id' => $this->userId,
+                    'course_id' => $this->courseId,
+                    'original_error' => $e->getMessage(),
+                    'original_code' => $e->getCode()
+                ]
+            );
         }
     }
 
@@ -919,7 +952,17 @@ class Enrollment extends AbstractBaseApi
         try {
             return Course::find($this->courseId);
         } catch (\Exception $e) {
-            throw new CanvasApiException("Could not load course with ID {$this->courseId}: " . $e->getMessage());
+            throw new CanvasApiException(
+                "Failed to load course for enrollment relationship",
+                0,
+                [
+                    'enrollment_id' => $this->id,
+                    'course_id' => $this->courseId,
+                    'user_id' => $this->userId,
+                    'original_error' => $e->getMessage(),
+                    'original_code' => $e->getCode()
+                ]
+            );
         }
     }
 

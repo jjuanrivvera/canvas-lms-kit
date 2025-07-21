@@ -12,7 +12,7 @@ class CreateEnrollmentDTOTest extends TestCase
     public function testConstructorPopulatesProperties(): void
     {
         $data = [
-            'userId' => '100',
+            'userId' => 100,
             'type' => 'StudentEnrollment',
             'enrollmentState' => 'active',
             'courseSectionId' => '456',
@@ -31,7 +31,7 @@ class CreateEnrollmentDTOTest extends TestCase
 
         $dto = new CreateEnrollmentDTO($data);
 
-        $this->assertEquals('100', $dto->getUserId());
+        $this->assertEquals(100, $dto->getUserId());
         $this->assertEquals('StudentEnrollment', $dto->getType());
         $this->assertEquals('active', $dto->getEnrollmentState());
         $this->assertEquals('456', $dto->getCourseSectionId());
@@ -59,7 +59,7 @@ class CreateEnrollmentDTOTest extends TestCase
     {
         $dto = new CreateEnrollmentDTO([]);
 
-        $dto->setUserId('200');
+        $dto->setUserId(200);
         $dto->setType('TeacherEnrollment');
         $dto->setEnrollmentState('invited');
         $dto->setCourseSectionId('789');
@@ -75,7 +75,7 @@ class CreateEnrollmentDTOTest extends TestCase
         $dto->setUserLastName('Smith');
         $dto->setUserSisId('sisuser456');
 
-        $this->assertEquals('200', $dto->getUserId());
+        $this->assertEquals(200, $dto->getUserId());
         $this->assertEquals('TeacherEnrollment', $dto->getType());
         $this->assertEquals('invited', $dto->getEnrollmentState());
         $this->assertEquals('789', $dto->getCourseSectionId());
@@ -95,7 +95,7 @@ class CreateEnrollmentDTOTest extends TestCase
     public function testToArray(): void
     {
         $data = [
-            'userId' => '100',
+            'userId' => 100,
             'type' => 'StudentEnrollment',
             'enrollmentState' => 'active',
             'courseSectionId' => '456',
@@ -121,7 +121,7 @@ class CreateEnrollmentDTOTest extends TestCase
     public function testToApiArray(): void
     {
         $data = [
-            'userId' => '100',
+            'userId' => 100,
             'type' => 'StudentEnrollment',
             'enrollmentState' => 'active',
             'courseSectionId' => '456',

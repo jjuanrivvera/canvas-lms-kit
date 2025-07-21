@@ -12,7 +12,7 @@ class CreateEnrollmentDTO extends AbstractBaseDto implements DTOInterface
     protected string $apiPropertyName = 'enrollment';
 
     // Required fields
-    public ?string $userId = null;
+    public ?int $userId = null;
     public ?string $type = null;
 
     // Optional enrollment configuration
@@ -39,7 +39,7 @@ class CreateEnrollmentDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Get the user ID
      */
-    public function getUserId(): ?string
+    public function getUserId(): ?int
     {
         return $this->userId;
     }
@@ -47,7 +47,7 @@ class CreateEnrollmentDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Set the user ID
      */
-    public function setUserId(?string $userId): void
+    public function setUserId(?int $userId): void
     {
         $this->userId = $userId;
     }

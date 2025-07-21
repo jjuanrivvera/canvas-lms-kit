@@ -37,13 +37,16 @@ abstract class AbstractBaseDto
      * Cast the value to the correct type
      * @param mixed $value
      * @param string $key
-     * @return DateTime|mixed
+     * @return DateTime|int|mixed
      * @throws Exception
      */
     private function cast($value, string $key)
     {
         if (in_array($key, ['startAt', 'endAt']) && is_string($value)) {
             return new DateTime($value);
+        }
+        if ($key === 'userId' && (is_string($value) || is_numeric($value))) {
+            return (int) $value;
         }
         return $value;
     }

@@ -117,9 +117,9 @@ class QuizSubmissionTest extends TestCase
         $this->assertEquals(456, $submission->getQuizId());
         $this->assertEquals(123, $submission->getUserId());
         $this->assertEquals(101112, $submission->getSubmissionId());
-        $this->assertEquals('2024-01-01T12:00:00Z', $submission->getStartedAt());
-        $this->assertEquals('2024-01-01T13:00:00Z', $submission->getFinishedAt());
-        $this->assertEquals('2024-01-01T13:30:00Z', $submission->getEndAt());
+        $this->assertEquals('2024-01-01T12:00:00Z', $submission->getStartedAt()->format('Y-m-d\TH:i:s\Z'));
+        $this->assertEquals('2024-01-01T13:00:00Z', $submission->getFinishedAt()->format('Y-m-d\TH:i:s\Z'));
+        $this->assertEquals('2024-01-01T13:30:00Z', $submission->getEndAt()->format('Y-m-d\TH:i:s\Z'));
         $this->assertEquals(1, $submission->getAttempt());
         $this->assertEquals(0, $submission->getExtraAttempts());
         $this->assertEquals(10, $submission->getExtraTime());
@@ -152,13 +152,13 @@ class QuizSubmissionTest extends TestCase
         $this->assertEquals(666, $submission->getSubmissionId());
 
         $submission->setStartedAt('2024-02-01T10:00:00Z');
-        $this->assertEquals('2024-02-01T10:00:00Z', $submission->getStartedAt());
+        $this->assertEquals('2024-02-01T10:00:00Z', $submission->getStartedAt()->format('Y-m-d\TH:i:s\Z'));
 
         $submission->setFinishedAt('2024-02-01T11:00:00Z');
-        $this->assertEquals('2024-02-01T11:00:00Z', $submission->getFinishedAt());
+        $this->assertEquals('2024-02-01T11:00:00Z', $submission->getFinishedAt()->format('Y-m-d\TH:i:s\Z'));
 
         $submission->setEndAt('2024-02-01T11:30:00Z');
-        $this->assertEquals('2024-02-01T11:30:00Z', $submission->getEndAt());
+        $this->assertEquals('2024-02-01T11:30:00Z', $submission->getEndAt()->format('Y-m-d\TH:i:s\Z'));
 
         $submission->setAttempt(2);
         $this->assertEquals(2, $submission->getAttempt());
@@ -551,7 +551,7 @@ class QuizSubmissionTest extends TestCase
 
         $this->assertTrue($result);
         $this->assertEquals('complete', $submission->getWorkflowState());
-        $this->assertEquals('2024-01-01T13:00:00Z', $submission->getFinishedAt());
+        $this->assertEquals('2024-01-01T13:00:00Z', $submission->getFinishedAt()->format('Y-m-d\TH:i:s\Z'));
         $this->assertEquals(85.0, $submission->getScore());
     }
 
