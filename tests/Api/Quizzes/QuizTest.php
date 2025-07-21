@@ -779,4 +779,64 @@ class QuizTest extends TestCase
 
         $quiz->save();
     }
+
+    public function testDescriptionXSSValidation(): void
+    {
+        $quiz = new Quiz(['title' => 'Test Quiz']);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Quiz description contains potentially dangerous content');
+
+        $quiz->setDescription('<script>alert("xss")</script>');
+    }
+
+    public function testDescriptionXSSValidationWithEventHandlers(): void
+    {
+        $quiz = new Quiz(['title' => 'Test Quiz']);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Quiz description contains potentially dangerous content');
+
+        $quiz->setDescription('<div onclick="alert(\'xss\')">Click me</div>');
+    }
+
+    public function testDescriptionXSSValidationWithJavascriptUrls(): void
+    {
+        $quiz = new Quiz(['title' => 'Test Quiz']);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Quiz description contains potentially dangerous content');
+
+        $quiz->setDescription('<a href="javascript:alert(\'xss\')">Link</a>');
+    }
+
+    public function testDescriptionLengthValidation(): void
+    {
+        $quiz = new Quiz(['title' => 'Test Quiz']);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Quiz description is too long. Maximum length is 65535 characters.');
+
+        $quiz->setDescription(str_repeat('a', 65536));
+    }
+
+    public function testDescriptionValidHTML(): void
+    {
+        $quiz = new Quiz(['title' => 'Test Quiz']);
+
+        // Should not throw exception for safe HTML
+        $quiz->setDescription('<p>This is <strong>safe</strong> HTML content with <em>formatting</em>.</p>');
+        
+        $this->assertEquals('<p>This is <strong>safe</strong> HTML content with <em>formatting</em>.</p>', $quiz->getDescription());
+    }
+
+    public function testDescriptionNullValue(): void
+    {
+        $quiz = new Quiz(['title' => 'Test Quiz']);
+
+        // Should not throw exception for null
+        $quiz->setDescription(null);
+        
+        $this->assertNull($quiz->getDescription());
+    }
 }

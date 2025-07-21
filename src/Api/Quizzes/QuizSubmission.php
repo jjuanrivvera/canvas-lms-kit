@@ -863,8 +863,8 @@ class QuizSubmission extends AbstractBaseApi
     /**
      * Complete a quiz submission
      *
-     * @return bool True if completed successfully
-     * @throws CanvasApiException If no ID set or API error
+     * @return bool True if completed successfully, false on API error
+     * @throws CanvasApiException If no ID set
      */
     public function complete(): bool
     {
@@ -916,8 +916,8 @@ class QuizSubmission extends AbstractBaseApi
     /**
      * Save the quiz submission (update if exists)
      *
-     * @return bool True if saved successfully
-     * @throws CanvasApiException If validation fails or API error
+     * @return bool True if saved successfully, false on API error
+     * @throws CanvasApiException If no ID set or validation fails
      */
     public function save(): bool
     {
@@ -965,9 +965,24 @@ class QuizSubmission extends AbstractBaseApi
      */
     public function canBeRetaken(): bool
     {
-        // This would depend on quiz settings and attempt limits
-        // For now, basic implementation
-        return $this->workflowState === 'complete' && self::$quiz->getAllowedAttempts() !== 1;
+        if ($this->workflowState !== 'complete') {
+            return false;
+        }
+
+        $allowedAttempts = self::$quiz->getAllowedAttempts();
+
+        // -1 means unlimited attempts
+        if ($allowedAttempts === -1) {
+            return true;
+        }
+
+        // If allowed attempts is null or 1, no retakes allowed
+        if ($allowedAttempts === null || $allowedAttempts <= 1) {
+            return false;
+        }
+
+        // Check if current attempt is less than allowed attempts
+        return ($this->attempt ?? 1) < $allowedAttempts;
     }
 
     /**

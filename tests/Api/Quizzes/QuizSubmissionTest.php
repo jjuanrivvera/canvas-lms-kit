@@ -651,20 +651,36 @@ class QuizSubmissionTest extends TestCase
 
     public function testCanBeRetaken(): void
     {
-        // Mock the quiz to return allowed attempts
+        // Test with multiple attempts allowed and first attempt
         $quiz = $this->createMock(Quiz::class);
         $quiz->method('getAllowedAttempts')->willReturn(3);
         QuizSubmission::setQuiz($quiz);
 
-        $submission = new QuizSubmission(['workflow_state' => 'complete']);
+        $submission = new QuizSubmission(['workflow_state' => 'complete', 'attempt' => 1]);
         $this->assertTrue($submission->canBeRetaken());
+
+        // Test with multiple attempts allowed but last attempt reached
+        $submission = new QuizSubmission(['workflow_state' => 'complete', 'attempt' => 3]);
+        $this->assertFalse($submission->canBeRetaken());
 
         // Test with single attempt quiz
         $singleAttemptQuiz = $this->createMock(Quiz::class);
         $singleAttemptQuiz->method('getAllowedAttempts')->willReturn(1);
         QuizSubmission::setQuiz($singleAttemptQuiz);
 
-        $submission = new QuizSubmission(['workflow_state' => 'complete']);
+        $submission = new QuizSubmission(['workflow_state' => 'complete', 'attempt' => 1]);
+        $this->assertFalse($submission->canBeRetaken());
+
+        // Test with unlimited attempts (-1)
+        $unlimitedQuiz = $this->createMock(Quiz::class);
+        $unlimitedQuiz->method('getAllowedAttempts')->willReturn(-1);
+        QuizSubmission::setQuiz($unlimitedQuiz);
+
+        $submission = new QuizSubmission(['workflow_state' => 'complete', 'attempt' => 5]);
+        $this->assertTrue($submission->canBeRetaken());
+
+        // Test with incomplete submission
+        $submission = new QuizSubmission(['workflow_state' => 'untaken', 'attempt' => 1]);
         $this->assertFalse($submission->canBeRetaken());
     }
 

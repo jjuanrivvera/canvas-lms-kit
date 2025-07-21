@@ -74,6 +74,25 @@ use CanvasLMS\Pagination\PaginationResult;
  */
 class Quiz extends AbstractBaseApi
 {
+    /**
+     * Valid quiz types
+     */
+    public const VALID_QUIZ_TYPES = [
+        'assignment',
+        'practice_quiz',
+        'survey',
+        'graded_survey'
+    ];
+
+    /**
+     * Valid hide results values
+     */
+    public const VALID_HIDE_RESULTS = [
+        null,
+        'always',
+        'until_after_last_attempt'
+    ];
+
     protected static Course $course;
 
     /**
@@ -319,10 +338,77 @@ class Quiz extends AbstractBaseApi
      *
      * @param string|null $description
      * @return void
+     * @throws CanvasApiException If description contains potentially dangerous content
      */
     public function setDescription(?string $description): void
     {
+        if ($description !== null) {
+            $this->validateDescription($description);
+        }
         $this->description = $description;
+    }
+
+    /**
+     * Validate quiz description for XSS prevention
+     *
+     * @param string $description
+     * @return void
+     * @throws CanvasApiException If description contains potentially dangerous content
+     */
+    private function validateDescription(string $description): void
+    {
+        $dangerousPatterns = [
+            '/<script[^>]*>.*?<\/script>/is',
+            '/<iframe[^>]*>.*?<\/iframe>/is',
+            '/on\w+\s*=\s*["\'].*?["\']/i',
+            '/javascript\s*:/i',
+            '/data\s*:\s*text\/html/i',
+            '/vbscript\s*:/i',
+            '/<object[^>]*>.*?<\/object>/is',
+            '/<embed[^>]*>.*?<\/embed>/is',
+            '/<applet[^>]*>.*?<\/applet>/is',
+            '/<form[^>]*>.*?<\/form>/is'
+        ];
+
+        foreach ($dangerousPatterns as $pattern) {
+            if (preg_match($pattern, $description)) {
+                throw new CanvasApiException(
+                    'Quiz description contains potentially dangerous content. ' .
+                    'Please remove scripts, event handlers, or other executable content.'
+                );
+            }
+        }
+
+        if (strlen($description) > 65535) {
+            throw new CanvasApiException('Quiz description is too long. Maximum length is 65535 characters.');
+        }
+    }
+
+    /**
+     * Check if a property is safe to update from API response
+     *
+     * @param string $property
+     * @return bool
+     */
+    private function isSafeToUpdateProperty(string $property): bool
+    {
+        if (!property_exists($this, $property)) {
+            return false;
+        }
+
+        $reflection = new \ReflectionProperty($this, $property);
+
+        // Only update public properties
+        if (!$reflection->isPublic()) {
+            return false;
+        }
+
+        // Don't update static properties
+        if ($reflection->isStatic()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -1125,10 +1211,9 @@ class Quiz extends AbstractBaseApi
 
         // Validate quiz type
         if ($this->quizType !== null) {
-            $validQuizTypes = ['assignment', 'practice_quiz', 'survey', 'graded_survey'];
-            if (!in_array($this->quizType, $validQuizTypes, true)) {
+            if (!in_array($this->quizType, self::VALID_QUIZ_TYPES, true)) {
                 throw new CanvasApiException(
-                    'Invalid quiz type. Must be one of: ' . implode(', ', $validQuizTypes)
+                    'Invalid quiz type. Must be one of: ' . implode(', ', self::VALID_QUIZ_TYPES)
                 );
             }
         }
@@ -1145,8 +1230,7 @@ class Quiz extends AbstractBaseApi
 
         // Validate hide results
         if ($this->hideResults !== null) {
-            $validHideResults = [null, 'always', 'until_after_last_attempt'];
-            if (!in_array($this->hideResults, $validHideResults, true)) {
+            if (!in_array($this->hideResults, self::VALID_HIDE_RESULTS, true)) {
                 throw new CanvasApiException(
                     'Invalid hide results value. Must be one of: null, always, until_after_last_attempt'
                 );
@@ -1165,7 +1249,7 @@ class Quiz extends AbstractBaseApi
                 // Update current instance with response data
                 foreach ($updatedQuiz->toArray() as $key => $value) {
                     $property = lcfirst(str_replace('_', '', ucwords($key, '_')));
-                    if (property_exists($this, $property)) {
+                    if ($this->isSafeToUpdateProperty($property)) {
                         $this->{$property} = $value;
                     }
                 }
@@ -1177,7 +1261,7 @@ class Quiz extends AbstractBaseApi
                 // Update current instance with response data
                 foreach ($newQuiz->toArray() as $key => $value) {
                     $property = lcfirst(str_replace('_', '', ucwords($key, '_')));
-                    if (property_exists($this, $property)) {
+                    if ($this->isSafeToUpdateProperty($property)) {
                         $this->{$property} = $value;
                     }
                 }
