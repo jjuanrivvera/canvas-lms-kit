@@ -200,7 +200,7 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Completion requirement structure.
-     * Format: ['type' => 'must_view|must_contribute|must_submit|min_score|must_mark_done', 'min_score' => int, 'completed' => bool]
+     * Format: ['type' => 'completion_type', 'min_score' => int]
      *
      * @var array<string, mixed>|null
      */
@@ -208,7 +208,7 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Type-specific details.
-     * Format: ['points_possible' => int, 'due_at' => string, 'unlock_at' => string, 'lock_at' => string, 'locked_for_user' => bool]
+     * Format: ['points_possible' => int, 'due_at' => string]
      *
      * @var array<string, mixed>|null
      */
@@ -287,9 +287,10 @@ class ModuleItem extends AbstractBaseApi
             $data = new CreateModuleItemDTO($data);
         }
 
-        $response = self::$apiClient->post(sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id), [
+        $endpoint = sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id);
+        $response = self::$apiClient->post($endpoint, [
             'multipart' => $data->toApiArray()
-        ]);
+            ]);
 
         $moduleItemData = json_decode($response->getBody()->getContents(), true);
 
@@ -314,9 +315,10 @@ class ModuleItem extends AbstractBaseApi
             $data = new UpdateModuleItemDTO($data);
         }
 
-        $response = self::$apiClient->put(sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $id), [
+        $endpoint = sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $id);
+        $response = self::$apiClient->put($endpoint, [
             'multipart' => $data->toApiArray()
-        ]);
+            ]);
 
         $moduleItemData = json_decode($response->getBody()->getContents(), true);
 
@@ -335,7 +337,8 @@ class ModuleItem extends AbstractBaseApi
         self::checkCourse();
         self::checkModule();
 
-        $response = self::$apiClient->get(sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $id));
+        $endpoint = sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $id);
+        $response = self::$apiClient->get($endpoint);
 
         $moduleItemData = json_decode($response->getBody()->getContents(), true);
 
@@ -354,9 +357,10 @@ class ModuleItem extends AbstractBaseApi
         self::checkCourse();
         self::checkModule();
 
-        $response = self::$apiClient->get(sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id), [
+        $endpoint = sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id);
+        $response = self::$apiClient->get($endpoint, [
             'query' => $params
-        ]);
+            ]);
 
         $moduleItemsData = json_decode($response->getBody()->getContents(), true);
 
@@ -378,7 +382,8 @@ class ModuleItem extends AbstractBaseApi
     {
         self::checkCourse();
         self::checkModule();
-        return self::getPaginatedResponse(sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id), $params);
+        $endpoint = sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id);
+        return self::getPaginatedResponse($endpoint, $params);
     }
 
     /**
@@ -403,7 +408,8 @@ class ModuleItem extends AbstractBaseApi
     {
         self::checkCourse();
         self::checkModule();
-        return self::fetchAllPagesAsModels(sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id), $params);
+        $endpoint = sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id);
+        return self::fetchAllPagesAsModels($endpoint, $params);
     }
 
     /**
@@ -452,7 +458,8 @@ class ModuleItem extends AbstractBaseApi
         self::checkModule();
 
         try {
-            self::$apiClient->delete(sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $this->id));
+            $endpoint = sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $this->id);
+            self::$apiClient->delete($endpoint);
         } catch (CanvasApiException $th) {
             return false;
         }
@@ -473,7 +480,13 @@ class ModuleItem extends AbstractBaseApi
         self::checkModule();
 
         try {
-            self::$apiClient->post(sprintf('courses/%d/modules/%d/items/%d/mark_read', self::$course->id, self::$module->id, $this->id));
+            $endpoint = sprintf(
+                'courses/%d/modules/%d/items/%d/mark_read',
+                self::$course->id,
+                self::$module->id,
+                $this->id
+            );
+            self::$apiClient->post($endpoint);
         } catch (CanvasApiException $th) {
             return false;
         }
@@ -493,7 +506,8 @@ class ModuleItem extends AbstractBaseApi
         self::checkModule();
 
         try {
-            self::$apiClient->put(sprintf('courses/%d/modules/%d/items/%d/done', self::$course->id, self::$module->id, $this->id));
+            $endpoint = sprintf('courses/%d/modules/%d/items/%d/done', self::$course->id, self::$module->id, $this->id);
+            self::$apiClient->put($endpoint);
         } catch (CanvasApiException $th) {
             return false;
         }
@@ -513,7 +527,8 @@ class ModuleItem extends AbstractBaseApi
         self::checkModule();
 
         try {
-            self::$apiClient->delete(sprintf('courses/%d/modules/%d/items/%d/done', self::$course->id, self::$module->id, $this->id));
+            $endpoint = sprintf('courses/%d/modules/%d/items/%d/done', self::$course->id, self::$module->id, $this->id);
+            self::$apiClient->delete($endpoint);
         } catch (CanvasApiException $th) {
             return false;
         }
