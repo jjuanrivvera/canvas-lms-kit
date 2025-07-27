@@ -46,6 +46,7 @@ jobs:
             - Code quality and best practices
             - Potential bugs or issues
             - Performance considerations
+            - Canvas LMS API implementation
             - Security concerns
             - Test coverage
             
