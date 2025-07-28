@@ -312,7 +312,7 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
                 $value = $value->format('c'); // Convert DateTime to ISO 8601 string
             }
 
-            if (empty($value)) {
+            if ($value === null || $value === '') {
                 unset($properties[$key]);
                 continue;
             }
@@ -1024,10 +1024,14 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
     }
 
     /**
-     * @param string|null $courseColor
+     * @param string|null $courseColor Hex color code (e.g., '#ff0000' or 'ff0000')
+     * @throws \InvalidArgumentException If color format is invalid
      */
     public function setCourseColor(?string $courseColor): void
     {
+        if ($courseColor !== null && !preg_match('/^#?[0-9a-fA-F]{6}$/', $courseColor)) {
+            throw new \InvalidArgumentException('Course color must be a valid hex color format (e.g., "#ff0000" or "ff0000")');
+        }
         $this->courseColor = $courseColor;
     }
 
