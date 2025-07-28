@@ -2193,7 +2193,9 @@ class Course extends AbstractBaseApi
     public function setCourseColor(?string $courseColor): void
     {
         if ($courseColor !== null && !preg_match('/^#?[0-9a-fA-F]{6}$/', $courseColor)) {
-            throw new \InvalidArgumentException('Course color must be a valid hex color format (e.g., "#ff0000" or "ff0000")');
+            throw new \InvalidArgumentException(
+                'Course color must be a valid hex color format (e.g., "#ff0000" or "ff0000")'
+            );
         }
         $this->courseColor = $courseColor;
     }
@@ -2388,8 +2390,11 @@ class Course extends AbstractBaseApi
      */
     public function setDefaultDueTime(string $defaultDueTime): void
     {
-        if ($defaultDueTime !== 'inherit' && !preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/', $defaultDueTime)) {
-            throw new \InvalidArgumentException('Default due time must be in HH:MM:SS format (e.g., "23:59:59") or "inherit"');
+        $timePattern = '/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/';
+        if ($defaultDueTime !== 'inherit' && !preg_match($timePattern, $defaultDueTime)) {
+            throw new \InvalidArgumentException(
+                'Default due time must be in HH:MM:SS format (e.g., "23:59:59") or "inherit"'
+            );
         }
         $this->defaultDueTime = $defaultDueTime;
     }

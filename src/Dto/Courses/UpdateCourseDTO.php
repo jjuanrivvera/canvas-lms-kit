@@ -232,6 +232,12 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
     public ?array $blueprintRestrictionsByObjectType = null;
 
     /**
+     * @var bool|null Enable or disable the course as a template that can be selected by an account.
+     */
+    public ?bool $template = null;
+
+    // Canvas for Elementary Properties
+    /**
      * @var bool|null Sets the course as a homeroom course.
      * The setting takes effect only when the course is associated with a Canvas for Elementary-enabled account.
      */
@@ -250,11 +256,6 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
      * Canvas for Elementary-enabled account and sync_enrollments_from_homeroom is enabled.
      */
     public ?string $homeroomCourseId = null;
-
-    /**
-     * @var bool|null Enable or disable the course as a template that can be selected by an account.
-     */
-    public ?bool $template = null;
 
     /**
      * @var string|null Sets a color in hex code format to be associated with the course.
@@ -951,6 +952,8 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
         $this->blueprintRestrictionsByObjectType = $blueprintRestrictionsByObjectType;
     }
 
+    // Canvas for Elementary Methods
+
     /**
      * @return bool|null
      */
@@ -1030,7 +1033,9 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
     public function setCourseColor(?string $courseColor): void
     {
         if ($courseColor !== null && !preg_match('/^#?[0-9a-fA-F]{6}$/', $courseColor)) {
-            throw new \InvalidArgumentException('Course color must be a valid hex color format (e.g., "#ff0000" or "ff0000")');
+            throw new \InvalidArgumentException(
+                'Course color must be a valid hex color format (e.g., "#ff0000" or "ff0000")'
+            );
         }
         $this->courseColor = $courseColor;
     }
