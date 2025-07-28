@@ -177,7 +177,7 @@ class UpdateAssignmentDTOTest extends TestCase
         $this->assertEquals('Updated description', $result['description']);
         $this->assertEquals('2024-12-31T23:59:59Z', $result['dueAt']);
         $this->assertEquals(150.0, $result['pointsPossible']);
-        $this->assertArrayNotHasKey('published', $result); // false values are filtered out by toArray
+        $this->assertFalse($result['published']); // false values are now preserved
         $this->assertEquals('percent', $result['gradingType']);
         $this->assertEquals(['online_upload'], $result['submissionTypes']);
         $this->assertEquals(789, $result['assignmentGroupId']);
@@ -254,8 +254,7 @@ class UpdateAssignmentDTOTest extends TestCase
         $result = $dto->toApiArray();
 
         $this->assertIsArray($result);
-        // The result should contain the name property plus the apiPropertyName property
-        $this->assertCount(2, $result);
+        $this->assertCount(1, $result);
 
         $resultKeys = array_column($result, 'name');
         $this->assertContains('assignment[name]', $resultKeys);

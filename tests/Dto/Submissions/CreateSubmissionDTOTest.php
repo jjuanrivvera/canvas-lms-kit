@@ -231,4 +231,78 @@ class CreateSubmissionDTOTest extends TestCase
         $this->assertContains('submission[media_comment_type]', $fieldNames);
         $this->assertContains('submission[user_id]', $fieldNames);
     }
+
+    public function testInvalidSubmissionTypeThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid submission type "invalid_type"');
+
+        $dto = new CreateSubmissionDTO([]);
+        $dto->setSubmissionType('invalid_type');
+    }
+
+    public function testInvalidUrlThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid URL format');
+
+        $dto = new CreateSubmissionDTO([]);
+        $dto->setUrl('not-a-valid-url');
+    }
+
+    public function testInternalUrlThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Internal URLs are not allowed');
+
+        $dto = new CreateSubmissionDTO([]);
+        $dto->setUrl('https://localhost/internal');
+    }
+
+    public function testHttpUrlThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Only HTTPS URLs are allowed');
+
+        $dto = new CreateSubmissionDTO([]);
+        $dto->setUrl('http://example.com/file');
+    }
+
+    public function testValidHttpsUrlAccepted(): void
+    {
+        $dto = new CreateSubmissionDTO([]);
+        $dto->setUrl('https://example.com/file');
+
+        $this->assertEquals('https://example.com/file', $dto->getUrl());
+    }
+
+    public function testInvalidFileIdThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('File IDs must be positive integers');
+
+        $dto = new CreateSubmissionDTO([]);
+        $dto->setFileIds([1, -2, 3]);
+    }
+
+    public function testTooManyFilesThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot attach more than 50 files');
+
+        $dto = new CreateSubmissionDTO([]);
+        $dto->setFileIds(range(1, 51));
+    }
+
+    public function testBodyContentSanitization(): void
+    {
+        $dto = new CreateSubmissionDTO([]);
+        $dto->setBody('<script>alert("xss")</script><p>Good content</p><a href="javascript:void(0)">Bad link</a>');
+
+        // Script tags and javascript: links should be removed
+        $body = $dto->getBody();
+        $this->assertStringNotContainsString('<script>', $body);
+        $this->assertStringNotContainsString('javascript:', $body);
+        $this->assertStringContainsString('<p>Good content</p>', $body);
+    }
 }

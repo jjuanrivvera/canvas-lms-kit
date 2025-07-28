@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CanvasLMS\Api\Submissions;
 
 use Exception;
+use InvalidArgumentException;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Assignments\Assignment;
@@ -297,6 +298,19 @@ class Submission extends AbstractBaseApi
     }
 
     /**
+     * Clear static contexts to prevent memory leaks in long-running processes
+     */
+    public static function clearContext(): void
+    {
+        if (isset(self::$course)) {
+            unset(self::$course);
+        }
+        if (isset(self::$assignment)) {
+            unset(self::$assignment);
+        }
+    }
+
+    /**
      * Create a new submission
      * @param array<string, mixed>|CreateSubmissionDTO $data
      * @throws CanvasApiException
@@ -317,10 +331,7 @@ class Submission extends AbstractBaseApi
 
         $submissionData = json_decode($response->getBody()->getContents(), true);
 
-        $submission = new self([]);
-        $submission->populate($submissionData);
-
-        return $submission;
+        return new self($submissionData);
     }
 
     /**
@@ -345,10 +356,7 @@ class Submission extends AbstractBaseApi
         $submissionData = json_decode($response->getBody()->getContents(), true);
 
         /** @phpstan-ignore-next-line */
-        $submission = new static([]);
-        $submission->populate($submissionData);
-
-        return $submission;
+        return new self($submissionData);
     }
 
     /**
@@ -449,10 +457,7 @@ class Submission extends AbstractBaseApi
 
         $submissionData = json_decode($response->getBody()->getContents(), true);
 
-        $submission = new self([]);
-        $submission->populate($submissionData);
-
-        return $submission;
+        return new self($submissionData);
     }
 
     /**
@@ -512,11 +517,37 @@ class Submission extends AbstractBaseApi
      * @param array<string, mixed> $gradeData
      * @throws CanvasApiException
      * @throws Exception
+     * @throws InvalidArgumentException
      */
     public static function updateGrades(array $gradeData): bool
     {
         self::checkApiClient();
         self::checkContexts();
+
+        // Validate batch size to prevent timeouts and Canvas API limits
+        if (isset($gradeData['grade_data']) && is_array($gradeData['grade_data'])) {
+            $batchSize = count($gradeData['grade_data']);
+            if ($batchSize > 100) {
+                throw new InvalidArgumentException(
+                    sprintf('Batch size cannot exceed 100 items. Got %d items.', $batchSize)
+                );
+            }
+
+            // Validate each grade data entry
+            foreach ($gradeData['grade_data'] as $index => $entry) {
+                if (!is_array($entry) || !isset($entry['user_id'])) {
+                    throw new InvalidArgumentException(
+                        sprintf('Grade data entry at index %d must contain user_id', $index)
+                    );
+                }
+
+                if (!is_int($entry['user_id']) || $entry['user_id'] <= 0) {
+                    throw new InvalidArgumentException(
+                        sprintf('Invalid user_id at index %d: must be positive integer', $index)
+                    );
+                }
+            }
+        }
 
         try {
             $endpoint = sprintf(
@@ -566,7 +597,14 @@ class Submission extends AbstractBaseApi
             ]);
 
             $submissionData = json_decode($response->getBody()->getContents(), true);
-            $this->populate($submissionData);
+
+            // Update the current instance with the response data
+            foreach ($submissionData as $key => $value) {
+                $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+                if (property_exists($this, $camelKey) && !is_null($value)) {
+                    $this->{$camelKey} = $value;
+                }
+            }
         } catch (CanvasApiException $exception) {
             error_log('Submission save failed: ' . $exception->getMessage());
             return false;

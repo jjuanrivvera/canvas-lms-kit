@@ -196,6 +196,22 @@ class SubmissionComment extends AbstractBaseApi
     }
 
     /**
+     * Clear static contexts to prevent memory leaks in long-running processes
+     */
+    public static function clearContext(): void
+    {
+        if (isset(self::$course)) {
+            unset(self::$course);
+        }
+        if (isset(self::$assignment)) {
+            unset(self::$assignment);
+        }
+        if (isset(self::$userId)) {
+            unset(self::$userId);
+        }
+    }
+
+    /**
      * Update an existing submission comment
      * @param array<string, mixed>|UpdateSubmissionCommentDTO $data
      * @throws CanvasApiException
@@ -222,10 +238,7 @@ class SubmissionComment extends AbstractBaseApi
 
         $commentData = json_decode($response->getBody()->getContents(), true);
 
-        $comment = new self([]);
-        $comment->populate($commentData);
-
-        return $comment;
+        return new self($commentData);
     }
 
     /**
@@ -338,7 +351,14 @@ class SubmissionComment extends AbstractBaseApi
             ]);
 
             $commentData = json_decode($response->getBody()->getContents(), true);
-            $this->populate($commentData);
+
+            // Update the current instance with the response data
+            foreach ($commentData as $key => $value) {
+                $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+                if (property_exists($this, $camelKey) && !is_null($value)) {
+                    $this->{$camelKey} = $value;
+                }
+            }
         } catch (CanvasApiException $exception) {
             error_log('SubmissionComment save failed: ' . $exception->getMessage());
             return false;

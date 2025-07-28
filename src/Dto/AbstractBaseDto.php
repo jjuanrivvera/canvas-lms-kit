@@ -57,11 +57,17 @@ abstract class AbstractBaseDto
         $properties = get_object_vars($this);
 
         foreach ($properties as $key => &$value) {
+            // Skip the apiPropertyName itself - it's a meta property, not data
+            if ($key === 'apiPropertyName') {
+                unset($properties[$key]);
+                continue;
+            }
+
             if ($value instanceof DateTime) {
                 $value = $value->format('c'); // Convert DateTime to ISO 8601 string
             }
 
-            if (empty($value)) {
+            if (is_null($value) || (empty($value) && !is_bool($value) && $value !== 0 && $value !== '0')) {
                 unset($properties[$key]);
             }
         }
@@ -80,6 +86,11 @@ abstract class AbstractBaseDto
         $modifiedProperties = [];
 
         foreach ($properties as $property => $value) {
+            // Skip the apiPropertyName itself - it's a meta property, not data
+            if ($property === 'apiPropertyName') {
+                continue;
+            }
+
             if ($this->apiPropertyName === '') {
                 throw new Exception('The API property name must be set in the DTO');
             }

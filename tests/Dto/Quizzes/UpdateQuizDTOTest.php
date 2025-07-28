@@ -207,7 +207,7 @@ class UpdateQuizDTOTest extends TestCase
 
         $apiArray = $dto->toApiArray();
 
-        $this->assertCount(3, $apiArray); // Includes apiPropertyName + 2 actual properties
+        $this->assertCount(2, $apiArray); // 2 actual properties (apiPropertyName excluded)
         
         $names = array_column($apiArray, 'name');
         $this->assertContains('quiz[published]', $names);

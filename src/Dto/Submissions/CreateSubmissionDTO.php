@@ -6,6 +6,7 @@ namespace CanvasLMS\Dto\Submissions;
 
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
+use InvalidArgumentException;
 
 /**
  * Data Transfer Object for creating submissions in Canvas LMS
@@ -74,9 +75,31 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set submission type
+     * @throws InvalidArgumentException
      */
     public function setSubmissionType(?string $submissionType): void
     {
+        if ($submissionType !== null) {
+            $validTypes = [
+                'online_text_entry',
+                'online_url',
+                'online_upload',
+                'media_recording',
+                'basic_lti_launch',
+                'student_annotation'
+            ];
+
+            if (!in_array($submissionType, $validTypes, true)) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Invalid submission type "%s". Valid types are: %s',
+                        $submissionType,
+                        implode(', ', $validTypes)
+                    )
+                );
+            }
+        }
+
         $this->submissionType = $submissionType;
     }
 
@@ -90,9 +113,21 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set submission body content
+     * Sanitizes HTML to prevent XSS attacks
      */
     public function setBody(?string $body): void
     {
+        if ($body !== null) {
+            // Basic HTML sanitization - remove script tags and dangerous attributes
+            $body = preg_replace('/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/mi', '', $body);
+            $body = preg_replace('/on\w+\s*=\s*["\'][^"\']*["\']/i', '', $body);
+            $body = preg_replace('/javascript:/i', '', $body);
+            $body = preg_replace('/vbscript:/i', '', $body);
+
+            // Trim whitespace
+            $body = trim($body);
+        }
+
         $this->body = $body;
     }
 
@@ -106,9 +141,39 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set submission URL
+     * @throws InvalidArgumentException
      */
     public function setUrl(?string $url): void
     {
+        if ($url !== null) {
+            // Validate URL format
+            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                throw new InvalidArgumentException('Invalid URL format');
+            }
+
+            // Prevent internal/localhost URLs for security
+            $parsedUrl = parse_url($url);
+            if ($parsedUrl === false) {
+                throw new InvalidArgumentException('Invalid URL format');
+            }
+
+            $host = strtolower($parsedUrl['host'] ?? '');
+            $internalHosts = ['localhost', '127.0.0.1', '0.0.0.0'];
+            $isInternal = in_array($host, $internalHosts) ||
+                         preg_match('/^192\.168\./', $host) ||
+                         preg_match('/^10\./', $host) ||
+                         preg_match('/^172\.(1[6-9]|2[0-9]|3[01])\./', $host);
+
+            if ($isInternal) {
+                throw new InvalidArgumentException('Internal URLs are not allowed');
+            }
+
+            // Ensure HTTPS for security
+            if (($parsedUrl['scheme'] ?? '') !== 'https') {
+                throw new InvalidArgumentException('Only HTTPS URLs are allowed');
+            }
+        }
+
         $this->url = $url;
     }
 
@@ -124,9 +189,24 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Set file IDs
      * @param array<int>|null $fileIds
+     * @throws InvalidArgumentException
      */
     public function setFileIds(?array $fileIds): void
     {
+        if ($fileIds !== null) {
+            // Validate that all file IDs are positive integers
+            foreach ($fileIds as $fileId) {
+                if (!is_int($fileId) || $fileId <= 0) {
+                    throw new InvalidArgumentException('File IDs must be positive integers');
+                }
+            }
+
+            // Limit the number of files to prevent abuse
+            if (count($fileIds) > 50) {
+                throw new InvalidArgumentException('Cannot attach more than 50 files to a submission');
+            }
+        }
+
         $this->fileIds = $fileIds;
     }
 
