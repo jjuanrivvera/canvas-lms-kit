@@ -327,6 +327,96 @@ class Course extends AbstractBaseApi
     public bool $template = false;
 
     /**
+     * Optional: Sets the course as a homeroom course
+     * @var bool
+     */
+    public bool $homeroomCourse = false;
+
+    /**
+     * Optional: Course friendly name for Canvas for Elementary
+     * @var string|null
+     */
+    public ?string $friendlyName = null;
+
+    /**
+     * Optional: Course color in hex format for Canvas for Elementary
+     * @var string|null
+     */
+    public ?string $courseColor = null;
+
+    /**
+     * Optional: Course image URL if set
+     * @var string|null
+     */
+    public ?string $imageUrl = null;
+
+    /**
+     * Optional: Course image ID if set
+     * @var int|null
+     */
+    public ?int $imageId = null;
+
+    /**
+     * Optional: Course banner image URL for Canvas for Elementary
+     * @var string|null
+     */
+    public ?string $bannerImageUrl = null;
+
+    /**
+     * Optional: Course banner image ID for Canvas for Elementary
+     * @var int|null
+     */
+    public ?int $bannerImageId = null;
+
+    /**
+     * Optional: Whether course is concluded (computed field)
+     * @var bool|null
+     */
+    public ?bool $concluded = null;
+
+    /**
+     * Optional: Whether grades are posted manually or automatically
+     * @var bool|null
+     */
+    public ?bool $postManually = null;
+
+    /**
+     * Optional: LTI context ID for the course
+     * @var string|null
+     */
+    public ?string $ltiContextId = null;
+
+    /**
+     * Syllabus course summary enabled (for syllabus page)
+     * @var bool
+     */
+    public bool $syllabusCoursesSummary = true;
+
+    /**
+     * Whether the course uses blueprint restrictions by object type
+     * @var bool
+     */
+    public bool $useBlueprintRestrictionsByObjectType = false;
+
+    /**
+     * Course pacing enabled flag
+     * @var bool
+     */
+    public bool $enableCoursePaces = false;
+
+    /**
+     * Conditional release (individual learning paths) enabled
+     * @var bool
+     */
+    public bool $conditionalRelease = false;
+
+    /**
+     * Default due time for assignments (HH:MM:SS format)
+     * @var string
+     */
+    public string $defaultDueTime = '23:59:59';
+
+    /**
      * Create a new Course instance
      * @param CreateCourseDTO|mixed[] $courseData
      * @return self
@@ -562,6 +652,436 @@ class Course extends AbstractBaseApi
         $this->populate($courseData);
 
         return $this;
+    }
+
+    /**
+     * Get course settings
+     * @return mixed[] Course settings array
+     * @throws CanvasApiException
+     */
+    public static function getSettings(int $courseId): array
+    {
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$courseId}/settings");
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Update course settings
+     * @param int $courseId
+     * @param mixed[] $settings
+     * @return mixed[] Updated settings
+     * @throws CanvasApiException
+     */
+    public static function updateSettings(int $courseId, array $settings): array
+    {
+        self::checkApiClient();
+
+        $response = self::$apiClient->put("/courses/{$courseId}/settings", [
+            'form_params' => $settings
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get user progress in this course
+     * @param int $userId
+     * @return mixed[] Course progress data
+     * @throws CanvasApiException
+     */
+    public function getUserProgress(int $userId): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get user progress');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/users/{$userId}/progress");
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get bulk user progress for all users in this course
+     * @return mixed[] Array of user progress data
+     * @throws CanvasApiException
+     */
+    public function getBulkUserProgress(): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get bulk user progress');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/bulk_user_progress");
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get effective due dates for assignments in this course
+     * @param mixed[] $params Optional parameters like assignment_ids
+     * @return mixed[] Effective due dates data
+     * @throws CanvasApiException
+     */
+    public function getEffectiveDueDates(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get effective due dates');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/effective_due_dates", [
+            'query' => $params
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get permissions for the current user in this course (relationship method)
+     * @param string[] $permissions List of permissions to check
+     * @return mixed[] Permissions data
+     * @throws CanvasApiException
+     */
+    public function permissions(array $permissions = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get permissions');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/permissions", [
+            'query' => ['permissions' => $permissions]
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get current user's course-specific activity stream
+     * @param mixed[] $params Optional parameters for filtering
+     * @return mixed[] Activity stream data
+     * @throws CanvasApiException
+     */
+    public function getActivityStream(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get activity stream');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/activity_stream", [
+            'query' => $params
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get current user's course-specific activity stream summary
+     * @return mixed[] Activity stream summary data
+     * @throws CanvasApiException
+     */
+    public function getActivityStreamSummary(): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get activity stream summary');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/activity_stream/summary");
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get current user's course-specific TODO items
+     * @return mixed[] TODO items data
+     * @throws CanvasApiException
+     */
+    public function getTodoItems(): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get TODO items');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/todo");
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get or create a test student for this course
+     * @return mixed[] Test student user data
+     * @throws CanvasApiException
+     */
+    public function getTestStudent(): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get test student');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/student_view_student");
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Preview HTML content processed for this course
+     * @param string $html HTML content to preview
+     * @return mixed[] Processed HTML data
+     * @throws CanvasApiException
+     */
+    public function previewHtml(string $html): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to preview HTML');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->post("/courses/{$this->id}/preview_html", [
+            'form_params' => ['html' => $html]
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Batch update multiple courses
+     * @param int $accountId Account ID containing the courses
+     * @param int[] $courseIds Array of course IDs to update
+     * @param string $event Action to take (offer, conclude, delete, undelete)
+     * @return mixed[] Progress object for tracking the batch operation
+     * @throws CanvasApiException
+     */
+    public static function batchUpdate(int $accountId, array $courseIds, string $event): array
+    {
+        self::checkApiClient();
+
+        if (count($courseIds) > 500) {
+            throw new CanvasApiException('Cannot update more than 500 courses at once');
+        }
+
+        $allowedEvents = ['offer', 'conclude', 'delete', 'undelete'];
+        if (!in_array($event, $allowedEvents)) {
+            throw new CanvasApiException('Invalid event. Must be one of: ' . implode(', ', $allowedEvents));
+        }
+
+        $response = self::$apiClient->put("/accounts/{$accountId}/courses", [
+            'form_params' => [
+                'course_ids' => $courseIds,
+                'event' => $event
+            ]
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * List users in this course with optional filtering
+     * @param mixed[] $params Parameters for filtering users
+     * @return mixed[] Array of user data
+     * @throws CanvasApiException
+     */
+    public function getUsers(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get users');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/users", [
+            'query' => $params
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get a single user in this course
+     * @param int $userId User ID to retrieve
+     * @param mixed[] $params Optional parameters like include[]
+     * @return mixed[] User data
+     * @throws CanvasApiException
+     */
+    public function getUser(int $userId, array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get user');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/users/{$userId}", [
+            'query' => $params
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get students in this course (legacy method - use getUsers with enrollment_type filter instead)
+     * @param mixed[] $params Optional parameters
+     * @return mixed[] Array of student data
+     * @throws CanvasApiException
+     * @deprecated Use getUsers() with enrollment_type[] = ['student'] instead
+     */
+    public function getStudents(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get students');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/students", [
+            'query' => $params
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get recently logged in students in this course
+     * @return mixed[] Array of recently logged in user data
+     * @throws CanvasApiException
+     */
+    public function getRecentStudents(): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get recent students');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/recent_students");
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Search for content share users in this course
+     * @param string $searchTerm Term to search for users
+     * @return mixed[] Array of users available for content sharing
+     * @throws CanvasApiException
+     */
+    public function searchContentShareUsers(string $searchTerm): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to search content share users');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/content_share_users", [
+            'query' => ['search_term' => $searchTerm]
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+
+    /**
+     * Create a file upload to the course
+     * This API endpoint is the first step in uploading a file to a course
+     * @param mixed[] $fileParams File upload parameters
+     * @return mixed[] File upload response
+     * @throws CanvasApiException
+     */
+    public function createFile(array $fileParams): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to create file');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->post("/courses/{$this->id}/files", [
+            'form_params' => $fileParams
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+
+    /**
+     * Remove quiz migration alert
+     * Remove alert about quiz migration limitations displayed to user
+     * @return mixed[] Success response
+     * @throws CanvasApiException
+     */
+    public function dismissQuizMigrationAlert(): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to dismiss quiz migration alert');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->post("/courses/{$this->id}/dismiss_migration_limitation_message");
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get course copy status
+     * DEPRECATED: Use Content Migrations API instead
+     * Retrieve the status of a course copy operation
+     * @param int $copyId Course copy ID
+     * @return mixed[] Course copy status
+     * @throws CanvasApiException
+     */
+    public function getCourseCopyStatus(int $copyId): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to get course copy status');
+        }
+
+        self::checkApiClient();
+
+        $response = self::$apiClient->get("/courses/{$this->id}/course_copy/{$copyId}");
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Copy course content
+     * DEPRECATED: Use Content Migrations API instead
+     * Copies content from one course into another
+     * @param string $sourceCourse Source course ID or SIS-ID
+     * @param mixed[] $options Copy options (except, only)
+     * @return mixed[] Course copy response
+     * @throws CanvasApiException
+     */
+    public function copyCourseContent(string $sourceCourse, array $options = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to copy course content');
+        }
+
+        self::checkApiClient();
+
+        $params = array_merge(['source_course' => $sourceCourse], $options);
+
+        $response = self::$apiClient->post("/courses/{$this->id}/course_copy", [
+            'form_params' => $params
+        ]);
+
+        return json_decode($response->getBody(), true);
     }
 
     // Relationship Method Aliases
@@ -1624,5 +2144,258 @@ class Course extends AbstractBaseApi
     public function setTemplate(bool $template): void
     {
         $this->template = $template;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHomeroomCourse(): bool
+    {
+        return $this->homeroomCourse;
+    }
+
+    /**
+     * @param bool $homeroomCourse
+     */
+    public function setHomeroomCourse(bool $homeroomCourse): void
+    {
+        $this->homeroomCourse = $homeroomCourse;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getFriendlyName(): ?string
+    {
+        return $this->friendlyName;
+    }
+
+    /**
+     * @param string|null $friendlyName
+     */
+    public function setFriendlyName(?string $friendlyName): void
+    {
+        $this->friendlyName = $friendlyName;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCourseColor(): ?string
+    {
+        return $this->courseColor;
+    }
+
+    /**
+     * @param string|null $courseColor Hex color code (e.g., '#ff0000' or 'ff0000')
+     * @throws \InvalidArgumentException If color format is invalid
+     */
+    public function setCourseColor(?string $courseColor): void
+    {
+        if ($courseColor !== null && !preg_match('/^#?[0-9a-fA-F]{6}$/', $courseColor)) {
+            throw new \InvalidArgumentException(
+                'Course color must be a valid hex color format (e.g., "#ff0000" or "ff0000")'
+            );
+        }
+        $this->courseColor = $courseColor;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getImageUrl(): ?string
+    {
+        return $this->imageUrl;
+    }
+
+    /**
+     * @param string|null $imageUrl
+     */
+    public function setImageUrl(?string $imageUrl): void
+    {
+        $this->imageUrl = $imageUrl;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getImageId(): ?int
+    {
+        return $this->imageId;
+    }
+
+    /**
+     * @param int|null $imageId
+     */
+    public function setImageId(?int $imageId): void
+    {
+        $this->imageId = $imageId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBannerImageUrl(): ?string
+    {
+        return $this->bannerImageUrl;
+    }
+
+    /**
+     * @param string|null $bannerImageUrl
+     */
+    public function setBannerImageUrl(?string $bannerImageUrl): void
+    {
+        $this->bannerImageUrl = $bannerImageUrl;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getBannerImageId(): ?int
+    {
+        return $this->bannerImageId;
+    }
+
+    /**
+     * @param int|null $bannerImageId
+     */
+    public function setBannerImageId(?int $bannerImageId): void
+    {
+        $this->bannerImageId = $bannerImageId;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function isConcluded(): ?bool
+    {
+        return $this->concluded;
+    }
+
+    /**
+     * @param bool|null $concluded
+     */
+    public function setConcluded(?bool $concluded): void
+    {
+        $this->concluded = $concluded;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function isPostManually(): ?bool
+    {
+        return $this->postManually;
+    }
+
+    /**
+     * @param bool|null $postManually
+     */
+    public function setPostManually(?bool $postManually): void
+    {
+        $this->postManually = $postManually;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getLtiContextId(): ?string
+    {
+        return $this->ltiContextId;
+    }
+
+    /**
+     * @param string|null $ltiContextId
+     */
+    public function setLtiContextId(?string $ltiContextId): void
+    {
+        $this->ltiContextId = $ltiContextId;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSyllabusCoursesSummary(): bool
+    {
+        return $this->syllabusCoursesSummary;
+    }
+
+    /**
+     * @param bool $syllabusCoursesSummary
+     */
+    public function setSyllabusCoursesSummary(bool $syllabusCoursesSummary): void
+    {
+        $this->syllabusCoursesSummary = $syllabusCoursesSummary;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUseBlueprintRestrictionsByObjectType(): bool
+    {
+        return $this->useBlueprintRestrictionsByObjectType;
+    }
+
+    /**
+     * @param bool $useBlueprintRestrictionsByObjectType
+     */
+    public function setUseBlueprintRestrictionsByObjectType(bool $useBlueprintRestrictionsByObjectType): void
+    {
+        $this->useBlueprintRestrictionsByObjectType = $useBlueprintRestrictionsByObjectType;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEnableCoursePaces(): bool
+    {
+        return $this->enableCoursePaces;
+    }
+
+    /**
+     * @param bool $enableCoursePaces
+     */
+    public function setEnableCoursePaces(bool $enableCoursePaces): void
+    {
+        $this->enableCoursePaces = $enableCoursePaces;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isConditionalRelease(): bool
+    {
+        return $this->conditionalRelease;
+    }
+
+    /**
+     * @param bool $conditionalRelease
+     */
+    public function setConditionalRelease(bool $conditionalRelease): void
+    {
+        $this->conditionalRelease = $conditionalRelease;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultDueTime(): string
+    {
+        return $this->defaultDueTime;
+    }
+
+    /**
+     * @param string $defaultDueTime Time in HH:MM:SS format (e.g., '23:59:59') or 'inherit'
+     * @throws \InvalidArgumentException If time format is invalid
+     */
+    public function setDefaultDueTime(string $defaultDueTime): void
+    {
+        $timePattern = '/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/';
+        if ($defaultDueTime !== 'inherit' && !preg_match($timePattern, $defaultDueTime)) {
+            throw new \InvalidArgumentException(
+                'Default due time must be in HH:MM:SS format (e.g., "23:59:59") or "inherit"'
+            );
+        }
+        $this->defaultDueTime = $defaultDueTime;
     }
 }

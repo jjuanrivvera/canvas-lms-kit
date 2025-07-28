@@ -118,9 +118,9 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * The unique ID of the term to create to course in.
-     * @var string|null $termId
+     * @var int|null $termId
      */
-    public ?string $termId = null;
+    public ?int $termId = null;
 
     /**
      * The unique SIS identifier.
@@ -209,6 +209,13 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
     public bool $enableSisReactivation = false;
 
     /**
+     * Default is false. When true, all grades in the course must be posted manually,
+     * and will not be automatically posted. When false, all grades in the course will be automatically posted.
+     * @var bool $postManually
+     */
+    public bool $postManually = false;
+
+    /**
      * Convert the DTO to an array for API requests
      * @return mixed[]
      */
@@ -223,7 +230,7 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
                 $value = $value->format('c');
             }
 
-            if (empty($value)) {
+            if ($value === null || $value === '') {
                 unset($properties[$key]);
                 continue;
             }
@@ -495,17 +502,17 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
     }
 
     /**
-     * @return string|null
+     * @return int|null
      */
-    public function getTermId(): ?string
+    public function getTermId(): ?int
     {
         return $this->termId;
     }
 
     /**
-     * @param string|null $termId
+     * @param int|null $termId
      */
-    public function setTermId(?string $termId): void
+    public function setTermId(?int $termId): void
     {
         $this->termId = $termId;
     }
@@ -716,5 +723,21 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
     public function setEnableSisReactivation(bool $enableSisReactivation): void
     {
         $this->enableSisReactivation = $enableSisReactivation;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPostManually(): bool
+    {
+        return $this->postManually;
+    }
+
+    /**
+     * @param bool $postManually
+     */
+    public function setPostManually(bool $postManually): void
+    {
+        $this->postManually = $postManually;
     }
 }

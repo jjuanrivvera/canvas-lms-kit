@@ -232,6 +232,12 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
     public ?array $blueprintRestrictionsByObjectType = null;
 
     /**
+     * @var bool|null Enable or disable the course as a template that can be selected by an account.
+     */
+    public ?bool $template = null;
+
+    // Canvas for Elementary Properties
+    /**
      * @var bool|null Sets the course as a homeroom course.
      * The setting takes effect only when the course is associated with a Canvas for Elementary-enabled account.
      */
@@ -250,11 +256,6 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
      * Canvas for Elementary-enabled account and sync_enrollments_from_homeroom is enabled.
      */
     public ?string $homeroomCourseId = null;
-
-    /**
-     * @var bool|null Enable or disable the course as a template that can be selected by an account.
-     */
-    public ?bool $template = null;
 
     /**
      * @var string|null Sets a color in hex code format to be associated with the course.
@@ -291,6 +292,13 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
     public ?bool $overrideSisStickiness = null;
 
     /**
+     * @var bool|null When true, all grades in the course will be posted manually.
+     * When false, all grades in the course will be automatically posted.
+     * Use with caution as this setting will override any assignment level post policy.
+     */
+    public ?bool $postManually = null;
+
+    /**
      * Convert the DTO to an array for API requests
      * @return mixed[]
      */
@@ -305,7 +313,7 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
                 $value = $value->format('c'); // Convert DateTime to ISO 8601 string
             }
 
-            if (empty($value)) {
+            if ($value === null || $value === '') {
                 unset($properties[$key]);
                 continue;
             }
@@ -944,6 +952,8 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
         $this->blueprintRestrictionsByObjectType = $blueprintRestrictionsByObjectType;
     }
 
+    // Canvas for Elementary Methods
+
     /**
      * @return bool|null
      */
@@ -1017,10 +1027,16 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
     }
 
     /**
-     * @param string|null $courseColor
+     * @param string|null $courseColor Hex color code (e.g., '#ff0000' or 'ff0000')
+     * @throws \InvalidArgumentException If color format is invalid
      */
     public function setCourseColor(?string $courseColor): void
     {
+        if ($courseColor !== null && !preg_match('/^#?[0-9a-fA-F]{6}$/', $courseColor)) {
+            throw new \InvalidArgumentException(
+                'Course color must be a valid hex color format (e.g., "#ff0000" or "ff0000")'
+            );
+        }
         $this->courseColor = $courseColor;
     }
 
@@ -1086,5 +1102,21 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
     public function setOverrideSisStickiness(?bool $overrideSisStickiness): void
     {
         $this->overrideSisStickiness = $overrideSisStickiness;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getPostManually(): ?bool
+    {
+        return $this->postManually;
+    }
+
+    /**
+     * @param bool|null $postManually
+     */
+    public function setPostManually(?bool $postManually): void
+    {
+        $this->postManually = $postManually;
     }
 }
