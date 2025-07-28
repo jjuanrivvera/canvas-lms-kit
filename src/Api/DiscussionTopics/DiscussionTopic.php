@@ -287,6 +287,26 @@ class DiscussionTopic extends AbstractBaseApi
     public ?bool $sortByRating = null;
 
     /**
+     * Default sort order of the discussion (asc or desc)
+     */
+    public ?string $sortOrder = null;
+
+    /**
+     * Whether users can choose their preferred sort order
+     */
+    public ?bool $sortOrderLocked = null;
+
+    /**
+     * Whether threaded replies should be expanded by default
+     */
+    public ?bool $expand = null;
+
+    /**
+     * Whether users can choose their preferred thread expansion setting
+     */
+    public ?bool $expandLocked = null;
+
+    /**
      * Whether this is an announcement
      */
     public ?bool $isAnnouncement = null;
@@ -1261,6 +1281,90 @@ class DiscussionTopic extends AbstractBaseApi
     }
 
     /**
+     * Get sort order
+     *
+     * @return string|null
+     */
+    public function getSortOrder(): ?string
+    {
+        return $this->sortOrder;
+    }
+
+    /**
+     * Set sort order
+     *
+     * @param string|null $sortOrder
+     * @return void
+     */
+    public function setSortOrder(?string $sortOrder): void
+    {
+        $this->sortOrder = $sortOrder;
+    }
+
+    /**
+     * Get sort order locked status
+     *
+     * @return bool|null
+     */
+    public function getSortOrderLocked(): ?bool
+    {
+        return $this->sortOrderLocked;
+    }
+
+    /**
+     * Set sort order locked status
+     *
+     * @param bool|null $sortOrderLocked
+     * @return void
+     */
+    public function setSortOrderLocked(?bool $sortOrderLocked): void
+    {
+        $this->sortOrderLocked = $sortOrderLocked;
+    }
+
+    /**
+     * Get expand status
+     *
+     * @return bool|null
+     */
+    public function getExpand(): ?bool
+    {
+        return $this->expand;
+    }
+
+    /**
+     * Set expand status
+     *
+     * @param bool|null $expand
+     * @return void
+     */
+    public function setExpand(?bool $expand): void
+    {
+        $this->expand = $expand;
+    }
+
+    /**
+     * Get expand locked status
+     *
+     * @return bool|null
+     */
+    public function getExpandLocked(): ?bool
+    {
+        return $this->expandLocked;
+    }
+
+    /**
+     * Set expand locked status
+     *
+     * @param bool|null $expandLocked
+     * @return void
+     */
+    public function setExpandLocked(?bool $expandLocked): void
+    {
+        $this->expandLocked = $expandLocked;
+    }
+
+    /**
      * Convert discussion topic to array
      *
      * @return array<string, mixed>
@@ -1301,6 +1405,10 @@ class DiscussionTopic extends AbstractBaseApi
             'allow_rating' => $this->allowRating,
             'only_graders_can_rate' => $this->onlyGradersCanRate,
             'sort_by_rating' => $this->sortByRating,
+            'sort_order' => $this->sortOrder,
+            'sort_order_locked' => $this->sortOrderLocked,
+            'expand' => $this->expand,
+            'expand_locked' => $this->expandLocked,
             'group_topic' => $this->groupTopic,
             'group_category_id' => $this->groupCategoryId,
             'topic_children' => $this->topicChildren,

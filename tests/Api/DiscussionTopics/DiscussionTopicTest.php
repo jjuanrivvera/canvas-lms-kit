@@ -839,6 +839,25 @@ class DiscussionTopicTest extends TestCase
         // Test sortByRating
         $topic->setSortByRating(true);
         $this->assertTrue($topic->getSortByRating());
+        
+        // Test sortOrder
+        $topic->setSortOrder('asc');
+        $this->assertEquals('asc', $topic->getSortOrder());
+        
+        $topic->setSortOrder('desc');
+        $this->assertEquals('desc', $topic->getSortOrder());
+        
+        // Test sortOrderLocked
+        $topic->setSortOrderLocked(true);
+        $this->assertTrue($topic->getSortOrderLocked());
+        
+        // Test expand
+        $topic->setExpand(false);
+        $this->assertFalse($topic->getExpand());
+        
+        // Test expandLocked
+        $topic->setExpandLocked(true);
+        $this->assertTrue($topic->getExpandLocked());
     }
 
     public function testMarkAsReadSuccess(): void
@@ -980,7 +999,11 @@ class DiscussionTopicTest extends TestCase
             'readState' => 'read',
             'unreadCount' => 3,
             'subscribed' => true,
-            'userName' => 'John Instructor'
+            'userName' => 'John Instructor',
+            'sortOrder' => 'asc',
+            'sortOrderLocked' => true,
+            'expand' => false,
+            'expandLocked' => true
         ]);
         
         $array = $topic->toArray();
@@ -994,5 +1017,9 @@ class DiscussionTopicTest extends TestCase
         $this->assertEquals(3, $array['unread_count']);
         $this->assertTrue($array['subscribed']);
         $this->assertEquals('John Instructor', $array['user_name']);
+        $this->assertEquals('asc', $array['sort_order']);
+        $this->assertTrue($array['sort_order_locked']);
+        $this->assertFalse($array['expand']);
+        $this->assertTrue($array['expand_locked']);
     }
 }

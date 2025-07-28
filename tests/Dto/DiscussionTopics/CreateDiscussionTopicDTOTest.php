@@ -411,5 +411,55 @@ class CreateDiscussionTopicDTOTest extends TestCase
         
         $dto->setPodcastSettings(null);
         $this->assertNull($dto->getPodcastSettings());
+        
+        // Test sortOrder
+        $dto->setSortOrder('asc');
+        $this->assertEquals('asc', $dto->getSortOrder());
+        
+        $dto->setSortOrder('desc');
+        $this->assertEquals('desc', $dto->getSortOrder());
+        
+        $dto->setSortOrder(null);
+        $this->assertNull($dto->getSortOrder());
+        
+        // Test sortOrderLocked
+        $dto->setSortOrderLocked(true);
+        $this->assertTrue($dto->getSortOrderLocked());
+        
+        $dto->setSortOrderLocked(false);
+        $this->assertFalse($dto->getSortOrderLocked());
+        
+        $dto->setSortOrderLocked(null);
+        $this->assertNull($dto->getSortOrderLocked());
+        
+        // Test expanded
+        $dto->setExpanded(true);
+        $this->assertTrue($dto->getExpanded());
+        
+        $dto->setExpanded(false);
+        $this->assertFalse($dto->getExpanded());
+        
+        $dto->setExpanded(null);
+        $this->assertNull($dto->getExpanded());
+        
+        // Test expandedLocked
+        $dto->setExpandedLocked(true);
+        $this->assertTrue($dto->getExpandedLocked());
+        
+        $dto->setExpandedLocked(false);
+        $this->assertFalse($dto->getExpandedLocked());
+        
+        $dto->setExpandedLocked(null);
+        $this->assertNull($dto->getExpandedLocked());
+        
+        // Test lockComment
+        $dto->setLockComment(true);
+        $this->assertTrue($dto->getLockComment());
+        
+        $dto->setLockComment(false);
+        $this->assertFalse($dto->getLockComment());
+        
+        $dto->setLockComment(null);
+        $this->assertNull($dto->getLockComment());
     }
 }

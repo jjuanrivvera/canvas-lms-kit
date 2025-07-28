@@ -152,6 +152,31 @@ class CreateDiscussionTopicDTO extends AbstractBaseDto implements DTOInterface
     public ?array $assignment = null;
 
     /**
+     * Default sort order of the discussion (asc or desc)
+     */
+    public ?string $sortOrder = null;
+
+    /**
+     * Whether users can choose their preferred sort order
+     */
+    public ?bool $sortOrderLocked = null;
+
+    /**
+     * Whether threaded replies should be expanded by default
+     */
+    public ?bool $expanded = null;
+
+    /**
+     * Whether users can choose their preferred thread expansion setting
+     */
+    public ?bool $expandedLocked = null;
+
+    /**
+     * If is_announcement and lock_comment are true, disable participant comments
+     */
+    public ?bool $lockComment = null;
+
+    /**
      * Get discussion topic title
      */
     public function getTitle(): ?string
@@ -557,5 +582,85 @@ class CreateDiscussionTopicDTO extends AbstractBaseDto implements DTOInterface
     public function setAssignment(?array $assignment): void
     {
         $this->assignment = $assignment;
+    }
+
+    /**
+     * Get sort order
+     */
+    public function getSortOrder(): ?string
+    {
+        return $this->sortOrder;
+    }
+
+    /**
+     * Set sort order
+     */
+    public function setSortOrder(?string $sortOrder): void
+    {
+        $this->sortOrder = $sortOrder;
+    }
+
+    /**
+     * Get sort order locked status
+     */
+    public function getSortOrderLocked(): ?bool
+    {
+        return $this->sortOrderLocked;
+    }
+
+    /**
+     * Set sort order locked status
+     */
+    public function setSortOrderLocked(?bool $sortOrderLocked): void
+    {
+        $this->sortOrderLocked = $sortOrderLocked;
+    }
+
+    /**
+     * Get expanded status
+     */
+    public function getExpanded(): ?bool
+    {
+        return $this->expanded;
+    }
+
+    /**
+     * Set expanded status
+     */
+    public function setExpanded(?bool $expanded): void
+    {
+        $this->expanded = $expanded;
+    }
+
+    /**
+     * Get expanded locked status
+     */
+    public function getExpandedLocked(): ?bool
+    {
+        return $this->expandedLocked;
+    }
+
+    /**
+     * Set expanded locked status
+     */
+    public function setExpandedLocked(?bool $expandedLocked): void
+    {
+        $this->expandedLocked = $expandedLocked;
+    }
+
+    /**
+     * Get lock comment status
+     */
+    public function getLockComment(): ?bool
+    {
+        return $this->lockComment;
+    }
+
+    /**
+     * Set lock comment status
+     */
+    public function setLockComment(?bool $lockComment): void
+    {
+        $this->lockComment = $lockComment;
     }
 }
