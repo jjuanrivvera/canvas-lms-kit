@@ -209,6 +209,325 @@ class Assignment extends AbstractBaseApi
     public ?string $updatedAt = null;
 
     /**
+     * URL to download all submissions as a zip
+     */
+    public ?string $submissionsDownloadUrl = null;
+
+    /**
+     * Boolean flag indicating whether assignment requires due date
+     */
+    public ?bool $dueDateRequired = null;
+
+    /**
+     * Integer indicating maximum assignment name length
+     */
+    public ?int $maxNameLength = null;
+
+    /**
+     * Whether Turnitin is enabled for this assignment
+     */
+    public ?bool $turnitinEnabled = null;
+
+    /**
+     * Whether VeriCite is enabled for this assignment
+     */
+    public ?bool $vericiteEnabled = null;
+
+    /**
+     * Turnitin settings object
+     * @var array<string, mixed>|null
+     */
+    public ?array $turnitinSettings = null;
+
+    /**
+     * Whether group students are graded individually
+     */
+    public ?bool $gradeGroupStudentsIndividually = null;
+
+    /**
+     * External tool tag attributes
+     * @var array<string, mixed>|null
+     */
+    public ?array $externalToolTagAttributes = null;
+
+    /**
+     * Whether automatic peer reviews are enabled
+     */
+    public ?bool $automaticPeerReviews = null;
+
+    /**
+     * Number of peer reviews per user
+     */
+    public ?int $peerReviewCount = null;
+
+    /**
+     * Date peer reviews are assigned
+     */
+    public ?string $peerReviewsAssignAt = null;
+
+    /**
+     * Whether intra-group peer reviews are allowed
+     */
+    public ?bool $intraGroupPeerReviews = null;
+
+    /**
+     * Number of submissions needing grading
+     */
+    public ?int $needsGradingCount = null;
+
+    /**
+     * Grading count by section
+     * @var array<array<string, mixed>>|null
+     */
+    public ?array $needsGradingCountBySection = null;
+
+    /**
+     * Whether to post to SIS
+     */
+    public ?bool $postToSis = null;
+
+    /**
+     * Third-party integration ID
+     */
+    public ?string $integrationId = null;
+
+    /**
+     * Third-party integration data
+     * @var array<string, mixed>|null
+     */
+    public ?array $integrationData = null;
+
+    /**
+     * Whether assignment has submitted submissions
+     */
+    public ?bool $hasSubmittedSubmissions = null;
+
+    /**
+     * Grading standard ID
+     */
+    public ?int $gradingStandardId = null;
+
+    /**
+     * Whether assignment can be unpublished
+     */
+    public ?bool $unpublishable = null;
+
+    /**
+     * Lock information object
+     * @var array<string, mixed>|null
+     */
+    public ?array $lockInfo = null;
+
+    /**
+     * Lock explanation text
+     */
+    public ?string $lockExplanation = null;
+
+    /**
+     * Associated quiz ID
+     */
+    public ?int $quizId = null;
+
+    /**
+     * Whether anonymous submissions are allowed
+     */
+    public ?bool $anonymousSubmissions = null;
+
+    /**
+     * Associated discussion topic
+     * @var array<string, mixed>|null
+     */
+    public ?array $discussionTopic = null;
+
+    /**
+     * Whether assignment is frozen on copy
+     */
+    public ?bool $freezeOnCopy = null;
+
+    /**
+     * Whether assignment is frozen
+     */
+    public ?bool $frozen = null;
+
+    /**
+     * Array of frozen attributes
+     * @var array<string>|null
+     */
+    public ?array $frozenAttributes = null;
+
+    /**
+     * Current user's submission
+     * @var array<string, mixed>|null
+     */
+    public ?array $submission = null;
+
+    /**
+     * Whether rubric is used for grading
+     */
+    public ?bool $useRubricForGrading = null;
+
+    /**
+     * Rubric settings
+     * @var array<string, mixed>|null
+     */
+    public ?array $rubricSettings = null;
+
+    /**
+     * Rubric criteria and ratings
+     * @var array<string, mixed>|null
+     */
+    public ?array $rubric = null;
+
+    /**
+     * Array of student IDs who can see assignment
+     * @var array<int>|null
+     */
+    public ?array $assignmentVisibility = null;
+
+    /**
+     * Array of assignment override objects
+     * @var array<array<string, mixed>>|null
+     */
+    public ?array $overrides = null;
+
+    /**
+     * Whether assignment is omitted from final grade
+     */
+    public ?bool $omitFromFinalGrade = null;
+
+    /**
+     * Whether assignment is hidden in gradebook
+     */
+    public ?bool $hideInGradebook = null;
+
+    /**
+     * Number of provisional graders
+     */
+    public ?int $graderCount = null;
+
+    /**
+     * Final grader user ID
+     */
+    public ?int $finalGraderId = null;
+
+    /**
+     * Whether grader comments are visible to graders
+     */
+    public ?bool $graderCommentsVisibleToGraders = null;
+
+    /**
+     * Whether graders are anonymous to other graders
+     */
+    public ?bool $gradersAnonymousToGraders = null;
+
+    /**
+     * Whether grader names are visible to final grader
+     */
+    public ?bool $gradersNamesVisibleToFinalGrader = null;
+
+    /**
+     * Whether assignment posts grades manually
+     */
+    public ?bool $postManually = null;
+
+    /**
+     * Score statistics
+     * @var array<string, mixed>|null
+     */
+    public ?array $scoreStatistics = null;
+
+    /**
+     * Whether user can submit
+     */
+    public ?bool $canSubmit = null;
+
+    /**
+     * Academic benchmark GUIDs
+     * @var array<string>|null
+     */
+    public ?array $abGuid = null;
+
+    /**
+     * Annotatable attachment ID
+     */
+    public ?int $annotatableAttachmentId = null;
+
+    /**
+     * Whether student names are anonymized
+     */
+    public ?bool $anonymizeStudents = null;
+
+    /**
+     * Whether LockDown Browser is required
+     */
+    public ?bool $requireLockdownBrowser = null;
+
+    /**
+     * Whether assignment has important dates
+     */
+    public ?bool $importantDates = null;
+
+    /**
+     * Whether notifications are muted (deprecated)
+     */
+    public ?bool $muted = null;
+
+    /**
+     * Whether peer reviews are anonymous
+     */
+    public ?bool $anonymousPeerReviews = null;
+
+    /**
+     * Whether instructor annotations are anonymous
+     */
+    public ?bool $anonymousInstructorAnnotations = null;
+
+    /**
+     * Whether assignment has graded submissions
+     */
+    public ?bool $gradedSubmissionsExist = null;
+
+    /**
+     * Whether this is a quiz assignment
+     */
+    public ?bool $isQuizAssignment = null;
+
+    /**
+     * Whether assignment is in closed grading period
+     */
+    public ?bool $inClosedGradingPeriod = null;
+
+    /**
+     * Whether assignment can be duplicated
+     */
+    public ?bool $canDuplicate = null;
+
+    /**
+     * Original course ID if duplicated
+     */
+    public ?int $originalCourseId = null;
+
+    /**
+     * Original assignment ID if duplicated
+     */
+    public ?int $originalAssignmentId = null;
+
+    /**
+     * Original LTI resource link ID if duplicated
+     */
+    public ?int $originalLtiResourceLinkId = null;
+
+    /**
+     * Original assignment name if duplicated
+     */
+    public ?string $originalAssignmentName = null;
+
+    /**
+     * Original quiz ID if duplicated
+     */
+    public ?int $originalQuizId = null;
+
+    /**
      * Create a new Assignment instance
      *
      * @param array<string, mixed> $data Assignment data from Canvas API
@@ -845,6 +1164,67 @@ class Assignment extends AbstractBaseApi
             'has_overrides' => $this->hasOverrides,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
+            'submissions_download_url' => $this->submissionsDownloadUrl,
+            'due_date_required' => $this->dueDateRequired,
+            'max_name_length' => $this->maxNameLength,
+            'turnitin_enabled' => $this->turnitinEnabled,
+            'vericite_enabled' => $this->vericiteEnabled,
+            'turnitin_settings' => $this->turnitinSettings,
+            'grade_group_students_individually' => $this->gradeGroupStudentsIndividually,
+            'external_tool_tag_attributes' => $this->externalToolTagAttributes,
+            'automatic_peer_reviews' => $this->automaticPeerReviews,
+            'peer_review_count' => $this->peerReviewCount,
+            'peer_reviews_assign_at' => $this->peerReviewsAssignAt,
+            'intra_group_peer_reviews' => $this->intraGroupPeerReviews,
+            'needs_grading_count' => $this->needsGradingCount,
+            'needs_grading_count_by_section' => $this->needsGradingCountBySection,
+            'post_to_sis' => $this->postToSis,
+            'integration_id' => $this->integrationId,
+            'integration_data' => $this->integrationData,
+            'has_submitted_submissions' => $this->hasSubmittedSubmissions,
+            'grading_standard_id' => $this->gradingStandardId,
+            'unpublishable' => $this->unpublishable,
+            'lock_info' => $this->lockInfo,
+            'lock_explanation' => $this->lockExplanation,
+            'quiz_id' => $this->quizId,
+            'anonymous_submissions' => $this->anonymousSubmissions,
+            'discussion_topic' => $this->discussionTopic,
+            'freeze_on_copy' => $this->freezeOnCopy,
+            'frozen' => $this->frozen,
+            'frozen_attributes' => $this->frozenAttributes,
+            'submission' => $this->submission,
+            'use_rubric_for_grading' => $this->useRubricForGrading,
+            'rubric_settings' => $this->rubricSettings,
+            'rubric' => $this->rubric,
+            'assignment_visibility' => $this->assignmentVisibility,
+            'overrides' => $this->overrides,
+            'omit_from_final_grade' => $this->omitFromFinalGrade,
+            'hide_in_gradebook' => $this->hideInGradebook,
+            'grader_count' => $this->graderCount,
+            'final_grader_id' => $this->finalGraderId,
+            'grader_comments_visible_to_graders' => $this->graderCommentsVisibleToGraders,
+            'graders_anonymous_to_graders' => $this->gradersAnonymousToGraders,
+            'graders_names_visible_to_final_grader' => $this->gradersNamesVisibleToFinalGrader,
+            'post_manually' => $this->postManually,
+            'score_statistics' => $this->scoreStatistics,
+            'can_submit' => $this->canSubmit,
+            'ab_guid' => $this->abGuid,
+            'annotatable_attachment_id' => $this->annotatableAttachmentId,
+            'anonymize_students' => $this->anonymizeStudents,
+            'require_lockdown_browser' => $this->requireLockdownBrowser,
+            'important_dates' => $this->importantDates,
+            'muted' => $this->muted,
+            'anonymous_peer_reviews' => $this->anonymousPeerReviews,
+            'anonymous_instructor_annotations' => $this->anonymousInstructorAnnotations,
+            'graded_submissions_exist' => $this->gradedSubmissionsExist,
+            'is_quiz_assignment' => $this->isQuizAssignment,
+            'in_closed_grading_period' => $this->inClosedGradingPeriod,
+            'can_duplicate' => $this->canDuplicate,
+            'original_course_id' => $this->originalCourseId,
+            'original_assignment_id' => $this->originalAssignmentId,
+            'original_lti_resource_link_id' => $this->originalLtiResourceLinkId,
+            'original_assignment_name' => $this->originalAssignmentName,
+            'original_quiz_id' => $this->originalQuizId,
         ];
     }
 
@@ -1049,7 +1429,8 @@ class Assignment extends AbstractBaseApi
         if ($this->submissionTypes !== null && !empty($this->submissionTypes)) {
             $validSubmissionTypes = [
                 'discussion_topic', 'online_quiz', 'on_paper', 'none', 'external_tool',
-                'online_text_entry', 'online_url', 'online_upload', 'media_recording'
+                'online_text_entry', 'online_url', 'online_upload', 'media_recording',
+                'student_annotation'
             ];
             foreach ($this->submissionTypes as $type) {
                 if (!in_array($type, $validSubmissionTypes, true)) {
