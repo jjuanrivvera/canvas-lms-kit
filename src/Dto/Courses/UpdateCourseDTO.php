@@ -291,6 +291,13 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
     public ?bool $overrideSisStickiness = null;
 
     /**
+     * @var bool|null When true, all grades in the course will be posted manually.
+     * When false, all grades in the course will be automatically posted.
+     * Use with caution as this setting will override any assignment level post policy.
+     */
+    public ?bool $postManually = null;
+
+    /**
      * Convert the DTO to an array for API requests
      * @return mixed[]
      */
@@ -1086,5 +1093,21 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
     public function setOverrideSisStickiness(?bool $overrideSisStickiness): void
     {
         $this->overrideSisStickiness = $overrideSisStickiness;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getPostManually(): ?bool
+    {
+        return $this->postManually;
+    }
+
+    /**
+     * @param bool|null $postManually
+     */
+    public function setPostManually(?bool $postManually): void
+    {
+        $this->postManually = $postManually;
     }
 }

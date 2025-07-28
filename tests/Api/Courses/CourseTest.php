@@ -847,6 +847,212 @@ class CourseTest extends TestCase
         $this->assertInstanceOf(Enrollment::class, $enrollments[0]);
     }
 
+    // New API Methods Tests
+
+    /**
+     * Test create file upload
+     */
+    public function testCreateFile(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $fileParams = [
+            'name' => 'test.pdf',
+            'size' => 1024,
+            'content_type' => 'application/pdf'
+        ];
+
+        $responseData = [
+            'upload_url' => 'https://canvas.example.com/upload',
+            'upload_params' => [
+                'key' => 'test-key',
+                'policy' => 'test-policy'
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($responseData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with('/courses/123/files', ['form_params' => $fileParams])
+            ->willReturn($response);
+
+        $result = $course->createFile($fileParams);
+
+        $this->assertEquals($responseData, $result);
+    }
+
+    /**
+     * Test create file throws exception when course ID not set
+     */
+    public function testCreateFileThrowsExceptionWhenCourseIdNotSet(): void
+    {
+        $course = new Course([]);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Course ID is required to create file');
+
+        $course->createFile(['name' => 'test.pdf']);
+    }
+
+    /**
+     * Test dismiss quiz migration alert
+     */
+    public function testDismissQuizMigrationAlert(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $responseData = ['success' => 'true'];
+        $response = new Response(200, [], json_encode($responseData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with('/courses/123/dismiss_migration_limitation_message')
+            ->willReturn($response);
+
+        $result = $course->dismissQuizMigrationAlert();
+
+        $this->assertEquals($responseData, $result);
+    }
+
+    /**
+     * Test dismiss quiz migration alert throws exception when course ID not set
+     */
+    public function testDismissQuizMigrationAlertThrowsExceptionWhenCourseIdNotSet(): void
+    {
+        $course = new Course([]);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Course ID is required to dismiss quiz migration alert');
+
+        $course->dismissQuizMigrationAlert();
+    }
+
+    /**
+     * Test get course copy status
+     */
+    public function testGetCourseCopyStatus(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $copyId = 456;
+        $responseData = [
+            'id' => 456,
+            'progress' => 100,
+            'workflow_state' => 'completed',
+            'created_at' => '2023-01-01T00:00:00Z',
+            'status_url' => '/api/v1/courses/123/course_copy/456'
+        ];
+
+        $response = new Response(200, [], json_encode($responseData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('/courses/123/course_copy/456')
+            ->willReturn($response);
+
+        $result = $course->getCourseCopyStatus($copyId);
+
+        $this->assertEquals($responseData, $result);
+    }
+
+    /**
+     * Test get course copy status throws exception when course ID not set
+     */
+    public function testGetCourseCopyStatusThrowsExceptionWhenCourseIdNotSet(): void
+    {
+        $course = new Course([]);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Course ID is required to get course copy status');
+
+        $course->getCourseCopyStatus(456);
+    }
+
+    /**
+     * Test copy course content
+     */
+    public function testCopyCourseContent(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $sourceCourse = '789';
+        $options = ['except' => ['assignments', 'quizzes']];
+        $expectedParams = [
+            'source_course' => '789',
+            'except' => ['assignments', 'quizzes']
+        ];
+
+        $responseData = [
+            'id' => 101,
+            'progress' => null,
+            'workflow_state' => 'created',
+            'created_at' => '2023-01-01T00:00:00Z'
+        ];
+
+        $response = new Response(200, [], json_encode($responseData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with('/courses/123/course_copy', ['form_params' => $expectedParams])
+            ->willReturn($response);
+
+        $result = $course->copyCourseContent($sourceCourse, $options);
+
+        $this->assertEquals($responseData, $result);
+    }
+
+    /**
+     * Test copy course content without options
+     */
+    public function testCopyCourseContentWithoutOptions(): void
+    {
+        $courseData = ['id' => 123, 'name' => 'Test Course'];
+        $course = new Course($courseData);
+
+        $sourceCourse = '789';
+        $expectedParams = ['source_course' => '789'];
+
+        $responseData = [
+            'id' => 102,
+            'progress' => null,
+            'workflow_state' => 'created'
+        ];
+
+        $response = new Response(200, [], json_encode($responseData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with('/courses/123/course_copy', ['form_params' => $expectedParams])
+            ->willReturn($response);
+
+        $result = $course->copyCourseContent($sourceCourse);
+
+        $this->assertEquals($responseData, $result);
+    }
+
+    /**
+     * Test copy course content throws exception when course ID not set
+     */
+    public function testCopyCourseContentThrowsExceptionWhenCourseIdNotSet(): void
+    {
+        $course = new Course([]);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Course ID is required to copy course content');
+
+        $course->copyCourseContent('789');
+    }
+
     protected function tearDown(): void
     {
         $this->course = null;

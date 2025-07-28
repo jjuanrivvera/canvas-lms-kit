@@ -209,6 +209,13 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
     public bool $enableSisReactivation = false;
 
     /**
+     * Default is false. When true, all grades in the course must be posted manually,
+     * and will not be automatically posted. When false, all grades in the course will be automatically posted.
+     * @var bool $postManually
+     */
+    public bool $postManually = false;
+
+    /**
      * Convert the DTO to an array for API requests
      * @return mixed[]
      */
@@ -716,5 +723,21 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
     public function setEnableSisReactivation(bool $enableSisReactivation): void
     {
         $this->enableSisReactivation = $enableSisReactivation;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPostManually(): bool
+    {
+        return $this->postManually;
+    }
+
+    /**
+     * @param bool $postManually
+     */
+    public function setPostManually(bool $postManually): void
+    {
+        $this->postManually = $postManually;
     }
 }
