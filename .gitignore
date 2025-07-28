@@ -32,3 +32,5 @@ tmp/
 .phpunit.cache
 
 wiki/
+
+canvas-lms-docs/
