@@ -30,3 +30,5 @@ tmp/
 # PHPUnit
 .phpunit.result.cache
 .phpunit.cache
+
+wiki/

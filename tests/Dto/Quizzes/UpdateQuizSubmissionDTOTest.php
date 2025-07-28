@@ -203,7 +203,7 @@ class UpdateQuizSubmissionDTOTest extends TestCase
 
         $apiArray = $dto->toApiArray();
 
-        $this->assertCount(2, $apiArray); // Includes apiPropertyName + 1 actual property
+        $this->assertCount(1, $apiArray); // 1 actual property (apiPropertyName excluded)
 
         $names = array_column($apiArray, 'name');
         $this->assertContains('quiz_submission[fudge_points]', $names);
