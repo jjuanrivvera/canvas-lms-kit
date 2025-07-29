@@ -1,0 +1,741 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Api\ExternalTools;
+
+use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\ExternalTools\ExternalTool;
+use CanvasLMS\Dto\ExternalTools\CreateExternalToolDTO;
+use CanvasLMS\Dto\ExternalTools\UpdateExternalToolDTO;
+use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Interfaces\HttpClientInterface;
+use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Pagination\PaginationResult;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
+
+/**
+ * Test class for External Tools API
+ *
+ * @covers \CanvasLMS\Api\ExternalTools\ExternalTool
+ */
+class ExternalToolTest extends TestCase
+{
+    private HttpClientInterface&MockObject $httpClientMock;
+    private Course $course;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        $this->httpClientMock = $this->createMock(HttpClientInterface::class);
+        ExternalTool::setApiClient($this->httpClientMock);
+        
+        $this->course = new Course(['id' => 123, 'name' => 'Test Course']);
+        ExternalTool::setCourse($this->course);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        
+        $reflectionClass = new \ReflectionClass(ExternalTool::class);
+        $courseProperty = $reflectionClass->getProperty('course');
+        $courseProperty->setAccessible(true);
+        unset($courseProperty);
+    }
+
+    public function testSetCourse(): void
+    {
+        $course = new Course(['id' => 456, 'name' => 'Another Course']);
+        ExternalTool::setCourse($course);
+        
+        $this->assertTrue(ExternalTool::checkCourse());
+    }
+
+    public function testCheckCourseThrowsExceptionWhenNotSet(): void
+    {
+        // Save current course state
+        $reflectionClass = new \ReflectionClass(ExternalTool::class);
+        $courseProperty = $reflectionClass->getProperty('course');
+        $courseProperty->setAccessible(true);
+        $originalCourse = $courseProperty->getValue();
+        
+        // Create a mock course with no id to trigger the exception
+        $mockCourseWithoutId = new Course([]);
+        $courseProperty->setValue($mockCourseWithoutId);
+        
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Course is required');
+        
+        // This should throw an exception since course->id is not set
+        ExternalTool::checkCourse();
+        
+        // Restore original course state
+        $courseProperty->setValue($originalCourse);
+    }
+
+    public function externalToolDataProvider(): array
+    {
+        return [
+            'basic external tool' => [
+                [
+                    'id' => 1,
+                    'name' => 'Test Tool',
+                    'description' => 'A test external tool',
+                    'url' => 'https://example.com/lti/launch',
+                    'consumer_key' => 'test_key',
+                    'privacy_level' => 'public',
+                    'custom_fields' => ['key1' => 'value1'],
+                    'is_rce_favorite' => false,
+                    'is_top_nav_favorite' => false,
+                    'course_navigation' => [
+                        'enabled' => true,
+                        'text' => 'Test Tool',
+                        'visibility' => 'public'
+                    ],
+                    'editor_button' => [
+                        'enabled' => true,
+                        'icon_url' => 'https://example.com/icon.png',
+                        'selection_width' => 500,
+                        'selection_height' => 400
+                    ],
+                    'selection_width' => 800,
+                    'selection_height' => 600,
+                    'icon_url' => 'https://example.com/icon.png',
+                    'not_selectable' => false,
+                    'workflow_state' => 'active',
+                    'created_at' => '2024-01-01T12:00:00Z',
+                    'updated_at' => '2024-01-02T12:00:00Z',
+                    'deployment_id' => 'deployment123',
+                    'unified_tool_id' => 'unified123'
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * @dataProvider externalToolDataProvider
+     */
+    public function testConstructor(array $data): void
+    {
+        $tool = new ExternalTool($data);
+        
+        $this->assertEquals($data['id'], $tool->getId());
+        $this->assertEquals($data['name'], $tool->getName());
+        $this->assertEquals($data['description'], $tool->getDescription());
+        $this->assertEquals($data['url'], $tool->getUrl());
+        $this->assertEquals($data['consumer_key'], $tool->getConsumerKey());
+        $this->assertEquals($data['privacy_level'], $tool->getPrivacyLevel());
+        $this->assertEquals($data['custom_fields'], $tool->getCustomFields());
+        $this->assertEquals($data['course_navigation'], $tool->getCourseNavigation());
+        $this->assertEquals($data['editor_button'], $tool->getEditorButton());
+    }
+
+    public function testFind(): void
+    {
+        $toolData = [
+            'id' => 1,
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public'
+        ];
+        
+        $response = new Response(200, [], json_encode($toolData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/external_tools/1')
+            ->willReturn($response);
+        
+        $tool = ExternalTool::find(1);
+        
+        $this->assertInstanceOf(ExternalTool::class, $tool);
+        $this->assertEquals(1, $tool->getId());
+        $this->assertEquals('Test Tool', $tool->getName());
+    }
+
+    public function testFetchAll(): void
+    {
+        $toolsData = [
+            ['id' => 1, 'name' => 'Tool 1', 'privacy_level' => 'public'],
+            ['id' => 2, 'name' => 'Tool 2', 'privacy_level' => 'anonymous']
+        ];
+        
+        $response = new Response(200, [], json_encode($toolsData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/external_tools', ['query' => []])
+            ->willReturn($response);
+        
+        $tools = ExternalTool::fetchAll();
+        
+        $this->assertIsArray($tools);
+        $this->assertCount(2, $tools);
+        $this->assertInstanceOf(ExternalTool::class, $tools[0]);
+        $this->assertEquals('Tool 1', $tools[0]->getName());
+    }
+
+    public function testFetchAllWithParams(): void
+    {
+        $params = ['include_parents' => true, 'placement' => 'editor_button'];
+        $toolsData = [['id' => 1, 'name' => 'Tool 1', 'privacy_level' => 'public']];
+        
+        $response = new Response(200, [], json_encode($toolsData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/external_tools', ['query' => $params])
+            ->willReturn($response);
+        
+        $tools = ExternalTool::fetchAll($params);
+        
+        $this->assertIsArray($tools);
+        $this->assertCount(1, $tools);
+    }
+
+    public function testFetchAllPaginated(): void
+    {
+        $paginatedResponse = $this->createMock(PaginatedResponse::class);
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('getPaginated')
+            ->with('courses/123/external_tools', ['query' => []])
+            ->willReturn($paginatedResponse);
+        
+        $result = ExternalTool::fetchAllPaginated();
+        
+        $this->assertInstanceOf(PaginatedResponse::class, $result);
+    }
+
+    public function testCreateWithArray(): void
+    {
+        $toolData = [
+            'name' => 'New Tool',
+            'consumer_key' => 'new_key',
+            'shared_secret' => 'new_secret',
+            'url' => 'https://example.com/lti/launch',
+            'privacy_level' => 'public'
+        ];
+        
+        $responseData = array_merge($toolData, ['id' => 1]);
+        $response = new Response(200, [], json_encode($responseData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                'courses/123/external_tools',
+                $this->callback(function ($options) {
+                    return isset($options['multipart']) && is_array($options['multipart']);
+                })
+            )
+            ->willReturn($response);
+        
+        $tool = ExternalTool::create($toolData);
+        
+        $this->assertInstanceOf(ExternalTool::class, $tool);
+        $this->assertEquals(1, $tool->getId());
+        $this->assertEquals('New Tool', $tool->getName());
+    }
+
+    public function testCreateWithDTO(): void
+    {
+        $dto = new CreateExternalToolDTO([
+            'name' => 'New Tool',
+            'consumer_key' => 'new_key',
+            'shared_secret' => 'new_secret',
+            'url' => 'https://example.com/lti/launch',
+            'privacy_level' => 'public'
+        ]);
+        
+        $responseData = [
+            'id' => 1,
+            'name' => 'New Tool',
+            'consumer_key' => 'new_key',
+            'privacy_level' => 'public'
+        ];
+        $response = new Response(200, [], json_encode($responseData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->willReturn($response);
+        
+        $tool = ExternalTool::create($dto);
+        
+        $this->assertInstanceOf(ExternalTool::class, $tool);
+        $this->assertEquals(1, $tool->getId());
+    }
+
+    public function testUpdateWithArray(): void
+    {
+        $updateData = ['name' => 'Updated Tool'];
+        $responseData = [
+            'id' => 1,
+            'name' => 'Updated Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public'
+        ];
+        
+        $response = new Response(200, [], json_encode($responseData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('put')
+            ->with(
+                'courses/123/external_tools/1',
+                $this->callback(function ($options) {
+                    return isset($options['multipart']) && is_array($options['multipart']);
+                })
+            )
+            ->willReturn($response);
+        
+        $tool = ExternalTool::update(1, $updateData);
+        
+        $this->assertInstanceOf(ExternalTool::class, $tool);
+        $this->assertEquals('Updated Tool', $tool->getName());
+    }
+
+    public function testUpdateWithDTO(): void
+    {
+        $dto = new UpdateExternalToolDTO(['name' => 'Updated Tool']);
+        $responseData = [
+            'id' => 1,
+            'name' => 'Updated Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public'
+        ];
+        
+        $response = new Response(200, [], json_encode($responseData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('put')
+            ->willReturn($response);
+        
+        $tool = ExternalTool::update(1, $dto);
+        
+        $this->assertInstanceOf(ExternalTool::class, $tool);
+    }
+
+    public function testGenerateSessionlessLaunch(): void
+    {
+        $params = ['id' => 1];
+        $launchData = [
+            'id' => 1,
+            'name' => 'Test Tool',
+            'url' => 'https://canvas.example.com/api/v1/external_tools/sessionless_launch?token=abc123'
+        ];
+        
+        $response = new Response(200, [], json_encode($launchData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/external_tools/sessionless_launch', ['query' => $params])
+            ->willReturn($response);
+        
+        $result = ExternalTool::generateSessionlessLaunch($params);
+        
+        $this->assertIsArray($result);
+        $this->assertEquals($launchData, $result);
+    }
+
+    public function testSaveNewTool(): void
+    {
+        $tool = new ExternalTool([
+            'name' => 'New Tool',
+            'consumer_key' => 'new_key',
+            'shared_secret' => 'new_secret',
+            'url' => 'https://example.com/lti/launch',
+            'privacy_level' => 'public'
+        ]);
+        
+        $responseData = [
+            'id' => 1,
+            'name' => 'New Tool',
+            'consumer_key' => 'new_key',
+            'privacy_level' => 'public'
+        ];
+        $response = new Response(200, [], json_encode($responseData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->willReturn($response);
+        
+        $result = $tool->save();
+        
+        $this->assertTrue($result);
+        $this->assertEquals(1, $tool->getId());
+    }
+
+    public function testSaveExistingTool(): void
+    {
+        $tool = new ExternalTool([
+            'id' => 1,
+            'name' => 'Updated Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public'
+        ]);
+        
+        $responseData = [
+            'id' => 1,
+            'name' => 'Updated Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public'
+        ];
+        $response = new Response(200, [], json_encode($responseData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('put')
+            ->willReturn($response);
+        
+        $result = $tool->save();
+        
+        $this->assertTrue($result);
+    }
+
+    public function testSaveThrowsExceptionForMissingName(): void
+    {
+        $tool = new ExternalTool();
+        
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('External tool name is required');
+        
+        $tool->save();
+    }
+
+    public function testSaveThrowsExceptionForMissingConsumerKey(): void
+    {
+        $tool = new ExternalTool(['name' => 'Test Tool']);
+        
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Consumer key is required');
+        
+        $tool->save();
+    }
+
+    public function testSaveThrowsExceptionForInvalidPrivacyLevel(): void
+    {
+        $tool = new ExternalTool([
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'shared_secret' => 'test_secret',
+            'privacy_level' => 'invalid',
+            'url' => 'https://example.com'
+        ]);
+        
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Invalid privacy level');
+        
+        $tool->save();
+    }
+
+    public function testDelete(): void
+    {
+        $tool = new ExternalTool(['id' => 1]);
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('delete')
+            ->with('courses/123/external_tools/1');
+        
+        $result = $tool->delete();
+        
+        $this->assertTrue($result);
+    }
+
+    public function testDeleteThrowsExceptionWithoutId(): void
+    {
+        $tool = new ExternalTool();
+        
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('External tool ID is required for deletion');
+        
+        $tool->delete();
+    }
+
+    public function testGetLaunchUrl(): void
+    {
+        $tool = new ExternalTool(['id' => 1]);
+        
+        $launchData = [
+            'id' => 1,
+            'name' => 'Test Tool',
+            'url' => 'https://canvas.example.com/api/v1/external_tools/sessionless_launch?token=abc123'
+        ];
+        
+        $response = new Response(200, [], json_encode($launchData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('courses/123/external_tools/sessionless_launch', ['query' => ['id' => 1]])
+            ->willReturn($response);
+        
+        $url = $tool->getLaunchUrl();
+        
+        $this->assertEquals($launchData['url'], $url);
+    }
+
+    public function testGetLaunchUrlThrowsExceptionWithoutId(): void
+    {
+        $tool = new ExternalTool();
+        
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('External tool ID is required to generate launch URL');
+        
+        $tool->getLaunchUrl();
+    }
+
+    public function testValidateConfiguration(): void
+    {
+        $validTool = new ExternalTool([
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public',
+            'url' => 'https://example.com'
+        ]);
+        
+        $this->assertTrue($validTool->validateConfiguration());
+        
+        $invalidTool = new ExternalTool([
+            'name' => 'Test Tool',
+            'privacy_level' => 'invalid'
+        ]);
+        
+        $this->assertFalse($invalidTool->validateConfiguration());
+    }
+
+    public function testToArray(): void
+    {
+        $data = [
+            'id' => 1,
+            'name' => 'Test Tool',
+            'description' => 'A test tool',
+            'url' => 'https://example.com',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public'
+        ];
+        
+        $tool = new ExternalTool($data);
+        $array = $tool->toArray();
+        
+        $this->assertIsArray($array);
+        $this->assertEquals($data['id'], $array['id']);
+        $this->assertEquals($data['name'], $array['name']);
+        $this->assertEquals($data['description'], $array['description']);
+    }
+    
+    public function testToArrayExcludesSharedSecret(): void
+    {
+        $tool = new ExternalTool([
+            'id' => 1,
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public'
+        ]);
+        
+        // Set shared secret to verify it's not included in array output
+        $tool->setSharedSecret('secret123');
+        
+        $array = $tool->toArray();
+        
+        $this->assertIsArray($array);
+        $this->assertArrayNotHasKey('shared_secret', $array);
+        $this->assertEquals('secret123', $tool->getSharedSecret()); // Verify it's still accessible via getter
+    }
+
+    public function testToDtoArray(): void
+    {
+        $tool = new ExternalTool([
+            'id' => 1,
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public',
+            'url' => 'https://example.com'
+        ]);
+        
+        $dtoArray = $tool->toDtoArray();
+        
+        $this->assertIsArray($dtoArray);
+        $this->assertArrayNotHasKey('id', $dtoArray);
+        $this->assertEquals('Test Tool', $dtoArray['name']);
+        $this->assertEquals('test_key', $dtoArray['consumer_key']);
+    }
+
+    public function testGettersAndSetters(): void
+    {
+        $tool = new ExternalTool();
+        
+        $tool->setName('Test Tool');
+        $this->assertEquals('Test Tool', $tool->getName());
+        
+        $tool->setDescription('Test Description');
+        $this->assertEquals('Test Description', $tool->getDescription());
+        
+        $tool->setUrl('https://example.com');
+        $this->assertEquals('https://example.com', $tool->getUrl());
+        
+        $tool->setDomain('example.com');
+        $this->assertEquals('example.com', $tool->getDomain());
+        
+        $tool->setConsumerKey('test_key');
+        $this->assertEquals('test_key', $tool->getConsumerKey());
+        
+        $tool->setPrivacyLevel('public');
+        $this->assertEquals('public', $tool->getPrivacyLevel());
+        
+        $customFields = ['key1' => 'value1'];
+        $tool->setCustomFields($customFields);
+        $this->assertEquals($customFields, $tool->getCustomFields());
+        
+        $tool->setIsRceFavorite(true);
+        $this->assertTrue($tool->getIsRceFavorite());
+        
+        $courseNavigation = ['enabled' => true, 'text' => 'Test'];
+        $tool->setCourseNavigation($courseNavigation);
+        $this->assertEquals($courseNavigation, $tool->getCourseNavigation());
+        
+        $tool->setSelectionWidth(800);
+        $this->assertEquals(800, $tool->getSelectionWidth());
+        
+        $tool->setSelectionHeight(600);
+        $this->assertEquals(600, $tool->getSelectionHeight());
+        
+        $tool->setIconUrl('https://example.com/icon.png');
+        $this->assertEquals('https://example.com/icon.png', $tool->getIconUrl());
+        
+        $tool->setNotSelectable(true);
+        $this->assertTrue($tool->getNotSelectable());
+        
+        $tool->setWorkflowState('active');
+        $this->assertEquals('active', $tool->getWorkflowState());
+        
+        $tool->setDeploymentId('deploy123');
+        $this->assertEquals('deploy123', $tool->getDeploymentId());
+        
+        $tool->setUnifiedToolId('unified123');
+        $this->assertEquals('unified123', $tool->getUnifiedToolId());
+    }
+
+    public function validPrivacyLevelsProvider(): array
+    {
+        return [
+            ['anonymous'],
+            ['name_only'],
+            ['email_only'],
+            ['public']
+        ];
+    }
+
+    /**
+     * @dataProvider validPrivacyLevelsProvider
+     */
+    public function testValidPrivacyLevels(string $privacyLevel): void
+    {
+        $tool = new ExternalTool([
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => $privacyLevel,
+            'url' => 'https://example.com'
+        ]);
+        
+        $this->assertTrue($tool->validateConfiguration());
+    }
+
+    public function invalidUrlProvider(): array
+    {
+        return [
+            'javascript scheme' => ['javascript:alert("xss")'],
+            'data scheme' => ['data:text/html,<script>alert("xss")</script>'],
+            'file scheme' => ['file:///etc/passwd'],
+            'ftp scheme' => ['ftp://example.com/file'],
+            'no scheme' => ['example.com/path'],
+            'invalid url' => ['not-a-url'],
+            'http in production' => ['http://example.com'],
+        ];
+    }
+
+    /**
+     * @dataProvider invalidUrlProvider
+     */
+    public function testInvalidUrlValidation(string $invalidUrl): void
+    {
+        $tool = new ExternalTool([
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public',
+            'url' => $invalidUrl
+        ]);
+
+        $this->assertFalse($tool->validateConfiguration());
+    }
+
+    public function testSaveThrowsExceptionForInvalidUrl(): void
+    {
+        $tool = new ExternalTool([
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'shared_secret' => 'test_secret',
+            'privacy_level' => 'public',
+            'url' => 'javascript:alert("xss")'
+        ]);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Invalid or insecure URL');
+
+        $tool->save();
+    }
+
+    public function testSaveThrowsExceptionForInvalidIconUrl(): void
+    {
+        $tool = new ExternalTool([
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'shared_secret' => 'test_secret',
+            'privacy_level' => 'public',
+            'url' => 'https://example.com',
+            'icon_url' => 'data:image/png;base64,malicious'
+        ]);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Invalid or insecure icon URL');
+
+        $tool->save();
+    }
+
+    public function validUrlProvider(): array
+    {
+        return [
+            'https url' => ['https://example.com/lti/launch'],
+            'https with port' => ['https://example.com:8080/lti'],
+            'https with path and query' => ['https://tool.example.com/lti/launch?param=value'],
+        ];
+    }
+
+    /**
+     * @dataProvider validUrlProvider
+     */
+    public function testValidUrlValidation(string $validUrl): void
+    {
+        $tool = new ExternalTool([
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public',
+            'url' => $validUrl
+        ]);
+
+        $this->assertTrue($tool->validateConfiguration());
+    }
+}
