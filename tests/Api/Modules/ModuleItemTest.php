@@ -15,6 +15,7 @@ use CanvasLMS\Dto\Modules\UpdateModuleItemDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
+use CanvasLMS\Objects\CompletionRequirement;
 
 /**
  * @covers \CanvasLMS\Api\Modules\ModuleItem
@@ -470,10 +471,13 @@ class ModuleItemTest extends TestCase
             'completion_requirement' => $completionRequirement
         ]);
         
-        $this->assertEquals($completionRequirement, $moduleItem->getCompletionRequirement());
+        $this->assertInstanceOf(CompletionRequirement::class, $moduleItem->getCompletionRequirement());
+        $this->assertEquals($completionRequirement['type'], $moduleItem->getCompletionRequirement()->getType());
+        $this->assertEquals($completionRequirement['min_score'], $moduleItem->getCompletionRequirement()->getMinScore());
         
-        $moduleItem->setCompletionRequirement(['type' => 'must_view']);
-        $this->assertEquals(['type' => 'must_view'], $moduleItem->getCompletionRequirement());
+        $newRequirement = new CompletionRequirement(['type' => 'must_view']);
+        $moduleItem->setCompletionRequirement($newRequirement);
+        $this->assertEquals('must_view', $moduleItem->getCompletionRequirement()->getType());
     }
 
     public function testPageUrlProperty(): void

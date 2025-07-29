@@ -12,6 +12,8 @@ use CanvasLMS\Dto\Modules\UpdateModuleItemDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Objects\CompletionRequirement;
+use CanvasLMS\Objects\ContentDetails;
 
 /**
  * Module Item Class
@@ -202,17 +204,17 @@ class ModuleItem extends AbstractBaseApi
      * Completion requirement structure.
      * Format: ['type' => 'completion_type', 'min_score' => int]
      *
-     * @var array<string, mixed>|null
+     * @var CompletionRequirement|null
      */
-    public ?array $completionRequirement;
+    public ?CompletionRequirement $completionRequirement = null;
 
     /**
      * Type-specific details.
      * Format: ['points_possible' => int, 'due_at' => string]
      *
-     * @var array<string, mixed>|null
+     * @var ContentDetails|null
      */
-    public ?array $contentDetails;
+    public ?ContentDetails $contentDetails = null;
 
     /**
      * External tool iframe configuration (when type = ExternalTool).
@@ -268,6 +270,47 @@ class ModuleItem extends AbstractBaseApi
         }
 
         return true;
+    }
+
+    /**
+     * Constructor
+     * @param mixed[] $data
+     */
+    public function __construct(array $data)
+    {
+        // Handle object instantiation for specific properties
+        if (isset($data['completion_requirement']) && is_array($data['completion_requirement'])) {
+            $this->completionRequirement = new CompletionRequirement($data['completion_requirement']);
+            unset($data['completion_requirement']);
+        }
+
+        if (isset($data['content_details']) && is_array($data['content_details'])) {
+            $this->contentDetails = new ContentDetails($data['content_details']);
+            unset($data['content_details']);
+        }
+
+        // Call parent constructor for remaining properties
+        parent::__construct($data);
+    }
+
+    /**
+     * Convert the object to an array for DTO operations
+     * @return mixed[]
+     */
+    protected function toDtoArray(): array
+    {
+        $data = parent::toDtoArray();
+
+        // Convert objects back to arrays
+        if ($this->completionRequirement !== null) {
+            $data['completionRequirement'] = $this->completionRequirement->toArray();
+        }
+
+        if ($this->contentDetails !== null) {
+            $data['contentDetails'] = $this->contentDetails->toArray();
+        }
+
+        return $data;
     }
 
     /**
@@ -755,33 +798,33 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return CompletionRequirement|null
      */
-    public function getCompletionRequirement(): ?array
+    public function getCompletionRequirement(): ?CompletionRequirement
     {
         return $this->completionRequirement;
     }
 
     /**
-     * @param array<string, mixed>|null $completionRequirement
+     * @param CompletionRequirement|null $completionRequirement
      */
-    public function setCompletionRequirement(?array $completionRequirement): void
+    public function setCompletionRequirement(?CompletionRequirement $completionRequirement): void
     {
         $this->completionRequirement = $completionRequirement;
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return ContentDetails|null
      */
-    public function getContentDetails(): ?array
+    public function getContentDetails(): ?ContentDetails
     {
         return $this->contentDetails;
     }
 
     /**
-     * @param array<string, mixed>|null $contentDetails
+     * @param ContentDetails|null $contentDetails
      */
-    public function setContentDetails(?array $contentDetails): void
+    public function setContentDetails(?ContentDetails $contentDetails): void
     {
         $this->contentDetails = $contentDetails;
     }
