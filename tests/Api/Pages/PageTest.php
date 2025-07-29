@@ -9,6 +9,7 @@ use CanvasLMS\Dto\Pages\CreatePageDTO;
 use CanvasLMS\Dto\Pages\UpdatePageDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use CanvasLMS\Objects\PageRevision;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
 use Psr\Http\Message\ResponseInterface;
@@ -168,12 +169,98 @@ class PageTest extends TestCase
         $this->assertEquals(100, $page->getPageViewsCount());
     }
 
-    public function testFindThrowsException(): void
+    public function testFindSuccess(): void
     {
-        $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage('Pages must be found by URL slug, not ID. Use findByUrl() instead.');
+        $pagesListResponse = [
+            ['page_id' => 100, 'url' => 'other-page', 'title' => 'Other Page'],
+            ['page_id' => 123, 'url' => 'test-page', 'title' => 'Test Page'],
+            ['page_id' => 200, 'url' => 'another-page', 'title' => 'Another Page']
+        ];
 
-        Page::find(123);
+        $pageDetailResponse = [
+            'page_id' => 123,
+            'url' => 'test-page',
+            'title' => 'Test Page',
+            'body' => '<p>Test content</p>',
+            'published' => true
+        ];
+
+        // Mock for list request - simplified for initial fetch
+        $listResponseMock = $this->createMock(ResponseInterface::class);
+        $listStreamMock = $this->createMock(StreamInterface::class);
+
+        $listStreamMock->expects($this->once())
+            ->method('getContents')
+            ->willReturn(json_encode($pagesListResponse));
+
+        $listResponseMock->expects($this->once())
+            ->method('getBody')
+            ->willReturn($listStreamMock);
+
+        // Mock for detail request
+        $detailResponseMock = $this->createMock(ResponseInterface::class);
+        $detailStreamMock = $this->createMock(StreamInterface::class);
+
+        $detailStreamMock->expects($this->once())
+            ->method('getContents')
+            ->willReturn(json_encode($pageDetailResponse));
+
+        $detailResponseMock->expects($this->once())
+            ->method('getBody')
+            ->willReturn($detailStreamMock);
+
+        $this->httpClientMock->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnCallback(function ($endpoint, $options = []) use ($listResponseMock, $detailResponseMock) {
+                if (str_contains($endpoint, 'pages/test-page')) {
+                    return $detailResponseMock;
+                }
+                return $listResponseMock;
+            });
+
+        Page::setApiClient($this->httpClientMock);
+        Page::setCourse($this->course);
+
+        $page = Page::find(123);
+
+        $this->assertInstanceOf(Page::class, $page);
+        $this->assertEquals(123, $page->getPageId());
+        $this->assertEquals('test-page', $page->getUrl());
+        $this->assertEquals('Test Page', $page->getTitle());
+    }
+
+    public function testFindNotFound(): void
+    {
+        $pagesListResponse = [
+            ['page_id' => 100, 'url' => 'other-page', 'title' => 'Other Page'],
+            ['page_id' => 200, 'url' => 'another-page', 'title' => 'Another Page']
+        ];
+
+        $responseMock = $this->createMock(ResponseInterface::class);
+        $streamMock = $this->createMock(StreamInterface::class);
+
+        $streamMock->expects($this->once())
+            ->method('getContents')
+            ->willReturn(json_encode($pagesListResponse));
+
+        $responseMock->expects($this->once())
+            ->method('getBody')
+            ->willReturn($streamMock);
+
+        // No need to check headers in simplified implementation
+
+        $this->httpClientMock->expects($this->once())
+            ->method('get')
+            ->with('courses/123/pages')
+            ->willReturn($responseMock);
+
+        Page::setApiClient($this->httpClientMock);
+        Page::setCourse($this->course);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Page with ID 999 not found in course 123');
+
+        Page::find(999);
     }
 
     public function testFindByUrl(): void
@@ -850,8 +937,10 @@ class PageTest extends TestCase
         $revisions = $page->getRevisions();
 
         $this->assertCount(2, $revisions);
-        $this->assertEquals(1, $revisions[0]['revision_id']);
-        $this->assertEquals(2, $revisions[1]['revision_id']);
+        $this->assertInstanceOf(PageRevision::class, $revisions[0]);
+        $this->assertInstanceOf(PageRevision::class, $revisions[1]);
+        $this->assertEquals(1, $revisions[0]->getRevisionId());
+        $this->assertEquals(2, $revisions[1]->getRevisionId());
     }
 
     public function testGetRevisionsThrowsExceptionForMissingUrl(): void
@@ -1015,9 +1104,9 @@ class PageTest extends TestCase
 
         $revision = $page->getRevision(3);
 
-        $this->assertIsArray($revision);
-        $this->assertEquals(3, $revision['revision_id']);
-        $this->assertEquals('Test Page - Old Version', $revision['title']);
+        $this->assertInstanceOf(PageRevision::class, $revision);
+        $this->assertEquals(3, $revision->getRevisionId());
+        $this->assertEquals('Test Page - Old Version', $revision->getTitle());
     }
 
     public function testGetRevisionLatest(): void
@@ -1047,7 +1136,8 @@ class PageTest extends TestCase
 
         $revision = $page->getRevision('latest');
 
-        $this->assertTrue($revision['latest']);
+        $this->assertInstanceOf(PageRevision::class, $revision);
+        $this->assertTrue($revision->getLatest());
     }
 
     public function testGetRevisionWithSummary(): void
@@ -1079,7 +1169,8 @@ class PageTest extends TestCase
 
         $revision = $page->getRevision(3, true);
 
-        $this->assertArrayNotHasKey('body', $revision);
+        $this->assertInstanceOf(PageRevision::class, $revision);
+        $this->assertNull($revision->getBody());
     }
 
     public function testRevertToRevision(): void
@@ -1111,9 +1202,9 @@ class PageTest extends TestCase
 
         $result = $page->revertToRevision(3);
 
-        $this->assertIsArray($result);
-        $this->assertEquals(6, $result['revision_id']);
-        $this->assertEquals('Reverted Page Title', $result['title']);
+        $this->assertInstanceOf(PageRevision::class, $result);
+        $this->assertEquals(6, $result->getRevisionId());
+        $this->assertEquals('Reverted Page Title', $result->getTitle());
     }
 
     public function testUpdateFrontPage(): void
@@ -1203,5 +1294,90 @@ class PageTest extends TestCase
         $this->assertCount(2, $pages);
         $this->assertEquals('Test Page 1', $pages[0]->getTitle());
         $this->assertEquals('<p>Content 1</p>', $pages[0]->getBody());
+    }
+
+    public function testGetSafeBody(): void
+    {
+        $page = new Page();
+
+        // Test null body
+        $this->assertNull($page->getSafeBody());
+
+        // Test safe content
+        $page->setBody('<p>This is <strong>safe</strong> content</p>');
+        $this->assertEquals('<p>This is <strong>safe</strong> content</p>', $page->getSafeBody());
+
+        // Test script removal
+        $page->setBody('<p>Text before<script>alert("XSS")</script>Text after</p>');
+        $this->assertEquals('<p>Text beforeText after</p>', $page->getSafeBody());
+
+        // Test event handler removal
+        $page->setBody('<p>Click me</p>');
+        $this->assertEquals('<p>Click me</p>', $page->getSafeBody());
+        
+        // Now test with event handlers - using double quotes
+        $htmlWithHandlers = '<p onclick="alert(123)">Click me</p>';
+        $page->setBody($htmlWithHandlers);
+        $safeResult = $page->getSafeBody();
+        // Should remove onclick but keep tags and content
+        $this->assertNotEmpty($safeResult, 'Safe body should not be empty. Got: ' . var_export($safeResult, true));
+        $this->assertStringNotContainsString('onclick', $safeResult);
+        $this->assertStringContainsString('<p', $safeResult);
+        $this->assertStringContainsString('Click me', $safeResult);
+
+        // Test javascript: protocol removal
+        $page->setBody('<a href="javascript:void(0)">Bad Link</a>');
+        $safeResult = $page->getSafeBody();
+        $this->assertStringNotContainsString('javascript:', $safeResult);
+        $this->assertStringContainsString('<a href="#">Bad Link</a>', $safeResult);
+
+        // Test data: protocol removal
+        $page->setBody('<img src="data:text/html,<script>alert(\'XSS\')</script>">');
+        $safeResult = $page->getSafeBody();
+        $this->assertStringNotContainsString('data:', $safeResult);
+        $this->assertStringContainsString('<img', $safeResult);
+
+        // Test iframe removal
+        $page->setBody('<p>Before</p><iframe src="evil.com"></iframe><p>After</p>');
+        $this->assertEquals('<p>Before</p><p>After</p>', $page->getSafeBody());
+
+        // Test complex malicious content
+        $maliciousContent = <<<HTML
+<div>
+    <h1>Title</h1>
+    <p>Safe paragraph</p>
+    <script type="text/javascript">
+        document.cookie = "stolen";
+    </script>
+    <a href="javascript:void(0)" onclick="stealData()">Click</a>
+    <iframe src="https://evil.com"></iframe>
+    <object data="malicious.swf"></object>
+    <embed src="bad.swf">
+    <p onmouseover="track()">Hover paragraph</p>
+    <img src="valid.jpg" onerror="alert('XSS')" />
+</div>
+HTML;
+
+        $page->setBody($maliciousContent);
+        $safeBody = $page->getSafeBody();
+
+        // Verify dangerous content is removed
+        $this->assertStringNotContainsString('<script', $safeBody);
+        $this->assertStringNotContainsString('onclick', $safeBody);
+        $this->assertStringNotContainsString('onmouseover', $safeBody);
+        $this->assertStringNotContainsString('onerror', $safeBody);
+        $this->assertStringNotContainsString('javascript:', $safeBody);
+        $this->assertStringNotContainsString('<iframe', $safeBody);
+        $this->assertStringNotContainsString('<object', $safeBody);
+        $this->assertStringNotContainsString('<embed', $safeBody);
+
+        // Verify safe content is preserved
+        $this->assertStringContainsString('<h1>Title</h1>', $safeBody);
+        $this->assertStringContainsString('<p>Safe paragraph</p>', $safeBody);
+        // img tag should be present with src but without onerror
+        if (strpos($safeBody, '<img') !== false) {
+            $this->assertStringContainsString('valid.jpg', $safeBody);
+            $this->assertStringNotContainsString('onerror', $safeBody);
+        }
     }
 }

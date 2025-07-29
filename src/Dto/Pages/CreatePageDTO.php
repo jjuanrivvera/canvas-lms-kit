@@ -58,6 +58,22 @@ class CreatePageDTO extends AbstractBaseDto implements DTOInterface
     public ?string $publishAt = null;
 
     /**
+     * Constructor with validation
+     *
+     * @param array<string, mixed> $data Initial data
+     * @throws \InvalidArgumentException If required fields are missing
+     */
+    public function __construct(array $data = [])
+    {
+        parent::__construct($data);
+
+        // Validate required fields
+        if (empty($this->title)) {
+            throw new \InvalidArgumentException('Page title is required');
+        }
+    }
+
+    /**
      * Get page title
      */
     public function getTitle(): string

@@ -10,17 +10,20 @@ use CanvasLMS\Dto\Pages\CreatePageDTO;
  */
 class CreatePageDTOTest extends TestCase
 {
-    public function testConstructorWithEmptyData(): void
+    public function testConstructorWithEmptyDataThrowsException(): void
     {
-        $dto = new CreatePageDTO([]);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Page title is required');
 
-        $this->assertEquals('', $dto->getTitle());
-        $this->assertEquals('', $dto->getBody());
-        $this->assertNull($dto->getPublished());
-        $this->assertNull($dto->getFrontPage());
-        $this->assertNull($dto->getEditingRoles());
-        $this->assertNull($dto->getNotifyOfUpdate());
-        $this->assertNull($dto->getPublishAt());
+        new CreatePageDTO([]);
+    }
+
+    public function testConstructorWithEmptyTitleThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Page title is required');
+
+        new CreatePageDTO(['title' => '']);
     }
 
     public function testConstructorWithData(): void
@@ -48,7 +51,7 @@ class CreatePageDTOTest extends TestCase
 
     public function testSettersAndGetters(): void
     {
-        $dto = new CreatePageDTO([]);
+        $dto = new CreatePageDTO(['title' => 'Initial Title']);
 
         $dto->setTitle('Test Page');
         $this->assertEquals('Test Page', $dto->getTitle());
@@ -164,7 +167,7 @@ class CreatePageDTOTest extends TestCase
 
     public function testApiPropertyName(): void
     {
-        $dto = new CreatePageDTO([]);
+        $dto = new CreatePageDTO(['title' => 'Test']);
         
         $reflection = new \ReflectionClass($dto);
         $property = $reflection->getProperty('apiPropertyName');
@@ -194,7 +197,7 @@ class CreatePageDTOTest extends TestCase
         $validRoles = ['teachers', 'students', 'members', 'public'];
         
         foreach ($validRoles as $role) {
-            $dto = new CreatePageDTO(['editing_roles' => $role]);
+            $dto = new CreatePageDTO(['title' => 'Test', 'editing_roles' => $role]);
             $this->assertEquals($role, $dto->getEditingRoles());
         }
     }
