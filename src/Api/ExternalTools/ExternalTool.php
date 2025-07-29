@@ -931,6 +931,7 @@ class ExternalTool extends AbstractBaseApi
 
     /**
      * Convert external tool to array
+     * Note: Shared secret is excluded for security reasons as it should never be exposed
      *
      * @return array<string, mixed>
      */
@@ -1199,6 +1200,15 @@ class ExternalTool extends AbstractBaseApi
             }
         }
 
+        // Validate URLs for security
+        if ($this->url && !$this->isValidUrl($this->url)) {
+            throw new CanvasApiException('Invalid or insecure URL. Only HTTPS URLs are allowed.');
+        }
+
+        if ($this->iconUrl && !$this->isValidUrl($this->iconUrl)) {
+            throw new CanvasApiException('Invalid or insecure icon URL. Only HTTPS URLs are allowed.');
+        }
+
         try {
             if ($this->id) {
                 $updateData = $this->toDtoArray();
@@ -1283,6 +1293,82 @@ class ExternalTool extends AbstractBaseApi
         $validPrivacyLevels = ['anonymous', 'name_only', 'email_only', 'public'];
         if (!in_array($this->privacyLevel, $validPrivacyLevels, true)) {
             return false;
+        }
+
+        // Validate URLs for security
+        if ($this->url && !$this->isValidUrl($this->url)) {
+            return false;
+        }
+
+        if ($this->iconUrl && !$this->isValidUrl($this->iconUrl)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate URL for security (HTTPS only, no malicious schemes)
+     *
+     * @param string $url URL to validate
+     * @return bool True if URL is valid and secure
+     */
+    private function isValidUrl(string $url): bool
+    {
+        // Parse URL
+        $parsed = parse_url($url);
+        if ($parsed === false) {
+            return false;
+        }
+
+        // Require scheme
+        if (!isset($parsed['scheme'])) {
+            return false;
+        }
+
+        // Only allow HTTPS (more secure) or HTTP for localhost/development
+        $allowedSchemes = ['https'];
+
+        // Allow HTTP only for localhost/development environments
+        if (
+            isset($parsed['host']) &&
+            (str_starts_with($parsed['host'], 'localhost') ||
+             str_starts_with($parsed['host'], '127.0.0.1') ||
+             str_ends_with($parsed['host'], '.local'))
+        ) {
+            $allowedSchemes[] = 'http';
+        }
+
+        if (!in_array(strtolower($parsed['scheme']), $allowedSchemes, true)) {
+            return false;
+        }
+
+        // Require host
+        if (!isset($parsed['host']) || empty($parsed['host'])) {
+            return false;
+        }
+
+        // Block malicious schemes and hosts
+        $maliciousPatterns = [
+            'javascript:', 'data:', 'vbscript:', 'file:', 'ftp:',
+            'localhost', '127.0.0.1', '0.0.0.0', '::1'
+        ];
+
+        foreach ($maliciousPatterns as $pattern) {
+            if (stripos($url, $pattern) === 0) {
+                // Allow localhost only for development (already handled above)
+                if (!str_starts_with($pattern, 'localhost') && !str_starts_with($pattern, '127.0.0.1')) {
+                    return false;
+                }
+            }
+        }
+
+        // Additional validation for production environments
+        if (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'production') {
+            // In production, only allow HTTPS
+            if (strtolower($parsed['scheme']) !== 'https') {
+                return false;
+            }
         }
 
         return true;

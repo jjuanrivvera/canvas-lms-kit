@@ -424,9 +424,34 @@ class CreateExternalToolDTOTest extends TestCase
             }
         }
         
-        // The current AbstractBaseDto implementation handles arrays as array[] format
-        // This might need custom handling for nested placement configurations
-        // For now, we'll adjust the test to match the current implementation
-        $this->markTestSkipped('Complex nested placement configurations need custom toApiArray handling');
+        // Test that nested placement configurations are properly formatted
+        $foundCourseNavEnabled = false;
+        $foundCourseNavText = false;
+        $foundEditorButtonEnabled = false;
+        $foundEditorButtonIcon = false;
+        
+        foreach ($apiArray as $item) {
+            if ($item['name'] === 'external_tool[course_navigation][enabled]') {
+                $foundCourseNavEnabled = true;
+                $this->assertTrue($item['contents']);
+            }
+            if ($item['name'] === 'external_tool[course_navigation][text]') {
+                $foundCourseNavText = true;
+                $this->assertEquals('My Tool', $item['contents']);
+            }
+            if ($item['name'] === 'external_tool[editor_button][enabled]') {
+                $foundEditorButtonEnabled = true;
+                $this->assertTrue($item['contents']);
+            }
+            if ($item['name'] === 'external_tool[editor_button][icon_url]') {
+                $foundEditorButtonIcon = true;
+                $this->assertEquals('https://example.com/icon.png', $item['contents']);
+            }
+        }
+        
+        $this->assertTrue($foundCourseNavEnabled, 'Course navigation enabled should be in API array');
+        $this->assertTrue($foundCourseNavText, 'Course navigation text should be in API array');
+        $this->assertTrue($foundEditorButtonEnabled, 'Editor button enabled should be in API array');
+        $this->assertTrue($foundEditorButtonIcon, 'Editor button icon URL should be in API array');
     }
 }

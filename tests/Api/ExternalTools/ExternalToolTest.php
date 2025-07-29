@@ -536,6 +536,25 @@ class ExternalToolTest extends TestCase
         $this->assertEquals($data['name'], $array['name']);
         $this->assertEquals($data['description'], $array['description']);
     }
+    
+    public function testToArrayExcludesSharedSecret(): void
+    {
+        $tool = new ExternalTool([
+            'id' => 1,
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public'
+        ]);
+        
+        // Set shared secret to verify it's not included in array output
+        $tool->setSharedSecret('secret123');
+        
+        $array = $tool->toArray();
+        
+        $this->assertIsArray($array);
+        $this->assertArrayNotHasKey('shared_secret', $array);
+        $this->assertEquals('secret123', $tool->getSharedSecret()); // Verify it's still accessible via getter
+    }
 
     public function testToDtoArray(): void
     {
@@ -632,6 +651,91 @@ class ExternalToolTest extends TestCase
             'url' => 'https://example.com'
         ]);
         
+        $this->assertTrue($tool->validateConfiguration());
+    }
+
+    public function invalidUrlProvider(): array
+    {
+        return [
+            'javascript scheme' => ['javascript:alert("xss")'],
+            'data scheme' => ['data:text/html,<script>alert("xss")</script>'],
+            'file scheme' => ['file:///etc/passwd'],
+            'ftp scheme' => ['ftp://example.com/file'],
+            'no scheme' => ['example.com/path'],
+            'invalid url' => ['not-a-url'],
+            'http in production' => ['http://example.com'],
+        ];
+    }
+
+    /**
+     * @dataProvider invalidUrlProvider
+     */
+    public function testInvalidUrlValidation(string $invalidUrl): void
+    {
+        $tool = new ExternalTool([
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public',
+            'url' => $invalidUrl
+        ]);
+
+        $this->assertFalse($tool->validateConfiguration());
+    }
+
+    public function testSaveThrowsExceptionForInvalidUrl(): void
+    {
+        $tool = new ExternalTool([
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'shared_secret' => 'test_secret',
+            'privacy_level' => 'public',
+            'url' => 'javascript:alert("xss")'
+        ]);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Invalid or insecure URL');
+
+        $tool->save();
+    }
+
+    public function testSaveThrowsExceptionForInvalidIconUrl(): void
+    {
+        $tool = new ExternalTool([
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'shared_secret' => 'test_secret',
+            'privacy_level' => 'public',
+            'url' => 'https://example.com',
+            'icon_url' => 'data:image/png;base64,malicious'
+        ]);
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Invalid or insecure icon URL');
+
+        $tool->save();
+    }
+
+    public function validUrlProvider(): array
+    {
+        return [
+            'https url' => ['https://example.com/lti/launch'],
+            'https with port' => ['https://example.com:8080/lti'],
+            'https with path and query' => ['https://tool.example.com/lti/launch?param=value'],
+        ];
+    }
+
+    /**
+     * @dataProvider validUrlProvider
+     */
+    public function testValidUrlValidation(string $validUrl): void
+    {
+        $tool = new ExternalTool([
+            'name' => 'Test Tool',
+            'consumer_key' => 'test_key',
+            'privacy_level' => 'public',
+            'url' => $validUrl
+        ]);
+
         $this->assertTrue($tool->validateConfiguration());
     }
 }

@@ -23,6 +23,23 @@ class UpdateExternalToolDTO extends AbstractBaseDto implements DTOInterface
     protected string $apiPropertyName = 'external_tool';
 
     /**
+     * Placement configuration property names that need nested array handling
+     */
+    private const PLACEMENT_PROPERTIES = [
+        'accountNavigation' => 'account_navigation',
+        'assignmentSelection' => 'assignment_selection',
+        'courseHomeSubNavigation' => 'course_home_sub_navigation',
+        'courseNavigation' => 'course_navigation',
+        'editorButton' => 'editor_button',
+        'homeworkSubmission' => 'homework_submission',
+        'linkSelection' => 'link_selection',
+        'migrationSelection' => 'migration_selection',
+        'resourceSelection' => 'resource_selection',
+        'toolConfiguration' => 'tool_configuration',
+        'userNavigation' => 'user_navigation',
+    ];
+
+    /**
      * External tool name
      */
     public ?string $name = null;
@@ -835,5 +852,77 @@ class UpdateExternalToolDTO extends AbstractBaseDto implements DTOInterface
             $this->resourceSelection = [];
         }
         $this->resourceSelection['selection_height'] = $selectionHeight;
+    }
+
+    /**
+     * Convert the DTO to an array for API requests with custom handling for placement configurations
+     *
+     * @return array<array{name: string, contents: mixed}>
+     */
+    public function toApiArray(): array
+    {
+        $properties = get_object_vars($this);
+        $modifiedProperties = [];
+
+        foreach ($properties as $property => $value) {
+            // Skip the apiPropertyName itself - it's a meta property, not data
+            if ($property === 'apiPropertyName') {
+                continue;
+            }
+
+            if ($this->apiPropertyName === '') {
+                throw new \Exception('The API property name must be set in the DTO');
+            }
+
+            // Skip null values
+            if (is_null($value)) {
+                continue;
+            }
+
+            // Handle placement configuration properties with nested arrays
+            if (array_key_exists($property, self::PLACEMENT_PROPERTIES)) {
+                $placementName = self::PLACEMENT_PROPERTIES[$property];
+                if (is_array($value)) {
+                    foreach ($value as $configKey => $configValue) {
+                        $fieldName = $this->apiPropertyName . '[' . $placementName . '][' . $configKey . ']';
+                        $modifiedProperties[] = [
+                            'name' => $fieldName,
+                            'contents' => $configValue
+                        ];
+                    }
+                }
+                continue;
+            }
+
+            $propertyName = $this->apiPropertyName . '[' . str_to_snake_case($property) . ']';
+
+            // For DateTimeInterface values, format them as ISO 8601 strings
+            if ($value instanceof \DateTimeInterface) {
+                $modifiedProperties[] = [
+                    'name' => $propertyName,
+                    'contents' => $value->format(\DateTimeInterface::ATOM)
+                ];
+                continue;
+            }
+
+            // For arrays that are not placement configurations, handle as regular arrays
+            if (is_array($value)) {
+                foreach ($value as $arrayValue) {
+                    $modifiedProperties[] = [
+                        'name' => $propertyName . '[]',
+                        'contents' => $arrayValue
+                    ];
+                }
+                continue;
+            }
+
+            // Handle scalar values (int, string, bool)
+            $modifiedProperties[] = [
+                'name' => $propertyName,
+                'contents' => $value
+            ];
+        }
+
+        return $modifiedProperties;
     }
 }
