@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Api\Quizzes;
+namespace CanvasLMS\Api\QuizSubmissions;
 
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Courses\Course;
-use CanvasLMS\Dto\Quizzes\CreateQuizSubmissionDTO;
-use CanvasLMS\Dto\Quizzes\UpdateQuizSubmissionDTO;
+use CanvasLMS\Api\Quizzes\Quiz;
+use CanvasLMS\Dto\QuizSubmissions\CreateQuizSubmissionDTO;
+use CanvasLMS\Dto\QuizSubmissions\UpdateQuizSubmissionDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
@@ -60,7 +61,7 @@ use CanvasLMS\Pagination\PaginationResult;
  * }
  * ```
  *
- * @package CanvasLMS\Api\Quizzes
+ * @package CanvasLMS\Api\QuizSubmissions
  */
 class QuizSubmission extends AbstractBaseApi
 {

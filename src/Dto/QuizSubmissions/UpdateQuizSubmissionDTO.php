@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Dto\Quizzes;
+namespace CanvasLMS\Dto\QuizSubmissions;
 
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
@@ -34,7 +34,7 @@ use CanvasLMS\Interfaces\DTOInterface;
  * $submission = QuizSubmission::update(123, $updateDto);
  * ```
  *
- * @package CanvasLMS\Dto\Quizzes
+ * @package CanvasLMS\Dto\QuizSubmissions
  */
 class UpdateQuizSubmissionDTO extends AbstractBaseDto implements DTOInterface
 {

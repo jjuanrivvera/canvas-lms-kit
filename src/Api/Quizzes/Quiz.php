@@ -6,6 +6,7 @@ namespace CanvasLMS\Api\Quizzes;
 
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\QuizSubmissions\QuizSubmission;
 use CanvasLMS\Dto\Quizzes\CreateQuizDTO;
 use CanvasLMS\Dto\Quizzes\UpdateQuizDTO;
 use CanvasLMS\Exceptions\CanvasApiException;

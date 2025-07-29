@@ -9,6 +9,9 @@ use CanvasLMS\Api\Enrollments\Enrollment;
 use CanvasLMS\Dto\Courses\CreateCourseDTO;
 use CanvasLMS\Dto\Courses\UpdateCourseDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Objects\CalendarLink;
+use CanvasLMS\Objects\CourseProgress;
+use CanvasLMS\Objects\Term;
 use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
 
@@ -177,9 +180,9 @@ class Course extends AbstractBaseApi
     public ?int $totalStudents = null;
 
     /**
-     * @var mixed[]|null
+     * @var CalendarLink|null
      */
-    public ?array $calendar = [];
+    public ?CalendarLink $calendar = null;
 
     /**
      * @var string
@@ -197,14 +200,14 @@ class Course extends AbstractBaseApi
     public ?int $needsGradingCount = null;
 
     /**
-     * @var mixed[]|null
+     * @var Term|null
      */
-    public ?array $term = [];
+    public ?Term $term = null;
 
     /**
-     * @var mixed[]|null
+     * @var CourseProgress|null
      */
-    public ?array $courseProgress = [];
+    public ?CourseProgress $courseProgress = null;
 
     /**
      * @var bool
@@ -415,6 +418,56 @@ class Course extends AbstractBaseApi
      * @var string
      */
     public string $defaultDueTime = '23:59:59';
+
+    /**
+     * Constructor
+     * @param mixed[] $data
+     */
+    public function __construct(array $data)
+    {
+        // Handle object instantiation for specific properties
+        if (isset($data['term']) && is_array($data['term'])) {
+            $this->term = new Term($data['term']);
+            unset($data['term']);
+        }
+
+        if (isset($data['course_progress']) && is_array($data['course_progress'])) {
+            $this->courseProgress = new CourseProgress($data['course_progress']);
+            unset($data['course_progress']);
+        }
+
+        if (isset($data['calendar']) && is_array($data['calendar'])) {
+            $this->calendar = new CalendarLink($data['calendar']);
+            unset($data['calendar']);
+        }
+
+        // Call parent constructor for remaining properties
+        parent::__construct($data);
+    }
+
+    /**
+     * Convert the object to an array for DTO operations
+     * @return mixed[]
+     */
+    protected function toDtoArray(): array
+    {
+        $data = parent::toDtoArray();
+
+        // Convert objects back to arrays
+        if ($this->term !== null) {
+            $data['term'] = $this->term->toArray();
+        }
+
+        if ($this->courseProgress !== null) {
+            $data['courseProgress'] = $this->courseProgress->toArray();
+        }
+
+        if ($this->calendar !== null) {
+            $data['calendar'] = $this->calendar->toArray();
+        }
+
+        return $data;
+    }
 
     /**
      * Create a new Course instance
@@ -1667,17 +1720,17 @@ class Course extends AbstractBaseApi
     }
 
     /**
-     * @return mixed[]|null
+     * @return CalendarLink|null
      */
-    public function getCalendar(): ?array
+    public function getCalendar(): ?CalendarLink
     {
         return $this->calendar;
     }
 
     /**
-     * @param mixed[]|null $calendar
+     * @param CalendarLink|null $calendar
      */
-    public function setCalendar(?array $calendar): void
+    public function setCalendar(?CalendarLink $calendar): void
     {
         $this->calendar = $calendar;
     }
@@ -1731,33 +1784,33 @@ class Course extends AbstractBaseApi
     }
 
     /**
-     * @return mixed[]|null
+     * @return Term|null
      */
-    public function getTerm(): ?array
+    public function getTerm(): ?Term
     {
         return $this->term;
     }
 
     /**
-     * @param mixed[]|null $term
+     * @param Term|null $term
      */
-    public function setTerm(?array $term): void
+    public function setTerm(?Term $term): void
     {
         $this->term = $term;
     }
 
     /**
-     * @return mixed[]|null
+     * @return CourseProgress|null
      */
-    public function getCourseProgress(): ?array
+    public function getCourseProgress(): ?CourseProgress
     {
         return $this->courseProgress;
     }
 
     /**
-     * @param mixed[]|null $courseProgress
+     * @param CourseProgress|null $courseProgress
      */
-    public function setCourseProgress(?array $courseProgress): void
+    public function setCourseProgress(?CourseProgress $courseProgress): void
     {
         $this->courseProgress = $courseProgress;
     }
