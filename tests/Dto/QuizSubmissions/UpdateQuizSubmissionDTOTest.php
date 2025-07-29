@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Dto\Quizzes;
+namespace Tests\Dto\QuizSubmissions;
 
 use PHPUnit\Framework\TestCase;
-use CanvasLMS\Dto\Quizzes\UpdateQuizSubmissionDTO;
+use CanvasLMS\Dto\QuizSubmissions\UpdateQuizSubmissionDTO;
 
 /**
- * @covers \CanvasLMS\Dto\Quizzes\UpdateQuizSubmissionDTO
+ * @covers \CanvasLMS\Dto\QuizSubmissions\UpdateQuizSubmissionDTO
  */
 class UpdateQuizSubmissionDTOTest extends TestCase
 {

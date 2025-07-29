@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Tests\Api\Quizzes;
+namespace Tests\Api\QuizSubmissions;
 
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Quizzes\Quiz;
-use CanvasLMS\Api\Quizzes\QuizSubmission;
-use CanvasLMS\Dto\Quizzes\CreateQuizSubmissionDTO;
-use CanvasLMS\Dto\Quizzes\UpdateQuizSubmissionDTO;
+use CanvasLMS\Api\QuizSubmissions\QuizSubmission;
+use CanvasLMS\Dto\QuizSubmissions\CreateQuizSubmissionDTO;
+use CanvasLMS\Dto\QuizSubmissions\UpdateQuizSubmissionDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
 
 /**
- * @covers \CanvasLMS\Api\Quizzes\QuizSubmission
+ * @covers \CanvasLMS\Api\QuizSubmissions\QuizSubmission
  */
 class QuizSubmissionTest extends TestCase
 {
