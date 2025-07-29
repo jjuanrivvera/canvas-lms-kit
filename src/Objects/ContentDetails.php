@@ -51,6 +51,11 @@ class ContentDetails
     public ?array $lockInfo = null;
 
     /**
+     * Lock context (e.g., 'module', 'assignment')
+     */
+    public ?string $lockContext = null;
+
+    /**
      * Constructor
      * @param mixed[] $data
      */
@@ -195,6 +200,54 @@ class ContentDetails
     }
 
     /**
+     * Get lock context
+     */
+    public function getLockContext(): ?string
+    {
+        return $this->lockContext;
+    }
+
+    /**
+     * Set lock context
+     */
+    public function setLockContext(?string $lockContext): void
+    {
+        $this->lockContext = $lockContext;
+    }
+
+    /**
+     * Check if content is available (based on unlock date)
+     */
+    public function isAvailable(): bool
+    {
+        if ($this->unlockAt === null) {
+            return true;
+        }
+
+        return strtotime($this->unlockAt) <= time();
+    }
+
+    /**
+     * Check if content is expired (based on lock date)
+     */
+    public function isExpired(): bool
+    {
+        if ($this->lockAt === null) {
+            return false;
+        }
+
+        return strtotime($this->lockAt) < time();
+    }
+
+    /**
+     * Check if content has a deadline
+     */
+    public function hasDeadline(): bool
+    {
+        return $this->dueAt !== null;
+    }
+
+    /**
      * Convert to array
      * @return mixed[]
      */
@@ -228,6 +281,10 @@ class ContentDetails
 
         if ($this->lockInfo !== null) {
             $data['lock_info'] = $this->lockInfo;
+        }
+
+        if ($this->lockContext !== null) {
+            $data['lock_context'] = $this->lockContext;
         }
 
         return $data;
