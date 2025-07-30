@@ -334,12 +334,29 @@ class Config
     {
         $context = self::$activeContext;
 
-        // Update legacy values to match active context (if set)
-        self::$appKey = self::$contexts[$context]['app_key'] ?? self::$appKey;
-        self::$baseUrl = self::$contexts[$context]['base_url'] ?? self::$baseUrl;
-        self::$apiVersion = self::$contexts[$context]['api_version'] ?? self::$apiVersion;
-        self::$timeout = self::$contexts[$context]['timeout'] ?? self::$timeout;
-        self::$accountId = self::$contexts[$context]['account_id'] ?? self::$accountId;
+        // Reset to defaults first to ensure proper context isolation
+        self::$appKey = null;
+        self::$baseUrl = null;
+        self::$apiVersion = 'v1';
+        self::$timeout = 30;
+        self::$accountId = 1;
+
+        // Then apply context-specific values if they exist
+        if (isset(self::$contexts[$context]['app_key'])) {
+            self::$appKey = self::$contexts[$context]['app_key'];
+        }
+        if (isset(self::$contexts[$context]['base_url'])) {
+            self::$baseUrl = self::$contexts[$context]['base_url'];
+        }
+        if (isset(self::$contexts[$context]['api_version'])) {
+            self::$apiVersion = self::$contexts[$context]['api_version'];
+        }
+        if (isset(self::$contexts[$context]['timeout'])) {
+            self::$timeout = self::$contexts[$context]['timeout'];
+        }
+        if (isset(self::$contexts[$context]['account_id'])) {
+            self::$accountId = self::$contexts[$context]['account_id'];
+        }
     }
 
     /**
