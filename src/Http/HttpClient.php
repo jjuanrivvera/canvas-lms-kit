@@ -5,6 +5,8 @@ namespace CanvasLMS\Http;
 use CanvasLMS\Config;
 use Psr\Log\LoggerInterface;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\HandlerStack;
+use CanvasLMS\Http\Middleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
@@ -30,13 +32,40 @@ class HttpClient implements HttpClientInterface
     private LoggerInterface $logger;
 
     /**
+     * @var HandlerStack
+     */
+    private HandlerStack $handlerStack;
+
+    /**
+     * @var array<string, MiddlewareInterface>
+     */
+    private array $middleware = [];
+
+    /**
      * @param ClientInterface|null $client
      * @param LoggerInterface|null $logger
+     * @param array<MiddlewareInterface> $middleware
      */
-    public function __construct(ClientInterface $client = null, LoggerInterface $logger = null)
-    {
-        $this->client = $client ?? new \GuzzleHttp\Client();
+    public function __construct(
+        ClientInterface $client = null,
+        LoggerInterface $logger = null,
+        array $middleware = []
+    ) {
         $this->logger = $logger ?? new \Psr\Log\NullLogger();
+        $this->handlerStack = HandlerStack::create();
+
+        // Register middleware
+        foreach ($middleware as $mw) {
+            $this->addMiddleware($mw);
+        }
+
+        // If a client is provided, use it directly (for backward compatibility)
+        // Otherwise create a new client with our handler stack
+        if ($client !== null) {
+            $this->client = $client;
+        } else {
+            $this->client = new \GuzzleHttp\Client(['handler' => $this->handlerStack]);
+        }
     }
 
     /**
@@ -141,6 +170,52 @@ class HttpClient implements HttpClientInterface
     }
 
     /**
+     * Add middleware to the stack
+     *
+     * @param MiddlewareInterface $middleware
+     * @return void
+     */
+    public function addMiddleware(MiddlewareInterface $middleware): void
+    {
+        $this->middleware[$middleware->getName()] = $middleware;
+        $this->handlerStack->push($middleware(), $middleware->getName());
+    }
+
+    /**
+     * Remove middleware from the stack
+     *
+     * @param string $name
+     * @return void
+     */
+    public function removeMiddleware(string $name): void
+    {
+        if (isset($this->middleware[$name])) {
+            unset($this->middleware[$name]);
+            $this->handlerStack->remove($name);
+        }
+    }
+
+    /**
+     * Get registered middleware
+     *
+     * @return array<string, MiddlewareInterface>
+     */
+    public function getMiddleware(): array
+    {
+        return $this->middleware;
+    }
+
+    /**
+     * Get the logger instance
+     *
+     * @return LoggerInterface
+     */
+    public function getLogger(): LoggerInterface
+    {
+        return $this->logger;
+    }
+
+    /**
      * Make an HTTP request
      * @param string $method
      * @param string $url
@@ -158,8 +233,17 @@ class HttpClient implements HttpClientInterface
             return $this->client->request($method, $url, $requestOptions);
         } catch (RequestException $e) {
             $this->logger->error($e->getMessage());
-            $response = json_decode($e->getResponse()->getBody()->getContents(), true);
-            throw new CanvasApiException($e->getMessage(), $e->getCode(), $response['errors'] ?? []);
+            $errors = [];
+            if ($e->getResponse()) {
+                $body = $e->getResponse()->getBody()->getContents();
+                if ($body) {
+                    $decoded = json_decode($body, true);
+                    if (is_array($decoded) && isset($decoded['errors'])) {
+                        $errors = $decoded['errors'];
+                    }
+                }
+            }
+            throw new CanvasApiException($e->getMessage(), $e->getCode(), $errors);
         } catch (GuzzleException $e) {
             throw new CanvasApiException($e->getMessage(), $e->getCode(), []);
         }
