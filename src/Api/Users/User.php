@@ -11,6 +11,16 @@ use CanvasLMS\Dto\Users\CreateUserDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Objects\ActivityStreamItem;
+use CanvasLMS\Objects\ActivityStreamSummary;
+use CanvasLMS\Objects\TodoItem;
+use CanvasLMS\Objects\UpcomingEvent;
+use CanvasLMS\Api\Assignments\Assignment;
+use CanvasLMS\Api\Files\File;
+use CanvasLMS\Objects\Profile;
+use CanvasLMS\Objects\Avatar;
+use CanvasLMS\Objects\CourseNickname;
+use CanvasLMS\Objects\PageView;
 
 /**
  * User Class
@@ -182,6 +192,20 @@ class User extends AbstractBaseApi
      * @var string|null
      */
     public ?string $bio;
+
+    /**
+     * The user's effective locale.
+     * @var string|null
+     */
+    public ?string $effectiveLocale = null;
+
+    /**
+     * Optional: This field is only returned in certain API calls, and will
+     * return a boolean value indicating whether or not the user can update their
+     * name.
+     * @var bool|null
+     */
+    public ?bool $canUpdateName = null;
 
     /**
      * Create a new User instance.
@@ -849,5 +873,663 @@ class User extends AbstractBaseApi
     public function setBio(?string $bio): void
     {
         $this->bio = $bio;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEffectiveLocale(): ?string
+    {
+        return $this->effectiveLocale;
+    }
+
+    /**
+     * @param string|null $effectiveLocale
+     */
+    public function setEffectiveLocale(?string $effectiveLocale): void
+    {
+        $this->effectiveLocale = $effectiveLocale;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getCanUpdateName(): ?bool
+    {
+        return $this->canUpdateName;
+    }
+
+    /**
+     * @param bool|null $canUpdateName
+     */
+    public function setCanUpdateName(?bool $canUpdateName): void
+    {
+        $this->canUpdateName = $canUpdateName;
+    }
+
+    // Activity Stream Methods
+
+    /**
+     * Get the user's activity stream
+     *
+     * Returns the current user's global activity stream, paginated.
+     * Use 'self' as the user ID to get the current authenticated user's stream.
+     *
+     * @param array<string, mixed> $params Optional parameters
+     * @return ActivityStreamItem[]
+     * @throws CanvasApiException
+     */
+    public function getActivityStream(array $params = []): array
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+        $response = self::$apiClient->get("/users/{$userId}/activity_stream", [
+            'query' => $params
+        ]);
+
+        $items = json_decode($response->getBody(), true);
+        $activityItems = [];
+
+        foreach ($items as $item) {
+            try {
+                $activityItems[] = ActivityStreamItem::createFromData($item);
+            } catch (\InvalidArgumentException $e) {
+                // Skip unknown activity stream item types
+                continue;
+            }
+        }
+
+        return $activityItems;
+    }
+
+    /**
+     * Get activity stream summary
+     *
+     * Returns a summary of the current user's global activity stream.
+     * Use 'self' as the user ID to get the current authenticated user's summary.
+     *
+     * @return ActivityStreamSummary[]
+     * @throws CanvasApiException
+     */
+    public function getActivityStreamSummary(): array
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+        $response = self::$apiClient->get("/users/{$userId}/activity_stream/summary");
+
+        $summaries = json_decode($response->getBody(), true);
+
+        return array_map(function ($summary) {
+            return new ActivityStreamSummary($summary);
+        }, $summaries);
+    }
+
+    /**
+     * Hide a stream item
+     *
+     * Hide the given stream item for the user.
+     * Use 'self' as the user ID for the current authenticated user.
+     *
+     * @param int $streamItemId The ID of the stream item to hide
+     * @return bool True if successful
+     * @throws CanvasApiException
+     */
+    public function hideStreamItem(int $streamItemId): bool
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+
+        try {
+            self::$apiClient->delete("/users/{$userId}/activity_stream/{$streamItemId}");
+            return true;
+        } catch (CanvasApiException $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Hide all stream items
+     *
+     * Hide all stream items for the user.
+     * Use 'self' as the user ID for the current authenticated user.
+     *
+     * @return bool True if successful
+     * @throws CanvasApiException
+     */
+    public function hideAllStreamItems(): bool
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+
+        try {
+            self::$apiClient->delete("/users/{$userId}/activity_stream");
+            return true;
+        } catch (CanvasApiException $e) {
+            return false;
+        }
+    }
+
+    // TODO & Events Methods
+
+    /**
+     * Get TODO items
+     *
+     * Get a paginated list of the current user's list of todo items,
+     * as seen on the user dashboard.
+     *
+     * @param array<string, mixed> $params Optional parameters:
+     *   - include[]: 'ungraded_quizzes' to include ungraded quizzes
+     * @return TodoItem[]
+     * @throws CanvasApiException
+     */
+    public function getTodoItems(array $params = []): array
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+        $response = self::$apiClient->get("/users/{$userId}/todo", [
+            'query' => $params
+        ]);
+
+        $items = json_decode($response->getBody(), true);
+
+        return array_map(function ($item) {
+            return new TodoItem($item);
+        }, $items);
+    }
+
+    /**
+     * Get upcoming events
+     *
+     * Get a paginated list of the current user's upcoming events.
+     *
+     * @return UpcomingEvent[]
+     * @throws CanvasApiException
+     */
+    public function getUpcomingEvents(): array
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+        $response = self::$apiClient->get("/users/{$userId}/upcoming_events");
+
+        $events = json_decode($response->getBody(), true);
+
+        return array_map(function ($event) {
+            return new UpcomingEvent($event);
+        }, $events);
+    }
+
+    // Missing Submissions
+
+    /**
+     * Get missing submissions
+     *
+     * Returns a paginated list of assignments for which the student has not yet
+     * created a submission. The user sending the request must either be the
+     * student, or must have permission to view the student's grades.
+     *
+     * @param array<string, mixed> $params Optional parameters:
+     *   - filter[]: Array of assignment IDs to filter by
+     *   - filter[course_ids][]: Array of course IDs to filter by
+     *   - include[]: Array of additional fields to include: ['planner_overrides', 'course']
+     *   - filter[submittable_types][]: Only return assignments that the user can submit online.
+     *     Excludes assignments with no submission type.
+     * @return Assignment[]
+     * @throws CanvasApiException
+     */
+    public function getMissingSubmissions(array $params = []): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to fetch missing submissions');
+        }
+
+        $response = self::$apiClient->get("/users/{$this->id}/missing_submissions", [
+            'query' => $params
+        ]);
+
+        $assignments = json_decode($response->getBody(), true);
+
+        return array_map(function ($assignment) {
+            return new Assignment($assignment);
+        }, $assignments);
+    }
+
+    // File Upload
+
+    /**
+     * Upload a file to the user's personal files
+     *
+     * Uploads a file to the user's personal files area using Canvas's 3-step upload process.
+     * The file will be placed in the user's root folder unless a parent_folder_id is specified.
+     *
+     * @param array<string, mixed> $fileData File upload data with the following possible keys:
+     *   - name: Required. The file name
+     *   - size: File size in bytes (optional if uploading from local file)
+     *   - content_type: MIME type (optional, will be detected if not provided)
+     *   - parent_folder_id: ID of the folder to upload to (optional, defaults to root)
+     *   - file: Path to local file to upload
+     *   - url: URL to download and upload (alternative to 'file')
+     *   - on_duplicate: What to do if file already exists ('overwrite' or 'rename', defaults to 'overwrite')
+     * @return File The uploaded File object
+     * @throws CanvasApiException
+     */
+    public function uploadFile(array $fileData): File
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to upload files');
+        }
+
+        return File::uploadToUser($this->id, $fileData);
+    }
+
+    // Profile & Avatar Methods
+
+    /**
+     * Get user profile
+     *
+     * Returns the full profile information for the user.
+     * This includes extended information beyond the basic User object.
+     *
+     * @return Profile The user's profile
+     * @throws CanvasApiException
+     */
+    public function getProfile(): Profile
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+        $response = self::$apiClient->get("/users/{$userId}/profile");
+
+        $profileData = json_decode($response->getBody(), true);
+
+        return new Profile($profileData);
+    }
+
+    /**
+     * Get avatar options
+     *
+     * Retrieve the possible user avatar options that can be set for the user.
+     * This includes uploaded files, Gravatar, and social media avatars.
+     *
+     * @return Avatar[] Array of Avatar objects
+     * @throws CanvasApiException
+     */
+    public function getAvatarOptions(): array
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+        $response = self::$apiClient->get("/users/{$userId}/avatars");
+
+        $avatars = json_decode($response->getBody(), true);
+
+        return array_map(function ($avatar) {
+            return new Avatar($avatar);
+        }, $avatars);
+    }
+
+    // Custom Data Storage Methods
+
+    /**
+     * Store custom data for the user
+     *
+     * Store arbitrary user data. Arbitrary JSON data can be stored as a hash,
+     * and a namespace parameter is required to isolate different sets of data.
+     * The scope parameter is optional and allows for additional segmentation.
+     *
+     * @param string $namespace Namespace to store the data under
+     * @param array<string, mixed> $data Arbitrary data to store
+     * @param string|null $scope Optional scope for additional data segmentation
+     * @return array<string, mixed> The stored data
+     * @throws CanvasApiException
+     */
+    public function setCustomData(string $namespace, array $data, ?string $scope = null): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to set custom data');
+        }
+
+        $path = "/users/{$this->id}/custom_data";
+        if ($scope) {
+            $path .= "/{$scope}";
+        }
+
+        $response = self::$apiClient->put($path, [
+            'form_params' => [
+                'ns' => $namespace,
+                'data' => json_encode($data)
+            ]
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get custom data for the user
+     *
+     * Retrieve arbitrary user data that was previously stored.
+     * The namespace parameter is required to identify the data set.
+     * The scope parameter is optional and must match what was used when storing.
+     *
+     * @param string $namespace Namespace to retrieve data from
+     * @param string|null $scope Optional scope that was used when storing
+     * @return array<string, mixed> The stored data
+     * @throws CanvasApiException
+     */
+    public function getCustomData(string $namespace, ?string $scope = null): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to get custom data');
+        }
+
+        $path = "/users/{$this->id}/custom_data";
+        if ($scope) {
+            $path .= "/{$scope}";
+        }
+
+        $response = self::$apiClient->get($path, [
+            'query' => ['ns' => $namespace]
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Delete custom data for the user
+     *
+     * Delete arbitrary user data that was previously stored.
+     * The namespace parameter is required to identify the data set.
+     * The scope parameter is optional and must match what was used when storing.
+     *
+     * @param string $namespace Namespace to delete data from
+     * @param string|null $scope Optional scope that was used when storing
+     * @return bool True if successful
+     * @throws CanvasApiException
+     */
+    public function deleteCustomData(string $namespace, ?string $scope = null): bool
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to delete custom data');
+        }
+
+        $path = "/users/{$this->id}/custom_data";
+        if ($scope) {
+            $path .= "/{$scope}";
+        }
+
+        try {
+            self::$apiClient->delete($path, [
+                'query' => ['ns' => $namespace]
+            ]);
+            return true;
+        } catch (CanvasApiException $e) {
+            return false;
+        }
+    }
+
+    // Course Nickname Methods
+
+    /**
+     * Get all course nicknames for the user
+     *
+     * Returns a list of all course nicknames set by the user.
+     *
+     * @return CourseNickname[] Array of CourseNickname objects
+     * @throws CanvasApiException
+     */
+    public function getCourseNicknames(): array
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+        $response = self::$apiClient->get("/users/{$userId}/course_nicknames");
+
+        $nicknames = json_decode($response->getBody(), true);
+
+        return array_map(function ($nickname) {
+            return new CourseNickname($nickname);
+        }, $nicknames);
+    }
+
+    /**
+     * Get course nickname for a specific course
+     *
+     * Returns the nickname for the specified course, or null if no nickname is set.
+     *
+     * @param int $courseId Course ID to get nickname for
+     * @return CourseNickname|null The course nickname or null
+     * @throws CanvasApiException
+     */
+    public function getCourseNickname(int $courseId): ?CourseNickname
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+
+        try {
+            $response = self::$apiClient->get("/users/{$userId}/course_nicknames/{$courseId}");
+            $nicknameData = json_decode($response->getBody(), true);
+            return new CourseNickname($nicknameData);
+        } catch (CanvasApiException $e) {
+            // Return null if no nickname is set (404 response)
+            if ($e->getCode() === 404) {
+                return null;
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Set course nickname for a specific course
+     *
+     * Set or update the nickname for the specified course.
+     *
+     * @param int $courseId Course ID to set nickname for
+     * @param string $nickname The nickname to set
+     * @return CourseNickname The updated course nickname
+     * @throws CanvasApiException
+     */
+    public function setCourseNickname(int $courseId, string $nickname): CourseNickname
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+        $response = self::$apiClient->put("/users/{$userId}/course_nicknames/{$courseId}", [
+            'form_params' => [
+                'nickname' => $nickname
+            ]
+        ]);
+
+        $nicknameData = json_decode($response->getBody(), true);
+        return new CourseNickname($nicknameData);
+    }
+
+    /**
+     * Remove course nickname for a specific course
+     *
+     * Remove the nickname for the specified course, reverting to the original course name.
+     *
+     * @param int $courseId Course ID to remove nickname for
+     * @return bool True if successful
+     * @throws CanvasApiException
+     */
+    public function removeCourseNickname(int $courseId): bool
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+
+        try {
+            self::$apiClient->delete("/users/{$userId}/course_nicknames/{$courseId}");
+            return true;
+        } catch (CanvasApiException $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Clear all course nicknames for the user
+     *
+     * Remove all course nicknames set by the user, reverting all courses to their original names.
+     *
+     * @return bool True if successful
+     * @throws CanvasApiException
+     */
+    public function clearAllCourseNicknames(): bool
+    {
+        self::checkApiClient();
+
+        $userId = $this->id ?? 'self';
+
+        try {
+            self::$apiClient->delete("/users/{$userId}/course_nicknames");
+            return true;
+        } catch (CanvasApiException $e) {
+            return false;
+        }
+    }
+
+    // User Management Methods
+
+    /**
+     * Self-register a new user
+     *
+     * Self register and return a new user and pseudonym for the account.
+     * If self-registration is enabled on the Canvas account, a user can use
+     * this endpoint to self register.
+     *
+     * @param array<string, mixed> $userData User registration data
+     * @return self The newly registered user
+     * @throws CanvasApiException
+     */
+    public static function selfRegister(array $userData): self
+    {
+        self::checkApiClient();
+
+        $accountId = Config::getAccountId();
+        $response = self::$apiClient->post("/accounts/{$accountId}/self_registration", [
+            'form_params' => $userData
+        ]);
+
+        $newUserData = json_decode($response->getBody(), true);
+        return new self($newUserData);
+    }
+
+    /**
+     * Split a merged user
+     *
+     * Split a merged user into separate user accounts.
+     * This operation is typically used to reverse a user merge operation.
+     *
+     * @return array<self> Array of User objects created from the split
+     * @throws CanvasApiException
+     */
+    public function split(): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to split user');
+        }
+
+        $response = self::$apiClient->post("/users/{$this->id}/split");
+        $splitUsers = json_decode($response->getBody(), true);
+
+        return array_map(function ($userData) {
+            return new self($userData);
+        }, $splitUsers);
+    }
+
+    /**
+     * Terminate all sessions for the user
+     *
+     * Terminate all active sessions for the user.
+     * This will force the user to log in again on all devices.
+     *
+     * @return bool True if successful
+     * @throws CanvasApiException
+     */
+    public function terminateAllSessions(): bool
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to terminate sessions');
+        }
+
+        try {
+            self::$apiClient->delete("/users/{$this->id}/sessions");
+            return true;
+        } catch (CanvasApiException $e) {
+            return false;
+        }
+    }
+
+    // Analytics & Tracking Methods
+
+    /**
+     * Get page views for the user
+     *
+     * Return a paginated list of the user's page view history in Canvas.
+     * Page views provide detailed tracking of user interactions within Canvas.
+     *
+     * @param array<string, mixed> $params Optional parameters:
+     *   - start_time: DateTime to start the search from (ISO 8601 format)
+     *   - end_time: DateTime to end the search at (ISO 8601 format)
+     * @return PageView[] Array of PageView objects
+     * @throws CanvasApiException
+     */
+    public function getPageViews(array $params = []): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to get page views');
+        }
+
+        $response = self::$apiClient->get("/users/{$this->id}/page_views", [
+            'query' => $params
+        ]);
+
+        $pageViews = json_decode($response->getBody(), true);
+
+        return array_map(function ($pageView) {
+            return new PageView($pageView);
+        }, $pageViews);
+    }
+
+    /**
+     * Get pandata events token
+     *
+     * Return the user's pandata events token.
+     * This token is used for analytics and tracking purposes.
+     *
+     * @return array<string, mixed> The pandata events token data
+     * @throws CanvasApiException
+     */
+    public function getPandataEventsToken(): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to get pandata events token');
+        }
+
+        $response = self::$apiClient->get("/users/{$this->id}/pandata_events_token");
+
+        return json_decode($response->getBody(), true);
     }
 }

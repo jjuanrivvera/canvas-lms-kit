@@ -244,6 +244,47 @@ class UserTest extends TestCase
         $this->assertInstanceOf(Enrollment::class, $enrollments[0]);
     }
 
+    /**
+     * Test new properties effective_locale and can_update_name
+     */
+    public function testNewProperties(): void
+    {
+        $userData = [
+            'id' => 123,
+            'name' => 'Test User',
+            'effective_locale' => 'en-US',
+            'can_update_name' => true
+        ];
+
+        $user = new User($userData);
+
+        $this->assertEquals('en-US', $user->getEffectiveLocale());
+        $this->assertTrue($user->getCanUpdateName());
+
+        // Test setters
+        $user->setEffectiveLocale('es-ES');
+        $user->setCanUpdateName(false);
+
+        $this->assertEquals('es-ES', $user->getEffectiveLocale());
+        $this->assertFalse($user->getCanUpdateName());
+    }
+
+    /**
+     * Test that new properties can be null
+     */
+    public function testNewPropertiesCanBeNull(): void
+    {
+        $userData = [
+            'id' => 123,
+            'name' => 'Test User'
+        ];
+
+        $user = new User($userData);
+
+        $this->assertNull($user->getEffectiveLocale());
+        $this->assertNull($user->getCanUpdateName());
+    }
+
     protected function tearDown(): void
     {
         $this->user = null;

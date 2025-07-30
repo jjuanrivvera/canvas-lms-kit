@@ -2,6 +2,7 @@
 
 namespace CanvasLMS\Dto\Users;
 
+use DateTimeInterface;
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
 
@@ -80,12 +81,18 @@ class UpdateUserDTO extends AbstractBaseDto implements DTOInterface
     public ?string $bio;
 
     /**
-     * Sets pronouns on the user profile. Passing an empty string will empty the user’s pronouns
+     * Sets pronouns on the user profile. Passing an empty string will empty the user's pronouns
      * Only Available Pronouns set on the root account are allowed Adding and changing pronouns
      * must be enabled on the root account.
      * @var string|null $pronouns
      */
     public ?string $pronouns;
+
+    /**
+     * The user's birth date.
+     * @var DateTimeInterface|null $birthdate
+     */
+    public ?DateTimeInterface $birthdate = null;
 
     /**
      * Suspends or unsuspends all logins for this user that the calling user has permission to
@@ -111,8 +118,13 @@ class UpdateUserDTO extends AbstractBaseDto implements DTOInterface
         $modifiedProperties = [];
 
         foreach ($properties as $key => $value) {
-            if (is_null($value)) {
+            // Skip protected/private properties and null values
+            if ($key === 'apiPropertyName' || is_null($value)) {
                 continue;
+            }
+
+            if ($value instanceof DateTimeInterface) {
+                $value = $value->format('Y-m-d'); // Convert DateTime to YYYY-MM-DD format for birthdate
             }
 
             $apiKeyName = 'user[' . str_to_snake_case($key) . ']';
@@ -122,6 +134,11 @@ class UpdateUserDTO extends AbstractBaseDto implements DTOInterface
                 $avatarKey = str_replace('avatar', '', $key);
                 $avatarKey = lcfirst($avatarKey); // make sure the first letter is lowercase
                 $apiKeyName = 'user[avatar][' . str_to_snake_case($avatarKey) . ']';
+            }
+
+            // For override_sis_stickiness, it should be at root level
+            if ($key === 'overrideSisStickiness') {
+                $apiKeyName = 'override_sis_stickiness';
             }
 
             $modifiedProperties[$apiKeyName] = $value;
@@ -352,5 +369,21 @@ class UpdateUserDTO extends AbstractBaseDto implements DTOInterface
     public function setOverrideSisStickiness(?bool $overrideSisStickiness): void
     {
         $this->overrideSisStickiness = $overrideSisStickiness;
+    }
+
+    /**
+     * @return DateTimeInterface|null
+     */
+    public function getBirthdate(): ?DateTimeInterface
+    {
+        return $this->birthdate;
+    }
+
+    /**
+     * @param DateTimeInterface|null $birthdate
+     */
+    public function setBirthdate(?DateTimeInterface $birthdate): void
+    {
+        $this->birthdate = $birthdate;
     }
 }
