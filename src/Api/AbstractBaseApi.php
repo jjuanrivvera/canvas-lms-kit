@@ -5,6 +5,7 @@ namespace CanvasLMS\Api;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
+use CanvasLMS\Config;
 use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Interfaces\ApiInterface;
 use CanvasLMS\Interfaces\HttpClientInterface;
@@ -65,8 +66,46 @@ abstract class AbstractBaseApi implements ApiInterface
     protected static function checkApiClient(): void
     {
         if (!isset(self::$apiClient)) {
-            self::$apiClient = new HttpClient();
+            self::$apiClient = self::createConfiguredHttpClient();
         }
+    }
+
+    /**
+     * Create an HttpClient with configured middleware
+     * @return HttpClient
+     */
+    protected static function createConfiguredHttpClient(): HttpClient
+    {
+        $middlewareConfig = Config::getMiddleware();
+        $middleware = [];
+        $logger = null;
+
+        // Check if logging is configured
+        if (isset($middlewareConfig['logging']) && $middlewareConfig['logging']['enabled'] !== false) {
+            // For now, use NullLogger unless a logger is provided via setApiClient
+            // In a future enhancement, we could support PSR-3 logger configuration
+            $logger = new \Psr\Log\NullLogger();
+        }
+
+        // If middleware config is empty, HttpClient will use defaults
+        if (!empty($middlewareConfig)) {
+            // Build middleware instances from configuration
+            if (isset($middlewareConfig['retry'])) {
+                $middleware[] = new \CanvasLMS\Http\Middleware\RetryMiddleware($middlewareConfig['retry']);
+            }
+
+            if (isset($middlewareConfig['rate_limit'])) {
+                $middleware[] = new \CanvasLMS\Http\Middleware\RateLimitMiddleware($middlewareConfig['rate_limit']);
+            }
+
+            if (isset($middlewareConfig['logging']) && $logger !== null) {
+                $loggingConfig = $middlewareConfig['logging'];
+                unset($loggingConfig['enabled']); // Remove the enabled flag
+                $middleware[] = new \CanvasLMS\Http\Middleware\LoggingMiddleware($logger, $loggingConfig);
+            }
+        }
+
+        return new HttpClient(null, $logger, $middleware);
     }
 
     /**

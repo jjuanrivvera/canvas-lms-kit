@@ -54,6 +54,11 @@ class HttpClient implements HttpClientInterface
         $this->logger = $logger ?? new \Psr\Log\NullLogger();
         $this->handlerStack = HandlerStack::create();
 
+        // If no middleware provided and no client provided, add sensible defaults
+        if (empty($middleware) && $client === null) {
+            $middleware = $this->getDefaultMiddleware();
+        }
+
         // Register middleware
         foreach ($middleware as $mw) {
             $this->addMiddleware($mw);
@@ -213,6 +218,42 @@ class HttpClient implements HttpClientInterface
     public function getLogger(): LoggerInterface
     {
         return $this->logger;
+    }
+
+    /**
+     * Get default middleware stack
+     *
+     * @return array<MiddlewareInterface>
+     */
+    private function getDefaultMiddleware(): array
+    {
+        $middleware = [];
+
+        // Add retry middleware with sensible defaults
+        $middleware[] = new Middleware\RetryMiddleware([
+            'max_attempts' => 3,
+            'delay' => 1000,
+            'multiplier' => 2,
+            'jitter' => true,
+        ]);
+
+        // Add rate limit middleware with Canvas defaults
+        $middleware[] = new Middleware\RateLimitMiddleware([
+            'enabled' => true,
+            'wait_on_limit' => true,
+            'max_wait_time' => 30,
+        ]);
+
+        // Add logging middleware if a logger is available
+        if (!($this->logger instanceof \Psr\Log\NullLogger)) {
+            $middleware[] = new Middleware\LoggingMiddleware($this->logger, [
+                'log_level' => \Psr\Log\LogLevel::INFO,
+                'log_errors' => true,
+                'log_timing' => true,
+            ]);
+        }
+
+        return $middleware;
     }
 
     /**

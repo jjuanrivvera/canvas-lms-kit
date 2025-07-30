@@ -60,7 +60,15 @@ class HttpClientMiddlewareTest extends TestCase
                 };
             });
 
-        $this->httpClient = new HttpClient(null, $this->loggerMock);
+        // Create a dummy middleware to prevent defaults from being added
+        $dummyMiddleware = $this->createMock(MiddlewareInterface::class);
+        $dummyMiddleware->method('getName')->willReturn('dummy');
+        $dummyMiddleware->method('__invoke')->willReturn(function ($handler) {
+            return $handler;
+        });
+
+        $this->httpClient = new HttpClient(null, null, [$dummyMiddleware]);
+        $this->httpClient->removeMiddleware('dummy'); // Remove the dummy
         $this->httpClient->addMiddleware($middlewareMock);
 
         $middleware = $this->httpClient->getMiddleware();
@@ -76,7 +84,15 @@ class HttpClientMiddlewareTest extends TestCase
             return $handler;
         });
 
-        $this->httpClient = new HttpClient(null, $this->loggerMock);
+        // Create a dummy middleware to prevent defaults from being added
+        $dummyMiddleware = $this->createMock(MiddlewareInterface::class);
+        $dummyMiddleware->method('getName')->willReturn('dummy');
+        $dummyMiddleware->method('__invoke')->willReturn(function ($handler) {
+            return $handler;
+        });
+
+        $this->httpClient = new HttpClient(null, null, [$dummyMiddleware]);
+        $this->httpClient->removeMiddleware('dummy'); // Remove the dummy
         $this->httpClient->addMiddleware($middlewareMock);
         
         $this->assertCount(1, $this->httpClient->getMiddleware());
@@ -112,5 +128,62 @@ class HttpClientMiddlewareTest extends TestCase
     {
         $this->httpClient = new HttpClient(null, $this->loggerMock);
         $this->assertSame($this->loggerMock, $this->httpClient->getLogger());
+    }
+
+    public function testDefaultMiddlewareApplied()
+    {
+        // Create HttpClient without any middleware or client
+        $this->httpClient = new HttpClient();
+        
+        $middleware = $this->httpClient->getMiddleware();
+        
+        // Should have retry and rate limit middleware by default
+        $this->assertCount(2, $middleware);
+        $this->assertArrayHasKey('retry', $middleware);
+        $this->assertArrayHasKey('rate-limit', $middleware);
+    }
+
+    public function testDefaultMiddlewareWithLogger()
+    {
+        // Create HttpClient with logger but no middleware
+        $this->httpClient = new HttpClient(null, $this->loggerMock);
+        
+        $middleware = $this->httpClient->getMiddleware();
+        
+        // Should have retry, rate limit, and logging middleware
+        $this->assertCount(3, $middleware);
+        $this->assertArrayHasKey('retry', $middleware);
+        $this->assertArrayHasKey('rate-limit', $middleware);
+        $this->assertArrayHasKey('logging', $middleware);
+    }
+
+    public function testNoDefaultMiddlewareWithCustomClient()
+    {
+        // Create HttpClient with custom client (backward compatibility)
+        $guzzleClient = new \GuzzleHttp\Client();
+        $this->httpClient = new HttpClient($guzzleClient);
+        
+        $middleware = $this->httpClient->getMiddleware();
+        
+        // Should have no middleware when custom client is provided
+        $this->assertCount(0, $middleware);
+    }
+
+    public function testNoDefaultMiddlewareWithCustomMiddleware()
+    {
+        // Create HttpClient with custom middleware
+        $customMiddleware = $this->createMock(MiddlewareInterface::class);
+        $customMiddleware->method('getName')->willReturn('custom');
+        $customMiddleware->method('__invoke')->willReturn(function ($handler) {
+            return $handler;
+        });
+
+        $this->httpClient = new HttpClient(null, null, [$customMiddleware]);
+        
+        $middleware = $this->httpClient->getMiddleware();
+        
+        // Should only have the custom middleware, no defaults
+        $this->assertCount(1, $middleware);
+        $this->assertArrayHasKey('custom', $middleware);
     }
 }

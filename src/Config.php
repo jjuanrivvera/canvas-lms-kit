@@ -12,7 +12,8 @@ class Config
      *     timeout?: int,
      *     app_key?: string,
      *     base_url?: string,
-     *     account_id?: int
+     *     account_id?: int,
+     *     middleware?: array<string, array<string, mixed>>
      * }>
      */
     private static array $contexts = [];
@@ -349,6 +350,31 @@ class Config
     public static function getContext(): string
     {
         return self::$activeContext;
+    }
+
+    /**
+     * Set middleware configuration.
+     *
+     * @param array<string, array<string, mixed>> $middleware Middleware configuration
+     * @param string|null $context The context to set the middleware for (null for active context)
+     * @return void
+     */
+    public static function setMiddleware(array $middleware, ?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+        self::$contexts[$context]['middleware'] = $middleware;
+    }
+
+    /**
+     * Get middleware configuration.
+     *
+     * @param string|null $context The context to get the middleware for (null for active context)
+     * @return array<string, array<string, mixed>> The middleware configuration
+     */
+    public static function getMiddleware(?string $context = null): array
+    {
+        $context ??= self::$activeContext;
+        return self::$contexts[$context]['middleware'] ?? [];
     }
 
     /**
