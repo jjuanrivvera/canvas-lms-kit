@@ -1,265 +1,291 @@
-# CanvasLMS PHP Tool Kit
+# Canvas LMS PHP SDK
 
-This library provides a PHP SDK for the Canvas Learning Management System (Canvas LMS). It's designed to facilitate developers in integrating with the Canvas LMS API, enabling efficient management of courses, users, and other features provided by the Canvas LMS API.
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue.svg)](https://php.net)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![PSR-12](https://img.shields.io/badge/PSR-12-blue.svg)](https://www.php-fig.org/psr/psr-12/)
 
-## System Requirements
+A modern PHP SDK for the Canvas Learning Management System (LMS) API. Built with PHP 8.1+ features, this SDK provides an intuitive Active Record interface for managing Canvas resources with automatic retry logic and rate limiting out of the box.
 
-- PHP 8.0 or later.
-- GuzzleHttp client for HTTP requests.
-- Composer for managing dependencies.
+## 📑 Table of Contents
 
-## Installation
+- [Features](#-features)
+- [Requirements](#-requirements)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Project Structure](#-project-structure)
+- [Automatic Protection](#️-automatic-protection)
+- [Multi-Tenant Configuration](#-multi-tenant-configuration)
+- [Documentation](#-documentation)
+- [Supported Canvas APIs](#-supported-canvas-apis)
+- [Testing](#-testing)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Support](#-support)
+- [Links](#-links)
 
-Install the library via Composer:
+## 🚀 Features
+
+- **Zero-Configuration Middleware**: Automatic retry and rate limiting protection
+- **Active Record Pattern**: Intuitive object-oriented API (`Course::find()`, `$course->save()`)
+- **Multi-Tenant Support**: Manage multiple Canvas instances with isolated contexts
+- **Type Safety**: Full PHP 8.1+ type declarations and PHPStan level 6 compliance
+- **Comprehensive Testing**: 1000+ tests with full coverage
+- **PSR Standards**: PSR-12 coding standards and PSR-3 logging support
+
+## 📋 Requirements
+
+- PHP 8.1 or higher
+- Composer
+- Canvas LMS API token
+
+## 📦 Installation
+
+Install via Composer:
 
 ```bash
 composer require jjuanrivvera/canvas-lms-kit
 ```
 
-Ensure your `composer.json` file includes the necessary dependencies.
+## 🔧 Quick Start
 
-## Basic Usage
+### Basic Configuration
 
-Here are some examples of how to use the library:
+```php
+use CanvasLMS\Config;
+use CanvasLMS\Api\Courses\Course;
+
+// Configure the SDK
+Config::setApiKey('your-canvas-api-key');
+Config::setBaseUrl('https://your-canvas-instance.instructure.com');
+
+// That's it! The SDK is ready to use with automatic retry and rate limiting
+$course = Course::find(123); // Automatically protected against failures
+```
 
 ### Creating a Course
 
 ```php
 use CanvasLMS\Api\Courses\Course;
 
-$courseData = [
-    'name' => 'Introduction to Philosophy',
-    'courseCode' => 'PHIL101',
-    // ... additional course data ...
-];
-$course = Course::create($courseData);
+// Using static method
+$course = Course::create([
+    'name' => 'Introduction to PHP',
+    'course_code' => 'PHP101',
+    'is_public' => false
+]);
 
-// Or using an object
-
-$course = new Course($courseData);
+// Using instance method
+$course = new Course([
+    'name' => 'Advanced PHP',
+    'course_code' => 'PHP201'
+]);
 $course->save();
 ```
 
-### Updating a Course
+### Managing Users
 
 ```php
-$updatedData = [
-    'name' => 'Advanced Philosophy',
-    'courseCode' => 'PHIL201',
-    // ... additional updated data ...
-];
-$updatedCourse = Course::update(123, $updatedData); // 123 is the course ID
+use CanvasLMS\Api\Users\User;
 
-// Or using an object
-$course = Course::find(123);
-$course->name = 'Advanced Philosophy';
-$course->courseCode = 'PHIL201';
-$course->save();
+// Create a user
+$user = User::create([
+    'name' => 'Jane Doe',
+    'email' => 'jane.doe@example.com',
+    'login_id' => 'jane.doe'
+]);
+
+// Find and update a user
+$user = User::find(456);
+$user->name = 'Jane Smith';
+$user->save();
 ```
 
-### Retrieving a Course
+## 📁 Project Structure
 
-```php
-$course = Course::find(123); // 123 is the course ID
+```
+canvas-lms-kit/
+├── src/
+│   ├── Api/                    # API resource classes (Active Record pattern)
+│   │   ├── AbstractBaseApi.php # Base class for all API resources
+│   │   ├── Courses/           # Course management
+│   │   ├── Users/             # User management
+│   │   ├── Enrollments/       # Enrollment management
+│   │   ├── Assignments/       # Assignment handling
+│   │   ├── Modules/           # Module organization
+│   │   ├── ModuleItems/       # Module item management
+│   │   ├── Quizzes/           # Quiz management
+│   │   ├── Sections/          # Course sections
+│   │   ├── Tabs/              # Course navigation tabs
+│   │   ├── ExternalTools/     # LTI integrations
+│   │   └── Files/             # File uploads
+│   ├── Dto/                   # Data Transfer Objects
+│   ├── Exceptions/            # Custom exceptions
+│   ├── Http/                  # HTTP client and middleware
+│   │   ├── HttpClient.php     # Main HTTP client
+│   │   └── Middleware/        # Request/response middleware
+│   │       ├── RetryMiddleware.php      # Automatic retry logic
+│   │       ├── RateLimitMiddleware.php  # Rate limit handling
+│   │       └── LoggingMiddleware.php    # Request logging
+│   ├── Interfaces/            # PHP interfaces
+│   ├── Objects/               # Read-only value objects
+│   ├── Pagination/            # Pagination support
+│   └── Config.php             # Global configuration
+├── tests/                     # PHPUnit tests
+├── docs/                      # Additional documentation
+├── wiki/                      # Wiki documentation (gitignored)
+├── docker-compose.yml         # Docker development setup
+├── composer.json              # Composer dependencies
+├── phpstan.neon              # PHPStan configuration
+└── README.md                 # This file
 ```
 
-## Configuration
+## 🛡️ Automatic Protection
 
-### Basic Configuration
+The SDK includes intelligent middleware that automatically handles:
 
-Before using the SDK, set up the API key and Base URL:
+### Retry Logic
+- Failed requests are retried up to 3 times
+- Exponential backoff prevents overwhelming the server
+- Handles transient network issues and 5xx errors
+
+### Rate Limiting
+- Monitors Canvas API rate limit headers
+- Automatically throttles requests when approaching limits
+- Prevents 403 rate limit errors
+
+### Request Logging
+- Logs all API interactions when configured
+- Sanitizes sensitive data automatically
+- Helps with debugging and monitoring
+
+### Customizing Protection
 
 ```php
-use CanvasLMS\Config;
-
-Config::setApiKey('your-api-key');
-Config::setBaseUrl('https://canvas.instructure.com');
-Config::setAccountId(1); // Optional: default is 1
+// Adjust retry and rate limiting behavior
+Config::setMiddleware([
+    'retry' => [
+        'max_attempts' => 5,        // More retries
+        'delay' => 2000,            // Start with 2s delay
+    ],
+    'rate_limit' => [
+        'wait_on_limit' => false,   // Fail fast instead of waiting
+        'max_wait_time' => 60,      // Wait up to 60 seconds
+    ],
+]);
 ```
 
-### Environment-Based Configuration
+## 🏢 Multi-Tenant Configuration
 
-The SDK can automatically detect configuration from environment variables:
-
-```php
-// Set these environment variables:
-// CANVAS_API_KEY=your-api-key
-// CANVAS_BASE_URL=https://canvas.instructure.com
-// CANVAS_ACCOUNT_ID=1
-// CANVAS_API_VERSION=v1
-// CANVAS_TIMEOUT=30
-
-Config::autoDetect(); // Reads from environment variables
-```
-
-### Multi-Tenant Configuration
-
-The SDK supports multiple Canvas instances using contexts:
+Manage multiple Canvas instances with context isolation:
 
 ```php
-// Configure first Canvas instance
+// Configure production instance
 Config::setContext('production');
 Config::setApiKey('prod-api-key');
-Config::setBaseUrl('https://prod.instructure.com');
-Config::setAccountId(1);
+Config::setBaseUrl('https://canvas.company.com');
+Config::setMiddleware([
+    'retry' => ['max_attempts' => 3],
+    'rate_limit' => ['wait_on_limit' => true],
+]);
 
-// Configure second Canvas instance
-Config::setContext('staging');
-Config::setApiKey('staging-api-key');
-Config::setBaseUrl('https://staging.instructure.com');
-Config::setAccountId(2);
-
-// Switch between contexts
-Config::setContext('production');
-$prodCourse = Course::find(123); // Uses production config
-
-Config::setContext('staging');
-$stagingCourse = Course::find(456); // Uses staging config
-```
-
-### Testing Configuration
-
-For better test isolation, use contexts to prevent test interference:
-
-```php
-// In your test setup
+// Configure test instance
 Config::setContext('test');
 Config::setApiKey('test-api-key');
-Config::setBaseUrl('https://test.canvas.local');
+Config::setBaseUrl('https://test.canvas.company.com');
+Config::setMiddleware([
+    'retry' => ['max_attempts' => 5],
+    'rate_limit' => ['enabled' => false], // No limits in test
+]);
 
-// In your test teardown
-Config::resetContext('test'); // Clean up test configuration
-```
-
-### Configuration Validation
-
-Validate your configuration to ensure all required values are set:
-
-```php
-try {
-    Config::validate(); // Throws exception if configuration is incomplete
-} catch (ConfigurationException $e) {
-    echo "Configuration error: " . $e->getMessage();
-}
-```
-
-### Debugging Configuration
-
-Debug your current configuration (masks sensitive data):
-
-```php
-$debug = Config::debugConfig();
-print_r($debug);
-// Output:
-// [
-//     'active_context' => 'default',
-//     'app_key' => '***-key',  // Masked for security
-//     'base_url' => 'https://canvas.instructure.com/',
-//     'api_version' => 'v1',
-//     'account_id' => 1,
-//     'all_contexts' => ['default', 'production', 'staging']
-// ]
-```
-
-## Troubleshooting
-
-### Common Configuration Issues
-
-#### Invalid URL Errors
-```
-Canvas URL must use HTTPS for security: http://canvas.example.com
-```
-**Solution**: Use HTTPS URLs for production Canvas instances. HTTP is only allowed for localhost/development:
-```php
-// ✅ Correct
-Config::setBaseUrl('https://canvas.instructure.com');
-
-// ❌ Incorrect (production)
-Config::setBaseUrl('http://canvas.instructure.com');
-
-// ✅ Allowed for development
-Config::setBaseUrl('http://localhost:3000');
-```
-
-#### Environment Variable Validation Errors
-```
-CANVAS_ACCOUNT_ID must be a positive integer, got: invalid
-```
-**Solution**: Ensure environment variables contain valid values:
-```bash
-# ✅ Correct
-export CANVAS_ACCOUNT_ID=123
-export CANVAS_TIMEOUT=30
-
-# ❌ Incorrect
-export CANVAS_ACCOUNT_ID=invalid
-export CANVAS_TIMEOUT=abc
-```
-
-#### Configuration Not Found
-```
-API key not set for context: production
-```
-**Solution**: Ensure all required configuration is set for each context:
-```php
+// Switch contexts as needed
 Config::setContext('production');
-Config::setApiKey('your-api-key');
-Config::setBaseUrl('https://canvas.example.com');
+$prodCourse = Course::find(123); // Uses production settings
 
-// Validate configuration
-Config::validate(); // Throws exception if incomplete
+Config::setContext('test');
+$testCourse = Course::find(456); // Uses test settings
 ```
 
-#### Context Isolation Issues
-If tests are interfering with each other, ensure proper context cleanup:
-```php
-// In test tearDown
-Config::resetContext('test');
+## 📚 Documentation
 
-// Or use unique context names per test
-Config::setContext('test-' . uniqid());
+### API Reference
+- **[PHPDoc API Reference](https://jjuanrivvera.github.io/canvas-lms-kit/)** - Complete API documentation with class references, method signatures, and examples
+
+### Guides and Tutorials
+Comprehensive guides are available in our [GitHub Wiki](https://github.com/jjuanrivvera/canvas-lms-kit/wiki):
+
+- **[Getting Started](https://github.com/jjuanrivvera/canvas-lms-kit/wiki)** - Installation and configuration guide
+- **[Implementation Examples](https://github.com/jjuanrivvera/canvas-lms-kit/wiki/Implementation‐Examples)** - Real-world usage patterns
+- **[Architecture Overview](https://github.com/jjuanrivvera/canvas-lms-kit/wiki/Architecture‐Overview)** - Design patterns and structure
+- **[API Coverage](https://github.com/jjuanrivvera/canvas-lms-kit/wiki/MVP‐Progress‐Tracking)** - Supported Canvas API endpoints
+- **[Contributing Guidelines](https://github.com/jjuanrivvera/canvas-lms-kit/wiki/Contributing‐Guidelines)** - How to contribute
+
+## 🎯 Supported Canvas APIs
+
+The SDK currently supports **17 Canvas API resources** organized into four main categories:
+
+### 📚 Core Course Management
+- **Courses** - Full CRUD operations for course creation and management
+- **Modules** - Content organization with position ordering
+- **Module Items** - Individual items within modules (assignments, pages, files, etc.)
+- **Sections** - Course section management
+- **Tabs** - Course navigation customization
+- **Pages** - Wiki-style content pages
+
+### 👥 User & Enrollment Management
+- **Users** - User profiles and account management
+- **Enrollments** - Course enrollment with role management
+
+### 📝 Assessment & Grading
+- **Assignments** - Assignment creation with due dates and grading
+- **Quizzes** - Quiz management with time limits and attempts
+- **Quiz Submissions** - Student quiz attempts and answers
+- **Submissions** - Assignment submissions with file uploads
+- **Submission Comments** - Feedback and grading comments
+
+### 🔧 Content & Tools
+- **Discussion Topics** - Threaded discussions with grading support
+- **Files** - File uploads using Canvas 3-step process
+- **External Tools** - LTI (Learning Tools Interoperability) integrations
+- **Module Assignment Overrides** - Custom dates for specific sections/students
+
+## 🧪 Testing
+
+Run the test suite using Docker:
+
+```bash
+# Run all tests
+docker compose exec php composer test
+
+# Run with coverage
+docker compose exec php composer test:coverage
+
+# Run specific test
+docker compose exec php ./vendor/bin/phpunit tests/Api/Courses/CourseTest.php
 ```
 
-### Debugging Configuration
+## 🤝 Contributing
 
-Use the debug method to inspect current configuration:
-```php
-$debug = Config::debugConfig();
-print_r($debug);
-```
+We welcome contributions! Please see our [Contributing Guidelines](https://github.com/jjuanrivvera/canvas-lms-kit/wiki/Contributing‐Guidelines) for details on:
 
-Enable notices to see when default values are used:
-```php
-// This will trigger a notice if account ID isn't explicitly set
-$accountId = Config::getAccountId();
-```
+- Code standards (PSR-12)
+- Testing requirements
+- Pull request process
+- Development setup
 
-### Performance Considerations
+## 📄 License
 
-For applications with many contexts:
-- Clean up unused contexts periodically
-- Consider using context prefixes for organization
-- Avoid frequent context switching in hot paths
+This SDK is open-sourced software licensed under the [MIT license](LICENSE).
 
-## 🗺️ Project Roadmap
+## 💬 Support
 
-This SDK is actively developed with a clear strategic roadmap. See [STRATEGIC_ROADMAP.md](STRATEGIC_ROADMAP.md) for:
+- **Issues**: [GitHub Issues](https://github.com/jjuanrivvera/canvas-lms-kit/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/jjuanrivvera/canvas-lms-kit/discussions)
+- **Email**: jjuanrivvera@gmail.com
 
-- **Current Canvas API coverage** (~15%) and target coverage (85%+)
-- **5-phase development plan** over 9 months to production readiness
-- **Prioritized feature development** based on real-world Canvas usage
-- **Enterprise readiness requirements** for production deployments
+## 🔗 Links
 
-**Current Phase**: Foundation completion (Enrollments, Grades, Submissions APIs)
-
-## Contributing
-
-We welcome contributions to the SDK. Please adhere to the PHP coding standards and include tests for new features or bug fixes.
-
-## License
-
-This SDK is open-sourced under the [MIT License](LICENSE).
-
-## Contact and Support
-
-For any questions or support, feel free to contact us at [jjuanrivvera@gmail.com].
+- **Repository**: [https://github.com/jjuanrivvera/canvas-lms-kit](https://github.com/jjuanrivvera/canvas-lms-kit)
+- **API Documentation**: [https://jjuanrivvera.github.io/canvas-lms-kit/](https://jjuanrivvera.github.io/canvas-lms-kit/)
+- **Wiki Documentation**: [https://github.com/jjuanrivvera/canvas-lms-kit/wiki](https://github.com/jjuanrivvera/canvas-lms-kit/wiki)
+- **Packagist**: [https://packagist.org/packages/jjuanrivvera/canvas-lms-kit](https://packagist.org/packages/jjuanrivvera/canvas-lms-kit)
+- **Canvas API Docs**: [https://canvas.instructure.com/doc/api/](https://canvas.instructure.com/doc/api/)
