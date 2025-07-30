@@ -38,11 +38,18 @@ class CreateUserDTO extends AbstractBaseDto implements DTOInterface
     public ?string $timeZone;
 
     /**
-     * The user’s preferred language, from the list of languages Canvas supports. This is in RFC-5646 format.
+     * The user's preferred language, from the list of languages Canvas supports. This is in RFC-5646 format.
      *
      * @var string|null
      */
     public ?string $locale;
+
+    /**
+     * The user's birth date.
+     *
+     * @var DateTimeInterface|null
+     */
+    public ?DateTimeInterface $birthdate = null;
 
     /**
      * Whether the user accepts the terms of use. Required if this is a self-registration and
@@ -124,7 +131,16 @@ class CreateUserDTO extends AbstractBaseDto implements DTOInterface
     public ?string $authenticationProviderId;
 
     /**
-     * The communication channel type, e.g. ‘email’ or ‘sms’.
+     * Send users a self-registration style email if true. Setting it means the users
+     * will get password-setting info. If false, notification_email is sent instead.
+     * Only valid if the sending_confirmation option is set.
+     *
+     * @var string|null
+     */
+    public ?string $declaredUserType = null;
+
+    /**
+     * The communication channel type, e.g. 'email' or 'sms'.
      *
      * @var string
      */
@@ -209,8 +225,8 @@ class CreateUserDTO extends AbstractBaseDto implements DTOInterface
         $modifiedProperties = [];
 
         foreach ($properties as $key => $value) {
-            if ($value instanceof \DateTime) {
-                $value = $value->format(DateTimeInterface::ATOM); // Convert DateTime to ISO 8601 string
+            if ($value instanceof DateTimeInterface) {
+                $value = $value->format('Y-m-d'); // Convert DateTime to YYYY-MM-DD format for birthdate
             }
 
             if (empty($value)) {
@@ -226,7 +242,8 @@ class CreateUserDTO extends AbstractBaseDto implements DTOInterface
                 'integrationId',
                 'sendConfirmation',
                 'forceSelfRegistration',
-                'authenticationProviderId' => 'pseudonym[' . str_to_snake_case($key) . ']',
+                'authenticationProviderId',
+                'declaredUserType' => 'pseudonym[' . str_to_snake_case($key) . ']',
                 'communicationType',
                 'communicationAddress',
                 'confirmationUrl',
@@ -234,7 +251,9 @@ class CreateUserDTO extends AbstractBaseDto implements DTOInterface
                 'communication_channel[' . str_to_snake_case(substr($key, strlen('communication'))) . ']',
                 'destination',
                 'initialEnrollmentType',
-                'pairingCode' => str_to_snake_case($key),
+                'pairingCode',
+                'forceValidations',
+                'enableSisReactivation' => str_to_snake_case($key),
                 default => 'user[' . str_to_snake_case($key) . ']'
             };
 
@@ -613,5 +632,37 @@ class CreateUserDTO extends AbstractBaseDto implements DTOInterface
     public function setPairingCode(?string $pairingCode): void
     {
         $this->pairingCode = $pairingCode;
+    }
+
+    /**
+     * @return DateTimeInterface|null
+     */
+    public function getBirthdate(): ?DateTimeInterface
+    {
+        return $this->birthdate;
+    }
+
+    /**
+     * @param DateTimeInterface|null $birthdate
+     */
+    public function setBirthdate(?DateTimeInterface $birthdate): void
+    {
+        $this->birthdate = $birthdate;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDeclaredUserType(): ?string
+    {
+        return $this->declaredUserType;
+    }
+
+    /**
+     * @param string|null $declaredUserType
+     */
+    public function setDeclaredUserType(?string $declaredUserType): void
+    {
+        $this->declaredUserType = $declaredUserType;
     }
 }
