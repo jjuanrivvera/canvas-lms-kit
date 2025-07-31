@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
  */
 class UpdateExternalToolDTOTest extends TestCase
 {
-    public function updateExternalToolDataProvider(): array
+    public static function updateExternalToolDataProvider(): array
     {
         return [
             'name only update' => [

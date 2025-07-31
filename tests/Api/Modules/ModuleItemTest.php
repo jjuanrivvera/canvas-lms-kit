@@ -48,7 +48,7 @@ class ModuleItemTest extends TestCase
     /**
      * @return array<string, array<mixed>>
      */
-    public function moduleItemDataProvider(): array
+    public static function moduleItemDataProvider(): array
     {
         return [
             'assignment_item' => [

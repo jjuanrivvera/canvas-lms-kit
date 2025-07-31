@@ -77,7 +77,7 @@ class ExternalToolTest extends TestCase
         $courseProperty->setValue($originalCourse);
     }
 
-    public function externalToolDataProvider(): array
+    public static function externalToolDataProvider(): array
     {
         return [
             'basic external tool' => [
@@ -629,7 +629,7 @@ class ExternalToolTest extends TestCase
         $this->assertEquals('unified123', $tool->getUnifiedToolId());
     }
 
-    public function validPrivacyLevelsProvider(): array
+    public static function validPrivacyLevelsProvider(): array
     {
         return [
             ['anonymous'],
@@ -654,7 +654,7 @@ class ExternalToolTest extends TestCase
         $this->assertTrue($tool->validateConfiguration());
     }
 
-    public function invalidUrlProvider(): array
+    public static function invalidUrlProvider(): array
     {
         return [
             'javascript scheme' => ['javascript:alert("xss")'],
@@ -715,7 +715,7 @@ class ExternalToolTest extends TestCase
         $tool->save();
     }
 
-    public function validUrlProvider(): array
+    public static function validUrlProvider(): array
     {
         return [
             'https url' => ['https://example.com/lti/launch'],

@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
  */
 class CreateExternalToolDTOTest extends TestCase
 {
-    public function basicExternalToolDataProvider(): array
+    public static function basicExternalToolDataProvider(): array
     {
         return [
             'minimal required data' => [
@@ -45,7 +45,7 @@ class CreateExternalToolDTOTest extends TestCase
         ];
     }
 
-    public function placementConfigurationDataProvider(): array
+    public static function placementConfigurationDataProvider(): array
     {
         return [
             'course navigation' => [
@@ -343,7 +343,7 @@ class CreateExternalToolDTOTest extends TestCase
         $this->assertEquals($data['url'], $array['url']);
     }
 
-    public function snakeCaseConversionProvider(): array
+    public static function snakeCaseConversionProvider(): array
     {
         return [
             ['privacy_level', 'public', 'privacyLevel'],
