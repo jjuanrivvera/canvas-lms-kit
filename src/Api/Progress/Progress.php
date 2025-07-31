@@ -149,8 +149,10 @@ class Progress extends AbstractBaseApi
         if (in_array($key, ['createdAt', 'updatedAt']) && is_string($value)) {
             try {
                 return new DateTime($value);
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 // Return null for invalid date formats instead of throwing
+                // Using \Throwable to catch both Exception and Error
+                // (including DateMalformedStringException in PHP 8.3+)
                 return null;
             }
         }
