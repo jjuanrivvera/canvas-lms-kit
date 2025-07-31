@@ -14,6 +14,8 @@ use CanvasLMS\Objects\CourseProgress;
 use CanvasLMS\Objects\Term;
 use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Api\CalendarEvents\CalendarEvent;
+use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
 
 /**
  * Course Class
@@ -2450,5 +2452,160 @@ class Course extends AbstractBaseApi
             );
         }
         $this->defaultDueTime = $defaultDueTime;
+    }
+
+    /**
+     * Get calendar events for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return CalendarEvent[]
+     * @throws CanvasApiException
+     */
+    public function getCalendarEvents(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to get calendar events');
+        }
+
+        $params['context_codes'] = [sprintf('course_%d', $this->id)];
+        return CalendarEvent::fetchAll($params);
+    }
+
+    /**
+     * Get paginated calendar events for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     */
+    public function getCalendarEventsPaginated(array $params = []): PaginatedResponse
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to get calendar events');
+        }
+
+        $params['context_codes'] = [sprintf('course_%d', $this->id)];
+        return CalendarEvent::fetchAllPaginated($params);
+    }
+
+    /**
+     * Create a calendar event for this course
+     *
+     * @param CreateCalendarEventDTO|array<string, mixed> $data
+     * @return CalendarEvent
+     * @throws CanvasApiException
+     */
+    public function createCalendarEvent($data): CalendarEvent
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to create calendar event');
+        }
+
+        $dto = $data instanceof CreateCalendarEventDTO ? $data : new CreateCalendarEventDTO($data);
+        $dto->contextCode = sprintf('course_%d', $this->id);
+        return CalendarEvent::create($dto);
+    }
+
+    /**
+     * Set course timetable
+     *
+     * @param array<string, array<int, array{weekdays: string, start_time: string, end_time: string, location_name?: string}>> $timetables
+     * @return array<string, mixed>
+     * @throws CanvasApiException
+     */
+    public function setTimetable(array $timetables): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to set timetable');
+        }
+
+        $endpoint = sprintf('courses/%d/calendar_events/timetable', $this->id);
+
+        $data = [];
+        foreach ($timetables as $sectionId => $sectionTimetables) {
+            foreach ($sectionTimetables as $index => $timetable) {
+                $data[] = [
+                    'name' => "timetables[$sectionId][$index][weekdays]",
+                    'contents' => $timetable['weekdays']
+                ];
+                $data[] = [
+                    'name' => "timetables[$sectionId][$index][start_time]",
+                    'contents' => $timetable['start_time']
+                ];
+                $data[] = [
+                    'name' => "timetables[$sectionId][$index][end_time]",
+                    'contents' => $timetable['end_time']
+                ];
+                if (isset($timetable['location_name'])) {
+                    $data[] = [
+                        'name' => "timetables[$sectionId][$index][location_name]",
+                        'contents' => $timetable['location_name']
+                    ];
+                }
+            }
+        }
+
+        $response = self::$apiClient->post($endpoint, $data);
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get course timetable
+     *
+     * @return array<string, mixed>
+     * @throws CanvasApiException
+     */
+    public function getTimetable(): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to get timetable');
+        }
+
+        $endpoint = sprintf('courses/%d/calendar_events/timetable', $this->id);
+        $response = self::$apiClient->get($endpoint);
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Set course timetable events directly
+     *
+     * @param array<int, array{start_at: \DateTime|string, end_at: \DateTime|string, location_name?: string, code?: string, title?: string}> $events
+     * @param string|null $sectionId
+     * @return array<string, mixed>
+     * @throws CanvasApiException
+     */
+    public function setTimetableEvents(array $events, ?string $sectionId = null): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to set timetable events');
+        }
+
+        $endpoint = sprintf('courses/%d/calendar_events/timetable_events', $this->id);
+
+        $data = [];
+        if ($sectionId !== null) {
+            $data[] = [
+                'name' => 'course_section_id',
+                'contents' => $sectionId
+            ];
+        }
+
+        foreach ($events as $index => $event) {
+            foreach ($event as $key => $value) {
+                $data[] = [
+                    'name' => "events[$index][$key]",
+                    'contents' => $value instanceof \DateTime ? $value->format(\DateTime::ATOM) : $value
+                ];
+            }
+        }
+
+        $response = self::$apiClient->post($endpoint, $data);
+        return json_decode($response->getBody(), true);
     }
 }

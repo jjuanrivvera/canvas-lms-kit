@@ -21,6 +21,8 @@ use CanvasLMS\Objects\Profile;
 use CanvasLMS\Objects\Avatar;
 use CanvasLMS\Objects\CourseNickname;
 use CanvasLMS\Objects\PageView;
+use CanvasLMS\Api\CalendarEvents\CalendarEvent;
+use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
 
 /**
  * User Class
@@ -1531,5 +1533,66 @@ class User extends AbstractBaseApi
         $response = self::$apiClient->get("/users/{$this->id}/pandata_events_token");
 
         return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get calendar events for this user
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return CalendarEvent[]
+     * @throws CanvasApiException
+     */
+    public function getCalendarEvents(array $params = []): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to get calendar events');
+        }
+
+        $endpoint = sprintf('users/%d/calendar_events', $this->id);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $data = json_decode($response->getBody(), true);
+
+        return array_map(function ($item) {
+            return new CalendarEvent($item);
+        }, $data);
+    }
+
+    /**
+     * Get paginated calendar events for this user
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     */
+    public function getCalendarEventsPaginated(array $params = []): PaginatedResponse
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to get calendar events');
+        }
+
+        $endpoint = sprintf('users/%d/calendar_events', $this->id);
+        return CalendarEvent::getPaginatedResponse($endpoint, $params);
+    }
+
+    /**
+     * Create a calendar event for this user
+     *
+     * @param CreateCalendarEventDTO|array<string, mixed> $data
+     * @return CalendarEvent
+     * @throws CanvasApiException
+     */
+    public function createCalendarEvent($data): CalendarEvent
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to create calendar event');
+        }
+
+        $dto = $data instanceof CreateCalendarEventDTO ? $data : new CreateCalendarEventDTO($data);
+        $dto->contextCode = sprintf('user_%d', $this->id);
+        return CalendarEvent::create($dto);
     }
 }

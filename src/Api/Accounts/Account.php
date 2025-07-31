@@ -10,6 +10,8 @@ use CanvasLMS\Dto\Accounts\UpdateAccountDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Api\CalendarEvents\CalendarEvent;
+use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
 
 /**
  * Account Class
@@ -667,5 +669,57 @@ class Account extends AbstractBaseApi
     {
         $this->sisAccountId = $sisAccountId;
         return $this;
+    }
+
+    /**
+     * Get calendar events for this account
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return CalendarEvent[]
+     * @throws CanvasApiException
+     */
+    public function getCalendarEvents(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Account ID is required to get calendar events');
+        }
+
+        $params['context_codes'] = [sprintf('account_%d', $this->id)];
+        return CalendarEvent::fetchAll($params);
+    }
+
+    /**
+     * Get paginated calendar events for this account
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     */
+    public function getCalendarEventsPaginated(array $params = []): PaginatedResponse
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Account ID is required to get calendar events');
+        }
+
+        $params['context_codes'] = [sprintf('account_%d', $this->id)];
+        return CalendarEvent::fetchAllPaginated($params);
+    }
+
+    /**
+     * Create a calendar event for this account
+     *
+     * @param CreateCalendarEventDTO|array<string, mixed> $data
+     * @return CalendarEvent
+     * @throws CanvasApiException
+     */
+    public function createCalendarEvent($data): CalendarEvent
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Account ID is required to create calendar event');
+        }
+
+        $dto = $data instanceof CreateCalendarEventDTO ? $data : new CreateCalendarEventDTO($data);
+        $dto->contextCode = sprintf('account_%d', $this->id);
+        return CalendarEvent::create($dto);
     }
 }
