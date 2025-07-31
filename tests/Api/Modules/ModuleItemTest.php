@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tests\Api\Modules;
 
 use PHPUnit\Framework\TestCase;
-use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Modules\Module;
 use CanvasLMS\Api\Modules\ModuleItem;
@@ -22,13 +24,18 @@ use CanvasLMS\Objects\CompletionRequirement;
  */
 class ModuleItemTest extends TestCase
 {
-    private HttpClient $httpClientMock;
+    private HttpClient|MockObject $httpClientMock;
+    private ResponseInterface|MockObject $mockResponse;
+    private StreamInterface|MockObject $mockStream;
     private Course $course;
     private Module $module;
 
     protected function setUp(): void
     {
         $this->httpClientMock = $this->createMock(HttpClient::class);
+        $this->mockResponse = $this->createMock(ResponseInterface::class);
+        $this->mockStream = $this->createMock(StreamInterface::class);
+        
         ModuleItem::setApiClient($this->httpClientMock);
 
         // Set up course and module context
@@ -119,7 +126,8 @@ class ModuleItemTest extends TestCase
      */
     public function testCreateWithArray(array $moduleItemData): void
     {
-        $response = new Response(200, [], json_encode($moduleItemData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($moduleItemData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock->expects($this->once())
             ->method('post')
@@ -129,7 +137,7 @@ class ModuleItemTest extends TestCase
                     return isset($options['multipart']) && is_array($options['multipart']);
                 })
             )
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
 
         $moduleItem = ModuleItem::create($moduleItemData);
         
@@ -157,12 +165,13 @@ class ModuleItemTest extends TestCase
             'position' => 1
         ]);
         
-        $response = new Response(200, [], json_encode($moduleItemData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($moduleItemData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock->expects($this->once())
             ->method('post')
             ->with('courses/1/modules/2/items')
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
 
         $moduleItem = ModuleItem::create($dto);
         
@@ -175,12 +184,13 @@ class ModuleItemTest extends TestCase
      */
     public function testFind(array $moduleItemData): void
     {
-        $response = new Response(200, [], json_encode($moduleItemData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($moduleItemData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock->expects($this->once())
             ->method('get')
             ->with('courses/1/modules/2/items/' . $moduleItemData['id'])
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
 
         $moduleItem = ModuleItem::find($moduleItemData['id']);
         
@@ -208,7 +218,8 @@ class ModuleItemTest extends TestCase
             ]
         ];
         
-        $response = new Response(200, [], json_encode($moduleItemsData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($moduleItemsData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock->expects($this->once())
             ->method('get')
@@ -218,7 +229,7 @@ class ModuleItemTest extends TestCase
                     return isset($options['query']) && is_array($options['query']);
                 })
             )
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
 
         $moduleItems = ModuleItem::fetchAll();
         
@@ -246,7 +257,8 @@ class ModuleItemTest extends TestCase
             'position' => 2
         ];
         
-        $response = new Response(200, [], json_encode($updatedData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($updatedData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock->expects($this->once())
             ->method('put')
@@ -256,7 +268,7 @@ class ModuleItemTest extends TestCase
                     return isset($options['multipart']) && is_array($options['multipart']);
                 })
             )
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
 
         $moduleItem = ModuleItem::update(1, ['title' => 'Updated Title', 'position' => 2]);
         
@@ -277,7 +289,8 @@ class ModuleItemTest extends TestCase
         
         $moduleItem = new ModuleItem($moduleItemData);
         
-        $response = new Response(200, [], json_encode($moduleItemData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($moduleItemData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock->expects($this->once())
             ->method('request')
@@ -288,7 +301,7 @@ class ModuleItemTest extends TestCase
                     return isset($options['multipart']) && is_array($options['multipart']);
                 })
             )
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
 
         $result = $moduleItem->save();
         
@@ -307,7 +320,8 @@ class ModuleItemTest extends TestCase
         
         $moduleItem = new ModuleItem($moduleItemData);
         
-        $response = new Response(200, [], json_encode($responseData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock->expects($this->once())
             ->method('request')
@@ -318,7 +332,7 @@ class ModuleItemTest extends TestCase
                     return isset($options['multipart']) && is_array($options['multipart']);
                 })
             )
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
 
         $result = $moduleItem->save();
         

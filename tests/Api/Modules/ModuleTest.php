@@ -281,6 +281,17 @@ class ModuleTest extends TestCase
             'publishFinalGrade' => false
         ];
 
+        // Mock the fetchAll request for prerequisite validation
+        $existingModules = [
+            ['id' => 1, 'position' => 0],
+            ['id' => 2, 'position' => 0]
+        ];
+        
+        $fetchResponse = $this->createMock(ResponseInterface::class);
+        $fetchStream = $this->createMock(StreamInterface::class);
+        $fetchStream->method('getContents')->willReturn(json_encode($existingModules));
+        $fetchResponse->method('getBody')->willReturn($fetchStream);
+
         $responseData = array_merge(['id' => 123], $createData);
 
         $response = $this->createMock(ResponseInterface::class);
@@ -289,6 +300,12 @@ class ModuleTest extends TestCase
         $stream->method('getContents')->willReturn(json_encode($responseData));
         $response->method('getBody')->willReturn($stream);
 
+        // Mock the get request for prerequisite validation
+        $this->httpClient->expects($this->once())
+            ->method('get')
+            ->with('courses/1/modules', ['query' => []])
+            ->willReturn($fetchResponse);
+            
         $this->httpClient->expects($this->once())
             ->method('post')
             ->with(

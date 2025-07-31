@@ -644,15 +644,26 @@ class SubmissionTest extends TestCase
             'include' => ['submission_comments', 'rubric_assessment']
         ];
 
+        $submissionsData = [
+            ['id' => 1, 'user_id' => 111, 'workflow_state' => 'submitted'],
+            ['id' => 2, 'user_id' => 222, 'workflow_state' => 'submitted']
+        ];
+
+        $response = $this->createMock(ResponseInterface::class);
+        $stream = $this->createMock(StreamInterface::class);
+        
+        $stream->method('getContents')->willReturn(json_encode($submissionsData));
+        $response->method('getBody')->willReturn($stream);
+
         $this->httpClientMock->expects($this->once())
             ->method('get')
             ->with('courses/123/assignments/456/submissions', ['query' => $params])
-            ->willReturn($this->createMock(ResponseInterface::class));
+            ->willReturn($response);
 
-        // This test ensures the parameters are passed correctly to the HTTP client
-        Submission::fetchAll($params);
+        $submissions = Submission::fetchAll($params);
         
-        // Add assertion to make test not risky
-        $this->assertTrue(true);
+        $this->assertCount(2, $submissions);
+        $this->assertEquals(111, $submissions[0]->getUserId());
+        $this->assertEquals(222, $submissions[1]->getUserId());
     }
 }

@@ -12,9 +12,10 @@ use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
-use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * Test class for External Tools API
@@ -24,6 +25,8 @@ use PHPUnit\Framework\MockObject\MockObject;
 class ExternalToolTest extends TestCase
 {
     private HttpClientInterface&MockObject $httpClientMock;
+    private ResponseInterface&MockObject $mockResponse;
+    private StreamInterface&MockObject $mockStream;
     private Course $course;
 
     protected function setUp(): void
@@ -31,6 +34,9 @@ class ExternalToolTest extends TestCase
         parent::setUp();
         
         $this->httpClientMock = $this->createMock(HttpClientInterface::class);
+        $this->mockResponse = $this->createMock(ResponseInterface::class);
+        $this->mockStream = $this->createMock(StreamInterface::class);
+        
         ExternalTool::setApiClient($this->httpClientMock);
         
         $this->course = new Course(['id' => 123, 'name' => 'Test Course']);
@@ -143,13 +149,14 @@ class ExternalToolTest extends TestCase
             'privacy_level' => 'public'
         ];
         
-        $response = new Response(200, [], json_encode($toolData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($toolData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
             ->with('courses/123/external_tools/1')
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
         
         $tool = ExternalTool::find(1);
         
@@ -165,13 +172,14 @@ class ExternalToolTest extends TestCase
             ['id' => 2, 'name' => 'Tool 2', 'privacy_level' => 'anonymous']
         ];
         
-        $response = new Response(200, [], json_encode($toolsData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($toolsData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
             ->with('courses/123/external_tools', ['query' => []])
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
         
         $tools = ExternalTool::fetchAll();
         
@@ -186,13 +194,14 @@ class ExternalToolTest extends TestCase
         $params = ['include_parents' => true, 'placement' => 'editor_button'];
         $toolsData = [['id' => 1, 'name' => 'Tool 1', 'privacy_level' => 'public']];
         
-        $response = new Response(200, [], json_encode($toolsData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($toolsData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
             ->with('courses/123/external_tools', ['query' => $params])
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
         
         $tools = ExternalTool::fetchAll($params);
         
@@ -226,7 +235,8 @@ class ExternalToolTest extends TestCase
         ];
         
         $responseData = array_merge($toolData, ['id' => 1]);
-        $response = new Response(200, [], json_encode($responseData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock
             ->expects($this->once())
@@ -237,7 +247,7 @@ class ExternalToolTest extends TestCase
                     return isset($options['multipart']) && is_array($options['multipart']);
                 })
             )
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
         
         $tool = ExternalTool::create($toolData);
         
@@ -262,12 +272,13 @@ class ExternalToolTest extends TestCase
             'consumer_key' => 'new_key',
             'privacy_level' => 'public'
         ];
-        $response = new Response(200, [], json_encode($responseData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock
             ->expects($this->once())
             ->method('post')
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
         
         $tool = ExternalTool::create($dto);
         
@@ -285,7 +296,8 @@ class ExternalToolTest extends TestCase
             'privacy_level' => 'public'
         ];
         
-        $response = new Response(200, [], json_encode($responseData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock
             ->expects($this->once())
@@ -296,7 +308,7 @@ class ExternalToolTest extends TestCase
                     return isset($options['multipart']) && is_array($options['multipart']);
                 })
             )
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
         
         $tool = ExternalTool::update(1, $updateData);
         
@@ -314,12 +326,13 @@ class ExternalToolTest extends TestCase
             'privacy_level' => 'public'
         ];
         
-        $response = new Response(200, [], json_encode($responseData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
         
         $tool = ExternalTool::update(1, $dto);
         
@@ -335,13 +348,14 @@ class ExternalToolTest extends TestCase
             'url' => 'https://canvas.example.com/api/v1/external_tools/sessionless_launch?token=abc123'
         ];
         
-        $response = new Response(200, [], json_encode($launchData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($launchData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
             ->with('courses/123/external_tools/sessionless_launch', ['query' => $params])
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
         
         $result = ExternalTool::generateSessionlessLaunch($params);
         
@@ -365,12 +379,13 @@ class ExternalToolTest extends TestCase
             'consumer_key' => 'new_key',
             'privacy_level' => 'public'
         ];
-        $response = new Response(200, [], json_encode($responseData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock
             ->expects($this->once())
             ->method('post')
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
         
         $result = $tool->save();
         
@@ -393,12 +408,13 @@ class ExternalToolTest extends TestCase
             'consumer_key' => 'test_key',
             'privacy_level' => 'public'
         ];
-        $response = new Response(200, [], json_encode($responseData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
         
         $result = $tool->save();
         
@@ -475,13 +491,14 @@ class ExternalToolTest extends TestCase
             'url' => 'https://canvas.example.com/api/v1/external_tools/sessionless_launch?token=abc123'
         ];
         
-        $response = new Response(200, [], json_encode($launchData));
+        $this->mockStream->method('getContents')->willReturn(json_encode($launchData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
             ->with('courses/123/external_tools/sessionless_launch', ['query' => ['id' => 1]])
-            ->willReturn($response);
+            ->willReturn($this->mockResponse);
         
         $url = $tool->getLaunchUrl();
         
