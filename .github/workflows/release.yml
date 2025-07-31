@@ -31,7 +31,7 @@ jobs:
         run: composer check
         
       - name: Generate coverage report
-        run: composer test:coverage
+        run: vendor/bin/phpunit tests --coverage-clover=coverage/clover.xml
         
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

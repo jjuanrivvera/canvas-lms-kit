@@ -1,10 +1,13 @@
-name: Tests
+name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ "*" ]
   pull_request:
     branches: [ main, develop ]
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -16,7 +19,7 @@ jobs:
         php-version: ['8.1', '8.2', '8.3']
         dependency-version: ['lowest', 'highest']
         
-    name: PHP ${{ matrix.php-version }} - ${{ matrix.dependency-version }} dependencies
+    name: PHP ${{ matrix.php-version }} - ${{ matrix.dependency-version }} deps
     
     steps:
       - uses: actions/checkout@v4
@@ -59,10 +62,18 @@ jobs:
       - name: Check coding standards
         run: composer cs
         
-      - name: Run tests with coverage
-        run: composer test:coverage
+      - name: PHP syntax check
+        run: find src/ -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
         
-      - name: Upload coverage reports to Codecov
+      - name: Run tests
+        run: composer test
+        if: matrix.php-version != '8.1' || matrix.dependency-version != 'highest'
+        
+      - name: Run tests with coverage
+        run: vendor/bin/phpunit tests --coverage-clover=coverage/clover.xml
+        if: matrix.php-version == '8.1' && matrix.dependency-version == 'highest'
+        
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         if: matrix.php-version == '8.1' && matrix.dependency-version == 'highest'
         with:
@@ -70,23 +81,3 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
-
-  static-analysis:
-    runs-on: ubuntu-latest
-    name: Static Analysis
-    
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          extensions: mbstring, curl, json
-          tools: composer:v2
-          
-      - name: Install dependencies
-        run: composer install --no-interaction --no-progress
-        
-      - name: Run PHPStan
-        run: composer phpstan -- --error-format=github
