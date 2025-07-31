@@ -352,9 +352,18 @@ class Progress extends AbstractBaseApi
         $startTime = time();
         $currentInterval = $intervalSeconds;
 
+        // Check if already finished before starting the polling loop
+        if ($this->isFinished()) {
+            if ($this->isFailed()) {
+                throw new CanvasApiException("Operation failed: {$this->message}");
+            }
+            return $this;
+        }
+
         while (time() - $startTime < $maxWaitSeconds) {
             $this->refresh();
 
+            // @phpstan-ignore-next-line This check is needed after refresh() updates the state
             if ($this->isFinished()) {
                 if ($this->isFailed()) {
                     throw new CanvasApiException("Operation failed: {$this->message}");
