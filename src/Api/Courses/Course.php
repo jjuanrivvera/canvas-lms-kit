@@ -2509,7 +2509,12 @@ class Course extends AbstractBaseApi
     /**
      * Set course timetable
      *
-     * @param array<string, array<int, array{weekdays: string, start_time: string, end_time: string, location_name?: string}>> $timetables
+     * @param array<string, array<int, array{
+     *   weekdays: string,
+     *   start_time: string,
+     *   end_time: string,
+     *   location_name?: string
+     * }>> $timetables
      * @return array<string, mixed>
      * @throws CanvasApiException
      */
@@ -2573,7 +2578,13 @@ class Course extends AbstractBaseApi
     /**
      * Set course timetable events directly
      *
-     * @param array<int, array{start_at: \DateTime|string, end_at: \DateTime|string, location_name?: string, code?: string, title?: string}> $events
+     * @param array<int, array{
+     *   start_at: \DateTime|string,
+     *   end_at: \DateTime|string,
+     *   location_name?: string,
+     *   code?: string,
+     *   title?: string
+     * }> $events
      * @param string|null $sectionId
      * @return array<string, mixed>
      * @throws CanvasApiException

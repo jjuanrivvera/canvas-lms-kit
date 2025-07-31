@@ -397,7 +397,11 @@ class AppointmentGroup extends AbstractBaseApi
             ];
 
             foreach ($properties as $property) {
-                if (property_exists($this, $property) && property_exists($dto, $property) && $this->{$property} !== null) {
+                if (
+                    property_exists($this, $property) &&
+                    property_exists($dto, $property) &&
+                    $this->{$property} !== null
+                ) {
                     $dto->{$property} = $this->{$property};
                 }
             }
