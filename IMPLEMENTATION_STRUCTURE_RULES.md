@@ -67,6 +67,43 @@ When implementing a new resource:
    - DTOs: `CanvasLMS\Dto\{ResourceName}`
    - Objects: `CanvasLMS\Objects`
 
+## API Design Principles
+
+### Array-Based User Interface
+
+**Rule**: Public API methods should accept arrays as input parameters to provide a simpler, more intuitive interface for end users. DTOs should be used internally for type safety and data validation.
+
+**Implementation Pattern**:
+```php
+// API methods should accept both arrays and DTOs
+public static function create(array|CreateResourceDTO $data): self
+{
+    if (is_array($data)) {
+        $data = new CreateResourceDTO($data);
+    }
+    // Continue with DTO processing
+}
+```
+
+**Benefits**:
+- Simpler API for end users (no need to import or instantiate DTO classes)
+- Maintains type safety internally through DTO validation
+- Follows modern PHP conventions
+- Backward compatible with direct DTO usage
+
+**Examples**:
+```php
+// User-friendly array syntax (recommended)
+$course = Course::create([
+    'name' => 'Introduction to PHP',
+    'course_code' => 'PHP101'
+]);
+
+// Direct DTO usage (still supported)
+$dto = new CreateCourseDTO(['name' => 'Introduction to PHP']);
+$course = Course::create($dto);
+```
+
 ## Examples
 
 ### API Class Example (Has Endpoints)
@@ -76,7 +113,14 @@ namespace CanvasLMS\Api\QuizSubmissions;
 
 class QuizSubmission extends AbstractBaseApi
 {
-    // CRUD operations available
+    // CRUD operations accept arrays
+    public static function create(array|CreateQuizSubmissionDTO $data): self
+    {
+        if (is_array($data)) {
+            $data = new CreateQuizSubmissionDTO($data);
+        }
+        // Implementation continues with DTO
+    }
 }
 ```
 

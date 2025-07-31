@@ -284,15 +284,7 @@ class AppointmentGroupTest extends TestCase
             ['id' => 11, 'start_at' => '2024-01-16T10:00:00Z', 'end_at' => '2024-01-16T11:00:00Z', 'title' => 'Slot 2']
         ];
 
-        // Mock the HTTP client for CalendarEvent::find calls
-        $this->httpClientMock
-            ->expects($this->exactly(2))
-            ->method('get')
-            ->willReturnOnConsecutiveCalls(
-                new Response(200, [], json_encode(['id' => 10, 'title' => 'Slot 1', 'start_at' => '2024-01-15T10:00:00Z', 'end_at' => '2024-01-15T11:00:00Z'])),
-                new Response(200, [], json_encode(['id' => 11, 'title' => 'Slot 2', 'start_at' => '2024-01-16T10:00:00Z', 'end_at' => '2024-01-16T11:00:00Z']))
-            );
-
+        // Test default behavior (no API calls)
         $events = $this->appointmentGroup->getCalendarEvents();
 
         $this->assertIsArray($events);
@@ -300,6 +292,21 @@ class AppointmentGroupTest extends TestCase
         $this->assertInstanceOf(CalendarEvent::class, $events[0]);
         $this->assertEquals(10, $events[0]->id);
         $this->assertEquals('Slot 1', $events[0]->title);
+        
+        // Test fresh fetch behavior
+        $this->httpClientMock
+            ->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnOnConsecutiveCalls(
+                new Response(200, [], json_encode(['id' => 10, 'title' => 'Slot 1 Updated', 'start_at' => '2024-01-15T10:00:00Z', 'end_at' => '2024-01-15T11:00:00Z'])),
+                new Response(200, [], json_encode(['id' => 11, 'title' => 'Slot 2 Updated', 'start_at' => '2024-01-16T10:00:00Z', 'end_at' => '2024-01-16T11:00:00Z']))
+            );
+        
+        $freshEvents = $this->appointmentGroup->getCalendarEvents(true);
+        
+        $this->assertIsArray($freshEvents);
+        $this->assertCount(2, $freshEvents);
+        $this->assertEquals('Slot 1 Updated', $freshEvents[0]->title);
     }
 
     /**

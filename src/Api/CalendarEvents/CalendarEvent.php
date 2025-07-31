@@ -326,16 +326,20 @@ class CalendarEvent extends AbstractBaseApi
     /**
      * Create a new calendar event
      *
-     * @param CreateCalendarEventDTO $dto The event data
+     * @param array<string, mixed>|CreateCalendarEventDTO $data The event data
      * @return self
      * @throws CanvasApiException
      */
-    public static function create(CreateCalendarEventDTO $dto): self
+    public static function create(array|CreateCalendarEventDTO $data): self
     {
+        if (is_array($data)) {
+            $data = new CreateCalendarEventDTO($data);
+        }
+
         self::checkApiClient();
-        $response = self::$apiClient->post('calendar_events', ['multipart' => $dto->toApiArray()]);
-        $data = json_decode($response->getBody(), true);
-        return new self($data);
+        $response = self::$apiClient->post('calendar_events', ['multipart' => $data->toApiArray()]);
+        $responseData = json_decode($response->getBody(), true);
+        return new self($responseData);
     }
 
     /**
@@ -359,23 +363,36 @@ class CalendarEvent extends AbstractBaseApi
      * Update a calendar event
      *
      * @param int $id The calendar event ID
-     * @param UpdateCalendarEventDTO $dto The update data
+     * @param array<string, mixed>|UpdateCalendarEventDTO $updateData The update data
      * @param array<string, mixed> $params Additional parameters (e.g., 'which' for series)
      * @return self
      * @throws CanvasApiException
      */
-    public static function update(int $id, UpdateCalendarEventDTO $dto, array $params = []): self
+    public static function update(int $id, array|UpdateCalendarEventDTO $updateData, array $params = []): self
     {
+        if (is_array($updateData)) {
+            $updateData = new UpdateCalendarEventDTO($updateData);
+        }
+
         self::checkApiClient();
         $endpoint = sprintf('calendar_events/%d', $id);
 
         // Merge params into the DTO array if needed
-        $data = $dto->toApiArray();
+        $data = $updateData->toApiArray();
+
+        // Whitelist allowed parameters for security
+        $allowedParams = ['which'];
+
         if (!empty($params)) {
             foreach ($params as $key => $value) {
+                if (!in_array($key, $allowedParams)) {
+                    $allowed = implode(', ', $allowedParams);
+                    throw new CanvasApiException("Invalid parameter '$key'. Allowed parameters: $allowed");
+                }
+
                 $data[] = [
                     'name' => $key,
-                    'contents' => $value
+                    'contents' => (string)$value
                 ];
             }
         }
@@ -514,39 +531,47 @@ class CalendarEvent extends AbstractBaseApi
     /**
      * Reserve a time slot
      *
-     * @param CreateReservationDTO $dto Reservation data
+     * @param array<string, mixed>|CreateReservationDTO $data Reservation data
      * @return self
      * @throws CanvasApiException
      */
-    public function reserve(CreateReservationDTO $dto): self
+    public function reserve(array|CreateReservationDTO $data): self
     {
+        if (is_array($data)) {
+            $data = new CreateReservationDTO($data);
+        }
+
         if (!$this->id) {
             throw new CanvasApiException("Cannot reserve without event ID");
         }
 
-        return self::reserveSlot($this->id, $dto, $dto->participantId);
+        return self::reserveSlot($this->id, $data, $data->participantId);
     }
 
     /**
      * Reserve a time slot (static method)
      *
      * @param int $eventId The calendar event ID
-     * @param CreateReservationDTO $dto Reservation data
+     * @param array<string, mixed>|CreateReservationDTO $data Reservation data
      * @param int|null $participantId Optional participant ID
      * @return self
      * @throws CanvasApiException
      */
-    public static function reserveSlot(int $eventId, CreateReservationDTO $dto, ?int $participantId = null): self
+    public static function reserveSlot(int $eventId, array|CreateReservationDTO $data, ?int $participantId = null): self
     {
+        if (is_array($data)) {
+            $data = new CreateReservationDTO($data);
+        }
+
         self::checkApiClient();
 
         $endpoint = $participantId
             ? sprintf('calendar_events/%d/reservations/%d', $eventId, $participantId)
             : sprintf('calendar_events/%d/reservations', $eventId);
 
-        $response = self::$apiClient->post($endpoint, ['multipart' => $dto->toApiArray()]);
-        $data = json_decode($response->getBody(), true);
-        return new self($data);
+        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $responseData = json_decode($response->getBody(), true);
+        return new self($responseData);
     }
 
     /**
@@ -610,12 +635,12 @@ class CalendarEvent extends AbstractBaseApi
     /**
      * Update a series of recurring events
      *
-     * @param UpdateCalendarEventDTO $dto Update data
+     * @param array<string, mixed>|UpdateCalendarEventDTO $updateData Update data
      * @param string $which Which events to update: 'one', 'all', 'following'
      * @return self
      * @throws CanvasApiException
      */
-    public function updateSeries(UpdateCalendarEventDTO $dto, string $which = 'one'): self
+    public function updateSeries(array|UpdateCalendarEventDTO $updateData, string $which = 'one'): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot update series without event ID");
@@ -625,7 +650,7 @@ class CalendarEvent extends AbstractBaseApi
             throw new CanvasApiException("Invalid 'which' parameter. Must be 'one', 'all', or 'following'");
         }
 
-        return self::update($this->id, $dto, ['which' => $which]);
+        return self::update($this->id, $updateData, ['which' => $which]);
     }
 
     /**
@@ -685,8 +710,16 @@ class CalendarEvent extends AbstractBaseApi
             try {
                 return new DateTime($value);
             } catch (\Exception $e) {
-                // If date parsing fails, return the original value
-                return $value;
+                // Log the parsing error for debugging
+                error_log(sprintf(
+                    'CalendarEvent: Failed to parse DateTime for field "%s" with value "%s": %s',
+                    $key,
+                    $value,
+                    $e->getMessage()
+                ));
+
+                // Return null for invalid dates to maintain consistency
+                return null;
             }
         }
 

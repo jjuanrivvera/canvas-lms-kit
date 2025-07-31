@@ -236,16 +236,20 @@ class AppointmentGroup extends AbstractBaseApi
     /**
      * Create a new appointment group
      *
-     * @param CreateAppointmentGroupDTO $dto The appointment group data
+     * @param array<string, mixed>|CreateAppointmentGroupDTO $data The appointment group data
      * @return self
      * @throws CanvasApiException
      */
-    public static function create(CreateAppointmentGroupDTO $dto): self
+    public static function create(array|CreateAppointmentGroupDTO $data): self
     {
+        if (is_array($data)) {
+            $data = new CreateAppointmentGroupDTO($data);
+        }
+
         self::checkApiClient();
-        $response = self::$apiClient->post('appointment_groups', ['multipart' => $dto->toApiArray()]);
-        $data = json_decode($response->getBody(), true);
-        return new self($data);
+        $response = self::$apiClient->post('appointment_groups', ['multipart' => $data->toApiArray()]);
+        $responseData = json_decode($response->getBody(), true);
+        return new self($responseData);
     }
 
     /**
@@ -269,17 +273,21 @@ class AppointmentGroup extends AbstractBaseApi
      * Update an appointment group
      *
      * @param int $id The appointment group ID
-     * @param UpdateAppointmentGroupDTO $dto The update data
+     * @param array<string, mixed>|UpdateAppointmentGroupDTO $updateData The update data
      * @return self
      * @throws CanvasApiException
      */
-    public static function update(int $id, UpdateAppointmentGroupDTO $dto): self
+    public static function update(int $id, array|UpdateAppointmentGroupDTO $updateData): self
     {
+        if (is_array($updateData)) {
+            $updateData = new UpdateAppointmentGroupDTO($updateData);
+        }
+
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d', $id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $dto->toApiArray()]);
-        $data = json_decode($response->getBody(), true);
-        return new self($data);
+        $response = self::$apiClient->put($endpoint, ['multipart' => $updateData->toApiArray()]);
+        $responseData = json_decode($response->getBody(), true);
+        return new self($responseData);
     }
 
     /**
@@ -519,21 +527,29 @@ class AppointmentGroup extends AbstractBaseApi
     /**
      * Get calendar events (time slots) for this appointment group
      *
+     * Note: This returns CalendarEvent objects created from the appointments data
+     * already loaded with the appointment group. If you need fresh data from the API,
+     * you should call CalendarEvent::find() with the specific appointment IDs.
+     *
+     * @param bool $fetchFresh Whether to fetch fresh data from API (causes N+1 queries)
      * @return CalendarEvent[]
      * @throws CanvasApiException
      */
-    public function getCalendarEvents(): array
+    public function getCalendarEvents(bool $fetchFresh = false): array
     {
         if (empty($this->appointments)) {
             return [];
         }
 
-        return array_map(function ($appointment) {
-            if (is_array($appointment) && isset($appointment['id'])) {
+        return array_map(function ($appointment) use ($fetchFresh) {
+            // If fresh data requested and we have an ID, fetch from API
+            if ($fetchFresh && is_array($appointment) && isset($appointment['id'])) {
                 return CalendarEvent::find($appointment['id']);
             }
-            // If it's already a full appointment object, create CalendarEvent from it
-            return new CalendarEvent($appointment);
+
+            // Otherwise, create CalendarEvent from existing data to avoid N+1 queries
+            $appointmentData = (array)$appointment;
+            return new CalendarEvent($appointmentData);
         }, $this->appointments);
     }
 
@@ -551,9 +567,17 @@ class AppointmentGroup extends AbstractBaseApi
         if (in_array($key, $dateTimeFields) && is_string($value) && !empty($value)) {
             try {
                 return new DateTime($value);
-            } catch (\Exception) {
-                // If date parsing fails, return the original value
-                return $value;
+            } catch (\Exception $e) {
+                // Log the parsing error for debugging
+                error_log(sprintf(
+                    'AppointmentGroup: Failed to parse DateTime for field "%s" with value "%s": %s',
+                    $key,
+                    $value,
+                    $e->getMessage()
+                ));
+
+                // Return null for invalid dates to maintain consistency
+                return null;
             }
         }
 
