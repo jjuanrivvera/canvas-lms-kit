@@ -114,7 +114,7 @@ class Admin extends AbstractBaseApi
 
         $accountId = $accountId ?? Config::getAccountId();
 
-        if (!$accountId || $accountId == 0) {
+        if (empty($accountId)) {
             throw new CanvasApiException("Account ID must be provided or set in Config");
         }
 
@@ -148,7 +148,7 @@ class Admin extends AbstractBaseApi
 
         $accountId = $params['account_id'] ?? Config::getAccountId();
 
-        if (!$accountId || $accountId == 0) {
+        if (empty($accountId)) {
             throw new CanvasApiException("Account ID must be provided or set in Config");
         }
 
@@ -176,7 +176,7 @@ class Admin extends AbstractBaseApi
         $accountId = $params['account_id'] ?? Config::getAccountId();
         unset($params['account_id']); // Remove from query params
 
-        if (!$accountId || $accountId == 0) {
+        if (empty($accountId)) {
             throw new CanvasApiException("Account ID must be provided or set in Config");
         }
 
@@ -205,7 +205,7 @@ class Admin extends AbstractBaseApi
         $accountId = $params['account_id'] ?? Config::getAccountId();
         unset($params['account_id']); // Remove from query params
 
-        if (!$accountId || $accountId == 0) {
+        if (empty($accountId)) {
             throw new CanvasApiException("Account ID must be provided or set in Config");
         }
 
@@ -248,7 +248,7 @@ class Admin extends AbstractBaseApi
         $accountId = $params['account_id'] ?? Config::getAccountId();
         unset($params['account_id']); // Remove from query params
 
-        if (!$accountId || $accountId == 0) {
+        if (empty($accountId)) {
             throw new CanvasApiException("Account ID must be provided or set in Config");
         }
 
@@ -299,7 +299,7 @@ class Admin extends AbstractBaseApi
 
         $accountId = $accountId ?? Config::getAccountId();
 
-        if (!$accountId || $accountId == 0) {
+        if (empty($accountId)) {
             throw new CanvasApiException("Account ID must be provided or set in Config");
         }
 

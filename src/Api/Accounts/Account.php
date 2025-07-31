@@ -168,7 +168,7 @@ class Account extends AbstractBaseApi
 
         $parentId = $parentAccountId ?? Config::getAccountId();
 
-        if (!$parentId || $parentId == 0) {
+        if (empty($parentId)) {
             throw new CanvasApiException("Parent account ID must be provided or set in Config");
         }
 
@@ -335,7 +335,7 @@ class Account extends AbstractBaseApi
     public static function getRootAccount(): self
     {
         $accountId = Config::getAccountId();
-        if (!$accountId || $accountId == 0) {
+        if (empty($accountId)) {
             throw new CanvasApiException("Account ID must be set in Config");
         }
 

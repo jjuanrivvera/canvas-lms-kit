@@ -732,7 +732,7 @@ class CalendarEvent extends AbstractBaseApi
      * @param string $name Property name
      * @param mixed $value Property value
      */
-    public function __set($name, $value)
+    public function __set($name, $value): void
     {
         $this->{$name} = $this->castValue($name, $value);
     }

@@ -5,4 +5,12 @@
       <directory>tests</directory>
     </testsuite>
   </testsuites>
+  <source>
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+    <exclude>
+      <directory>src/Utilities</directory>
+    </exclude>
+  </source>
 </phpunit>
