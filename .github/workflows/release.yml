@@ -1,0 +1,114 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, curl, json
+          coverage: xdebug
+          tools: composer:v2
+          
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+        
+      - name: Run all quality checks
+        run: composer check
+        
+      - name: Generate coverage report
+        run: composer test:coverage
+        
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/clover.xml
+
+  release:
+    name: Create Release
+    needs: quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        
+      - name: Get previous tag
+        id: previoustag
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          echo "PREVIOUS_TAG=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+          
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          # Extract the section for this version from CHANGELOG.md
+          CHANGELOG_CONTENT=$(awk "/## \[${VERSION}\]/{flag=1;next}/## \[/{flag=0}flag" CHANGELOG.md | sed '/^$/d')
+          
+          # Handle multiline output
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## Canvas LMS Kit v${{ steps.get_version.outputs.VERSION }}
+            
+            ### What's Changed
+            ${{ steps.changelog.outputs.CHANGELOG }}
+            
+            ### Installation
+            ```bash
+            composer require jjuanrivvera/canvas-lms-kit:^${{ steps.get_version.outputs.VERSION }}
+            ```
+            
+            ### Upgrading
+            ```bash
+            composer update jjuanrivvera/canvas-lms-kit
+            ```
+            
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.previoustag.outputs.PREVIOUS_TAG }}...v${{ steps.get_version.outputs.VERSION }}
+          draft: false
+          prerelease: ${{ contains(github.ref, '-alpha') || contains(github.ref, '-beta') || contains(github.ref, '-rc') }}
+
+  notify-packagist:
+    name: Update Packagist
+    needs: release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Notify Packagist
+        if: secrets.PACKAGIST_USERNAME != '' && secrets.PACKAGIST_API_TOKEN != ''
+        run: |
+          curl -XPOST -H'content-type:application/json' \
+            'https://packagist.org/api/update-package?username=${{ secrets.PACKAGIST_USERNAME }}&apiToken=${{ secrets.PACKAGIST_API_TOKEN }}' \
+            -d'{"repository":{"url":"https://github.com/jjuanrivvera/canvas-lms-kit"}}'
+            
+      - name: Packagist update reminder
+        if: secrets.PACKAGIST_USERNAME == '' || secrets.PACKAGIST_API_TOKEN == ''
+        run: |
+          echo "::warning::Packagist webhook not configured. Please update Packagist manually or add PACKAGIST_USERNAME and PACKAGIST_API_TOKEN secrets."

@@ -1,0 +1,92 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.1', '8.2', '8.3']
+        dependency-version: ['lowest', 'highest']
+        
+    name: PHP ${{ matrix.php-version }} - ${{ matrix.dependency-version }} dependencies
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, curl, json
+          coverage: xdebug
+          tools: composer:v2
+          
+      - name: Validate composer.json
+        run: composer validate --strict
+        
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ matrix.dependency-version }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ matrix.dependency-version }}-
+            ${{ runner.os }}-composer-
+            
+      - name: Install dependencies
+        run: |
+          if [ "${{ matrix.dependency-version }}" = "lowest" ]; then
+            composer update --prefer-lowest --prefer-stable --no-interaction --no-progress
+          else
+            composer update --no-interaction --no-progress
+          fi
+          
+      - name: Run PHPStan
+        run: composer phpstan
+        
+      - name: Check coding standards
+        run: composer cs
+        
+      - name: Run tests with coverage
+        run: composer test:coverage
+        
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        if: matrix.php-version == '8.1' && matrix.dependency-version == 'highest'
+        with:
+          file: ./coverage/clover.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    name: Static Analysis
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, curl, json
+          tools: composer:v2
+          
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+        
+      - name: Run PHPStan
+        run: composer phpstan -- --error-format=github

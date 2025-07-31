@@ -1,0 +1,104 @@
+name: Bug Report
+description: Report a bug in Canvas LMS Kit
+title: "[BUG] "
+labels: ["bug"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this issue! Please provide as much detail as possible.
+        
+  - type: input
+    id: version
+    attributes:
+      label: Canvas LMS Kit Version
+      description: What version of Canvas LMS Kit are you using?
+      placeholder: "1.0.0"
+    validations:
+      required: true
+      
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP Version
+      description: What version of PHP are you using?
+      placeholder: "8.1.0"
+    validations:
+      required: true
+      
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: "When I try to create a course, I get an error..."
+    validations:
+      required: true
+      
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Configure the SDK with '...'
+        2. Call method '...'
+        3. See error
+    validations:
+      required: true
+      
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: "The course should be created successfully"
+    validations:
+      required: true
+      
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: "I received an error: ..."
+    validations:
+      required: true
+      
+  - type: textarea
+    id: code-sample
+    attributes:
+      label: Code Sample
+      description: If applicable, add a minimal code sample to reproduce the issue
+      render: php
+      placeholder: |
+        <?php
+        use CanvasLMS\Config;
+        use CanvasLMS\Api\Courses\Course;
+        
+        Config::setApiKey('xxx');
+        // Your code here
+        
+  - type: textarea
+    id: error-output
+    attributes:
+      label: Error Output
+      description: If applicable, paste any error messages or stack traces
+      render: shell
+      
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here
+      
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched for similar issues before creating this one
+          required: true
+        - label: I have provided all the requested information
+          required: true
