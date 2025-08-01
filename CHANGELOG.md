@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2025-08-01
+
+### Fixed
+- Fixed DateTime conversion issue in DTOs that was causing Module save() to fail when unlockAt was a string value
+- Fixed README badges for CI workflow and license information
+
 ## [1.0.0] - 2025-01-31
 
 ### 🎉 Initial Production Release

@@ -53,3 +53,4 @@ USER_ENDPOINTS_IMPLEMENTATION.md export-ignore
 canvas_api_resources_complete.md export-ignore
 middleware.md export-ignore
 PACKAGING_AND_RELEASE_STRATEGY.md export-ignore
+IMPLEMENTATION_STRUCTURE_RULES.md export-ignore
