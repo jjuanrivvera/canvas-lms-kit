@@ -42,9 +42,35 @@ abstract class AbstractBaseDto
      */
     private function cast($value, string $key)
     {
-        if (in_array($key, ['startAt', 'endAt']) && is_string($value)) {
-            return new DateTime($value);
+        // Check if the property expects a DateTimeInterface
+        $reflection = new \ReflectionClass($this);
+        if ($reflection->hasProperty($key)) {
+            $property = $reflection->getProperty($key);
+            $type = $property->getType();
+
+            if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+                $typeName = $type->getName();
+                if ($typeName === 'DateTimeInterface' || is_subclass_of($typeName, 'DateTimeInterface')) {
+                    if (is_string($value) && !empty($value)) {
+                        return new DateTime($value);
+                    }
+                    return null;
+                }
+            }
         }
+
+        // Legacy support for known date fields ONLY if they're typed as DateTime/DateTimeInterface
+        if (in_array($key, ['startAt', 'endAt']) && is_string($value) && !empty($value)) {
+            $reflection = new \ReflectionClass($this);
+            if ($reflection->hasProperty($key)) {
+                $property = $reflection->getProperty($key);
+                $type = $property->getType();
+                if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+                    return new DateTime($value);
+                }
+            }
+        }
+
         return $value;
     }
 
