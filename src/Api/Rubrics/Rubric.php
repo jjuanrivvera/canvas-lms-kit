@@ -26,7 +26,13 @@ use CanvasLMS\Pagination\PaginationResult;
  * Usage:
  *
  * ```php
- * // Creating a rubric in a course
+ * // Creating a rubric in a course (using array)
+ * $rubric = Rubric::create([
+ *     'title' => 'Essay Rubric',
+ *     'criteria' => [...]
+ * ], ['course_id' => 123]);
+ *
+ * // Creating a rubric using DTO (still supported)
  * $dto = new CreateRubricDTO();
  * $dto->title = "Essay Rubric";
  * $dto->criteria = [...];
@@ -38,7 +44,12 @@ use CanvasLMS\Pagination\PaginationResult;
  * // Listing rubrics in an account
  * $rubrics = Rubric::fetchAll(['account_id' => 1]);
  *
- * // Updating a rubric
+ * // Updating a rubric (using array)
+ * $rubric = Rubric::update(456, [
+ *     'title' => 'Updated Essay Rubric'
+ * ], ['course_id' => 123]);
+ *
+ * // Updating a rubric using DTO (still supported)
  * $updateDto = new UpdateRubricDTO();
  * $updateDto->title = "Updated Essay Rubric";
  * $rubric = Rubric::update(456, $updateDto, ['course_id' => 123]);
@@ -198,30 +209,34 @@ class Rubric extends AbstractBaseApi
     /**
      * Create a new rubric
      *
-     * @param CreateRubricDTO $dto The rubric data
+     * @param array<string, mixed>|CreateRubricDTO $data The rubric data
      * @param array<string, mixed> $context Context parameters (course_id or account_id)
      * @return self
      * @throws CanvasApiException
      */
-    public static function create(CreateRubricDTO $dto, array $context = []): self
+    public static function create(array|CreateRubricDTO $data, array $context = []): self
     {
         self::checkApiClient();
 
+        if (is_array($data)) {
+            $data = new CreateRubricDTO($data);
+        }
+
         $endpoint = self::getContextEndpoint($context);
-        $response = self::$apiClient->post($endpoint, $dto->toApiArray());
-        $data = json_decode($response->getBody(), true);
+        $response = self::$apiClient->post($endpoint, $data->toApiArray());
+        $responseData = json_decode($response->getBody(), true);
 
         // Handle non-standard response format
-        if (isset($data['rubric'])) {
-            $rubric = new self($data['rubric']);
-            if (isset($data['rubric_association'])) {
-                $rubric->association = new RubricAssociation($data['rubric_association']);
+        if (isset($responseData['rubric'])) {
+            $rubric = new self($responseData['rubric']);
+            if (isset($responseData['rubric_association'])) {
+                $rubric->association = new RubricAssociation($responseData['rubric_association']);
             }
             return $rubric;
         }
 
         // Fallback to standard response
-        return new self($data);
+        return new self($responseData);
     }
 
     /**
@@ -251,30 +266,34 @@ class Rubric extends AbstractBaseApi
      * Update a rubric
      *
      * @param int $id The rubric ID
-     * @param UpdateRubricDTO $dto The update data
+     * @param array<string, mixed>|UpdateRubricDTO $data The update data
      * @param array<string, mixed> $context Context parameters (course_id or account_id)
      * @return self
      * @throws CanvasApiException
      */
-    public static function update(int $id, UpdateRubricDTO $dto, array $context = []): self
+    public static function update(int $id, array|UpdateRubricDTO $data, array $context = []): self
     {
         self::checkApiClient();
 
+        if (is_array($data)) {
+            $data = new UpdateRubricDTO($data);
+        }
+
         $endpoint = sprintf('%s/%d', self::getContextEndpoint($context), $id);
-        $response = self::$apiClient->put($endpoint, $dto->toApiArray());
-        $data = json_decode($response->getBody(), true);
+        $response = self::$apiClient->put($endpoint, $data->toApiArray());
+        $responseData = json_decode($response->getBody(), true);
 
         // Handle non-standard response format
-        if (isset($data['rubric'])) {
-            $rubric = new self($data['rubric']);
-            if (isset($data['rubric_association'])) {
-                $rubric->association = new RubricAssociation($data['rubric_association']);
+        if (isset($responseData['rubric'])) {
+            $rubric = new self($responseData['rubric']);
+            if (isset($responseData['rubric_association'])) {
+                $rubric->association = new RubricAssociation($responseData['rubric_association']);
             }
             return $rubric;
         }
 
         // Fallback to standard response
-        return new self($data);
+        return new self($responseData);
     }
 
     /**

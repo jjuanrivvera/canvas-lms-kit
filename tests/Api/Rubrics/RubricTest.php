@@ -242,6 +242,57 @@ class RubricTest extends TestCase
     }
 
     /**
+     * Test create rubric with array input
+     */
+    public function testCreateRubricWithArrayInput(): void
+    {
+        $rubricData = [
+            'title' => 'Array Input Rubric',
+            'criteria' => [
+                [
+                    'description' => 'Grammar',
+                    'points' => 5,
+                    'id' => 'grammar_1',
+                    'ratings' => [
+                        ['description' => 'Excellent', 'points' => 5],
+                        ['description' => 'Good', 'points' => 3],
+                        ['description' => 'Poor', 'points' => 1]
+                    ]
+                ]
+            ],
+            'freeFormCriterionComments' => true,
+            'hideScoreTotal' => false
+        ];
+
+        $expectedResult = [
+            'id' => 128,
+            'title' => 'Array Input Rubric',
+            'points_possible' => 5.0,
+            'free_form_criterion_comments' => true,
+            'hide_score_total' => false
+        ];
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                'courses/789/rubrics',
+                $this->isType('array')
+            )
+            ->willReturn($response);
+
+        $rubric = Rubric::create($rubricData, ['course_id' => 789]);
+
+        $this->assertEquals(128, $rubric->id);
+        $this->assertEquals('Array Input Rubric', $rubric->title);
+        $this->assertEquals(5.0, $rubric->pointsPossible);
+        $this->assertTrue($rubric->freeFormCriterionComments);
+        $this->assertFalse($rubric->hideScoreTotal);
+    }
+
+    /**
      * Test find rubric
      */
     public function testFindRubric(): void
@@ -309,6 +360,45 @@ class RubricTest extends TestCase
         $this->assertEquals(128, $rubric->id);
         $this->assertEquals('Updated Rubric', $rubric->title);
         $this->assertInstanceOf(RubricAssociation::class, $rubric->association);
+    }
+
+    /**
+     * Test update rubric with array input
+     */
+    public function testUpdateRubricWithArrayInput(): void
+    {
+        $updateData = [
+            'title' => 'Updated Array Rubric',
+            'freeFormCriterionComments' => false,
+            'hideScoreTotal' => true
+        ];
+
+        $expectedResult = [
+            'rubric' => [
+                'id' => 129,
+                'title' => 'Updated Array Rubric',
+                'free_form_criterion_comments' => false,
+                'hide_score_total' => true
+            ]
+        ];
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('put')
+            ->with(
+                'courses/201/rubrics/129',
+                $this->isType('array')
+            )
+            ->willReturn($response);
+
+        $rubric = Rubric::update(129, $updateData, ['course_id' => 201]);
+
+        $this->assertEquals(129, $rubric->id);
+        $this->assertEquals('Updated Array Rubric', $rubric->title);
+        $this->assertFalse($rubric->freeFormCriterionComments);
+        $this->assertTrue($rubric->hideScoreTotal);
     }
 
     /**

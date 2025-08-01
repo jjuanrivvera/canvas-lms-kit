@@ -149,6 +149,62 @@ class RubricAssessmentTest extends TestCase
     }
 
     /**
+     * Test create rubric assessment with array input
+     */
+    public function testCreateRubricAssessmentWithArrayInput(): void
+    {
+        // Set course context
+        RubricAssessment::setCourse(new Course(['id' => 100]));
+        
+        $assessmentData = [
+            'userId' => 789,
+            'assessmentType' => 'grading',
+            'criterionData' => [
+                'criterion_1' => [
+                    'points' => 9.5,
+                    'comments' => 'Nice work on this criterion'
+                ],
+                'criterion_2' => [
+                    'points' => 9.0,
+                    'comments' => 'Outstanding performance'
+                ]
+            ],
+            'provisional' => false,
+            'final' => false,
+            'gradedAnonymously' => false
+        ];
+
+        $expectedResult = [
+            'id' => 3,
+            'rubric_id' => 125,
+            'rubric_association_id' => 457,
+            'score' => 18.5,
+            'user_id' => 789,
+            'assessment_type' => 'grading'
+        ];
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                'courses/100/rubric_associations/457/rubric_assessments',
+                $this->isType('array')
+            )
+            ->willReturn($response);
+
+        $assessment = RubricAssessment::create($assessmentData, ['rubric_association_id' => 457]);
+
+        $this->assertEquals(3, $assessment->id);
+        $this->assertEquals(125, $assessment->rubricId);
+        $this->assertEquals(457, $assessment->rubricAssociationId);
+        $this->assertEquals(18.5, $assessment->score);
+        $this->assertEquals(789, $assessment->userId);
+        $this->assertEquals('grading', $assessment->assessmentType);
+    }
+
+    /**
      * Test create without required context throws exception
      */
     public function testCreateWithoutRequiredContextThrowsException(): void
@@ -273,6 +329,53 @@ class RubricAssessmentTest extends TestCase
         $this->assertEquals(4, $assessment->id);
         $this->assertEquals('provisional_grade', $assessment->assessmentType);
         $this->assertEquals(444, $assessment->provisionalGradeId);
+    }
+
+    /**
+     * Test update rubric assessment with array input
+     */
+    public function testUpdateRubricAssessmentWithArrayInput(): void
+    {
+        // Set course context
+        RubricAssessment::setCourse(new Course(['id' => 100]));
+        
+        $updateData = [
+            'userId' => 790,
+            'assessmentType' => 'grading',
+            'criterionData' => [
+                'criterion_1' => ['points' => 10.0, 'comments' => 'Perfect!']
+            ],
+            'provisional' => false,
+            'final' => false,
+            'gradedAnonymously' => true
+        ];
+
+        $expectedResult = [
+            'id' => 5,
+            'rubric_id' => 126,
+            'score' => 10.0,
+            'user_id' => 790,
+            'assessment_type' => 'grading'
+        ];
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('put')
+            ->with(
+                'courses/100/rubric_associations/458/rubric_assessments/5',
+                $this->isType('array')
+            )
+            ->willReturn($response);
+
+        $assessment = RubricAssessment::update(5, $updateData, ['rubric_association_id' => 458]);
+
+        $this->assertEquals(5, $assessment->id);
+        $this->assertEquals(126, $assessment->rubricId);
+        $this->assertEquals(10.0, $assessment->score);
+        $this->assertEquals(790, $assessment->userId);
+        $this->assertEquals('grading', $assessment->assessmentType);
     }
 
     /**

@@ -98,6 +98,55 @@ class RubricAssociationTest extends TestCase
     }
 
     /**
+     * Test create rubric association with array input
+     */
+    public function testCreateRubricAssociationWithArrayInput(): void
+    {
+        $associationData = [
+            'rubricId' => 125,
+            'associationId' => 458,
+            'associationType' => 'Assignment',
+            'useForGrading' => true,
+            'purpose' => 'grading',
+            'hideScoreTotal' => false,
+            'bookmarked' => false
+        ];
+
+        $expectedResult = [
+            'id' => 3,
+            'rubric_id' => 125,
+            'association_id' => 458,
+            'association_type' => 'Assignment',
+            'use_for_grading' => true,
+            'purpose' => 'grading',
+            'hide_score_total' => false,
+            'bookmarked' => false
+        ];
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                'courses/101/rubric_associations',
+                $this->isType('array')
+            )
+            ->willReturn($response);
+
+        $association = RubricAssociation::create($associationData, 101);
+
+        $this->assertEquals(3, $association->id);
+        $this->assertEquals(125, $association->rubricId);
+        $this->assertEquals(458, $association->associationId);
+        $this->assertEquals('Assignment', $association->associationType);
+        $this->assertTrue($association->useForGrading);
+        $this->assertEquals('grading', $association->purpose);
+        $this->assertFalse($association->hideScoreTotal);
+        $this->assertFalse($association->bookmarked);
+    }
+
+    /**
      * Test create without current course throws exception
      */
     public function testCreateWithoutCurrentCourseThrowsException(): void
@@ -168,6 +217,49 @@ class RubricAssociationTest extends TestCase
         $this->assertFalse($association->useForGrading);
         $this->assertEquals('bookmark', $association->purpose);
         $this->assertTrue($association->hideScoreTotal);
+    }
+
+    /**
+     * Test update rubric association with array input
+     */
+    public function testUpdateRubricAssociationWithArrayInput(): void
+    {
+        $updateData = [
+            'rubricId' => 126,
+            'useForGrading' => false,
+            'purpose' => 'bookmark',
+            'hideScoreTotal' => true,
+            'bookmarked' => true
+        ];
+
+        $expectedResult = [
+            'id' => 4,
+            'rubric_id' => 126,
+            'use_for_grading' => false,
+            'purpose' => 'bookmark',
+            'hide_score_total' => true,
+            'bookmarked' => true
+        ];
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('put')
+            ->with(
+                'courses/102/rubric_associations/4',
+                $this->isType('array')
+            )
+            ->willReturn($response);
+
+        $association = RubricAssociation::update(4, $updateData, 102);
+
+        $this->assertEquals(4, $association->id);
+        $this->assertEquals(126, $association->rubricId);
+        $this->assertFalse($association->useForGrading);
+        $this->assertEquals('bookmark', $association->purpose);
+        $this->assertTrue($association->hideScoreTotal);
+        $this->assertTrue($association->bookmarked);
     }
 
     /**

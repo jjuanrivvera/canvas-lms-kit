@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Updated Rubrics API classes (Rubric, RubricAssessment, RubricAssociation) to support array-based interface for consistency with the rest of the SDK (#78)
+  - `create()` and `update()` methods now accept both arrays and DTOs as input
+  - Maintains backward compatibility with existing DTO usage
+  - Added comprehensive tests for array input support
+
 ## [1.0.1] - 2025-08-01
 
 ### Fixed
