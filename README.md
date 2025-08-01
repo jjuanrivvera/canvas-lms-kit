@@ -5,10 +5,9 @@
   
   [![Latest Version](https://img.shields.io/packagist/v/jjuanrivvera/canvas-lms-kit.svg?style=flat-square)](https://packagist.org/packages/jjuanrivvera/canvas-lms-kit)
   [![Total Downloads](https://img.shields.io/packagist/dt/jjuanrivvera/canvas-lms-kit.svg?style=flat-square)](https://packagist.org/packages/jjuanrivvera/canvas-lms-kit)
-  [![Tests](https://github.com/jjuanrivvera/canvas-lms-kit/workflows/tests/badge.svg)](https://github.com/jjuanrivvera/canvas-lms-kit/actions)
-  [![Coverage](https://codecov.io/gh/jjuanrivvera/canvas-lms-kit/branch/main/graph/badge.svg)](https://codecov.io/gh/jjuanrivvera/canvas-lms-kit)
+  [![CI](https://github.com/jjuanrivvera/canvas-lms-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/jjuanrivvera/canvas-lms-kit/actions/workflows/ci.yml)
   [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-8892BF.svg?style=flat-square)](https://php.net)
-  [![License](https://img.shields.io/packagist/l/jjuanrivvera/canvas-lms-kit.svg?style=flat-square)](https://github.com/jjuanrivvera/canvas-lms-kit/blob/main/LICENSE)
+  [![License](https://img.shields.io/github/license/jjuanrivvera/canvas-lms-kit?style=flat-square)](https://github.com/jjuanrivvera/canvas-lms-kit/blob/main/LICENSE)
 
   **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 90% API coverage.**
 </div>
