@@ -18,17 +18,29 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * Usage:
  *
  * ```php
- * // Creating a rubric assessment
+ * // Creating a rubric assessment (using array)
+ * $assessment = RubricAssessment::create([
+ *     'userId' => 123,
+ *     'assessmentType' => 'grading',
+ *     'criterionData' => [...]
+ * ], ['rubric_association_id' => 456]);
+ *
+ * // Creating using DTO (still supported)
  * $dto = new CreateRubricAssessmentDTO();
  * $dto->userId = 123;
  * $dto->assessmentType = 'grading';
  * $dto->criterionData = [...];
- * $assessment = RubricAssessment::create($dto, 789, 456); // Course ID, Association ID
+ * $assessment = RubricAssessment::create($dto, ['rubric_association_id' => 456]);
  *
- * // Updating an assessment
+ * // Updating an assessment (using array)
+ * $assessment = RubricAssessment::update(111, [
+ *     'criterionData' => [...]
+ * ], ['rubric_association_id' => 456]);
+ *
+ * // Updating using DTO (still supported)
  * $updateDto = new UpdateRubricAssessmentDTO();
  * $updateDto->criterionData = [...];
- * $assessment = RubricAssessment::update(111, $updateDto, 789, 456);
+ * $assessment = RubricAssessment::update(111, $updateDto, ['rubric_association_id' => 456]);
  * ```
  *
  * @package CanvasLMS\Api\Rubrics
@@ -281,28 +293,32 @@ class RubricAssessment extends AbstractBaseApi
     /**
      * Create a new rubric assessment
      *
-     * @param CreateRubricAssessmentDTO $dto The assessment data
+     * @param array<string, mixed>|CreateRubricAssessmentDTO $data The assessment data
      * @param array<string, mixed> $context Context parameters (rubric_association_id
      *                                     or assignment_id + provisional_grade_id)
      * @return self
      * @throws CanvasApiException
      */
-    public static function create(CreateRubricAssessmentDTO $dto, array $context = []): self
+    public static function create(array|CreateRubricAssessmentDTO $data, array $context = []): self
     {
         self::checkApiClient();
 
-        $endpoint = self::getResourceEndpointFromContext($context);
-        $response = self::$apiClient->post($endpoint, $dto->toApiArray());
-        $data = json_decode($response->getBody(), true);
+        if (is_array($data)) {
+            $data = new CreateRubricAssessmentDTO($data);
+        }
 
-        return new self($data);
+        $endpoint = self::getResourceEndpointFromContext($context);
+        $response = self::$apiClient->post($endpoint, $data->toApiArray());
+        $responseData = json_decode($response->getBody(), true);
+
+        return new self($responseData);
     }
 
     /**
      * Update a rubric assessment
      *
      * @param int $id The assessment ID
-     * @param UpdateRubricAssessmentDTO $dto The update data
+     * @param array<string, mixed>|UpdateRubricAssessmentDTO $data The update data
      * @param array<string, mixed> $context Context parameters (rubric_association_id
      *                                     or assignment_id + provisional_grade_id)
      * @return self
@@ -310,17 +326,21 @@ class RubricAssessment extends AbstractBaseApi
      */
     public static function update(
         int $id,
-        UpdateRubricAssessmentDTO $dto,
+        array|UpdateRubricAssessmentDTO $data,
         array $context = []
     ): self {
         self::checkApiClient();
 
+        if (is_array($data)) {
+            $data = new UpdateRubricAssessmentDTO($data);
+        }
+
         $baseEndpoint = self::getResourceEndpointFromContext($context);
         $endpoint = sprintf('%s/%d', $baseEndpoint, $id);
-        $response = self::$apiClient->put($endpoint, $dto->toApiArray());
-        $data = json_decode($response->getBody(), true);
+        $response = self::$apiClient->put($endpoint, $data->toApiArray());
+        $responseData = json_decode($response->getBody(), true);
 
-        return new self($data);
+        return new self($responseData);
     }
 
     /**

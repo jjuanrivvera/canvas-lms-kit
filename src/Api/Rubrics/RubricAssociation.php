@@ -18,7 +18,15 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * Usage:
  *
  * ```php
- * // Creating a rubric association
+ * // Creating a rubric association (using array)
+ * $association = RubricAssociation::create([
+ *     'rubricId' => 123,
+ *     'associationId' => 456,
+ *     'associationType' => 'Assignment',
+ *     'useForGrading' => true
+ * ], 789); // Course ID
+ *
+ * // Creating using DTO (still supported)
  * $dto = new CreateRubricAssociationDTO();
  * $dto->rubricId = 123;
  * $dto->associationId = 456;
@@ -26,7 +34,12 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * $dto->useForGrading = true;
  * $association = RubricAssociation::create($dto, 789); // Course ID
  *
- * // Updating an association
+ * // Updating an association (using array)
+ * $association = RubricAssociation::update(111, [
+ *     'useForGrading' => false
+ * ], 789);
+ *
+ * // Updating using DTO (still supported)
  * $updateDto = new UpdateRubricAssociationDTO();
  * $updateDto->useForGrading = false;
  * $association = RubricAssociation::update(111, $updateDto, 789);
@@ -199,40 +212,48 @@ class RubricAssociation extends AbstractBaseApi
     /**
      * Create a new rubric association
      *
-     * @param CreateRubricAssociationDTO $dto The association data
+     * @param array<string, mixed>|CreateRubricAssociationDTO $data The association data
      * @param int|null $courseId Optional course ID (uses set course if not provided)
      * @return self
      * @throws CanvasApiException
      */
-    public static function create(CreateRubricAssociationDTO $dto, ?int $courseId = null): self
+    public static function create(array|CreateRubricAssociationDTO $data, ?int $courseId = null): self
     {
         self::checkApiClient();
 
-        $endpoint = self::getResourceEndpoint($courseId);
-        $response = self::$apiClient->post($endpoint, $dto->toApiArray());
-        $data = json_decode($response->getBody(), true);
+        if (is_array($data)) {
+            $data = new CreateRubricAssociationDTO($data);
+        }
 
-        return new self($data);
+        $endpoint = self::getResourceEndpoint($courseId);
+        $response = self::$apiClient->post($endpoint, $data->toApiArray());
+        $responseData = json_decode($response->getBody(), true);
+
+        return new self($responseData);
     }
 
     /**
      * Update a rubric association
      *
      * @param int $id The association ID
-     * @param UpdateRubricAssociationDTO $dto The update data
+     * @param array<string, mixed>|UpdateRubricAssociationDTO $data The update data
      * @param int|null $courseId Optional course ID (uses set course if not provided)
      * @return self
      * @throws CanvasApiException
      */
-    public static function update(int $id, UpdateRubricAssociationDTO $dto, ?int $courseId = null): self
+    public static function update(int $id, array|UpdateRubricAssociationDTO $data, ?int $courseId = null): self
     {
         self::checkApiClient();
 
-        $endpoint = sprintf('%s/%d', self::getResourceEndpoint($courseId), $id);
-        $response = self::$apiClient->put($endpoint, $dto->toApiArray());
-        $data = json_decode($response->getBody(), true);
+        if (is_array($data)) {
+            $data = new UpdateRubricAssociationDTO($data);
+        }
 
-        return new self($data);
+        $endpoint = sprintf('%s/%d', self::getResourceEndpoint($courseId), $id);
+        $response = self::$apiClient->put($endpoint, $data->toApiArray());
+        $responseData = json_decode($response->getBody(), true);
+
+        return new self($responseData);
     }
 
     /**
