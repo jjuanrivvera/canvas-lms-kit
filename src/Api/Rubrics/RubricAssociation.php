@@ -18,13 +18,17 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * Usage:
  *
  * ```php
+ * // Set course context first
+ * $course = Course::find(123);
+ * RubricAssociation::setCourse($course);
+ *
  * // Creating a rubric association (using array)
  * $association = RubricAssociation::create([
  *     'rubricId' => 123,
  *     'associationId' => 456,
  *     'associationType' => 'Assignment',
  *     'useForGrading' => true
- * ], 789); // Course ID
+ * ]);
  *
  * // Creating using DTO (still supported)
  * $dto = new CreateRubricAssociationDTO();
@@ -32,17 +36,17 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * $dto->associationId = 456;
  * $dto->associationType = 'Assignment';
  * $dto->useForGrading = true;
- * $association = RubricAssociation::create($dto, 789); // Course ID
+ * $association = RubricAssociation::create($dto);
  *
  * // Updating an association (using array)
  * $association = RubricAssociation::update(111, [
  *     'useForGrading' => false
- * ], 789);
+ * ]);
  *
  * // Updating using DTO (still supported)
  * $updateDto = new UpdateRubricAssociationDTO();
  * $updateDto->useForGrading = false;
- * $association = RubricAssociation::update(111, $updateDto, 789);
+ * $association = RubricAssociation::update(111, $updateDto);
  * ```
  *
  * @package CanvasLMS\Api\Rubrics
@@ -192,16 +196,11 @@ class RubricAssociation extends AbstractBaseApi
     /**
      * Get the resource endpoint
      *
-     * @param int|null $courseId Optional course ID override
      * @return string
      * @throws CanvasApiException
      */
-    protected static function getResourceEndpoint(?int $courseId = null): string
+    protected static function getResourceEndpoint(): string
     {
-        if ($courseId !== null) {
-            return sprintf('courses/%d/rubric_associations', $courseId);
-        }
-
         if (self::$course === null) {
             throw new CanvasApiException("Course context must be set for RubricAssociation operations");
         }
@@ -213,11 +212,10 @@ class RubricAssociation extends AbstractBaseApi
      * Create a new rubric association
      *
      * @param array<string, mixed>|CreateRubricAssociationDTO $data The association data
-     * @param int|null $courseId Optional course ID (uses set course if not provided)
      * @return self
      * @throws CanvasApiException
      */
-    public static function create(array|CreateRubricAssociationDTO $data, ?int $courseId = null): self
+    public static function create(array|CreateRubricAssociationDTO $data): self
     {
         self::checkApiClient();
 
@@ -225,7 +223,7 @@ class RubricAssociation extends AbstractBaseApi
             $data = new CreateRubricAssociationDTO($data);
         }
 
-        $endpoint = self::getResourceEndpoint($courseId);
+        $endpoint = self::getResourceEndpoint();
         $response = self::$apiClient->post($endpoint, $data->toApiArray());
         $responseData = json_decode($response->getBody(), true);
 
@@ -237,11 +235,10 @@ class RubricAssociation extends AbstractBaseApi
      *
      * @param int $id The association ID
      * @param array<string, mixed>|UpdateRubricAssociationDTO $data The update data
-     * @param int|null $courseId Optional course ID (uses set course if not provided)
      * @return self
      * @throws CanvasApiException
      */
-    public static function update(int $id, array|UpdateRubricAssociationDTO $data, ?int $courseId = null): self
+    public static function update(int $id, array|UpdateRubricAssociationDTO $data): self
     {
         self::checkApiClient();
 
@@ -249,7 +246,7 @@ class RubricAssociation extends AbstractBaseApi
             $data = new UpdateRubricAssociationDTO($data);
         }
 
-        $endpoint = sprintf('%s/%d', self::getResourceEndpoint($courseId), $id);
+        $endpoint = sprintf('%s/%d', self::getResourceEndpoint(), $id);
         $response = self::$apiClient->put($endpoint, $data->toApiArray());
         $responseData = json_decode($response->getBody(), true);
 
@@ -282,11 +279,10 @@ class RubricAssociation extends AbstractBaseApi
     /**
      * Save the rubric association (create or update)
      *
-     * @param int|null $courseId Optional course ID for create operation
      * @return self
      * @throws CanvasApiException
      */
-    public function save(?int $courseId = null): self
+    public function save(): self
     {
         // Validate required fields for new associations
         if (!$this->id && !$this->rubricId) {
@@ -305,7 +301,7 @@ class RubricAssociation extends AbstractBaseApi
             $dto->purpose = $this->purpose;
             $dto->bookmarked = $this->bookmarked;
 
-            return self::update($this->id, $dto, $courseId);
+            return self::update($this->id, $dto);
         } else {
             // Create new
             $dto = new CreateRubricAssociationDTO();
@@ -318,7 +314,7 @@ class RubricAssociation extends AbstractBaseApi
             $dto->purpose = $this->purpose;
             $dto->bookmarked = $this->bookmarked;
 
-            return self::create($dto, $courseId);
+            return self::create($dto);
         }
     }
 
@@ -338,7 +334,9 @@ class RubricAssociation extends AbstractBaseApi
             throw new CanvasApiException("Course context must be set");
         }
 
-        return Rubric::find($this->rubricId, ['course_id' => self::$course->id]);
+        // Set the course context for Rubric before calling find
+        Rubric::setCourse(self::$course);
+        return Rubric::find($this->rubricId);
     }
 
     /**
