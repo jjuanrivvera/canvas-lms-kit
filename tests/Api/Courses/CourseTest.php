@@ -10,6 +10,7 @@ use CanvasLMS\Api\Enrollments\Enrollment;
 use CanvasLMS\Dto\Courses\CreateCourseDTO;
 use CanvasLMS\Dto\Courses\UpdateCourseDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Config;
 
 class CourseTest extends TestCase
 {
@@ -28,6 +29,9 @@ class CourseTest extends TestCase
      */
     protected function setUp(): void
     {
+        // Set up test configuration
+        Config::setAccountId(1);
+        
         $this->httpClientMock = $this->createMock(HttpClient::class);
         Course::setApiClient($this->httpClientMock);
         Enrollment::setApiClient($this->httpClientMock);
@@ -109,6 +113,87 @@ class CourseTest extends TestCase
 
         $this->assertInstanceOf(Course::class, $course);
         $this->assertEquals('Test Course', $course->getName());
+    }
+
+    /**
+     * Test that Course::create uses the configured account ID
+     * @return void
+     */
+    public function testCreateCourseUsesConfiguredAccountId(): void
+    {
+        // Set a custom account ID
+        Config::setAccountId(456);
+        
+        $courseData = [
+            'name' => 'Test Course',
+            'course_code' => 'TC101'
+        ];
+
+        $dto = new CreateCourseDTO($courseData);
+        $expectedPayload = $dto->toApiArray();
+        $expectedResult = array_merge($courseData, ['id' => 1]);
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                $this->equalTo('/accounts/456/courses'),
+                $this->callback(function ($subject) use ($expectedPayload) {
+                    return $subject['multipart'] === $expectedPayload;
+                })
+            )
+            ->willReturn($response);
+
+        $course = Course::create($courseData);
+
+        $this->assertInstanceOf(Course::class, $course);
+        $this->assertEquals('Test Course', $course->getName());
+        
+        // Reset to default for other tests
+        Config::setAccountId(1);
+    }
+
+    /**
+     * Test that Course::create uses default account ID when none is configured
+     * @return void
+     */
+    public function testCreateCourseUsesDefaultAccountId(): void
+    {
+        // Reset config to ensure we're using defaults
+        Config::resetContext(Config::getContext());
+        
+        $courseData = [
+            'name' => 'Test Course',
+            'course_code' => 'TC101'
+        ];
+
+        $dto = new CreateCourseDTO($courseData);
+        $expectedPayload = $dto->toApiArray();
+        $expectedResult = array_merge($courseData, ['id' => 1]);
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                $this->equalTo('/accounts/1/courses'), // Default account ID is 1
+                $this->callback(function ($subject) use ($expectedPayload) {
+                    return $subject['multipart'] === $expectedPayload;
+                })
+            )
+            ->willReturn($response);
+
+        // Suppress the warning about using default account ID
+        @$course = Course::create($courseData);
+
+        $this->assertInstanceOf(Course::class, $course);
+        $this->assertEquals('Test Course', $course->getName());
+        
+        // Restore configured account ID for other tests
+        Config::setAccountId(1);
     }
 
     /**

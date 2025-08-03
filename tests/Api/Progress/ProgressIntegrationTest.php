@@ -12,6 +12,7 @@ use CanvasLMS\Api\Progress\Progress;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Config;
 use DateTime;
 
 class ProgressIntegrationTest extends TestCase
@@ -22,6 +23,9 @@ class ProgressIntegrationTest extends TestCase
 
     protected function setUp(): void
     {
+        // Set up test configuration
+        Config::setAccountId(1);
+        
         $this->mockHttpClient = $this->createMock(HttpClientInterface::class);
         $this->mockResponse = $this->createMock(ResponseInterface::class);
         $this->mockStream = $this->createMock(StreamInterface::class);

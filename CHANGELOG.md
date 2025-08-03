@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Full support for student group collaboration workflows and self-signup groups
   - Comprehensive test coverage for all group-related functionality
 
+### Fixed
+- Fixed hardcoded account ID in Course::create() method to use configured account ID from Config class (#84)
+- Fixed hardcoded account ID in User::create() method to use configured account ID from Config class (#84)
+- Both methods now properly use Config::getAccountId() which defaults to 1 when not explicitly configured (#84)
+- Added tests to verify correct account ID usage in multi-tenant environments and default behavior (#84)
+
 ### Changed
 - Enhanced User relationship methods to use pagination for groups listing (#63)
 - Refactored Rubric API classes to follow SDK conventions for context handling (#80)
