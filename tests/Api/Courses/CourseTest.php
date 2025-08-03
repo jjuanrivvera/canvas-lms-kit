@@ -297,9 +297,9 @@ class CourseTest extends TestCase
     // Enrollment Relationship Tests
 
     /**
-     * Test getting enrollments as objects for a course
+     * Test getting enrollments for a course
      */
-    public function testGetEnrollmentsAsObjects(): void
+    public function testGetEnrollments(): void
     {
         $courseData = ['id' => 123, 'name' => 'Test Course'];
         $course = new Course($courseData);
@@ -329,7 +329,7 @@ class CourseTest extends TestCase
             ->with('courses/123/enrollments', ['query' => []])
             ->willReturn($response);
 
-        $enrollments = $course->getEnrollmentsAsObjects();
+        $enrollments = $course->enrollments();
 
         $this->assertCount(2, $enrollments);
         $this->assertInstanceOf(Enrollment::class, $enrollments[0]);
@@ -801,16 +801,16 @@ class CourseTest extends TestCase
     }
 
     /**
-     * Test getting enrollments as objects throws exception when course ID not set
+     * Test getting enrollments throws exception when course ID not set
      */
-    public function testGetEnrollmentsAsObjectsThrowsExceptionWhenCourseIdNotSet(): void
+    public function testGetEnrollmentsThrowsExceptionWhenCourseIdNotSet(): void
     {
         $course = new Course([]);
 
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course ID is required to fetch enrollments');
 
-        $course->getEnrollmentsAsObjects();
+        $course->enrollments();
     }
 
     // Relationship Method Tests

@@ -6,6 +6,7 @@ namespace CanvasLMS\Api\Sections;
 
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Enrollments\Enrollment;
 use CanvasLMS\Dto\Sections\CreateSectionDTO;
 use CanvasLMS\Dto\Sections\UpdateSectionDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -321,5 +322,49 @@ class Section extends AbstractBaseApi
             'end_at' => $this->endAt,
             'restrict_enrollments_to_section_dates' => $this->restrictEnrollmentsToSectionDates,
         ];
+    }
+
+    // Relationship Methods
+
+    /**
+     * Get the course this section belongs to
+     *
+     * @return Course|null
+     * @throws CanvasApiException
+     */
+    public function course(): ?Course
+    {
+        self::checkCourse();
+        return self::$course;
+    }
+
+    /**
+     * Get enrollments for this section
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Enrollment[]
+     * @throws CanvasApiException
+     */
+    public function enrollments(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Section ID is required to fetch enrollments');
+        }
+
+        return Enrollment::fetchAllBySection($this->id, $params);
+    }
+
+
+    /**
+     * Get student enrollments for this section
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Enrollment[]
+     * @throws CanvasApiException
+     */
+    public function students(array $params = []): array
+    {
+        $params = array_merge($params, ['type[]' => ['StudentEnrollment']]);
+        return $this->enrollments($params);
     }
 }

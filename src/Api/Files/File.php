@@ -713,4 +713,20 @@ class File extends AbstractBaseApi
     {
         $this->hidden = $hidden;
     }
+
+    // Relationship Methods
+
+    /**
+     * Get the folder containing this file
+     *
+     * NOTE: The Folder API class is not yet implemented in this SDK.
+     * This method serves as a placeholder for future implementation.
+     *
+     * @return null
+     */
+    public function folder(): ?object
+    {
+        // Folder class not yet implemented
+        return null;
+    }
 }

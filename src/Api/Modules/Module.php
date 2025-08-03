@@ -890,4 +890,127 @@ class Module extends AbstractBaseApi
             return false;
         }
     }
+
+    // Relationship Methods
+
+    /**
+     * Get the course this module belongs to
+     *
+     * @return Course|null
+     * @throws CanvasApiException
+     */
+    public function course(): ?Course
+    {
+        self::checkCourse();
+        return self::$course;
+    }
+
+    /**
+     * Get completion rate for this module
+     *
+     * @example
+     * ```php
+     * $course = Course::find(123);
+     * Module::setCourse($course);
+     *
+     * $module = Module::find(456);
+     *
+     * // Get overall completion rate (current user)
+     * $rate = $module->getCompletionRate();
+     * echo "Module is {$rate}% complete\n";
+     *
+     * // Get completion rate for specific student
+     * $studentRate = $module->getCompletionRate(789);
+     * if ($studentRate === 100.0) {
+     *     echo "Student has completed this module!\n";
+     * }
+     *
+     * // Track progress across all modules
+     * $modules = Module::fetchAll();
+     * foreach ($modules as $module) {
+     *     $rate = $module->getCompletionRate();
+     *     echo "{$module->name}: {$rate}% complete\n";
+     * }
+     * ```
+     *
+     * @param int|null $userId Optional user ID to get completion rate for specific user
+     * @return float Completion rate as a percentage (0.0 to 100.0)
+     * @throws CanvasApiException
+     */
+    public function getCompletionRate(?int $userId = null): float
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Module ID is required to get completion rate');
+        }
+
+        self::checkApiClient();
+        self::checkCourse();
+
+        // Get all module items with completion status
+        $params = ['include[]' => 'content_details'];
+        if ($userId !== null) {
+            $params['student_id'] = $userId;
+        }
+
+        $items = $this->items($params);
+
+        if (count($items) === 0) {
+            return 100.0; // No items means 100% complete
+        }
+
+        $completedCount = 0;
+        foreach ($items as $item) {
+            // Check if item is completed based on completion_requirement
+            if (
+                isset($item->completionRequirement) &&
+                isset($item->completionRequirement['completed']) &&
+                $item->completionRequirement['completed'] === true
+            ) {
+                $completedCount++;
+            }
+        }
+
+        return round(($completedCount / count($items)) * 100, 2);
+    }
+
+    /**
+     * Get prerequisite modules
+     *
+     * @example
+     * ```php
+     * $course = Course::find(123);
+     * Module::setCourse($course);
+     *
+     * $module = Module::find(456);
+     * $prerequisites = $module->prerequisites();
+     *
+     * foreach ($prerequisites as $prereq) {
+     *     echo "Must complete: {$prereq->name}\n";
+     * }
+     * ```
+     *
+     * @return Module[] Array of prerequisite Module objects
+     * @throws CanvasApiException
+     */
+    public function prerequisites(): array
+    {
+        if (!isset($this->prerequisiteModuleIds) || empty($this->prerequisiteModuleIds)) {
+            return [];
+        }
+
+        self::checkApiClient();
+        self::checkCourse();
+
+        $prerequisites = [];
+        foreach ($this->prerequisiteModuleIds as $moduleId) {
+            try {
+                $prerequisites[] = self::find($moduleId);
+            } catch (\Exception $e) {
+                // Skip modules that can't be loaded (might be deleted or inaccessible)
+                continue;
+            }
+        }
+
+        return $prerequisites;
+    }
 }
