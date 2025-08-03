@@ -510,6 +510,16 @@ class GroupMembership extends AbstractBaseApi
         $this->moderator = $moderator;
     }
 
+    /**
+     * Get the user object for this membership
+     *
+     * This method implements lazy-loading: if the user object is not already loaded
+     * but a userId is present, it will make an API call to fetch the user data.
+     * To avoid N+1 queries when processing multiple memberships, consider using
+     * Canvas API include parameters when fetching memberships.
+     *
+     * @return User|null The user object or null if no user is associated
+     */
     public function getUser(): ?User
     {
         if ($this->user === null && $this->userId !== null) {

@@ -410,6 +410,16 @@ class GroupTest extends TestCase
         $this->assertTrue($result);
     }
 
+    public function testInviteWithInvalidEmail(): void
+    {
+        $group = new Group(['id' => 123]);
+        
+        $this->expectException(\CanvasLMS\Exceptions\CanvasApiException::class);
+        $this->expectExceptionMessage('Invalid email address: not-an-email');
+
+        $group->invite(['not-an-email']);
+    }
+
     public function testRemoveUser(): void
     {
         $group = new Group(['id' => 123]);

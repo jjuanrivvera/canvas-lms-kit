@@ -349,7 +349,13 @@ class GroupCategory extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('group_categories/%d/assign_unassigned_members', $this->id);
-        $params = $sync ? ['multipart' => [['name' => 'sync', 'contents' => 'true']]] : [];
+
+        // Consistent multipart parameter structure
+        $multipart = [];
+        if ($sync) {
+            $multipart[] = ['name' => 'sync', 'contents' => 'true'];
+        }
+        $params = empty($multipart) ? [] : ['multipart' => $multipart];
 
         $response = self::$apiClient->post($endpoint, $params);
         $data = json_decode($response->getBody()->getContents(), true);

@@ -483,6 +483,13 @@ class Group extends AbstractBaseApi
             throw new CanvasApiException('Group ID is required to invite users');
         }
 
+        // Validate email addresses
+        foreach ($emails as $email) {
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new CanvasApiException("Invalid email address: {$email}");
+            }
+        }
+
         self::checkApiClient();
 
         try {
@@ -500,6 +507,11 @@ class Group extends AbstractBaseApi
 
     /**
      * Remove user from group
+     *
+     * Note: Canvas API doesn't provide a direct endpoint to remove a user by user ID.
+     * This method fetches memberships to find the correct membership ID for deletion.
+     * For better performance when removing multiple users, consider fetching all
+     * memberships once and managing them locally.
      *
      * @param int $userId User ID to remove
      * @return bool
@@ -537,8 +549,32 @@ class Group extends AbstractBaseApi
     /**
      * Get group activity stream
      *
+     * Returns an array of activity stream items which may include:
+     * - Discussion topics (type: 'DiscussionTopic')
+     * - Announcements (type: 'Announcement')
+     * - Conversations (type: 'Conversation')
+     * - Messages (type: 'Message')
+     * - Submissions (type: 'Submission')
+     * - Conference invitations (type: 'WebConference')
+     * - Collaborations (type: 'Collaboration')
+     * - AssessmentRequests (type: 'AssessmentRequest')
+     *
+     * Each item contains: id, title, message, type, read_state, created_at, updated_at,
+     * and context-specific fields based on the activity type.
+     *
      * @param array<string, mixed> $params Query parameters
-     * @return array<mixed>
+     * @return array{
+     *   0?: array{
+     *     id: int,
+     *     title: string,
+     *     message: string,
+     *     type: string,
+     *     read_state: bool,
+     *     created_at: string,
+     *     updated_at: string,
+     *     ...
+     *   }
+     * } Array of activity stream items
      * @throws CanvasApiException
      */
     public function activityStream(array $params = []): array
@@ -558,7 +594,13 @@ class Group extends AbstractBaseApi
     /**
      * Get group activity stream summary
      *
-     * @return array<mixed>
+     * Returns a summary of the group's activity stream with counts by type.
+     *
+     * @return array{
+     *   type: string,
+     *   unread_count: int,
+     *   count: int
+     * }[] Array of activity type summaries
      * @throws CanvasApiException
      */
     public function activityStreamSummary(): array
