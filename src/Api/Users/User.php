@@ -236,7 +236,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->post('/accounts/1/users', [
+        $response = self::$apiClient->post('/accounts/' . Config::getAccountId() . '/users', [
             'multipart' => $dto->toApiArray()
         ]);
         return new self(json_decode($response->getBody(), true));

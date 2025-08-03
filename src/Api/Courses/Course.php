@@ -506,7 +506,7 @@ class Course extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->post('/accounts/1/courses', [
+        $response = self::$apiClient->post('/accounts/' . Config::getAccountId() . '/courses', [
             'multipart' => $dto->toApiArray()
         ]);
 

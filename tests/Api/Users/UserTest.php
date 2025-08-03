@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Users\CreateUserDTO;
 use CanvasLMS\Dto\Users\UpdateUserDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Config;
 
 class UserTest extends TestCase
 {
@@ -28,6 +29,9 @@ class UserTest extends TestCase
      */
     protected function setUp(): void
     {
+        // Set up test configuration
+        Config::setAccountId(1);
+        
         $this->httpClientMock = $this->createMock(HttpClient::class);
         User::setApiClient($this->httpClientMock);
         $this->user = new User([]);
@@ -102,6 +106,87 @@ class UserTest extends TestCase
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertEquals('Test User', $user->getName());
+    }
+
+    /**
+     * Test that User::create uses the configured account ID
+     * @return void
+     */
+    public function testCreateUserUsesConfiguredAccountId(): void
+    {
+        // Set a custom account ID
+        Config::setAccountId(789);
+        
+        $userData = [
+            'name' => 'Test User',
+            'unique_id' => 'testuser789'
+        ];
+
+        $dto = new CreateUserDTO($userData);
+        $expectedPayload = $dto->toApiArray();
+        $expectedResult = array_merge($userData, ['id' => 1]);
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                $this->equalTo('/accounts/789/users'),
+                $this->callback(function ($subject) use ($expectedPayload) {
+                    return $subject['multipart'] === $expectedPayload;
+                })
+            )
+            ->willReturn($response);
+
+        $user = User::create($userData);
+
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertEquals('Test User', $user->getName());
+        
+        // Reset to default for other tests
+        Config::setAccountId(1);
+    }
+
+    /**
+     * Test that User::create uses default account ID when none is configured
+     * @return void
+     */
+    public function testCreateUserUsesDefaultAccountId(): void
+    {
+        // Reset config to ensure we're using defaults
+        Config::resetContext(Config::getContext());
+        
+        $userData = [
+            'name' => 'Test User',
+            'unique_id' => 'testuser_default'
+        ];
+
+        $dto = new CreateUserDTO($userData);
+        $expectedPayload = $dto->toApiArray();
+        $expectedResult = array_merge($userData, ['id' => 1]);
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                $this->equalTo('/accounts/1/users'), // Default account ID is 1
+                $this->callback(function ($subject) use ($expectedPayload) {
+                    return $subject['multipart'] === $expectedPayload;
+                })
+            )
+            ->willReturn($response);
+
+        // Suppress the warning about using default account ID
+        @$user = User::create($userData);
+
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertEquals('Test User', $user->getName());
+        
+        // Restore configured account ID for other tests
+        Config::setAccountId(1);
     }
 
     /**
