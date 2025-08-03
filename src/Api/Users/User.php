@@ -253,7 +253,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get("/users/{$id}");
-        return new self(json_decode($response->getBody(), true));
+        return new self(json_decode($response->getBody()->getContents(), true));
     }
 
     /**

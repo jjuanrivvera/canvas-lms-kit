@@ -13,6 +13,7 @@ use CanvasLMS\Api\Submissions\Submission;
 use CanvasLMS\Api\Assignments\Assignment;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use CanvasLMS\Pagination\PaginatedResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -140,20 +141,17 @@ class UserRelationshipTest extends TestCase
             ]
         ];
 
-        // Set up mock expectations
-        $this->mockStream->method('getContents')
-            ->willReturn(json_encode($groupsData));
-        
-        $this->mockStream->method('__toString')
-            ->willReturn(json_encode($groupsData));
+        // Mock paginated response
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('fetchAllPages')
+            ->willReturn($groupsData);
 
-        $this->mockResponse->method('getBody')
-            ->willReturn($this->mockStream);
-
+        // Set up mock expectations for paginated request
         $this->mockHttpClient->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('users/100/groups', ['query' => []])
-            ->willReturn($this->mockResponse);
+            ->willReturn($mockPaginatedResponse);
 
         // Test the method
         $groups = $user->groups();
