@@ -44,6 +44,22 @@ class UpdateGroupDTO extends AbstractBaseDto
     public ?string $sisGroupId = null;
 
     /**
+     * The ID of the avatar attachment to use for the group
+     */
+    public ?int $avatarId = null;
+
+    /**
+     * An array of user IDs to add as group members
+     * @var array<int>|null
+     */
+    public ?array $members = null;
+
+    /**
+     * Override any sis stickiness
+     */
+    public ?bool $overrideSisStickiness = null;
+
+    /**
      * Convert DTO to API-compatible array format
      *
      * @return array<array{name: string, contents: string}>
@@ -74,6 +90,23 @@ class UpdateGroupDTO extends AbstractBaseDto
 
         if ($this->sisGroupId !== null) {
             $data[] = ['name' => 'sis_group_id', 'contents' => $this->sisGroupId];
+        }
+
+        if ($this->avatarId !== null) {
+            $data[] = ['name' => 'avatar_id', 'contents' => (string)$this->avatarId];
+        }
+
+        if ($this->members !== null) {
+            foreach ($this->members as $memberId) {
+                $data[] = ['name' => 'members[]', 'contents' => (string)$memberId];
+            }
+        }
+
+        if ($this->overrideSisStickiness !== null) {
+            $data[] = [
+                'name' => 'override_sis_stickiness',
+                'contents' => $this->overrideSisStickiness ? 'true' : 'false'
+            ];
         }
 
         return $data;

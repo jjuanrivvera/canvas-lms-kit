@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Complete Groups API implementation with student collaboration features (#63)
+  - **Group** class enhanced with pagination support, activity streams, permissions, and membership management
+  - **GroupCategory** class for organizing groups within courses with bulk member assignment
+  - **GroupMembership** class for managing group membership, moderator status, and invitations
+  - Added relationship methods to Course and User classes for group-related operations
+  - Full support for student group collaboration workflows and self-signup groups
+  - Comprehensive test coverage for all group-related functionality
+
 ### Changed
+- Enhanced User relationship methods to use pagination for groups listing (#63)
 - Refactored Rubric API classes to follow SDK conventions for context handling (#80)
   - Rubric class now uses `setCourse()` pattern like other API classes
   - Removed context parameters from all Rubric methods

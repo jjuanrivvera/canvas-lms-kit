@@ -679,6 +679,100 @@ class Course extends AbstractBaseApi
     }
 
     /**
+     * Get groups in this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<\CanvasLMS\Api\Groups\Group>
+     * @throws CanvasApiException
+     */
+    public function groups(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch groups');
+        }
+
+        return \CanvasLMS\Api\Groups\Group::fetchByContext('courses', $this->id, $params);
+    }
+
+    /**
+     * Get paginated groups in this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     */
+    public function groupsPaginated(array $params = []): PaginatedResponse
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch groups');
+        }
+
+        return \CanvasLMS\Api\Groups\Group::fetchByContextPaginated('courses', $this->id, $params);
+    }
+
+    /**
+     * Get group categories in this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<\CanvasLMS\Api\GroupCategories\GroupCategory>
+     * @throws CanvasApiException
+     */
+    public function groupCategories(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch group categories');
+        }
+
+        return \CanvasLMS\Api\GroupCategories\GroupCategory::fetchAllPagesAsModels(
+            sprintf('courses/%d/group_categories', $this->id),
+            $params
+        );
+    }
+
+    /**
+     * Get paginated group categories in this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     */
+    public function groupCategoriesPaginated(array $params = []): PaginatedResponse
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch group categories');
+        }
+
+        return \CanvasLMS\Api\GroupCategories\GroupCategory::getPaginatedResponse(
+            sprintf('courses/%d/group_categories', $this->id),
+            $params
+        );
+    }
+
+    /**
+     * Create a group category in this course
+     *
+     * @param array<string, mixed>|\CanvasLMS\Dto\GroupCategories\CreateGroupCategoryDTO $data Group category data
+     * @return \CanvasLMS\Api\GroupCategories\GroupCategory
+     * @throws CanvasApiException
+     */
+    public function createGroupCategory(
+        array|\CanvasLMS\Dto\GroupCategories\CreateGroupCategoryDTO $data
+    ): \CanvasLMS\Api\GroupCategories\GroupCategory {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to create group category');
+        }
+
+        // Transform data to include course_id
+        if (is_array($data)) {
+            $data['course_id'] = $this->id;
+        } else {
+            $data->courseId = $this->id;
+        }
+
+        return \CanvasLMS\Api\GroupCategories\GroupCategory::create($data);
+    }
+
+    /**
      * Conclude the course in the Canvas LMS system
      * @return bool
      */
