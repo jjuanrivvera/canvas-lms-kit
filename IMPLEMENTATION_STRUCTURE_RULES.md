@@ -69,6 +69,39 @@ When implementing a new resource:
 
 ## API Design Principles
 
+### Account-as-Default Convention for Multi-Context Resources
+
+**Rule**: Resources that can exist in multiple contexts (Account, Course, User) should default to Account context when accessed directly through the API class. Course-specific and other context-specific access should be provided through instance methods on the respective context classes.
+
+**Implementation Pattern**:
+```php
+// Default: Account context
+$rubrics = Rubric::fetchAll();  // Uses Config::getAccountId()
+$tools = ExternalTool::fetchAll();  // Uses Config::getAccountId()
+
+// Course context via Course instance
+$course = Course::find(123);
+$rubrics = $course->getRubrics();
+$tools = $course->getExternalTools();
+
+// User context via User instance (where applicable)
+$user = User::find(456);
+$groups = $user->getGroups();
+```
+
+**Benefits**:
+- Consistency across all multi-context resources
+- Respects Canvas LMS hierarchy (Account as parent context)
+- Course class becomes the gateway for course-specific operations
+- Maintains clean separation of concerns
+
+**Examples of Multi-Context Resources**:
+- Groups (Account/Course/User)
+- Rubrics (Account/Course)  
+- External Tools (Account/Course)
+- Calendar Events (Account/Course/User)
+- Outcomes (Account/Course)
+
 ### Array-Based User Interface
 
 **Rule**: Public API methods should accept arrays as input parameters to provide a simpler, more intuitive interface for end users. DTOs should be used internally for type safety and data validation.
