@@ -6,6 +6,7 @@ use Exception;
 use CanvasLMS\Config;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Enrollments\Enrollment;
+use CanvasLMS\Api\Groups\Group;
 use CanvasLMS\Dto\Users\UpdateUserDTO;
 use CanvasLMS\Dto\Users\CreateUserDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -17,6 +18,7 @@ use CanvasLMS\Objects\TodoItem;
 use CanvasLMS\Objects\UpcomingEvent;
 use CanvasLMS\Api\Assignments\Assignment;
 use CanvasLMS\Api\Files\File;
+use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Objects\Profile;
 use CanvasLMS\Objects\Avatar;
 use CanvasLMS\Objects\CourseNickname;
@@ -440,29 +442,15 @@ class User extends AbstractBaseApi
      */
     public function enrollments(array $params = []): array
     {
-        return $this->getEnrollmentsAsObjects($params);
-    }
-
-    // Enrollment Relationship Methods
-
-    /**
-     * Get all enrollments for this user as Enrollment objects
-     *
-     * This method fetches enrollments across all courses for the current user.
-     * Use the $params array to filter enrollments by type, state, or other Canvas API parameters.
-     *
-     * @param mixed[] $params Query parameters for filtering enrollments (e.g., ['type[]' => ['StudentEnrollment']])
-     * @return Enrollment[] Array of Enrollment objects
-     * @throws CanvasApiException If the user ID is not set or API request fails
-     */
-    public function getEnrollmentsAsObjects(array $params = []): array
-    {
         if (!$this->id) {
             throw new CanvasApiException('User ID is required to fetch enrollments');
         }
 
         return Enrollment::fetchAllByUser($this->id, $params);
     }
+
+    // Enrollment Relationship Methods
+
 
     /**
      * Get enrollments for this user in a specific course
@@ -499,7 +487,7 @@ class User extends AbstractBaseApi
     public function getActiveEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['state[]' => ['active']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -514,7 +502,7 @@ class User extends AbstractBaseApi
     public function getStudentEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['StudentEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -529,7 +517,7 @@ class User extends AbstractBaseApi
     public function getTeacherEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['TeacherEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -580,7 +568,7 @@ class User extends AbstractBaseApi
      *
      * This returns the raw enrollments array that may be embedded in the user object
      * from certain Canvas API calls. For fetching current enrollments from the API,
-     * use getEnrollmentsAsObjects() instead.
+     * use enrollments() instead.
      *
      * @return mixed[]|null Raw enrollments data array or null
      */
@@ -1594,5 +1582,71 @@ class User extends AbstractBaseApi
         $dto = $data instanceof CreateCalendarEventDTO ? $data : new CreateCalendarEventDTO($data);
         $dto->contextCode = sprintf('user_%d', $this->id);
         return CalendarEvent::create($dto);
+    }
+
+    // Additional Relationship Methods
+
+
+    /**
+     * Get groups for this user
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Group[]
+     * @throws CanvasApiException
+     */
+    public function groups(array $params = []): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to get groups');
+        }
+
+        return Group::fetchUserGroups($this->id, $params);
+    }
+
+
+    /**
+     * Get courses for this user
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Course[]
+     * @throws CanvasApiException
+     */
+    public function courses(array $params = []): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to get courses');
+        }
+
+        $endpoint = sprintf('users/%d/courses', $this->id);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $coursesData = json_decode($response->getBody(), true);
+
+        $courses = [];
+        foreach ($coursesData as $courseData) {
+            $courses[] = new Course($courseData);
+        }
+
+        return $courses;
+    }
+
+
+    /**
+     * Get files for this user
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return File[]
+     * @throws CanvasApiException
+     */
+    public function files(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to get files');
+        }
+
+        return File::fetchUserFiles($this->id, $params);
     }
 }

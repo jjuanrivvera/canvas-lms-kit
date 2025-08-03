@@ -16,6 +16,16 @@ use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
+use CanvasLMS\Api\Assignments\Assignment;
+use CanvasLMS\Api\Modules\Module;
+use CanvasLMS\Api\Pages\Page;
+use CanvasLMS\Api\Sections\Section;
+use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
+use CanvasLMS\Api\Quizzes\Quiz;
+use CanvasLMS\Api\Files\File;
+use CanvasLMS\Api\Rubrics\Rubric;
+use CanvasLMS\Api\ExternalTools\ExternalTool;
+use CanvasLMS\Api\Tabs\Tab;
 
 /**
  * Course Class
@@ -1178,23 +1188,6 @@ class Course extends AbstractBaseApi
      */
     public function enrollments(array $params = []): array
     {
-        return $this->getEnrollmentsAsObjects($params);
-    }
-
-    // Enrollment Relationship Methods
-
-    /**
-     * Get all enrollments for this course as Enrollment objects
-     *
-     * This method fetches all enrollments in the current course.
-     * Use the $params array to filter enrollments by type, state, or other Canvas API parameters.
-     *
-     * @param mixed[] $params Query parameters for filtering enrollments (e.g., ['type[]' => ['StudentEnrollment']]
-     * @return Enrollment[] Array of Enrollment objects
-     * @throws CanvasApiException If the course ID is not set or API request fails
-     */
-    public function getEnrollmentsAsObjects(array $params = []): array
-    {
         if (!isset($this->id) || !$this->id) {
             throw new CanvasApiException('Course ID is required to fetch enrollments');
         }
@@ -1203,6 +1196,9 @@ class Course extends AbstractBaseApi
         Enrollment::setCourse($this);
         return Enrollment::fetchAll($params);
     }
+
+    // Enrollment Relationship Methods
+
 
     /**
      * Get active enrollments for this course
@@ -1216,7 +1212,7 @@ class Course extends AbstractBaseApi
     public function getActiveEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['state[]' => ['active']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -1231,7 +1227,7 @@ class Course extends AbstractBaseApi
     public function getStudentEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['StudentEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -1246,7 +1242,7 @@ class Course extends AbstractBaseApi
     public function getTeacherEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['TeacherEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -1261,7 +1257,7 @@ class Course extends AbstractBaseApi
     public function getTaEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['TaEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -1276,7 +1272,7 @@ class Course extends AbstractBaseApi
     public function getObserverEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['ObserverEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -1291,7 +1287,7 @@ class Course extends AbstractBaseApi
     public function getDesignerEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['DesignerEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -1309,7 +1305,7 @@ class Course extends AbstractBaseApi
             $params['type[]'] = [$enrollmentType];
         }
 
-        $enrollments = $this->getEnrollmentsAsObjects($params);
+        $enrollments = $this->enrollments($params);
         return count($enrollments) > 0;
     }
 
@@ -1368,7 +1364,7 @@ class Course extends AbstractBaseApi
      */
     public function getTotalEnrollmentCount(array $params = []): int
     {
-        return count($this->getEnrollmentsAsObjects($params));
+        return count($this->enrollments($params));
     }
 
     /**
@@ -1376,7 +1372,7 @@ class Course extends AbstractBaseApi
      *
      * This returns the raw enrollments array that may be embedded in the course object
      * from certain Canvas API calls. For fetching current enrollments from the API,
-     * use getEnrollmentsAsObjects() instead.
+     * use enrollments() instead.
      *
      * @return mixed[]|null Raw enrollments data array or null
      */
@@ -2505,6 +2501,215 @@ class Course extends AbstractBaseApi
         $dto->contextCode = sprintf('course_%d', $this->id);
         return CalendarEvent::create($dto);
     }
+
+    // Assignment Relationship Methods
+
+    /**
+     * Get assignments for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Assignment[]
+     * @throws CanvasApiException
+     */
+    public function assignments(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch assignments');
+        }
+
+        Assignment::setCourse($this);
+        return Assignment::fetchAll($params);
+    }
+
+
+    // Module Relationship Methods
+
+    /**
+     * Get modules for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Module[]
+     * @throws CanvasApiException
+     */
+    public function modules(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch modules');
+        }
+
+        Module::setCourse($this);
+        return Module::fetchAll($params);
+    }
+
+
+
+    // Page Relationship Methods
+
+    /**
+     * Get pages for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Page[]
+     * @throws CanvasApiException
+     */
+    public function pages(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch pages');
+        }
+
+        Page::setCourse($this);
+        return Page::fetchAll($params);
+    }
+
+
+    // Section Relationship Methods
+
+    /**
+     * Get sections for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Section[]
+     * @throws CanvasApiException
+     */
+    public function sections(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch sections');
+        }
+
+        Section::setCourse($this);
+        return Section::fetchAll($params);
+    }
+
+
+    // Discussion Topic Relationship Methods
+
+    /**
+     * Get discussion topics for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return DiscussionTopic[]
+     * @throws CanvasApiException
+     */
+    public function discussionTopics(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch discussion topics');
+        }
+
+        DiscussionTopic::setCourse($this);
+        return DiscussionTopic::fetchAll($params);
+    }
+
+
+    // Quiz Relationship Methods
+
+    /**
+     * Get quizzes for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Quiz[]
+     * @throws CanvasApiException
+     */
+    public function quizzes(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch quizzes');
+        }
+
+        Quiz::setCourse($this);
+        return Quiz::fetchAll($params);
+    }
+
+
+    // File Relationship Methods
+
+    /**
+     * Get files for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return File[]
+     * @throws CanvasApiException
+     */
+    public function files(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch files');
+        }
+
+        return File::fetchCourseFiles($this->id, $params);
+    }
+
+
+    // Rubric Relationship Methods
+
+    /**
+     * Get rubrics for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Rubric[]
+     * @throws CanvasApiException
+     */
+    public function rubrics(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch rubrics');
+        }
+
+        self::checkApiClient();
+
+        $endpoint = sprintf('courses/%d/rubrics', $this->id);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $rubricsData = json_decode($response->getBody(), true);
+
+        $rubrics = [];
+        foreach ($rubricsData as $rubricData) {
+            $rubrics[] = new Rubric($rubricData);
+        }
+
+        return $rubrics;
+    }
+
+
+    // External Tool Relationship Methods
+
+    /**
+     * Get external tools for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return ExternalTool[]
+     * @throws CanvasApiException
+     */
+    public function externalTools(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch external tools');
+        }
+
+        ExternalTool::setCourse($this);
+        return ExternalTool::fetchAll($params);
+    }
+
+
+    // Tab Relationship Methods
+
+    /**
+     * Get tabs for this course
+     *
+     * @return Tab[]
+     * @throws CanvasApiException
+     */
+    public function tabs(): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch tabs');
+        }
+
+        Tab::setCourse($this);
+        return Tab::fetchAll();
+    }
+
 
     /**
      * Set course timetable
