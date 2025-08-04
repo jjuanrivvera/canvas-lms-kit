@@ -135,6 +135,26 @@ $submission->grade([
 ]);
 ```
 
+### Working with Current User
+
+```php
+use CanvasLMS\Api\Users\User;
+
+// Get current authenticated user instance
+$currentUser = User::self();
+
+// Canvas supports 'self' for these endpoints:
+$profile = $currentUser->getProfile();
+$activityStream = $currentUser->getActivityStream();
+$todoItems = $currentUser->getTodo();
+$groups = $currentUser->groups();
+
+// Other methods require explicit user ID
+$user = User::find(123);
+$enrollments = $user->enrollments();
+$courses = $user->courses();
+```
+
 ### File Uploads
 
 ```php
@@ -250,6 +270,24 @@ $course = Course::find(123);
 $students = $course->getStudents();
 $assignments = $course->getAssignments();
 $modules = $course->getModules();
+```
+
+### Context Management
+
+```php
+// Account-as-Default Convention
+// Resources default to account context when accessed directly
+$groups = Group::fetchAll();  // Uses Config::getAccountId()
+$rubrics = Rubric::fetchAll(); // Account-level rubrics
+
+// Course-specific access via Course instance
+$course = Course::find(123);
+$courseGroups = $course->getGroups();
+$courseRubrics = $course->getRubrics();
+
+// User-specific access via User instance
+$user = User::find(456);
+$userGroups = $user->getGroups();
 ```
 
 ## 🧪 Testing

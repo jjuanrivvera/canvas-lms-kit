@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added relationship methods to Course and User classes for group-related operations
   - Full support for student group collaboration workflows and self-signup groups
   - Comprehensive test coverage for all group-related functionality
+- Support for current user endpoints using Canvas "self" pattern (#87)
+  - Added `User::self()` static method to get instance for current authenticated user
+  - Implemented "self" support for Canvas API endpoints that actually support it:
+    - `getActivityStream()` - Get current user's activity stream
+    - `getTodo()` - Get current user's todo items
+    - `getProfile()` - Get current user's profile
+    - `groups()` - Get current user's groups (special handling for /users/self/groups)
+  - Other User methods require numeric user ID and throw exception when ID not set
+  - Added comprehensive tests for self pattern functionality
+  - No breaking changes - existing code continues to work unchanged
 
 ### Fixed
 - Fixed hardcoded account ID in Course::create() method to use configured account ID from Config class (#84)
