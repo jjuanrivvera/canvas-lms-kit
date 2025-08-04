@@ -1761,7 +1761,7 @@ class User extends AbstractBaseApi
             throw new CanvasApiException('User ID is required to create content migration');
         }
 
-        return ContentMigration::create('users', $this->id, $data);
+        return ContentMigration::createInContext('users', $this->id, $data);
     }
 
     /**
@@ -1778,7 +1778,7 @@ class User extends AbstractBaseApi
             throw new CanvasApiException('User ID is required to import content');
         }
 
-        $migration = ContentMigration::create('users', $this->id, array_merge($options, [
+        $migration = ContentMigration::createInContext('users', $this->id, array_merge($options, [
             'migration_type' => ContentMigration::TYPE_COMMON_CARTRIDGE,
             'pre_attachment' => [
                 'name' => basename($filePath),
@@ -1807,7 +1807,7 @@ class User extends AbstractBaseApi
             throw new CanvasApiException('User ID is required to import content');
         }
 
-        $migration = ContentMigration::create('users', $this->id, array_merge($options, [
+        $migration = ContentMigration::createInContext('users', $this->id, array_merge($options, [
             'migration_type' => ContentMigration::TYPE_ZIP_FILE,
             'pre_attachment' => [
                 'name' => basename($filePath),

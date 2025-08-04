@@ -891,7 +891,7 @@ class Group extends AbstractBaseApi
             throw new CanvasApiException('Group ID is required to create content migration');
         }
 
-        return ContentMigration::create('groups', $this->id, $data);
+        return ContentMigration::createInContext('groups', $this->id, $data);
     }
 
     /**
@@ -908,7 +908,7 @@ class Group extends AbstractBaseApi
             throw new CanvasApiException('Group ID is required to import content');
         }
 
-        $migration = ContentMigration::create('groups', $this->id, array_merge($options, [
+        $migration = ContentMigration::createInContext('groups', $this->id, array_merge($options, [
             'migration_type' => ContentMigration::TYPE_COMMON_CARTRIDGE,
             'pre_attachment' => [
                 'name' => basename($filePath),
@@ -937,7 +937,7 @@ class Group extends AbstractBaseApi
             throw new CanvasApiException('Group ID is required to import content');
         }
 
-        $migration = ContentMigration::create('groups', $this->id, array_merge($options, [
+        $migration = ContentMigration::createInContext('groups', $this->id, array_merge($options, [
             'migration_type' => ContentMigration::TYPE_ZIP_FILE,
             'pre_attachment' => [
                 'name' => basename($filePath),

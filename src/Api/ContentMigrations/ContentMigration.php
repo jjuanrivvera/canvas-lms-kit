@@ -265,7 +265,20 @@ class ContentMigration extends AbstractBaseApi
     }
 
     /**
-     * Create a new content migration
+     * Create a new content migration in the default account context
+     *
+     * @param array<string, mixed>|CreateContentMigrationDTO $data Migration data
+     * @return self
+     * @throws CanvasApiException
+     */
+    public static function create(array|CreateContentMigrationDTO $data): self
+    {
+        $accountId = Config::getAccountId();
+        return self::createInContext('accounts', $accountId, $data);
+    }
+
+    /**
+     * Create a new content migration in a specific context
      *
      * @param string $contextType Context type (accounts, courses, groups, users)
      * @param int $contextId Context ID
@@ -273,8 +286,11 @@ class ContentMigration extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function create(string $contextType, int $contextId, array|CreateContentMigrationDTO $data): self
-    {
+    public static function createInContext(
+        string $contextType,
+        int $contextId,
+        array|CreateContentMigrationDTO $data
+    ): self {
         self::checkApiClient();
 
         if (is_array($data)) {
@@ -301,20 +317,21 @@ class ContentMigration extends AbstractBaseApi
     }
 
     /**
-     * Create a migration in the default account context
+     * Update content migration in the default account context
      *
-     * @param array<string, mixed>|CreateContentMigrationDTO $data Migration data
+     * @param int $id Migration ID
+     * @param array<string, mixed>|UpdateContentMigrationDTO $data Update data
      * @return self
      * @throws CanvasApiException
      */
-    public static function createInAccount(array|CreateContentMigrationDTO $data): self
+    public static function update(int $id, array|UpdateContentMigrationDTO $data): self
     {
         $accountId = Config::getAccountId();
-        return self::create('accounts', $accountId, $data);
+        return self::updateInContext('accounts', $accountId, $id, $data);
     }
 
     /**
-     * Update content migration
+     * Update content migration in a specific context
      *
      * @param string $contextType Context type (accounts, courses, groups, users)
      * @param int $contextId Context ID
@@ -323,7 +340,7 @@ class ContentMigration extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function update(
+    public static function updateInContext(
         string $contextType,
         int $contextId,
         int $id,
@@ -804,7 +821,7 @@ class ContentMigration extends AbstractBaseApi
             ])
         ]);
 
-        return self::create('courses', $targetCourseId, $data);
+        return self::createInContext('courses', $targetCourseId, $data);
     }
 
     /**
@@ -835,7 +852,7 @@ class ContentMigration extends AbstractBaseApi
             ]
         ]);
 
-        $migration = self::create('courses', $courseId, $data);
+        $migration = self::createInContext('courses', $courseId, $data);
 
         // Process file upload if needed
         if ($migration->isFileUploadPending()) {
@@ -873,7 +890,7 @@ class ContentMigration extends AbstractBaseApi
             ]
         ]);
 
-        $migration = self::create('courses', $courseId, $data);
+        $migration = self::createInContext('courses', $courseId, $data);
 
         // Process file upload if needed
         if ($migration->isFileUploadPending()) {
@@ -907,7 +924,7 @@ class ContentMigration extends AbstractBaseApi
             'select' => $selections
         ]);
 
-        return self::create('courses', $targetCourseId, $data);
+        return self::createInContext('courses', $targetCourseId, $data);
     }
 
     /**
@@ -940,7 +957,7 @@ class ContentMigration extends AbstractBaseApi
             ])
         ]);
 
-        return self::create('courses', $targetCourseId, $data);
+        return self::createInContext('courses', $targetCourseId, $data);
     }
 
     // Getter and setter methods

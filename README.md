@@ -353,23 +353,39 @@ $assignments = $course->getAssignments();
 $modules = $course->getModules();
 ```
 
-### Context Management
+### Context Management (Account-as-Default)
+
+Canvas LMS Kit uses the **Account-as-Default** convention for multi-context resources:
 
 ```php
-// Account-as-Default Convention
-// Resources default to account context when accessed directly
-$groups = Group::fetchAll();  // Uses Config::getAccountId()
-$rubrics = Rubric::fetchAll(); // Account-level rubrics
+// Direct API calls use Account context (Config::getAccountId())
+$groups = Group::fetchAll();              // All groups in the account
+$rubrics = Rubric::fetchAll();            // All rubrics in the account
+$migrations = ContentMigration::fetchAll(); // All migrations in the account
 
-// Course-specific access via Course instance
+// Course-specific access via Course instance methods
 $course = Course::find(123);
-$courseGroups = $course->getGroups();
-$courseRubrics = $course->getRubrics();
+$courseGroups = $course->getGroups();              // Groups in this course
+$courseRubrics = $course->getRubrics();            // Rubrics in this course
+$courseMigrations = $course->contentMigrations(); // Migrations in this course
 
-// User-specific access via User instance
+// User-specific access via User instance methods
 $user = User::find(456);
-$userGroups = $user->getGroups();
+$userGroups = $user->groups();                    // User's groups
+$userMigrations = $user->contentMigrations();    // User's migrations
+
+// Group-specific access via Group instance methods
+$group = Group::find(789);
+$groupMigrations = $group->contentMigrations();  // Group's migrations
 ```
+
+**Why Account-as-Default?**
+- ✅ Consistency across all multi-context resources
+- ✅ Respects Canvas hierarchy (Account → Course → User/Group)
+- ✅ Clean separation of concerns
+- ✅ No confusion about which context is being used
+
+[📖 Full Context Management Guide](https://github.com/jjuanrivvera/canvas-lms-kit/wiki/Context-Management-Guide)
 
 ## 🧪 Testing
 

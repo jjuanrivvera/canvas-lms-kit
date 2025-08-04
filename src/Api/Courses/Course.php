@@ -1244,7 +1244,7 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to create content migration');
         }
 
-        return ContentMigration::create('courses', $this->id, $data);
+        return ContentMigration::createInContext('courses', $this->id, $data);
     }
 
     /**

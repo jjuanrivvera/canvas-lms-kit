@@ -119,7 +119,7 @@ class ContentMigrationTest extends TestCase
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('File upload initialization failed: file exceeded quota');
 
-        ContentMigration::create('courses', 123, [
+        ContentMigration::createInContext('courses', 123, [
             'migration_type' => 'common_cartridge_importer',
             'pre_attachment' => ['name' => 'test.imscc', 'size' => 12345]
         ]);
