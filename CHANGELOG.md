@@ -25,6 +25,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Other User methods require numeric user ID and throw exception when ID not set
   - Added comprehensive tests for self pattern functionality
   - No breaking changes - existing code continues to work unchanged
+- Content Migrations API for course content import/export workflows (#61)
+  - **ContentMigration** class with multi-context support (Account/Course/Group/User)
+  - **MigrationIssue** class for handling migration warnings, errors, and todos
+  - **Migrator** read-only object for available migration systems
+  - Support for various migration types: course copy, ZIP files, Common Cartridge, QTI, Moodle
+  - Integration with Progress API for tracking async operations
+  - File upload handling with pre-attachment support
+  - Selective import functionality with copy parameters
+  - Date shifting options for course content
+  - Asset ID mapping for course migrations
+  - Comprehensive DTOs for create/update operations with complex nested settings
 
 ### Fixed
 - Fixed hardcoded account ID in Course::create() method to use configured account ID from Config class (#84)

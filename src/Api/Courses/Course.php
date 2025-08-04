@@ -18,6 +18,8 @@ use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
 use CanvasLMS\Api\Assignments\Assignment;
 use CanvasLMS\Api\Modules\Module;
+use CanvasLMS\Api\ContentMigrations\ContentMigration;
+use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 use CanvasLMS\Api\Pages\Page;
 use CanvasLMS\Api\Sections\Section;
 use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
@@ -1195,6 +1197,160 @@ class Course extends AbstractBaseApi
 
         $response = self::$apiClient->post("/courses/{$this->id}/dismiss_migration_limitation_message");
         return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Get content migrations for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<ContentMigration>
+     * @throws CanvasApiException
+     */
+    public function contentMigrations(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch content migrations');
+        }
+
+        return ContentMigration::fetchByContext('courses', $this->id, $params);
+    }
+
+    /**
+     * Get a specific content migration for this course
+     *
+     * @param int $migrationId Content migration ID
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function contentMigration(int $migrationId): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch content migration');
+        }
+
+        return ContentMigration::findByContext('courses', $this->id, $migrationId);
+    }
+
+    /**
+     * Create a content migration for this course
+     *
+     * @param array<string, mixed>|CreateContentMigrationDTO $data Migration data
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function createContentMigration(array|CreateContentMigrationDTO $data): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to create content migration');
+        }
+
+        return ContentMigration::create('courses', $this->id, $data);
+    }
+
+    /**
+     * Copy content from another course
+     *
+     * @param int $sourceCourseId The course to copy content FROM
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function copyContentFrom(int $sourceCourseId, array $options = []): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to copy content');
+        }
+
+        return ContentMigration::createCourseCopy($this->id, $sourceCourseId, $options);
+    }
+
+    /**
+     * Import content from a Common Cartridge file
+     *
+     * @param string $filePath Path to the .imscc file
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function importCommonCartridge(string $filePath, array $options = []): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to import content');
+        }
+
+        return ContentMigration::importCommonCartridge($this->id, $filePath, $options);
+    }
+
+    /**
+     * Import content from a ZIP file
+     *
+     * @param string $filePath Path to the .zip file
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function importZipFile(string $filePath, array $options = []): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to import content');
+        }
+
+        return ContentMigration::importZipFile($this->id, $filePath, $options);
+    }
+
+    /**
+     * Create a selective course copy
+     *
+     * @param int $sourceCourseId The course to copy content FROM
+     * @param array<string, array<string|int>> $selections Items to copy
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function selectiveCopyFrom(
+        int $sourceCourseId,
+        array $selections,
+        array $options = []
+    ): ContentMigration {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required for selective copy');
+        }
+
+        return ContentMigration::createSelectiveCourseCopy(
+            $this->id,
+            $sourceCourseId,
+            $selections,
+            $options
+        );
+    }
+
+    /**
+     * Copy content with date shifting
+     *
+     * @param int $sourceCourseId The course to copy content FROM
+     * @param string $oldStartDate Original course start date (Y-m-d)
+     * @param string $newStartDate New course start date (Y-m-d)
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function copyWithDateShift(
+        int $sourceCourseId,
+        string $oldStartDate,
+        string $newStartDate,
+        array $options = []
+    ): ContentMigration {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required for date shift copy');
+        }
+
+        return ContentMigration::createCourseCopyWithDateShift(
+            $this->id,
+            $sourceCourseId,
+            $oldStartDate,
+            $newStartDate,
+            $options
+        );
     }
 
     /**

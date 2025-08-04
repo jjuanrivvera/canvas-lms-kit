@@ -25,6 +25,8 @@ use CanvasLMS\Objects\CourseNickname;
 use CanvasLMS\Objects\PageView;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
+use CanvasLMS\Api\ContentMigrations\ContentMigration;
+use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 
 /**
  * User Class
@@ -1712,5 +1714,111 @@ class User extends AbstractBaseApi
         }
 
         return File::fetchUserFiles($this->id, $params);
+    }
+
+    /**
+     * Get content migrations for this user
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<ContentMigration>
+     * @throws CanvasApiException
+     */
+    public function contentMigrations(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to fetch content migrations');
+        }
+
+        return ContentMigration::fetchByContext('users', $this->id, $params);
+    }
+
+    /**
+     * Get a specific content migration for this user
+     *
+     * @param int $migrationId Content migration ID
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function contentMigration(int $migrationId): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to fetch content migration');
+        }
+
+        return ContentMigration::findByContext('users', $this->id, $migrationId);
+    }
+
+    /**
+     * Create a content migration for this user
+     *
+     * @param array<string, mixed>|CreateContentMigrationDTO $data Migration data
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function createContentMigration(array|CreateContentMigrationDTO $data): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to create content migration');
+        }
+
+        return ContentMigration::create('users', $this->id, $data);
+    }
+
+    /**
+     * Import content from a Common Cartridge file
+     *
+     * @param string $filePath Path to the .imscc file
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function importCommonCartridge(string $filePath, array $options = []): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to import content');
+        }
+
+        $migration = ContentMigration::create('users', $this->id, array_merge($options, [
+            'migration_type' => ContentMigration::TYPE_COMMON_CARTRIDGE,
+            'pre_attachment' => [
+                'name' => basename($filePath),
+                'size' => filesize($filePath)
+            ]
+        ]));
+
+        if ($migration->isFileUploadPending()) {
+            $migration->processFileUpload($filePath);
+        }
+
+        return $migration;
+    }
+
+    /**
+     * Import content from a ZIP file
+     *
+     * @param string $filePath Path to the .zip file
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function importZipFile(string $filePath, array $options = []): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to import content');
+        }
+
+        $migration = ContentMigration::create('users', $this->id, array_merge($options, [
+            'migration_type' => ContentMigration::TYPE_ZIP_FILE,
+            'pre_attachment' => [
+                'name' => basename($filePath),
+                'size' => filesize($filePath)
+            ]
+        ]));
+
+        if ($migration->isFileUploadPending()) {
+            $migration->processFileUpload($filePath);
+        }
+
+        return $migration;
     }
 }
