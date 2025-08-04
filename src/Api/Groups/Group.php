@@ -13,6 +13,8 @@ use CanvasLMS\Dto\Groups\UpdateGroupDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
+use CanvasLMS\Api\ContentMigrations\ContentMigration;
+use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 
 /**
  * Canvas LMS Groups API
@@ -842,5 +844,111 @@ class Group extends AbstractBaseApi
     public function setWorkflowState(?string $workflowState): void
     {
         $this->workflowState = $workflowState;
+    }
+
+    /**
+     * Get content migrations for this group
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<ContentMigration>
+     * @throws CanvasApiException
+     */
+    public function contentMigrations(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Group ID is required to fetch content migrations');
+        }
+
+        return ContentMigration::fetchByContext('groups', $this->id, $params);
+    }
+
+    /**
+     * Get a specific content migration for this group
+     *
+     * @param int $migrationId Content migration ID
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function contentMigration(int $migrationId): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Group ID is required to fetch content migration');
+        }
+
+        return ContentMigration::findByContext('groups', $this->id, $migrationId);
+    }
+
+    /**
+     * Create a content migration for this group
+     *
+     * @param array<string, mixed>|CreateContentMigrationDTO $data Migration data
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function createContentMigration(array|CreateContentMigrationDTO $data): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Group ID is required to create content migration');
+        }
+
+        return ContentMigration::create('groups', $this->id, $data);
+    }
+
+    /**
+     * Import content from a Common Cartridge file
+     *
+     * @param string $filePath Path to the .imscc file
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function importCommonCartridge(string $filePath, array $options = []): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Group ID is required to import content');
+        }
+
+        $migration = ContentMigration::create('groups', $this->id, array_merge($options, [
+            'migration_type' => ContentMigration::TYPE_COMMON_CARTRIDGE,
+            'pre_attachment' => [
+                'name' => basename($filePath),
+                'size' => filesize($filePath)
+            ]
+        ]));
+
+        if ($migration->isFileUploadPending()) {
+            $migration->processFileUpload($filePath);
+        }
+
+        return $migration;
+    }
+
+    /**
+     * Import content from a ZIP file
+     *
+     * @param string $filePath Path to the .zip file
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function importZipFile(string $filePath, array $options = []): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Group ID is required to import content');
+        }
+
+        $migration = ContentMigration::create('groups', $this->id, array_merge($options, [
+            'migration_type' => ContentMigration::TYPE_ZIP_FILE,
+            'pre_attachment' => [
+                'name' => basename($filePath),
+                'size' => filesize($filePath)
+            ]
+        ]));
+
+        if ($migration->isFileUploadPending()) {
+            $migration->processFileUpload($filePath);
+        }
+
+        return $migration;
     }
 }
