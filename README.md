@@ -9,7 +9,7 @@
   [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-8892BF.svg?style=flat-square)](https://php.net)
   [![License](https://img.shields.io/github/license/jjuanrivvera/canvas-lms-kit?style=flat-square)](https://github.com/jjuanrivvera/canvas-lms-kit/blob/main/LICENSE)
 
-  **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 90% API coverage.**
+  **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 95% API coverage.**
 </div>
 
 ---
@@ -17,7 +17,7 @@
 ## ✨ Why Canvas LMS Kit?
 
 - 🚀 **Production Ready**: Rate limiting, middleware support, battle-tested
-- 📚 **Comprehensive**: 21 Canvas APIs fully implemented (90% coverage)
+- 📚 **Comprehensive**: 30 Canvas APIs fully implemented (95% coverage)
 - 🛡️ **Type Safe**: Full PHP 8.1+ type declarations and PHPStan level 6
 - 🔧 **Developer Friendly**: Intuitive Active Record pattern - just pass arrays!
 - 📖 **Well Documented**: Extensive examples, guides, and API reference
@@ -155,6 +155,33 @@ $enrollments = $user->enrollments();
 $courses = $user->courses();
 ```
 
+### Managing Groups
+
+```php
+use CanvasLMS\Api\Groups\Group;
+use CanvasLMS\Api\Groups\GroupMembership;
+
+// Create a group in your account
+$group = Group::create([
+    'name' => 'Study Group Alpha',
+    'description' => 'Weekly study sessions',
+    'is_public' => false,
+    'join_level' => 'invitation_only'
+]);
+
+// Add members to the group
+$membership = $group->createMembership([
+    'user_id' => 456,
+    'workflow_state' => 'accepted'
+]);
+
+// Get group activity stream
+$activities = $group->activityStream();
+
+// Invite users by email
+$group->invite(['student1@example.com', 'student2@example.com']);
+```
+
 ### File Uploads
 
 ```php
@@ -169,9 +196,55 @@ $file = File::upload([
 ]);
 ```
 
+### Content Migrations
+
+```php
+use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\ContentMigrations\ContentMigration;
+
+// Copy content between courses
+$course = Course::find(456);
+$migration = $course->copyContentFrom(123, [
+    'except' => ['announcements', 'calendar_events']
+]);
+
+// Selective copy with specific items
+$migration = $course->selectiveCopyFrom(123, [
+    'assignments' => [1, 2, 3],
+    'quizzes' => ['quiz-1', 'quiz-2'],
+    'modules' => [10, 11]
+]);
+
+// Import a Common Cartridge file
+$migration = $course->importCommonCartridge('/path/to/course.imscc');
+
+// Copy with date shifting
+$migration = $course->copyWithDateShift(123, '2024-01-01', '2025-01-01', [
+    'shift_dates' => true,
+    'old_start_date' => '2024-01-01',
+    'new_start_date' => '2025-01-01'
+]);
+
+// Track migration progress
+while (!$migration->isCompleted()) {
+    $progress = $migration->getProgress();
+    echo "Migration {$progress->workflow_state}: {$progress->completion}%\n";
+    sleep(5);
+    $migration->refresh();
+}
+
+// Handle migration issues
+$issues = $migration->migrationIssues();
+foreach ($issues as $issue) {
+    if ($issue->workflow_state === 'active') {
+        $issue->resolve();
+    }
+}
+```
+
 ## 📊 Supported APIs
 
-### ✅ Currently Implemented (21 APIs - 90% Coverage)
+### ✅ Currently Implemented (30 APIs - 95% Coverage)
 
 <details>
 <summary><b>📚 Core Course Management</b></summary>
@@ -187,9 +260,10 @@ $file = File::upload([
 <details>
 <summary><b>👥 Users & Enrollment</b></summary>
 
-- ✅ **Users** - User management
+- ✅ **Users** - User management with self() pattern support
 - ✅ **Enrollments** - Course enrollments
-- ✅ **Admin/Account** - Administrative functions
+- ✅ **Admins** - Administrative roles
+- ✅ **Accounts** - Account management
 </details>
 
 <details>
@@ -200,26 +274,33 @@ $file = File::upload([
 - ✅ **Quiz Submissions** - Student attempts
 - ✅ **Submissions** - Assignment submissions
 - ✅ **Submission Comments** - Feedback
-- ✅ **Rubrics** - Grading criteria
+- ✅ **Rubrics** - Grading criteria and assessment
+- ✅ **Rubric Associations** - Link rubrics to assignments
+- ✅ **Rubric Assessments** - Grade with rubrics
 </details>
 
 <details>
 <summary><b>💬 Communication & Collaboration</b></summary>
 
 - ✅ **Discussion Topics** - Forums and discussions
+- ✅ **Groups** - Student groups and collaboration
+- ✅ **Group Categories** - Organize and manage groups
+- ✅ **Group Memberships** - Group member management
 - 🔄 **Announcements** - Course announcements (coming soon)
-- 🔄 **Groups** - Student groups (coming soon)
+- 🔄 **Conversations** - Private messaging (coming soon)
 </details>
 
 <details>
 <summary><b>🔧 Tools & Integration</b></summary>
 
-- ✅ **Files** - File management
+- ✅ **Files** - File management and uploads
 - ✅ **External Tools** - LTI integrations
 - ✅ **Module Assignment Overrides** - Custom dates
 - ✅ **Calendar Events** - Event management
 - ✅ **Appointment Groups** - Scheduling
 - ✅ **Progress** - Async operation tracking
+- ✅ **Content Migrations** - Import/export course content
+- ✅ **Migration Issues** - Handle import problems
 </details>
 
 ## 🚀 Advanced Features

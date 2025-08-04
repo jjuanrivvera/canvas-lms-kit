@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Other User methods require numeric user ID and throw exception when ID not set
   - Added comprehensive tests for self pattern functionality
   - No breaking changes - existing code continues to work unchanged
-- Content Migrations API for course content import/export workflows (#61)
+- Content Migrations API for course content import/export workflows (#61, #89)
   - **ContentMigration** class with multi-context support (Account/Course/Group/User)
   - **MigrationIssue** class for handling migration warnings, errors, and todos
   - **Migrator** read-only object for available migration systems
@@ -36,12 +36,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Date shifting options for course content
   - Asset ID mapping for course migrations
   - Comprehensive DTOs for create/update operations with complex nested settings
+  - Context-specific methods added to Course, Group, and User classes for content migrations (#89)
+  - Full test coverage for all context-specific content migration methods (#89)
 
 ### Fixed
 - Fixed hardcoded account ID in Course::create() method to use configured account ID from Config class (#84)
 - Fixed hardcoded account ID in User::create() method to use configured account ID from Config class (#84)
 - Both methods now properly use Config::getAccountId() which defaults to 1 when not explicitly configured (#84)
 - Added tests to verify correct account ID usage in multi-tenant environments and default behavior (#84)
+- Fixed MigrationIssue property update methods to use direct property assignment instead of populate() (#89)
+- Improved file resource management in ContentMigration with proper try-finally blocks (#89)
+- Added constants for magic numbers in ContentMigration polling logic (#89)
 
 ### Changed
 - Enhanced User relationship methods to use pagination for groups listing (#63)
@@ -56,6 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Rubrics API classes (Rubric, RubricAssessment, RubricAssociation) to support array-based interface for consistency with the rest of the SDK (#78)
   - `create()` and `update()` methods now accept both arrays and DTOs as input
   - Added comprehensive tests for array input support
+- Extracted multipart building logic to dedicated method in ContentMigration class for better code organization (#89)
+- Removed deprecated static properties and methods from MigrationIssue class (#89)
 
 ## [1.0.1] - 2025-08-01
 
