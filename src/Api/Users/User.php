@@ -33,10 +33,22 @@ use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
  * and find users from the Canvas LMS system. It utilizes Data Transfer Objects (DTOs)
  * for handling user creation and updates.
  *
+ * The User class supports Canvas's "self" pattern, allowing users to access their own
+ * data without knowing their user ID. The Canvas API documentation states: "the :user_id
+ * parameter can always be replaced with self if the requesting user is asking for his/her
+ * own information."
+ *
  * Usage Examples:
  *
  * ```php
- * // Creating a new user
+ * // Current user operations (using the self pattern)
+ * $currentUser = User::self();
+ * $profile = $currentUser->getProfile();
+ * $courses = $currentUser->courses();
+ * $todos = $currentUser->getTodoItems();
+ * $groups = $currentUser->groups();
+ *
+ * // Creating a new user (admin operation)
  * $userData = [
  *     'username' => 'john_doe',
  *     'email' => 'john.doe@example.com',
@@ -44,17 +56,17 @@ use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
  * ];
  * $user = User::create($userData);
  *
- * // Updating an existing user
+ * // Updating an existing user (admin operation)
  * $updatedData = [
  *     'email' => 'new_john.doe@example.com',
  *     // ... other updated data ...
  * ];
  * $updatedUser = User::update(123, $updatedData); // where 123 is the user ID
  *
- * // Finding a user by ID
+ * // Finding a user by ID (admin operation)
  * $user = User::find(123);
  *
- * // Fetching all users (first page only)
+ * // Fetching all users (admin operation - first page only)
  * $users = User::fetchAll();
  *
  * // Fetching users with pagination support
@@ -210,6 +222,48 @@ class User extends AbstractBaseApi
      * @var bool|null
      */
     public ?bool $canUpdateName = null;
+
+    /**
+     * Get an instance representing the current authenticated user.
+     *
+     * This method returns a User instance configured to use Canvas's "self" identifier,
+     * allowing access to the current user's data without knowing their user ID.
+     *
+     * Note: Only specific Canvas API endpoints support the "self" identifier:
+     * - Activity stream endpoints (getActivityStream, getActivityStreamSummary, hideStreamItem)
+     * - Todo and upcoming events (getTodoItems, getUpcomingEvents)
+     * - Profile and avatar endpoints (getProfile, getAvatarOptions)
+     * - Course nicknames (getCourseNicknames, setCourseNickname, etc.)
+     * - Groups endpoint (groups() method uses /users/self/groups)
+     *
+     * Methods that do NOT support self:
+     * - File operations (use numeric user ID)
+     * - Custom data storage
+     * - Page views
+     * - Most other endpoints
+     *
+     * @example
+     * ```php
+     * // Get current user's profile
+     * $currentUser = User::self();
+     * $profile = $currentUser->getProfile();
+     *
+     * // Get current user's todo items
+     * $todos = $currentUser->getTodoItems();
+     *
+     * // Get current user's groups
+     * $groups = $currentUser->groups();
+     * ```
+     *
+     * @return self A User instance configured for the current authenticated user
+     */
+    public static function self(): self
+    {
+        $instance = new self([]);
+        // Don't set the id property - let it remain uninitialized
+        // Methods that support 'self' will use it when id is not set
+        return $instance;
+    }
 
     /**
      * Create a new User instance.
@@ -1076,7 +1130,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to fetch missing submissions');
         }
 
@@ -1184,7 +1238,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to set custom data');
         }
 
@@ -1219,7 +1273,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to get custom data');
         }
 
@@ -1431,7 +1485,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to split user');
         }
 
@@ -1534,7 +1588,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to get calendar events');
         }
 
@@ -1558,7 +1612,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to get calendar events');
         }
 
@@ -1590,6 +1644,9 @@ class User extends AbstractBaseApi
     /**
      * Get groups for this user
      *
+     * Note: This method supports the 'self' identifier for the current user
+     * when called on an instance returned by User::self().
+     *
      * @param array<string, mixed> $params Query parameters
      * @return Group[]
      * @throws CanvasApiException
@@ -1598,10 +1655,17 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
-            throw new CanvasApiException('User ID is required to get groups');
+        if (!isset($this->id)) {
+            // Special case: Canvas supports /users/self/groups endpoint
+            $response = self::$apiClient->get('users/self/groups', ['query' => $params]);
+            $groupsData = json_decode($response->getBody(), true);
+
+            return array_map(function ($groupData) {
+                return new Group($groupData);
+            }, $groupsData);
         }
 
+        // For regular users with IDs, use the standard method
         return Group::fetchUserGroups($this->id, $params);
     }
 
@@ -1617,7 +1681,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to get courses');
         }
 
@@ -1643,7 +1707,7 @@ class User extends AbstractBaseApi
      */
     public function files(array $params = []): array
     {
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to get files');
         }
 
