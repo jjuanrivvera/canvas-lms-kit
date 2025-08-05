@@ -4,6 +4,7 @@ namespace CanvasLMS\Api\CalendarEvents;
 
 use DateTime;
 use CanvasLMS\Api\AbstractBaseApi;
+use CanvasLMS\Config;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
 use CanvasLMS\Dto\CalendarEvents\UpdateCalendarEventDTO;
 use CanvasLMS\Dto\CalendarEvents\CreateReservationDTO;
@@ -307,6 +308,48 @@ class CalendarEvent extends AbstractBaseApi
     public ?bool $blackoutDate = null;
 
     /**
+     * Context type extracted from context code
+     * @var string|null
+     */
+    protected ?string $contextType = null;
+
+    /**
+     * Context ID extracted from context code
+     * @var int|null
+     */
+    protected ?int $contextId = null;
+
+    /**
+     * Get the context type
+     *
+     * @return string|null
+     */
+    public function getContextType(): ?string
+    {
+        if ($this->contextType === null && $this->contextCode !== null) {
+            $parsed = self::parseContextCode($this->contextCode);
+            $this->contextType = $parsed['type'];
+            $this->contextId = $parsed['id'];
+        }
+        return $this->contextType;
+    }
+
+    /**
+     * Get the context ID
+     *
+     * @return int|null
+     */
+    public function getContextId(): ?int
+    {
+        if ($this->contextId === null && $this->contextCode !== null) {
+            $parsed = self::parseContextCode($this->contextCode);
+            $this->contextType = $parsed['type'];
+            $this->contextId = $parsed['id'];
+        }
+        return $this->contextId;
+    }
+
+    /**
      * Constructor
      *
      * @param array<string, mixed> $data
@@ -437,6 +480,16 @@ class CalendarEvent extends AbstractBaseApi
     public static function fetchAll(array $params = []): array
     {
         self::checkApiClient();
+
+        // Default to account context if no context_codes provided
+        if (!isset($params['context_codes'])) {
+            $accountId = Config::getAccountId();
+            if (!$accountId || $accountId <= 0) {
+                throw new CanvasApiException('Account ID must be configured to fetch calendar events');
+            }
+            $params['context_codes'] = [sprintf('account_%d', $accountId)];
+        }
+
         $response = self::$apiClient->get('calendar_events', ['query' => $params]);
         $data = json_decode($response->getBody(), true);
 
@@ -455,7 +508,41 @@ class CalendarEvent extends AbstractBaseApi
     public static function fetchAllPaginated(array $params = []): PaginatedResponse
     {
         self::checkApiClient();
+
+        // Default to account context if no context_codes provided
+        if (!isset($params['context_codes'])) {
+            $accountId = Config::getAccountId();
+            if (!$accountId || $accountId <= 0) {
+                throw new CanvasApiException('Account ID must be configured to fetch calendar events');
+            }
+            $params['context_codes'] = [sprintf('account_%d', $accountId)];
+        }
+
         return self::getPaginatedResponse('calendar_events', $params);
+    }
+
+    /**
+     * Fetch calendar events by context
+     *
+     * @param string $contextType Context type ('account', 'course', 'user', 'group')
+     * @param int $contextId Context ID
+     * @param array<string, mixed> $params Query parameters
+     * @return array<int, self>
+     * @throws CanvasApiException
+     */
+    public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
+    {
+        // Build context code
+        $contextCode = sprintf('%s_%d', $contextType, $contextId);
+        $params['context_codes'] = [$contextCode];
+
+        self::checkApiClient();
+        $response = self::$apiClient->get('calendar_events', ['query' => $params]);
+        $data = json_decode($response->getBody(), true);
+
+        return array_map(function ($item) {
+            return new self($item);
+        }, $data);
     }
 
     /**

@@ -334,9 +334,8 @@ class RubricAssociation extends AbstractBaseApi
             throw new CanvasApiException("Course context must be set");
         }
 
-        // Set the course context for Rubric before calling find
-        Rubric::setCourse(self::$course);
-        return Rubric::find($this->rubricId);
+        // Use the new context-based find method
+        return Rubric::findByContext('courses', self::$course->id, $this->rubricId);
     }
 
     /**

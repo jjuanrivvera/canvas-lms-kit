@@ -172,15 +172,20 @@ class CourseRelationshipTest extends TestCase
     public function testFilesReturnsArrayOfFiles(): void
     {
         $responseData = [
-            ['id' => 1, 'display_name' => 'file1.pdf'],
-            ['id' => 2, 'display_name' => 'file2.doc']
+            ['id' => 1, 'display_name' => 'file1.pdf', 'filename' => 'file1.pdf'],
+            ['id' => 2, 'display_name' => 'file2.doc', 'filename' => 'file2.doc']
         ];
+
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('fetchAllPages')
+            ->willReturn($responseData);
 
         $this->httpClient
             ->expects($this->once())
-            ->method('get')
-            ->with('/courses/123/files', ['query' => []])
-            ->willReturn(new Response(200, [], json_encode($responseData)));
+            ->method('getPaginated')
+            ->with('courses/123/files', ['query' => []])
+            ->willReturn($mockPaginatedResponse);
 
         $files = $this->course->files();
 
@@ -196,12 +201,16 @@ class CourseRelationshipTest extends TestCase
             ['id' => 2, 'title' => 'Rubric 2']
         ];
 
-        // First call returns data with no Link header (single page)
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('fetchAllPages')
+            ->willReturn($responseData);
+
         $this->httpClient
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/rubrics', ['query' => []])
-            ->willReturn(new Response(200, [], json_encode($responseData)));
+            ->willReturn($mockPaginatedResponse);
 
         $rubrics = $this->course->rubrics();
 
@@ -217,11 +226,16 @@ class CourseRelationshipTest extends TestCase
             ['id' => 2, 'name' => 'Tool 2']
         ];
 
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('fetchAllPages')
+            ->willReturn($responseData);
+
         $this->httpClient
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/external_tools', ['query' => []])
-            ->willReturn(new Response(200, [], json_encode($responseData)));
+            ->willReturn($mockPaginatedResponse);
 
         $externalTools = $this->course->externalTools();
 

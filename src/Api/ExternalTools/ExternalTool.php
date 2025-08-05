@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace CanvasLMS\Api\ExternalTools;
 
 use CanvasLMS\Api\AbstractBaseApi;
-use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Config;
 use CanvasLMS\Dto\ExternalTools\CreateExternalToolDTO;
 use CanvasLMS\Dto\ExternalTools\UpdateExternalToolDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -16,54 +16,51 @@ use CanvasLMS\Pagination\PaginationResult;
  * Canvas LMS External Tools API
  *
  * Provides functionality to manage external tools (LTI integrations) in Canvas LMS.
- * This class handles creating, reading, updating, and deleting external tools for a specific course.
- * External tools are IMS LTI links that extend Canvas functionality with third-party applications.
+ * This class handles creating, reading, updating, and deleting external tools in both
+ * account and course contexts. External tools are IMS LTI links that extend Canvas
+ * functionality with third-party applications.
  *
  * Usage Examples:
  *
  * ```php
- * // Set course context (required for all operations)
- * $course = Course::find(123);
- * ExternalTool::setCourse($course);
- *
- * // Create a new external tool
- * $toolData = [
+ * // Account context (default)
+ * $tools = ExternalTool::fetchAll();
+ * $tool = ExternalTool::create([
  *     'name' => 'My LTI Tool',
  *     'consumer_key' => 'key123',
  *     'shared_secret' => 'secret456',
  *     'url' => 'https://tool.example.com/lti/launch',
  *     'privacy_level' => 'public'
- * ];
- * $tool = ExternalTool::create($toolData);
+ * ]);
  *
- * // Find an external tool by ID
- * $tool = ExternalTool::find(456);
+ * // Course context via Course instance
+ * $course = Course::find(123);
+ * $tools = $course->externalTools();
  *
- * // List all external tools for the course
- * $tools = ExternalTool::fetchAll();
+ * // Direct context access
+ * $tools = ExternalTool::fetchByContext('courses', 123);
+ * $tool = ExternalTool::createInContext('courses', 123, [
+ *     'name' => 'Course LTI Tool',
+ *     'consumer_key' => 'key456',
+ *     'shared_secret' => 'secret789',
+ *     'url' => 'https://tool.example.com/lti/launch',
+ *     'privacy_level' => 'public'
+ * ]);
  *
- * // Get tools including parent account tools
- * $allTools = ExternalTool::fetchAll(['include_parents' => true]);
+ * // Finding and updating tools
+ * $tool = ExternalTool::find(456); // Searches in account context
+ * $tool = ExternalTool::findByContext('courses', 123, 456); // Course-specific
  *
- * // Get paginated external tools
- * $paginatedTools = ExternalTool::fetchAllPaginated();
- * $paginationResult = ExternalTool::fetchPage();
+ * $tool = ExternalTool::update(456, ['name' => 'Updated Tool Name']);
  *
- * // Update an external tool
- * $updatedTool = ExternalTool::update(456, ['name' => 'Updated Tool Name']);
- *
- * // Update using DTO
- * $updateDto = new UpdateExternalToolDTO(['name' => 'New Name']);
- * $updatedTool = ExternalTool::update(456, $updateDto);
- *
- * // Update using instance method
- * $tool = ExternalTool::find(456);
- * $tool->setName('New Tool Name');
- * $success = $tool->save();
- *
- * // Delete an external tool
- * $tool = ExternalTool::find(456);
- * $success = $tool->delete();
+ * // Using DTOs
+ * $dto = new CreateExternalToolDTO();
+ * $dto->name = 'My Tool';
+ * $dto->consumerKey = 'key123';
+ * $dto->sharedSecret = 'secret456';
+ * $dto->url = 'https://tool.example.com';
+ * $dto->privacyLevel = 'public';
+ * $tool = ExternalTool::create($dto);
  *
  * // Generate sessionless launch URL
  * $launchData = ExternalTool::generateSessionlessLaunch(['id' => 456]);
@@ -73,12 +70,20 @@ use CanvasLMS\Pagination\PaginationResult;
  */
 class ExternalTool extends AbstractBaseApi
 {
-    protected static Course $course;
-
     /**
      * External tool unique identifier
      */
     public ?int $id = null;
+
+    /**
+     * The context type (account, course) for the external tool
+     */
+    public ?string $contextType = null;
+
+    /**
+     * The context ID for the external tool
+     */
+    public ?int $contextId = null;
 
     /**
      * External tool name
@@ -254,28 +259,13 @@ class ExternalTool extends AbstractBaseApi
     }
 
     /**
-     * Set the course context for external tool operations
+     * Get the resource identifier for API endpoints
      *
-     * @param Course $course The course to operate on
-     * @return void
+     * @return string
      */
-    public static function setCourse(Course $course): void
+    protected static function getResourceIdentifier(): string
     {
-        self::$course = $course;
-    }
-
-    /**
-     * Check if course context is set
-     *
-     * @return bool
-     * @throws CanvasApiException If course is not set
-     */
-    public static function checkCourse(): bool
-    {
-        if (!isset(self::$course) || !isset(self::$course->id)) {
-            throw new CanvasApiException('Course is required');
-        }
-        return true;
+        return 'external_tools';
     }
 
     /**
@@ -297,6 +287,48 @@ class ExternalTool extends AbstractBaseApi
     public function setId(?int $id): void
     {
         $this->id = $id;
+    }
+
+    /**
+     * Get context type
+     *
+     * @return string|null
+     */
+    public function getContextType(): ?string
+    {
+        return $this->contextType;
+    }
+
+    /**
+     * Set context type
+     *
+     * @param string|null $contextType
+     * @return void
+     */
+    public function setContextType(?string $contextType): void
+    {
+        $this->contextType = $contextType;
+    }
+
+    /**
+     * Get context ID
+     *
+     * @return int|null
+     */
+    public function getContextId(): ?int
+    {
+        return $this->contextId;
+    }
+
+    /**
+     * Set context ID
+     *
+     * @param int|null $contextId
+     * @return void
+     */
+    public function setContextId(?int $contextId): void
+    {
+        $this->contextId = $contextId;
     }
 
     /**
@@ -1006,7 +1038,7 @@ class ExternalTool extends AbstractBaseApi
     }
 
     /**
-     * Find a single external tool by ID
+     * Find a single external tool by ID in the default account context
      *
      * @param int $id External tool ID
      * @return self
@@ -1014,92 +1046,138 @@ class ExternalTool extends AbstractBaseApi
      */
     public static function find(int $id): self
     {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/external_tools/%d', self::$course->id, $id);
-        $response = self::$apiClient->get($endpoint);
-        $toolData = json_decode($response->getBody()->getContents(), true);
-
-        return new self($toolData);
+        $accountId = Config::getAccountId();
+        return self::findByContext('accounts', $accountId, $id);
     }
 
     /**
-     * Fetch all external tools for the course
+     * Find an external tool by ID in a specific context
+     *
+     * @param string $contextType Context type (accounts, courses)
+     * @param int $contextId Context ID
+     * @param int $id External tool ID
+     * @return self
+     * @throws CanvasApiException
+     */
+    public static function findByContext(string $contextType, int $contextId, int $id): self
+    {
+        self::checkApiClient();
+
+        $endpoint = sprintf('%s/%d/external_tools/%d', $contextType, $contextId, $id);
+        $response = self::$apiClient->get($endpoint);
+        $toolData = json_decode($response->getBody()->getContents(), true);
+
+        $tool = new self($toolData);
+        // Set context information
+        $tool->contextType = rtrim($contextType, 's'); // Remove trailing 's'
+        $tool->contextId = $contextId;
+
+        return $tool;
+    }
+
+    /**
+     * Fetch all external tools in the default account context
      *
      * @param array<string, mixed> $params Optional parameters
      * @return array<ExternalTool> Array of ExternalTool objects
      * @throws CanvasApiException
+     * @deprecated Use fetchAllPaginated(), fetchPage(), or fetchAllPages() for better pagination support
      */
     public static function fetchAll(array $params = []): array
     {
-        self::checkCourse();
-        self::checkApiClient();
+        return self::fetchAllPages($params);
+    }
 
-        $endpoint = sprintf('courses/%d/external_tools', self::$course->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $toolsData = json_decode($response->getBody()->getContents(), true);
+    /**
+     * Get all pages of external tools in current account
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<self>
+     * @throws CanvasApiException
+     */
+    public static function fetchAllPages(array $params = []): array
+    {
+        $accountId = Config::getAccountId();
+        $tools = self::fetchAllPagesAsModels(sprintf('accounts/%d/external_tools', $accountId), $params);
 
-        $tools = [];
-        foreach ($toolsData as $toolData) {
-            $tools[] = new self($toolData);
+        // Set context information on each tool
+        foreach ($tools as $tool) {
+            $tool->contextType = 'account';
+            $tool->contextId = $accountId;
         }
 
         return $tools;
     }
 
     /**
-     * Fetch all external tools with pagination support
+     * List external tools for a specific context
      *
-     * @param array<string, mixed> $params Optional parameters
+     * @param string $contextType 'accounts' or 'courses'
+     * @param int $contextId Account or Course ID
+     * @param array<string, mixed> $params Query parameters
+     * @return array<self>
+     * @throws CanvasApiException
+     */
+    public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
+    {
+        $tools = self::fetchAllPagesAsModels(sprintf('%s/%d/external_tools', $contextType, $contextId), $params);
+
+        // Set context information on each tool
+        $singularContext = rtrim($contextType, 's');
+        foreach ($tools as $tool) {
+            $tool->contextType = $singularContext;
+            $tool->contextId = $contextId;
+        }
+
+        return $tools;
+    }
+
+    /**
+     * Get paginated external tools in current account
+     *
+     * @param array<string, mixed> $params Query parameters
      * @return PaginatedResponse
      * @throws CanvasApiException
      */
     public static function fetchAllPaginated(array $params = []): PaginatedResponse
     {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/external_tools', self::$course->id);
-        return self::getPaginatedResponse($endpoint, $params);
+        $accountId = Config::getAccountId();
+        return self::getPaginatedResponse(sprintf('accounts/%d/external_tools', $accountId), $params);
     }
 
     /**
-     * Fetch a single page of external tools
+     * Get paginated external tools for a specific context
      *
-     * @param array<string, mixed> $params Optional parameters
+     * @param string $contextType 'accounts' or 'courses'
+     * @param int $contextId Account or Course ID
+     * @param array<string, mixed> $params Query parameters
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     */
+    public static function fetchByContextPaginated(
+        string $contextType,
+        int $contextId,
+        array $params = []
+    ): PaginatedResponse {
+        return self::getPaginatedResponse(sprintf('%s/%d/external_tools', $contextType, $contextId), $params);
+    }
+
+    /**
+     * Get a single page of external tools in current account
+     *
+     * @param array<string, mixed> $params Query parameters
      * @return PaginationResult
      * @throws CanvasApiException
      */
     public static function fetchPage(array $params = []): PaginationResult
     {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/external_tools', self::$course->id);
-        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-
+        $paginatedResponse = self::fetchAllPaginated($params);
         return self::createPaginationResult($paginatedResponse);
     }
 
-    /**
-     * Fetch all pages of external tools
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return array<ExternalTool> Array of ExternalTool objects from all pages
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/external_tools', self::$course->id);
-        return self::fetchAllPagesAsModels($endpoint, $params);
-    }
 
     /**
-     * Create a new external tool
+     * Create a new external tool in the default account context
      *
      * @param array<string, mixed>|CreateExternalToolDTO $data External tool data
      * @return self Created ExternalTool object
@@ -1107,22 +1185,44 @@ class ExternalTool extends AbstractBaseApi
      */
     public static function create(array|CreateExternalToolDTO $data): self
     {
-        self::checkCourse();
+        $accountId = Config::getAccountId();
+        return self::createInContext('accounts', $accountId, $data);
+    }
+
+    /**
+     * Create a new external tool in a specific context
+     *
+     * @param string $contextType Context type (accounts, courses)
+     * @param int $contextId Context ID
+     * @param array<string, mixed>|CreateExternalToolDTO $data External tool data
+     * @return self
+     * @throws CanvasApiException
+     */
+    public static function createInContext(
+        string $contextType,
+        int $contextId,
+        array|CreateExternalToolDTO $data
+    ): self {
         self::checkApiClient();
 
         if (is_array($data)) {
             $data = new CreateExternalToolDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/external_tools', self::$course->id);
+        $endpoint = sprintf('%s/%d/external_tools', $contextType, $contextId);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
         $toolData = json_decode($response->getBody()->getContents(), true);
 
-        return new self($toolData);
+        $tool = new self($toolData);
+        // Set context information
+        $tool->contextType = rtrim($contextType, 's'); // Remove trailing 's'
+        $tool->contextId = $contextId;
+
+        return $tool;
     }
 
     /**
-     * Update an external tool
+     * Update an external tool in the default account context
      *
      * @param int $id External tool ID
      * @param array<string, mixed>|UpdateExternalToolDTO $data External tool data
@@ -1131,22 +1231,46 @@ class ExternalTool extends AbstractBaseApi
      */
     public static function update(int $id, array|UpdateExternalToolDTO $data): self
     {
-        self::checkCourse();
+        $accountId = Config::getAccountId();
+        return self::updateInContext('accounts', $accountId, $id, $data);
+    }
+
+    /**
+     * Update an external tool in a specific context
+     *
+     * @param string $contextType Context type (accounts, courses)
+     * @param int $contextId Context ID
+     * @param int $id External tool ID
+     * @param array<string, mixed>|UpdateExternalToolDTO $data External tool data
+     * @return self
+     * @throws CanvasApiException
+     */
+    public static function updateInContext(
+        string $contextType,
+        int $contextId,
+        int $id,
+        array|UpdateExternalToolDTO $data
+    ): self {
         self::checkApiClient();
 
         if (is_array($data)) {
             $data = new UpdateExternalToolDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/external_tools/%d', self::$course->id, $id);
+        $endpoint = sprintf('%s/%d/external_tools/%d', $contextType, $contextId, $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
         $toolData = json_decode($response->getBody()->getContents(), true);
 
-        return new self($toolData);
+        $tool = new self($toolData);
+        // Set context information
+        $tool->contextType = rtrim($contextType, 's'); // Remove trailing 's'
+        $tool->contextId = $contextId;
+
+        return $tool;
     }
 
     /**
-     * Generate a sessionless launch URL for an external tool
+     * Generate a sessionless launch URL for an external tool in account context
      *
      * @param array<string, mixed> $params Launch parameters
      * @return array<string, mixed> Launch data with id, name, and url
@@ -1154,10 +1278,27 @@ class ExternalTool extends AbstractBaseApi
      */
     public static function generateSessionlessLaunch(array $params): array
     {
-        self::checkCourse();
+        $accountId = Config::getAccountId();
+        return self::generateSessionlessLaunchInContext('accounts', $accountId, $params);
+    }
+
+    /**
+     * Generate a sessionless launch URL for an external tool in a specific context
+     *
+     * @param string $contextType Context type (accounts, courses)
+     * @param int $contextId Context ID
+     * @param array<string, mixed> $params Launch parameters
+     * @return array<string, mixed> Launch data with id, name, and url
+     * @throws CanvasApiException
+     */
+    public static function generateSessionlessLaunchInContext(
+        string $contextType,
+        int $contextId,
+        array $params
+    ): array {
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/external_tools/sessionless_launch', self::$course->id);
+        $endpoint = sprintf('%s/%d/external_tools/sessionless_launch', $contextType, $contextId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
 
         return json_decode($response->getBody()->getContents(), true);
@@ -1216,12 +1357,42 @@ class ExternalTool extends AbstractBaseApi
                     return true;
                 }
 
-                $updatedTool = self::update($this->id, $updateData);
+                if (!$this->contextType || !$this->contextId) {
+                    throw new CanvasApiException('Context information required for update');
+                }
+
+                // Ensure context type is plural (e.g., 'account' -> 'accounts', 'course' -> 'courses')
+                $pluralContext = $this->contextType . 's';
+                if (substr($pluralContext, -2) === 'ss') {
+                    $pluralContext = substr($pluralContext, 0, -1);
+                }
+
+                $updatedTool = self::updateInContext(
+                    $pluralContext,
+                    $this->contextId,
+                    $this->id,
+                    $updateData
+                );
                 $this->populate($updatedTool->toArray());
             } else {
                 $createData = $this->toDtoArray();
 
-                $newTool = self::create($createData);
+                // Create in account context by default if no context is set
+                if ($this->contextType && $this->contextId) {
+                    // Ensure context type is plural (e.g., 'account' -> 'accounts', 'course' -> 'courses')
+                    $pluralContext = $this->contextType . 's';
+                    if (substr($pluralContext, -2) === 'ss') {
+                        $pluralContext = substr($pluralContext, 0, -1);
+                    }
+
+                    $newTool = self::createInContext(
+                        $pluralContext,
+                        $this->contextId,
+                        $createData
+                    );
+                } else {
+                    $newTool = self::create($createData);
+                }
                 $this->populate($newTool->toArray());
             }
 
@@ -1243,11 +1414,19 @@ class ExternalTool extends AbstractBaseApi
             throw new CanvasApiException('External tool ID is required for deletion');
         }
 
+        if (!$this->contextType || !$this->contextId) {
+            throw new CanvasApiException('Context information required for deletion');
+        }
+
         try {
-            self::checkCourse();
             self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/external_tools/%d', self::$course->id, $this->id);
+            // Ensure context type is plural (e.g., 'account' -> 'accounts', 'course' -> 'courses')
+            $pluralContext = $this->contextType . 's';
+            if (substr($pluralContext, -2) === 'ss') {
+                $pluralContext = substr($pluralContext, 0, -1);
+            }
+            $endpoint = sprintf('%s/%d/external_tools/%d', $pluralContext, $this->contextId, $this->id);
             self::$apiClient->delete($endpoint);
 
             return true;
@@ -1269,8 +1448,16 @@ class ExternalTool extends AbstractBaseApi
             throw new CanvasApiException('External tool ID is required to generate launch URL');
         }
 
+        if (!$this->contextType || !$this->contextId) {
+            throw new CanvasApiException('Context information required to generate launch URL');
+        }
+
         $params['id'] = $this->id;
-        $launchData = self::generateSessionlessLaunch($params);
+        $launchData = self::generateSessionlessLaunchInContext(
+            $this->contextType . 's', // Add trailing 's' for API endpoint
+            $this->contextId,
+            $params
+        );
 
         return $launchData['url'] ?? '';
     }

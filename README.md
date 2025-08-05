@@ -196,6 +196,42 @@ $file = File::upload([
 ]);
 ```
 
+### Working with Multi-Context Resources
+
+Some Canvas resources exist in multiple contexts (Account, Course, User, Group). Canvas LMS Kit follows an **Account-as-Default** convention for consistency:
+
+```php
+use CanvasLMS\Api\Rubrics\Rubric;
+use CanvasLMS\Api\ExternalTools\ExternalTool;
+use CanvasLMS\Api\CalendarEvents\CalendarEvent;
+use CanvasLMS\Api\Files\File;
+
+// Direct calls default to Account context
+$rubrics = Rubric::fetchAll();           // Account-level rubrics
+$tools = ExternalTool::fetchAll();       // Account-level external tools  
+$events = CalendarEvent::fetchAll();     // Account-level calendar events
+$files = File::fetchAll();               // Exception: User files (no account context)
+
+// Course-specific access through Course instance
+$course = Course::find(123);
+$courseRubrics = $course->rubrics();            // Course-specific rubrics
+$courseTools = $course->externalTools();        // Course-specific tools
+$courseEvents = $course->calendarEvents();      // Course-specific events
+$courseFiles = $course->files();                // Course-specific files
+
+// Direct context access when needed
+$userEvents = CalendarEvent::fetchByContext('user', 456);
+$groupFiles = File::fetchByContext('groups', 789);
+```
+
+**Multi-Context Resources:**
+- **Rubrics** (Account/Course)
+- **External Tools** (Account/Course)
+- **Calendar Events** (Account/Course/User/Group)
+- **Files** (User/Course/Group) - No Account context
+- **Groups** (Account/Course/User)
+- **Content Migrations** (Account/Course/Group/User)
+
 ### Content Migrations
 
 ```php
