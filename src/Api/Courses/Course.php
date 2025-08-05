@@ -652,7 +652,7 @@ class Course extends AbstractBaseApi
 
             $updatedCourseData = json_decode($response->getBody(), true);
             $this->populate($updatedCourseData);
-        } catch (CanvasApiException $th) {
+        } catch (CanvasApiException) {
             return false;
         }
 
@@ -673,7 +673,7 @@ class Course extends AbstractBaseApi
                     "event" => "delete"
                 ]
             ]);
-        } catch (CanvasApiException $th) {
+        } catch (CanvasApiException) {
             return false;
         }
 
@@ -788,7 +788,7 @@ class Course extends AbstractBaseApi
                     "event" => "conclude"
                 ]
             ]);
-        } catch (CanvasApiException $th) {
+        } catch (CanvasApiException) {
             return false;
         }
 
@@ -2700,39 +2700,6 @@ class Course extends AbstractBaseApi
         $this->defaultDueTime = $defaultDueTime;
     }
 
-    /**
-     * Get calendar events for this course
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return CalendarEvent[]
-     * @throws CanvasApiException
-     */
-    public function getCalendarEvents(array $params = []): array
-    {
-        if (!$this->id) {
-            throw new CanvasApiException('Course ID is required to get calendar events');
-        }
-
-        $params['context_codes'] = [sprintf('course_%d', $this->id)];
-        return CalendarEvent::fetchAll($params);
-    }
-
-    /**
-     * Get paginated calendar events for this course
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public function getCalendarEventsPaginated(array $params = []): PaginatedResponse
-    {
-        if (!$this->id) {
-            throw new CanvasApiException('Course ID is required to get calendar events');
-        }
-
-        $params['context_codes'] = [sprintf('course_%d', $this->id)];
-        return CalendarEvent::fetchAllPaginated($params);
-    }
 
     /**
      * Create a calendar event for this course
@@ -2888,7 +2855,22 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to fetch files');
         }
 
-        return File::fetchCourseFiles($this->id, $params);
+        return File::fetchByContext('courses', $this->id, $params);
+    }
+
+    /**
+     * Get calendar events for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return CalendarEvent[]
+     * @throws CanvasApiException
+     */
+    public function calendarEvents(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch calendar events');
+        }
+        return CalendarEvent::fetchByContext('course', $this->id, $params);
     }
 
 
@@ -2898,7 +2880,7 @@ class Course extends AbstractBaseApi
      * Get rubrics for this course
      *
      * @param array<string, mixed> $params Query parameters
-     * @return Rubric[]
+     * @return array<Rubric>
      * @throws CanvasApiException
      */
     public function rubrics(array $params = []): array
@@ -2907,18 +2889,7 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to fetch rubrics');
         }
 
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/rubrics', $this->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $rubricsData = json_decode($response->getBody(), true);
-
-        $rubrics = [];
-        foreach ($rubricsData as $rubricData) {
-            $rubrics[] = new Rubric($rubricData);
-        }
-
-        return $rubrics;
+        return Rubric::fetchByContext('courses', $this->id, $params);
     }
 
 
@@ -2937,8 +2908,7 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to fetch external tools');
         }
 
-        ExternalTool::setCourse($this);
-        return ExternalTool::fetchAll($params);
+        return ExternalTool::fetchByContext('courses', $this->id, $params);
     }
 
 

@@ -173,6 +173,86 @@ class File extends AbstractBaseApi
     public ?string $thumbnailUrl = null;
 
     /**
+     * Context type where the file belongs
+     * @var string|null
+     */
+    protected ?string $contextType = null;
+
+    /**
+     * Context ID where the file belongs
+     * @var int|null
+     */
+    protected ?int $contextId = null;
+
+    /**
+     * Get the context type
+     *
+     * @return string|null
+     */
+    public function getContextType(): ?string
+    {
+        return $this->contextType;
+    }
+
+    /**
+     * Set the context type
+     *
+     * @param string|null $contextType
+     * @return void
+     */
+    public function setContextType(?string $contextType): void
+    {
+        $this->contextType = $contextType;
+    }
+
+    /**
+     * Get the context ID
+     *
+     * @return int|null
+     */
+    public function getContextId(): ?int
+    {
+        return $this->contextId;
+    }
+
+    /**
+     * Set the context ID
+     *
+     * @param int|null $contextId
+     * @return void
+     */
+    public function setContextId(?int $contextId): void
+    {
+        $this->contextId = $contextId;
+    }
+
+    /**
+     * Upload a file to a specific context
+     *
+     * @param string $contextType Context type ('courses', 'groups', 'users')
+     * @param int $contextId Context ID
+     * @param array<string, mixed>|UploadFileDto $fileData File data to upload
+     * @return self
+     * @throws CanvasApiException
+     */
+    public static function uploadToContext(
+        string $contextType,
+        int $contextId,
+        array|UploadFileDto $fileData
+    ): self {
+        $fileData = is_array($fileData) ? new UploadFileDto($fileData) : $fileData;
+        $endpoint = sprintf('/%s/%d/files', $contextType, $contextId);
+
+        $file = self::performUpload($endpoint, $fileData);
+
+        // Set context information
+        $file->contextType = rtrim($contextType, 's');
+        $file->contextId = $contextId;
+
+        return $file;
+    }
+
+    /**
      * Upload a file to a course
      * @param int $courseId
      * @param UploadFileDto|mixed[] $fileData
@@ -181,9 +261,7 @@ class File extends AbstractBaseApi
      */
     public static function uploadToCourse(int $courseId, array | UploadFileDto $fileData): self
     {
-        $fileData = is_array($fileData) ? new UploadFileDto($fileData) : $fileData;
-
-        return self::performUpload("/courses/{$courseId}/files", $fileData);
+        return self::uploadToContext('courses', $courseId, $fileData);
     }
 
     /**
@@ -195,9 +273,7 @@ class File extends AbstractBaseApi
      */
     public static function uploadToUser(int $userId, array | UploadFileDto $fileData): self
     {
-        $fileData = is_array($fileData) ? new UploadFileDto($fileData) : $fileData;
-
-        return self::performUpload("/users/{$userId}/files", $fileData);
+        return self::uploadToContext('users', $userId, $fileData);
     }
 
     /**
@@ -209,9 +285,7 @@ class File extends AbstractBaseApi
      */
     public static function uploadToGroup(int $groupId, array | UploadFileDto $fileData): self
     {
-        $fileData = is_array($fileData) ? new UploadFileDto($fileData) : $fileData;
-
-        return self::performUpload("/groups/{$groupId}/files", $fileData);
+        return self::uploadToContext('groups', $groupId, $fileData);
     }
 
     /**
@@ -361,8 +435,12 @@ class File extends AbstractBaseApi
 
         $files = json_decode($response->getBody(), true);
 
-        return array_map(function ($file) {
-            return new self($file);
+        return array_map(function ($fileData) {
+            $file = new self($fileData);
+            // Set context information
+            $file->contextType = 'user';
+            $file->contextId = null; // 'self' user ID is not known at this point
+            return $file;
         }, $files);
     }
 
@@ -397,7 +475,39 @@ class File extends AbstractBaseApi
      */
     public static function fetchAllPages(array $params = []): array
     {
-        return self::fetchAllPagesAsModels('/users/self/files', $params);
+        $files = self::fetchAllPagesAsModels('/users/self/files', $params);
+
+        // Set context information on each file
+        foreach ($files as $file) {
+            $file->contextType = 'user';
+            $file->contextId = null; // 'self' user ID is not known at this point
+        }
+
+        return $files;
+    }
+
+    /**
+     * Fetch files from a specific context
+     *
+     * @param string $contextType Context type ('courses', 'groups', 'users', 'folders')
+     * @param int $contextId Context ID (course_id, group_id, user_id, or folder_id)
+     * @param array<string, mixed> $params Query parameters
+     * @return array<self>
+     * @throws CanvasApiException
+     */
+    public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
+    {
+        $endpoint = sprintf('%s/%d/files', $contextType, $contextId);
+        $files = self::fetchAllPagesAsModels($endpoint, $params);
+
+        // Set context information on each file
+        $singularContext = rtrim($contextType, 's');
+        foreach ($files as $file) {
+            $file->contextType = $singularContext;
+            $file->contextId = $contextId;
+        }
+
+        return $files;
     }
 
     /**
@@ -409,17 +519,7 @@ class File extends AbstractBaseApi
      */
     public static function fetchCourseFiles(int $courseId, array $params = []): array
     {
-        self::checkApiClient();
-
-        $response = self::$apiClient->get("/courses/{$courseId}/files", [
-            'query' => $params
-        ]);
-
-        $files = json_decode($response->getBody(), true);
-
-        return array_map(function ($file) {
-            return new self($file);
-        }, $files);
+        return self::fetchByContext('courses', $courseId, $params);
     }
 
     /**
@@ -431,17 +531,7 @@ class File extends AbstractBaseApi
      */
     public static function fetchUserFiles(int $userId, array $params = []): array
     {
-        self::checkApiClient();
-
-        $response = self::$apiClient->get("/users/{$userId}/files", [
-            'query' => $params
-        ]);
-
-        $files = json_decode($response->getBody(), true);
-
-        return array_map(function ($file) {
-            return new self($file);
-        }, $files);
+        return self::fetchByContext('users', $userId, $params);
     }
 
     /**
@@ -453,17 +543,7 @@ class File extends AbstractBaseApi
      */
     public static function fetchGroupFiles(int $groupId, array $params = []): array
     {
-        self::checkApiClient();
-
-        $response = self::$apiClient->get("/groups/{$groupId}/files", [
-            'query' => $params
-        ]);
-
-        $files = json_decode($response->getBody(), true);
-
-        return array_map(function ($file) {
-            return new self($file);
-        }, $files);
+        return self::fetchByContext('groups', $groupId, $params);
     }
 
     /**
