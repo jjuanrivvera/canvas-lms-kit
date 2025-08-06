@@ -6,7 +6,9 @@ This document defines the rules for organizing classes and namespaces in the Can
 
 ### 1. API Classes (Classes with Endpoints)
 
-**Rule**: If a class has its own page in the Canvas LMS API documentation (found in `canvas-lms-docs/`), it must have its own namespace.
+**Rule**: If a class has its own page in the Canvas LMS API documentation (found in `canvas-lms-docs/`) AND has any endpoints (GET, POST, PUT, DELETE), it must have its own namespace in the API folder.
+
+**Note**: Read-only API resources (only GET endpoints) still belong in the API folder but may not extend AbstractBaseApi.
 
 **Structure**:
 ```
@@ -27,9 +29,9 @@ tests/Dto/{ResourceName}/
 - `Modules` has its own page → `src/Api/Modules/Module.php`
 - `Assignments` has its own page → `src/Api/Assignments/Assignment.php`
 
-### 2. Read-Only Objects (No Endpoints)
+### 2. Data Objects (No Endpoints)
 
-**Rule**: Objects that are referenced in the official Canvas LMS documentation but do not have any endpoint usage (read-only objects) should be stored in the `src/Objects/` folder.
+**Rule**: Objects that are referenced in the official Canvas LMS documentation but do not have ANY endpoints at all should be stored in the `src/Objects/` folder. These are pure data structures returned as part of other API responses.
 
 **Structure**:
 ```
@@ -39,11 +41,11 @@ tests/Objects/
     └── {ObjectName}Test.php
 ```
 
-**Characteristics of Read-Only Objects**:
-- No CRUD operations (no create, update, delete endpoints)
-- Typically returned as part of other API responses
-- May contain nested data structures
-- Examples: Grade objects, RubricCriteria, QuizStatistics, etc.
+**Characteristics of Data Objects**:
+- No endpoints at all (not even GET)
+- Only exist as data structures returned by other API calls
+- Cannot be fetched directly from the API
+- Examples: OutcomeLink, OutcomeRating, RubricCriteria, Grade objects
 
 ## Implementation Checklist
 
@@ -55,8 +57,9 @@ When implementing a new resource:
    - Check if it has CRUD endpoints
 
 2. **Determine Classification**
-   - **Has own page + endpoints** → API Class with own namespace
-   - **Referenced but no endpoints** → Objects folder
+   - **Has own page + ANY endpoints (even just GET)** → API Class with own namespace
+   - **Referenced but NO endpoints at all** → Objects folder
+   - **Read-only APIs (GET only)** → API Class (may not extend AbstractBaseApi)
 
 3. **Create Directory Structure**
    - Follow the patterns above
@@ -137,9 +140,17 @@ $dto = new CreateCourseDTO(['name' => 'Introduction to PHP']);
 $course = Course::create($dto);
 ```
 
+### Read-Only API Classes
+
+**Rule**: API resources that only have GET endpoints (no CREATE, UPDATE, DELETE) are still API classes but:
+- Should be placed in `/src/Api/{ResourceName}/`
+- May not extend `AbstractBaseApi` since they don't need full CRUD operations
+- Should implement their own static methods for fetching data
+- Examples: OutcomeResult (context-specific fetching only)
+
 ## Examples
 
-### API Class Example (Has Endpoints)
+### Standard API Class Example (Full CRUD)
 ```php
 // src/Api/QuizSubmissions/QuizSubmission.php
 namespace CanvasLMS\Api\QuizSubmissions;
@@ -157,7 +168,26 @@ class QuizSubmission extends AbstractBaseApi
 }
 ```
 
-### Read-Only Object Example (No Endpoints)
+### Read-Only API Class Example (GET endpoints only)
+```php
+// src/Api/OutcomeResult/OutcomeResult.php
+namespace CanvasLMS\Api\Outcomes\OutcomeResult;
+
+class OutcomeResult  // Note: Does not extend AbstractBaseApi
+{
+    // Properties for data
+    public ?array $results = null;
+    public ?array $linked = null;
+    
+    // Static methods for fetching
+    public static function fetchByCourse(int $courseId, array $params = []): OutcomeResult
+    {
+        // Fetch from API endpoint
+    }
+}
+```
+
+### Data Object Example (No Endpoints)
 ```php
 // src/Objects/RubricCriterion.php
 namespace CanvasLMS\Objects;
