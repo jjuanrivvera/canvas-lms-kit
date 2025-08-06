@@ -17,7 +17,7 @@
 ## ✨ Why Canvas LMS Kit?
 
 - 🚀 **Production Ready**: Rate limiting, middleware support, battle-tested
-- 📚 **Comprehensive**: 30 Canvas APIs fully implemented (95% coverage)
+- 📚 **Comprehensive**: 31 Canvas APIs fully implemented (95% coverage)
 - 🛡️ **Type Safe**: Full PHP 8.1+ type declarations and PHPStan level 6
 - 🔧 **Developer Friendly**: Intuitive Active Record pattern - just pass arrays!
 - 📖 **Well Documented**: Extensive examples, guides, and API reference
@@ -90,8 +90,11 @@ Config::setMiddleware([
 ```php
 use CanvasLMS\Api\Courses\Course;
 
-// List all courses
+// List courses (first page with Canvas default limit)
 $courses = Course::fetchAll();
+
+// Get ALL courses across all pages
+$allCourses = Course::fetchAllPages();
 
 // Find a specific course
 $course = Course::find(123);
@@ -280,7 +283,7 @@ foreach ($issues as $issue) {
 
 ## 📊 Supported APIs
 
-### ✅ Currently Implemented (30 APIs - 95% Coverage)
+### ✅ Currently Implemented (31 APIs - 95% Coverage)
 
 <details>
 <summary><b>📚 Core Course Management</b></summary>
@@ -367,8 +370,11 @@ $testCourse = Course::find(456);
 ### Pagination Support
 
 ```php
-// Automatic pagination handling
-$allCourses = Course::fetchAll(); // Fetches ALL pages automatically
+// Get first page with Canvas default limit
+$courses = Course::fetchAll(); 
+
+// Get ALL items across all pages automatically
+$allCourses = Course::fetchAllPages();
 
 // Manual pagination control
 $paginator = Course::fetchAllPaginated(['per_page' => 50]);
@@ -395,9 +401,9 @@ Canvas LMS Kit uses the **Account-as-Default** convention for multi-context reso
 
 ```php
 // Direct API calls use Account context (Config::getAccountId())
-$groups = Group::fetchAll();              // All groups in the account
-$rubrics = Rubric::fetchAll();            // All rubrics in the account
-$migrations = ContentMigration::fetchAll(); // All migrations in the account
+$groups = Group::fetchAll();              // First page of groups in the account
+$rubrics = Rubric::fetchAll();            // First page of rubrics in the account
+$migrations = ContentMigration::fetchAll(); // First page of migrations in the account
 
 // Course-specific access via Course instance methods
 $course = Course::find(123);

@@ -28,6 +28,7 @@ use CanvasLMS\Api\Files\File;
 use CanvasLMS\Api\Rubrics\Rubric;
 use CanvasLMS\Api\ExternalTools\ExternalTool;
 use CanvasLMS\Api\Tabs\Tab;
+use CanvasLMS\Objects\OutcomeLink;
 
 /**
  * Course Class
@@ -2930,6 +2931,219 @@ class Course extends AbstractBaseApi
         return Tab::fetchAll();
     }
 
+    /**
+     * Get outcomes for this course.
+     * Note: This returns OutcomeLink objects as per Canvas API.
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, OutcomeLink> Array of OutcomeLink objects
+     * @throws CanvasApiException
+     */
+    public function outcomes(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch outcomes');
+        }
+
+        // Get the root outcome group for this course
+        $rootGroup = \CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup::getRootGroup('courses', $this->id);
+
+        // Get outcomes from the root group (returns OutcomeLink objects)
+        return $rootGroup->outcomes($params);
+    }
+
+    /**
+     * Get all outcome links for this course (across all groups).
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, OutcomeLink> Array of OutcomeLink objects
+     * @throws CanvasApiException
+     */
+    public function outcomeLinks(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch outcome links');
+        }
+
+        return \CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup::fetchAllLinksByContext('courses', $this->id, $params);
+    }
+
+    /**
+     * Create a new outcome directly in this course.
+     *
+     * @param array<string, mixed>|\CanvasLMS\Dto\Outcomes\Outcome\CreateOutcomeDTO $data Outcome data
+     * @param int|null $groupId The group to create in (null for root group)
+     * @return OutcomeLink
+     * @throws CanvasApiException
+     */
+    public function createOutcome(
+        array|\CanvasLMS\Dto\Outcomes\Outcome\CreateOutcomeDTO $data,
+        ?int $groupId = null
+    ): OutcomeLink {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to create outcomes');
+        }
+
+        if ($groupId) {
+            $group = \CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup::findByContext('courses', $this->id, $groupId);
+        } else {
+            $group = \CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup::getRootGroup('courses', $this->id);
+        }
+
+        return $group->createOutcome($data);
+    }
+
+    /**
+     * Link an existing outcome to this course.
+     *
+     * @param int $outcomeId The outcome ID to link
+     * @param int|null $groupId The group to link into (null for root group)
+     * @param int|null $moveFrom The group ID to move from (optional)
+     * @return OutcomeLink
+     * @throws CanvasApiException
+     */
+    public function linkOutcome(int $outcomeId, ?int $groupId = null, ?int $moveFrom = null): OutcomeLink
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to link outcomes');
+        }
+
+        if ($groupId) {
+            $group = \CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup::findByContext('courses', $this->id, $groupId);
+        } else {
+            $group = \CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup::getRootGroup('courses', $this->id);
+        }
+
+        return $group->linkOutcome($outcomeId, $moveFrom);
+    }
+
+    /**
+     * Get outcome groups for this course
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, \CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup> Array of OutcomeGroup objects
+     * @throws CanvasApiException
+     */
+    public function outcomeGroups(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch outcome groups');
+        }
+
+        return \CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup::fetchByContext('courses', $this->id, $params);
+    }
+
+    /**
+     * Get outcome results for this course
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, \CanvasLMS\Api\Outcomes\OutcomeResult\OutcomeResult> Array of OutcomeResult objects
+     * @throws CanvasApiException
+     */
+    public function outcomeResults(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch outcome results');
+        }
+
+        return \CanvasLMS\Api\Outcomes\OutcomeResult\OutcomeResult::fetchByCourse($this->id, $params);
+    }
+
+    /**
+     * Fetch outcome rollups for this course.
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     *                                   (aggregate, aggregate_stat, user_ids, outcome_ids, etc.)
+     * @return array<string, mixed> Rollup data with rollups and linked data
+     * @throws CanvasApiException
+     */
+    public function outcomeRollups(array $params = []): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch outcome rollups');
+        }
+
+        $endpoint = sprintf('courses/%d/outcome_rollups', $this->id);
+
+        $response = self::$apiClient->get($endpoint, [
+            'query' => $params
+        ]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * Import outcomes to this course from a CSV file
+     *
+     * @param string $filePath Path to the CSV file
+     * @param int|null $groupId Optional outcome group ID to import into
+     * @param string $importType Import type (default: 'instructure_csv')
+     * @return \CanvasLMS\Api\Outcomes\OutcomeImport\OutcomeImport
+     * @throws CanvasApiException
+     */
+    public function importOutcomes(
+        string $filePath,
+        ?int $groupId = null,
+        string $importType = 'instructure_csv'
+    ): \CanvasLMS\Api\Outcomes\OutcomeImport\OutcomeImport {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to import outcomes');
+        }
+
+        return \CanvasLMS\Api\Outcomes\OutcomeImport\OutcomeImport::importToContext(
+            'courses',
+            $this->id,
+            $filePath,
+            $groupId,
+            $importType
+        );
+    }
+
+    /**
+     * Import outcomes to this course from CSV data
+     *
+     * @param string $csvData Raw CSV data
+     * @param int|null $groupId Optional outcome group ID to import into
+     * @param string $importType Import type (default: 'instructure_csv')
+     * @return \CanvasLMS\Api\Outcomes\OutcomeImport\OutcomeImport
+     * @throws CanvasApiException
+     */
+    public function importOutcomesFromData(
+        string $csvData,
+        ?int $groupId = null,
+        string $importType = 'instructure_csv'
+    ): \CanvasLMS\Api\Outcomes\OutcomeImport\OutcomeImport {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to import outcomes');
+        }
+
+        return \CanvasLMS\Api\Outcomes\OutcomeImport\OutcomeImport::importDataToContext(
+            'courses',
+            $this->id,
+            $csvData,
+            $groupId,
+            $importType
+        );
+    }
+
+    /**
+     * Get outcome import status for this course
+     *
+     * @param int|string $importId Import ID or 'latest'
+     * @return \CanvasLMS\Api\Outcomes\OutcomeImport\OutcomeImport
+     * @throws CanvasApiException
+     */
+    public function getOutcomeImportStatus(int|string $importId): \CanvasLMS\Api\Outcomes\OutcomeImport\OutcomeImport
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to get import status');
+        }
+
+        return \CanvasLMS\Api\Outcomes\OutcomeImport\OutcomeImport::getStatus('courses', $this->id, $importId);
+    }
+
 
     /**
      * Set course timetable
@@ -3043,5 +3257,58 @@ class Course extends AbstractBaseApi
 
         $response = self::$apiClient->post($endpoint, $data);
         return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Fetch course aggregate outcome rollup.
+     *
+     * @param string $aggregateStat Statistic type (mean, median)
+     * @param array<string, mixed> $params Additional query parameters
+     * @return array<string, mixed> Rollup data with aggregate results
+     * @throws CanvasApiException
+     */
+    public function outcomeRollupsAggregate(string $aggregateStat = 'mean', array $params = []): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch outcome rollups aggregate');
+        }
+
+        $params['aggregate'] = 'course';
+        $params['aggregate_stat'] = $aggregateStat;
+
+        $endpoint = sprintf('courses/%d/outcome_rollups', $this->id);
+
+        $response = self::$apiClient->get($endpoint, [
+            'query' => $params
+        ]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * Export outcome rollups to CSV for this course.
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return string CSV data
+     * @throws CanvasApiException
+     */
+    public function outcomeRollupsExportCSV(array $params = []): string
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to export outcome rollups');
+        }
+
+        $params['export_format'] = 'csv';
+        $endpoint = sprintf('courses/%d/outcome_rollups.csv', $this->id);
+
+        $response = self::$apiClient->get($endpoint, [
+            'query' => $params
+        ]);
+
+        return $response->getBody()->getContents();
     }
 }

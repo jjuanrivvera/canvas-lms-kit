@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Outcomes API for learning objectives and competency tracking (#64)
+  - **Outcome** class with Account-as-Default pattern for managing learning outcomes
+  - **OutcomeGroup** class for hierarchical organization of outcomes with global context support
+  - **OutcomeResult** class for tracking individual student mastery (context-specific only)
+  - Outcome rollups integrated into Course class (`outcomeRollups()`, `outcomeRollupsAggregate()`, `outcomeRollupsExportCSV()`)
+  - **OutcomeImport** class for bulk importing outcomes from CSV files with async processing
+  - Support for multiple calculation methods (decaying average, n_mastery, latest, highest, average)
+  - Rating scales configuration with mastery points
+  - Outcome alignment with assignments and rubrics
+  - Bulk import/export capabilities for outcome standards
+  - CSV template generation and validation for imports
+  - Async import status tracking with progress monitoring
+  - Error handling and reporting for failed imports
+  - Vendor GUID support for external standard integration
+  - Course instance methods for context-specific outcome operations and imports
+  - Comprehensive DTOs for create/update operations with validation
+  - Full support for competency-based education workflows
 - Complete Groups API implementation with student collaboration features (#63)
   - **Group** class enhanced with pagination support, activity streams, permissions, and membership management
   - **GroupCategory** class for organizing groups within courses with bulk member assignment
