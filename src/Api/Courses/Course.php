@@ -2969,6 +2969,73 @@ class Course extends AbstractBaseApi
     }
 
     /**
+     * Get all feature flags for this course.
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, \CanvasLMS\Api\FeatureFlags\FeatureFlag> Array of FeatureFlag objects
+     * @throws CanvasApiException
+     */
+    public function featureFlags(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch feature flags');
+        }
+
+        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::fetchByContext('courses', $this->id, $params);
+    }
+
+    /**
+     * Get a specific feature flag for this course.
+     *
+     * @param string $featureName The symbolic name of the feature
+     * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
+     * @throws CanvasApiException
+     */
+    public function getFeatureFlag(string $featureName): \CanvasLMS\Api\FeatureFlags\FeatureFlag
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to get feature flag');
+        }
+
+        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::findByContext('courses', $this->id, $featureName);
+    }
+
+    /**
+     * Update a feature flag for this course.
+     *
+     * @param string $featureName The symbolic name of the feature
+     * @param array<string, mixed>|\CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO $data Update data
+     * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
+     * @throws CanvasApiException
+     */
+    public function setFeatureFlag(
+        string $featureName,
+        array|\CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO $data
+    ): \CanvasLMS\Api\FeatureFlags\FeatureFlag {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to set feature flag');
+        }
+
+        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::updateByContext('courses', $this->id, $featureName, $data);
+    }
+
+    /**
+     * Remove a feature flag for this course.
+     *
+     * @param string $featureName The symbolic name of the feature
+     * @return bool
+     * @throws CanvasApiException
+     */
+    public function removeFeatureFlag(string $featureName): bool
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to remove feature flag');
+        }
+
+        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::deleteByContext('courses', $this->id, $featureName);
+    }
+
+    /**
      * Create a new outcome directly in this course.
      *
      * @param array<string, mixed>|\CanvasLMS\Dto\Outcomes\Outcome\CreateOutcomeDTO $data Outcome data
