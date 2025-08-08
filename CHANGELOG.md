@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Feature Flags API for managing Canvas feature toggles (#68)
+  - **FeatureFlag** class for managing feature states at Account/Course/User levels
+  - Account-as-Default pattern implementation for multi-context support
+  - Support for feature states (off, allowed, on) with inheritance hierarchy
+  - Feature flag locking and hiding capabilities
+  - Beta and development feature identification
+  - Integration with Course and User classes via instance methods
+  - **UpdateFeatureFlagDTO** for managing feature flag updates with validation
+  - Convenience methods for enable/disable/allow operations
+  - Context-specific feature flag management
 - Outcomes API for learning objectives and competency tracking (#64)
   - **Outcome** class with Account-as-Default pattern for managing learning outcomes
   - **OutcomeGroup** class for hierarchical organization of outcomes with global context support
