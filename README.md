@@ -9,7 +9,7 @@
   [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-8892BF.svg?style=flat-square)](https://php.net)
   [![License](https://img.shields.io/github/license/jjuanrivvera/canvas-lms-kit?style=flat-square)](https://github.com/jjuanrivvera/canvas-lms-kit/blob/main/LICENSE)
 
-  **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 95% API coverage.**
+  **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 40+ APIs implemented.**
 </div>
 
 ---
@@ -17,7 +17,7 @@
 ## ✨ Why Canvas LMS Kit?
 
 - 🚀 **Production Ready**: Rate limiting, middleware support, battle-tested
-- 📚 **Comprehensive**: 31 Canvas APIs fully implemented (95% coverage)
+- 📚 **Comprehensive**: 37 Canvas APIs fully implemented
 - 🛡️ **Type Safe**: Full PHP 8.1+ type declarations and PHPStan level 6
 - 🔧 **Developer Friendly**: Intuitive Active Record pattern - just pass arrays!
 - 📖 **Well Documented**: Extensive examples, guides, and API reference
@@ -199,6 +199,33 @@ $file = File::upload([
 ]);
 ```
 
+### Feature Flags
+
+```php
+use CanvasLMS\Api\FeatureFlags\FeatureFlag;
+use CanvasLMS\Api\Courses\Course;
+
+// List all feature flags for the account
+$flags = FeatureFlag::fetchAll();
+
+// Get a specific feature flag
+$flag = FeatureFlag::find('new_gradebook');
+
+// Enable a feature for the account
+$flag->enable();
+
+// Disable a feature
+$flag->disable();
+
+// Feature flags for a specific course
+$course = Course::find(123);
+$courseFlags = $course->featureFlags();
+
+// Enable a feature for a specific course
+$courseFlag = $course->getFeatureFlag('anonymous_marking');
+$courseFlag->enable();
+```
+
 ### Working with Multi-Context Resources
 
 Some Canvas resources exist in multiple contexts (Account, Course, User, Group). Canvas LMS Kit follows an **Account-as-Default** convention for consistency:
@@ -234,6 +261,42 @@ $groupFiles = File::fetchByContext('groups', 789);
 - **Files** (User/Course/Group) - No Account context
 - **Groups** (Account/Course/User)
 - **Content Migrations** (Account/Course/Group/User)
+
+### Learning Outcomes
+
+```php
+use CanvasLMS\Api\Outcomes\Outcome\Outcome;
+use CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup;
+
+// Create an outcome group
+$group = OutcomeGroup::create([
+    'title' => 'Critical Thinking Skills',
+    'description' => 'Core competencies for analytical thinking'
+]);
+
+// Create a learning outcome
+$outcome = Outcome::create([
+    'title' => 'Analyze Complex Problems',
+    'description' => 'Student can break down complex problems into manageable parts',
+    'mastery_points' => 3,
+    'ratings' => [
+        ['description' => 'Exceeds', 'points' => 4],
+        ['description' => 'Mastery', 'points' => 3],
+        ['description' => 'Near Mastery', 'points' => 2],
+        ['description' => 'Below Mastery', 'points' => 1]
+    ]
+]);
+
+// Link outcome to a group
+$group->linkOutcome($outcome->id);
+
+// Align outcome with an assignment
+$assignment = Assignment::find(123);
+$assignment->alignOutcome($outcome->id, [
+    'mastery_score' => 3,
+    'possible_score' => 4
+]);
+```
 
 ### Content Migrations
 
@@ -283,7 +346,7 @@ foreach ($issues as $issue) {
 
 ## 📊 Supported APIs
 
-### ✅ Currently Implemented (31 APIs - 95% Coverage)
+### ✅ Currently Implemented (37 APIs)
 
 <details>
 <summary><b>📚 Core Course Management</b></summary>
@@ -316,6 +379,10 @@ foreach ($issues as $issue) {
 - ✅ **Rubrics** - Grading criteria and assessment
 - ✅ **Rubric Associations** - Link rubrics to assignments
 - ✅ **Rubric Assessments** - Grade with rubrics
+- ✅ **Outcomes** - Learning objectives and competencies
+- ✅ **Outcome Groups** - Organize learning outcomes
+- ✅ **Outcome Imports** - Import outcome data
+- ✅ **Outcome Results** - Track student achievement
 </details>
 
 <details>
@@ -340,6 +407,7 @@ foreach ($issues as $issue) {
 - ✅ **Progress** - Async operation tracking
 - ✅ **Content Migrations** - Import/export course content
 - ✅ **Migration Issues** - Handle import problems
+- ✅ **Feature Flags** - Manage Canvas feature toggles
 </details>
 
 ## 🚀 Advanced Features

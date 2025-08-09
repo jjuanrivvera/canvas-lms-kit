@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Conferences API for web conferencing integration (#67)
+  - **Conference** class for managing web conferences with BigBlueButton, Zoom, and other providers
+  - Multi-context support for both Course and Group contexts
+  - **ConferenceRecording** object for managing conference recordings
+  - Special actions: `join()` method for joining conferences, `getRecordings()` for retrieving recordings
+  - **CreateConferenceDTO** and **UpdateConferenceDTO** for handling complex provider settings
+  - Provider-specific settings support through flexible array structures
+  - Integration with Course class via `conferences()` and `createConference()` methods
+  - Participant management and invitation capabilities
+  - Support for long-running conferences and advanced settings
+  - Comprehensive test coverage for all conference operations
 - Feature Flags API for managing Canvas feature toggles (#68)
   - **FeatureFlag** class for managing feature states at Account/Course/User levels
   - Account-as-Default pattern implementation for multi-context support
