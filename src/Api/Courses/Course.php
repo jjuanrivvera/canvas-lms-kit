@@ -3378,4 +3378,35 @@ class Course extends AbstractBaseApi
 
         return $response->getBody()->getContents();
     }
+
+    /**
+     * Get conferences for this course.
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<\CanvasLMS\Api\Conferences\Conference>
+     * @throws CanvasApiException
+     */
+    public function conferences(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch conferences');
+        }
+        return \CanvasLMS\Api\Conferences\Conference::fetchByCourse($this->id, $params);
+    }
+
+    /**
+     * Create a conference for this course.
+     *
+     * @param array<string, mixed>|\CanvasLMS\Dto\Conferences\CreateConferenceDTO $data Conference data
+     * @return \CanvasLMS\Api\Conferences\Conference
+     * @throws CanvasApiException
+     */
+    public function createConference(
+        array|\CanvasLMS\Dto\Conferences\CreateConferenceDTO $data
+    ): \CanvasLMS\Api\Conferences\Conference {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to create conference');
+        }
+        return \CanvasLMS\Api\Conferences\Conference::createForCourse($this->id, $data);
+    }
 }
