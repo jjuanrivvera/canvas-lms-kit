@@ -30,11 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Convenience methods for enable/disable/allow operations
   - Context-specific feature flag management
 - Outcomes API for learning objectives and competency tracking (#64)
-  - **Outcome** class with Account-as-Default pattern for managing learning outcomes
-  - **OutcomeGroup** class for hierarchical organization of outcomes with global context support
-  - **OutcomeResult** class for tracking individual student mastery (context-specific only)
+  - **Outcome** class (`Api\Outcomes`) with Account-as-Default pattern for managing learning outcomes
+  - **OutcomeGroup** class (`Api\OutcomeGroups`) for hierarchical organization of outcomes with global context support
+  - **OutcomeResult** class (`Api\OutcomeResults`) for tracking individual student mastery (context-specific only)
+  - **OutcomeImport** class (`Api\OutcomeImports`) for bulk importing outcomes from CSV files with async processing
   - Outcome rollups integrated into Course class (`outcomeRollups()`, `outcomeRollupsAggregate()`, `outcomeRollupsExportCSV()`)
-  - **OutcomeImport** class for bulk importing outcomes from CSV files with async processing
   - Support for multiple calculation methods (decaying average, n_mastery, latest, highest, average)
   - Rating scales configuration with mastery points
   - Outcome alignment with assignments and rubrics
