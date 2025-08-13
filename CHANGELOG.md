@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-01-13
+
 ### Added
 - Conferences API for web conferencing integration (#67)
   - **Conference** class for managing web conferences with BigBlueButton, Zoom, and other providers
