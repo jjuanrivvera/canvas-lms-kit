@@ -7,6 +7,7 @@ namespace CanvasLMS\Api\Enrollments;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Users\User;
+use CanvasLMS\Api\Sections\Section;
 use CanvasLMS\Dto\Enrollments\CreateEnrollmentDTO;
 use CanvasLMS\Dto\Enrollments\UpdateEnrollmentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -55,6 +56,8 @@ use CanvasLMS\Pagination\PaginationResult;
  *     echo $enrollment->getTypeName() . ': ' . $enrollment->getStateName();
  * }
  * ```
+ *
+ * @package CanvasLMS\Api\Enrollments
  */
 class Enrollment extends AbstractBaseApi
 {
@@ -1026,5 +1029,24 @@ class Enrollment extends AbstractBaseApi
             self::STATE_INACTIVE => 'Inactive',
             default => $this->enrollmentState ?? 'Unknown'
         };
+    }
+
+    /**
+     * Get the section for this enrollment
+     *
+     * @return Section|null The section object or null if no section ID is set
+     * @throws CanvasApiException If the section cannot be loaded
+     */
+    public function section(): ?Section
+    {
+        if (!$this->sectionId) {
+            return null;
+        }
+
+        try {
+            return Section::find($this->sectionId);
+        } catch (\Exception $e) {
+            throw new CanvasApiException("Could not load section with ID {$this->sectionId}: " . $e->getMessage());
+        }
     }
 }

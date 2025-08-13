@@ -6,6 +6,7 @@ namespace CanvasLMS\Api\Pages;
 
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Users\User;
 use CanvasLMS\Dto\Pages\CreatePageDTO;
 use CanvasLMS\Dto\Pages\UpdatePageDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -1321,5 +1322,48 @@ class Page extends AbstractBaseApi
         $pageData = json_decode($response->getBody()->getContents(), true);
 
         return new self($pageData);
+    }
+
+    // Relationship Methods
+
+    /**
+     * Get the course this page belongs to
+     *
+     * @return Course|null
+     */
+    public function course(): ?Course
+    {
+        return isset(self::$course) ? self::$course : null;
+    }
+
+    /**
+     * Get revisions for this page
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<PageRevision>
+     * @throws CanvasApiException
+     */
+    public function revisions(array $params = []): array
+    {
+        return $this->getRevisions();
+    }
+
+    /**
+     * Get the user who last edited this page
+     *
+     * @return User|null
+     * @throws CanvasApiException
+     */
+    public function lastEditor(): ?User
+    {
+        if (!$this->lastEditedBy || !isset($this->lastEditedBy['id'])) {
+            return null;
+        }
+
+        try {
+            return User::find($this->lastEditedBy['id']);
+        } catch (\Exception $e) {
+            throw new CanvasApiException("Could not load user who last edited page: " . $e->getMessage());
+        }
     }
 }

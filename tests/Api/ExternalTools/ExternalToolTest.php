@@ -38,50 +38,16 @@ class ExternalToolTest extends TestCase
         $this->mockStream = $this->createMock(StreamInterface::class);
         
         ExternalTool::setApiClient($this->httpClientMock);
+        \CanvasLMS\Config::setAccountId(1);
         
         $this->course = new Course(['id' => 123, 'name' => 'Test Course']);
-        ExternalTool::setCourse($this->course);
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        
-        $reflectionClass = new \ReflectionClass(ExternalTool::class);
-        $courseProperty = $reflectionClass->getProperty('course');
-        $courseProperty->setAccessible(true);
-        unset($courseProperty);
     }
 
-    public function testSetCourse(): void
-    {
-        $course = new Course(['id' => 456, 'name' => 'Another Course']);
-        ExternalTool::setCourse($course);
-        
-        $this->assertTrue(ExternalTool::checkCourse());
-    }
-
-    public function testCheckCourseThrowsExceptionWhenNotSet(): void
-    {
-        // Save current course state
-        $reflectionClass = new \ReflectionClass(ExternalTool::class);
-        $courseProperty = $reflectionClass->getProperty('course');
-        $courseProperty->setAccessible(true);
-        $originalCourse = $courseProperty->getValue();
-        
-        // Create a mock course with no id to trigger the exception
-        $mockCourseWithoutId = new Course([]);
-        $courseProperty->setValue($mockCourseWithoutId);
-        
-        $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage('Course is required');
-        
-        // This should throw an exception since course->id is not set
-        ExternalTool::checkCourse();
-        
-        // Restore original course state
-        $courseProperty->setValue($originalCourse);
-    }
 
     public static function externalToolDataProvider(): array
     {
@@ -155,7 +121,7 @@ class ExternalToolTest extends TestCase
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
-            ->with('courses/123/external_tools/1')
+            ->with('accounts/1/external_tools/1')
             ->willReturn($this->mockResponse);
         
         $tool = ExternalTool::find(1);
@@ -172,14 +138,16 @@ class ExternalToolTest extends TestCase
             ['id' => 2, 'name' => 'Tool 2', 'privacy_level' => 'anonymous']
         ];
         
-        $this->mockStream->method('getContents')->willReturn(json_encode($toolsData));
-        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
-        
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('fetchAllPages')
+            ->willReturn($toolsData);
+
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
-            ->with('courses/123/external_tools', ['query' => []])
-            ->willReturn($this->mockResponse);
+            ->method('getPaginated')
+            ->with('accounts/1/external_tools', ['query' => []])
+            ->willReturn($mockPaginatedResponse);
         
         $tools = ExternalTool::fetchAll();
         
@@ -194,14 +162,16 @@ class ExternalToolTest extends TestCase
         $params = ['include_parents' => true, 'placement' => 'editor_button'];
         $toolsData = [['id' => 1, 'name' => 'Tool 1', 'privacy_level' => 'public']];
         
-        $this->mockStream->method('getContents')->willReturn(json_encode($toolsData));
-        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
-        
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('fetchAllPages')
+            ->willReturn($toolsData);
+
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
-            ->with('courses/123/external_tools', ['query' => $params])
-            ->willReturn($this->mockResponse);
+            ->method('getPaginated')
+            ->with('accounts/1/external_tools', ['query' => $params])
+            ->willReturn($mockPaginatedResponse);
         
         $tools = ExternalTool::fetchAll($params);
         
@@ -216,7 +186,7 @@ class ExternalToolTest extends TestCase
         $this->httpClientMock
             ->expects($this->once())
             ->method('getPaginated')
-            ->with('courses/123/external_tools', ['query' => []])
+            ->with('accounts/1/external_tools', ['query' => []])
             ->willReturn($paginatedResponse);
         
         $result = ExternalTool::fetchAllPaginated();
@@ -242,7 +212,7 @@ class ExternalToolTest extends TestCase
             ->expects($this->once())
             ->method('post')
             ->with(
-                'courses/123/external_tools',
+                'accounts/1/external_tools',
                 $this->callback(function ($options) {
                     return isset($options['multipart']) && is_array($options['multipart']);
                 })
@@ -303,7 +273,7 @@ class ExternalToolTest extends TestCase
             ->expects($this->once())
             ->method('put')
             ->with(
-                'courses/123/external_tools/1',
+                'accounts/1/external_tools/1',
                 $this->callback(function ($options) {
                     return isset($options['multipart']) && is_array($options['multipart']);
                 })
@@ -354,7 +324,7 @@ class ExternalToolTest extends TestCase
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
-            ->with('courses/123/external_tools/sessionless_launch', ['query' => $params])
+            ->with('accounts/1/external_tools/sessionless_launch', ['query' => $params])
             ->willReturn($this->mockResponse);
         
         $result = ExternalTool::generateSessionlessLaunch($params);
@@ -399,7 +369,9 @@ class ExternalToolTest extends TestCase
             'id' => 1,
             'name' => 'Updated Tool',
             'consumer_key' => 'test_key',
-            'privacy_level' => 'public'
+            'privacy_level' => 'public',
+            'context_type' => 'account',
+            'context_id' => 1
         ]);
         
         $responseData = [
@@ -414,6 +386,7 @@ class ExternalToolTest extends TestCase
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
+            ->with('accounts/1/external_tools/1', $this->anything())
             ->willReturn($this->mockResponse);
         
         $result = $tool->save();
@@ -459,12 +432,16 @@ class ExternalToolTest extends TestCase
 
     public function testDelete(): void
     {
-        $tool = new ExternalTool(['id' => 1]);
+        $tool = new ExternalTool([
+            'id' => 1,
+            'context_type' => 'account',
+            'context_id' => 1
+        ]);
         
         $this->httpClientMock
             ->expects($this->once())
             ->method('delete')
-            ->with('courses/123/external_tools/1');
+            ->with('accounts/1/external_tools/1');
         
         $result = $tool->delete();
         
@@ -483,7 +460,11 @@ class ExternalToolTest extends TestCase
 
     public function testGetLaunchUrl(): void
     {
-        $tool = new ExternalTool(['id' => 1]);
+        $tool = new ExternalTool([
+            'id' => 1,
+            'context_type' => 'account', 
+            'context_id' => 1
+        ]);
         
         $launchData = [
             'id' => 1,
@@ -497,7 +478,7 @@ class ExternalToolTest extends TestCase
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
-            ->with('courses/123/external_tools/sessionless_launch', ['query' => ['id' => 1]])
+            ->with('accounts/1/external_tools/sessionless_launch', ['query' => ['id' => 1]])
             ->willReturn($this->mockResponse);
         
         $url = $tool->getLaunchUrl();

@@ -13,7 +13,11 @@ use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
 
 /**
+ * Abstract base class for Canvas LMS API resources.
  *
+ * Provides common functionality for all API resource classes including CRUD operations,
+ * pagination support, HTTP client management, and data population from API responses.
+ * Implements the Active Record pattern for Canvas API interactions.
  */
 abstract class AbstractBaseApi implements ApiInterface
 {
@@ -220,6 +224,7 @@ abstract class AbstractBaseApi implements ApiInterface
      * @param string $name
      * @param mixed[] $arguments
      * @return mixed
+     * @throws InvalidArgumentException
      */
     public static function __callStatic($name, $arguments)
     {

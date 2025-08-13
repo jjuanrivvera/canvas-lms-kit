@@ -47,6 +47,10 @@ class RubricAssociationTest extends TestCase
      */
     public function testCreateRubricAssociation(): void
     {
+        // Set course context
+        $course = new Course(['id' => 100]);
+        RubricAssociation::setCourse($course);
+        
         $expectedResult = [
             'id' => 1,
             'rubric_id' => 123,
@@ -84,7 +88,7 @@ class RubricAssociationTest extends TestCase
         $dto->purpose = 'grading';
         $dto->bookmarked = true;
 
-        $association = RubricAssociation::create($dto, 100);
+        $association = RubricAssociation::create($dto);
 
         $this->assertEquals(1, $association->id);
         $this->assertEquals(123, $association->rubricId);
@@ -98,10 +102,66 @@ class RubricAssociationTest extends TestCase
     }
 
     /**
+     * Test create rubric association with array input
+     */
+    public function testCreateRubricAssociationWithArrayInput(): void
+    {
+        // Set course context
+        $course = new Course(['id' => 101]);
+        RubricAssociation::setCourse($course);
+        
+        $associationData = [
+            'rubricId' => 125,
+            'associationId' => 458,
+            'associationType' => 'Assignment',
+            'useForGrading' => true,
+            'purpose' => 'grading',
+            'hideScoreTotal' => false,
+            'bookmarked' => false
+        ];
+
+        $expectedResult = [
+            'id' => 3,
+            'rubric_id' => 125,
+            'association_id' => 458,
+            'association_type' => 'Assignment',
+            'use_for_grading' => true,
+            'purpose' => 'grading',
+            'hide_score_total' => false,
+            'bookmarked' => false
+        ];
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                'courses/101/rubric_associations',
+                $this->isType('array')
+            )
+            ->willReturn($response);
+
+        $association = RubricAssociation::create($associationData);
+
+        $this->assertEquals(3, $association->id);
+        $this->assertEquals(125, $association->rubricId);
+        $this->assertEquals(458, $association->associationId);
+        $this->assertEquals('Assignment', $association->associationType);
+        $this->assertTrue($association->useForGrading);
+        $this->assertEquals('grading', $association->purpose);
+        $this->assertFalse($association->hideScoreTotal);
+        $this->assertFalse($association->bookmarked);
+    }
+
+    /**
      * Test create without current course throws exception
      */
     public function testCreateWithoutCurrentCourseThrowsException(): void
     {
+        // Ensure course context is null
+        RubricAssociation::setCourse(null);
+        
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage("Course context must be set for RubricAssociation operations");
 
@@ -136,6 +196,10 @@ class RubricAssociationTest extends TestCase
      */
     public function testUpdateRubricAssociation(): void
     {
+        // Set course context
+        $course = new Course(['id' => 100]);
+        RubricAssociation::setCourse($course);
+        
         $expectedResult = [
             'id' => 2,
             'rubric_id' => 124,
@@ -162,12 +226,59 @@ class RubricAssociationTest extends TestCase
         $dto->purpose = 'bookmark';
         $dto->hideScoreTotal = true;
 
-        $association = RubricAssociation::update(2, $dto, 100);
+        $association = RubricAssociation::update(2, $dto);
 
         $this->assertEquals(2, $association->id);
         $this->assertFalse($association->useForGrading);
         $this->assertEquals('bookmark', $association->purpose);
         $this->assertTrue($association->hideScoreTotal);
+    }
+
+    /**
+     * Test update rubric association with array input
+     */
+    public function testUpdateRubricAssociationWithArrayInput(): void
+    {
+        // Set course context
+        $course = new Course(['id' => 102]);
+        RubricAssociation::setCourse($course);
+        
+        $updateData = [
+            'rubricId' => 126,
+            'useForGrading' => false,
+            'purpose' => 'bookmark',
+            'hideScoreTotal' => true,
+            'bookmarked' => true
+        ];
+
+        $expectedResult = [
+            'id' => 4,
+            'rubric_id' => 126,
+            'use_for_grading' => false,
+            'purpose' => 'bookmark',
+            'hide_score_total' => true,
+            'bookmarked' => true
+        ];
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('put')
+            ->with(
+                'courses/102/rubric_associations/4',
+                $this->isType('array')
+            )
+            ->willReturn($response);
+
+        $association = RubricAssociation::update(4, $updateData);
+
+        $this->assertEquals(4, $association->id);
+        $this->assertEquals(126, $association->rubricId);
+        $this->assertFalse($association->useForGrading);
+        $this->assertEquals('bookmark', $association->purpose);
+        $this->assertTrue($association->hideScoreTotal);
+        $this->assertTrue($association->bookmarked);
     }
 
     /**
@@ -261,6 +372,8 @@ class RubricAssociationTest extends TestCase
      */
     public function testSaveNewAssociation(): void
     {
+        // Set course context for save operation
+        RubricAssociation::setCourse(new Course(['id' => 400]));
 
         $expectedResult = [
             'id' => 6,
@@ -288,7 +401,7 @@ class RubricAssociationTest extends TestCase
             'use_for_grading' => false
         ]);
 
-        $savedAssociation = $association->save(400);
+        $savedAssociation = $association->save();
 
         $this->assertEquals(6, $savedAssociation->id);
         $this->assertEquals(126, $savedAssociation->rubricId);

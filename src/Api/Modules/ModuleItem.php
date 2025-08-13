@@ -69,6 +69,8 @@ use CanvasLMS\Objects\ContentDetails;
  * // Delete module item
  * $item->delete();
  * ```
+ *
+ * @package CanvasLMS\Api\Modules
  */
 class ModuleItem extends AbstractBaseApi
 {

@@ -4,12 +4,14 @@ namespace Tests\Api\Users;
 
 use CanvasLMS\Api\Users\User;
 use CanvasLMS\Api\Enrollments\Enrollment;
+use CanvasLMS\Api\Groups\Group;
 use GuzzleHttp\Psr7\Response;
 use CanvasLMS\Http\HttpClient;
 use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Users\CreateUserDTO;
 use CanvasLMS\Dto\Users\UpdateUserDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Config;
 
 class UserTest extends TestCase
 {
@@ -28,6 +30,9 @@ class UserTest extends TestCase
      */
     protected function setUp(): void
     {
+        // Set up test configuration
+        Config::setAccountId(1);
+        
         $this->httpClientMock = $this->createMock(HttpClient::class);
         User::setApiClient($this->httpClientMock);
         $this->user = new User([]);
@@ -102,6 +107,87 @@ class UserTest extends TestCase
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertEquals('Test User', $user->getName());
+    }
+
+    /**
+     * Test that User::create uses the configured account ID
+     * @return void
+     */
+    public function testCreateUserUsesConfiguredAccountId(): void
+    {
+        // Set a custom account ID
+        Config::setAccountId(789);
+        
+        $userData = [
+            'name' => 'Test User',
+            'unique_id' => 'testuser789'
+        ];
+
+        $dto = new CreateUserDTO($userData);
+        $expectedPayload = $dto->toApiArray();
+        $expectedResult = array_merge($userData, ['id' => 1]);
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                $this->equalTo('/accounts/789/users'),
+                $this->callback(function ($subject) use ($expectedPayload) {
+                    return $subject['multipart'] === $expectedPayload;
+                })
+            )
+            ->willReturn($response);
+
+        $user = User::create($userData);
+
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertEquals('Test User', $user->getName());
+        
+        // Reset to default for other tests
+        Config::setAccountId(1);
+    }
+
+    /**
+     * Test that User::create uses default account ID when none is configured
+     * @return void
+     */
+    public function testCreateUserUsesDefaultAccountId(): void
+    {
+        // Reset config to ensure we're using defaults
+        Config::resetContext(Config::getContext());
+        
+        $userData = [
+            'name' => 'Test User',
+            'unique_id' => 'testuser_default'
+        ];
+
+        $dto = new CreateUserDTO($userData);
+        $expectedPayload = $dto->toApiArray();
+        $expectedResult = array_merge($userData, ['id' => 1]);
+
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                $this->equalTo('/accounts/1/users'), // Default account ID is 1
+                $this->callback(function ($subject) use ($expectedPayload) {
+                    return $subject['multipart'] === $expectedPayload;
+                })
+            )
+            ->willReturn($response);
+
+        // Suppress the warning about using default account ID
+        @$user = User::create($userData);
+
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertEquals('Test User', $user->getName());
+        
+        // Restore configured account ID for other tests
+        Config::setAccountId(1);
     }
 
     /**
@@ -283,6 +369,187 @@ class UserTest extends TestCase
 
         $this->assertNull($user->getEffectiveLocale());
         $this->assertNull($user->getCanUpdateName());
+    }
+
+    // Tests for User::self() pattern
+
+    /**
+     * Test User::self() returns a User instance without ID
+     */
+    public function testSelfReturnsUserInstanceWithoutId(): void
+    {
+        $currentUser = User::self();
+        
+        $this->assertInstanceOf(User::class, $currentUser);
+        $this->assertFalse(isset($currentUser->id), 'self() should return a User instance without ID set');
+    }
+
+    /**
+     * Test getProfile uses 'self' when ID is not set
+     */
+    public function testGetProfileUsesSelfWhenNoId(): void
+    {
+        $profileData = [
+            'id' => 123,
+            'name' => 'Current User',
+            'short_name' => 'Current',
+            'login_id' => 'current@example.com'
+        ];
+        
+        $response = new Response(200, [], json_encode($profileData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('/users/self/profile')
+            ->willReturn($response);
+        
+        $currentUser = User::self();
+        $profile = $currentUser->getProfile();
+        
+        $this->assertEquals('Current User', $profile->name);
+    }
+
+    /**
+     * Test getMissingSubmissions throws exception when ID is not set
+     */
+    public function testGetMissingSubmissionsThrowsExceptionWhenNoId(): void
+    {
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('User ID is required to fetch missing submissions');
+        
+        $currentUser = User::self();
+        $currentUser->getMissingSubmissions();
+    }
+
+    /**
+     * Test setCustomData throws exception when ID is not set
+     */
+    public function testSetCustomDataThrowsExceptionWhenNoId(): void
+    {
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('User ID is required to set custom data');
+        
+        $currentUser = User::self();
+        $currentUser->setCustomData('namespace', ['data' => 'value']);
+    }
+
+    /**
+     * Test getCustomData throws exception when ID is not set
+     */
+    public function testGetCustomDataThrowsExceptionWhenNoId(): void
+    {
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('User ID is required to get custom data');
+        
+        $currentUser = User::self();
+        $currentUser->getCustomData('namespace');
+    }
+
+    /**
+     * Test courses() throws exception when ID is not set
+     */
+    public function testCoursesThrowsExceptionWhenNoId(): void
+    {
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('User ID is required to get courses');
+        
+        $currentUser = User::self();
+        $currentUser->courses();
+    }
+
+    /**
+     * Test that methods still work with explicit user ID
+     */
+    public function testMethodsStillWorkWithExplicitUserId(): void
+    {
+        $userId = 456;
+        $userData = ['id' => $userId, 'name' => 'Specific User'];
+        $profileData = ['id' => $userId, 'name' => 'Specific User', 'short_name' => 'Specific'];
+        
+        // First mock for User::find()
+        $userResponse = new Response(200, [], json_encode($userData));
+        // Second mock for getProfile()
+        $profileResponse = new Response(200, [], json_encode($profileData));
+        
+        $this->httpClientMock
+            ->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnCallback(function ($path) use ($userResponse, $profileResponse) {
+                if ($path === '/users/456') {
+                    return $userResponse;
+                } elseif ($path === '/users/456/profile') {
+                    return $profileResponse;
+                }
+            });
+        
+        $user = User::find($userId);
+        $this->assertEquals($userId, $user->getId());
+        
+        $profile = $user->getProfile();
+        $this->assertEquals('Specific User', $profile->name);
+    }
+
+    /**
+     * Test getCalendarEvents throws exception when ID is not set
+     */
+    public function testGetCalendarEventsThrowsExceptionWhenNoId(): void
+    {
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('User ID is required to get calendar events');
+        
+        $currentUser = User::self();
+        $currentUser->getCalendarEvents();
+    }
+
+    /**
+     * Test split throws exception when ID is not set
+     */
+    public function testSplitThrowsExceptionWhenNoId(): void
+    {
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('User ID is required to split user');
+        
+        $currentUser = User::self();
+        $currentUser->split();
+    }
+
+    /**
+     * Test groups() uses 'self' endpoint for current user
+     */
+    public function testGroupsMethodUsesSelfForCurrentUser(): void
+    {
+        $groupsData = [
+            ['id' => 1, 'name' => 'Group 1'],
+            ['id' => 2, 'name' => 'Group 2']
+        ];
+        
+        $response = new Response(200, [], json_encode($groupsData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('users/self/groups', $this->anything())
+            ->willReturn($response);
+        
+        $currentUser = User::self();
+        $groups = $currentUser->groups();
+        
+        $this->assertCount(2, $groups);
+        $this->assertInstanceOf(Group::class, $groups[0]);
+        $this->assertEquals('Group 1', $groups[0]->name);
+    }
+
+    /**
+     * Test files() throws exception when ID is not set
+     */
+    public function testFilesThrowsExceptionWhenNoId(): void
+    {
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('User ID is required to get files');
+        
+        $currentUser = User::self();
+        $currentUser->files();
     }
 
     protected function tearDown(): void

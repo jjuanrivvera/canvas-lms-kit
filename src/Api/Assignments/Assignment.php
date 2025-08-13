@@ -11,6 +11,9 @@ use CanvasLMS\Dto\Assignments\UpdateAssignmentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
+use CanvasLMS\Api\Submissions\Submission;
+use CanvasLMS\Api\Rubrics\Rubric;
+use CanvasLMS\Api\Rubrics\RubricAssociation;
 
 /**
  * Canvas LMS Assignments API
@@ -1516,5 +1519,165 @@ class Assignment extends AbstractBaseApi
         $assignmentData = json_decode($response->getBody()->getContents(), true);
 
         return new self($assignmentData);
+    }
+
+    // Relationship Methods
+
+    /**
+     * Get submissions for this assignment
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Submission[]
+     * @throws CanvasApiException
+     */
+    public function submissions(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Assignment ID is required to fetch submissions');
+        }
+
+        self::checkCourse();
+
+        Submission::setCourse(self::$course);
+        Submission::setAssignment($this);
+        return Submission::fetchAll($params);
+    }
+
+
+    /**
+     * Get submission for a specific user
+     *
+     * @param int $userId User ID
+     * @return Submission|null
+     * @throws CanvasApiException
+     */
+    public function getSubmissionForUser(int $userId): ?Submission
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Assignment ID is required to fetch submission');
+        }
+
+        self::checkCourse();
+        self::checkApiClient();
+
+        try {
+            $endpoint = sprintf('courses/%d/assignments/%d/submissions/%d', self::$course->id, $this->id, $userId);
+            $response = self::$apiClient->get($endpoint);
+            $submissionData = json_decode($response->getBody()->getContents(), true);
+
+            return new Submission($submissionData);
+        } catch (CanvasApiException $e) {
+            // If submission not found, return null
+            if (strpos($e->getMessage(), '404') !== false) {
+                return null;
+            }
+            $msg = "Failed to get submission for user {$userId} on assignment {$this->id}: ";
+            throw new CanvasApiException($msg . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get count of submissions for this assignment
+     *
+     * @return int
+     * @throws CanvasApiException
+     */
+    public function getSubmissionCount(): int
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Assignment ID is required to get submission count');
+        }
+
+        // In a real implementation, we would use the Link header to get total count
+        // For now, we'll fetch all and count (not optimal for large datasets)
+        $allSubmissions = $this->submissions(['per_page' => 100]);
+        return count($allSubmissions);
+    }
+
+    /**
+     * Get rubric associated with this assignment
+     *
+     * @return Rubric|null
+     * @throws CanvasApiException
+     */
+    public function rubric(): ?Rubric
+    {
+        if (!isset($this->rubric) || empty($this->rubric)) {
+            return null;
+        }
+
+        self::checkCourse();
+
+        // If rubric data is embedded, create object from it
+        if (isset($this->rubric['id'])) {
+            return new Rubric($this->rubric);
+        }
+
+        return null;
+    }
+
+    /**
+     * Get assignment overrides
+     *
+     * @return array<mixed>
+     * @throws CanvasApiException
+     */
+    public function overrides(): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Assignment ID is required to fetch overrides');
+        }
+
+        self::checkCourse();
+        self::checkApiClient();
+
+        $endpoint = sprintf('courses/%d/assignments/%d/overrides', self::$course->id, $this->id);
+        $response = self::$apiClient->get($endpoint);
+        $overridesData = json_decode($response->getBody()->getContents(), true);
+
+        // Return raw override data for now, could create Override objects in future
+        return $overridesData;
+    }
+
+    /**
+     * Get rubric association for this assignment
+     *
+     * @return RubricAssociation|null
+     * @throws CanvasApiException
+     */
+    public function rubricAssociation(): ?RubricAssociation
+    {
+        if (!isset($this->rubric) || empty($this->rubric)) {
+            return null;
+        }
+
+        self::checkCourse();
+        self::checkApiClient();
+
+        try {
+            // Get rubric associations for this assignment
+            $endpoint = sprintf('courses/%d/rubric_associations', self::$course->id);
+            $response = self::$apiClient->get($endpoint, [
+                'query' => [
+                    'include' => ['association_object'],
+                    'association_type' => 'Assignment',
+                    'association_id' => $this->id
+                ]
+            ]);
+
+            $associations = json_decode($response->getBody()->getContents(), true);
+
+            // Find the association for this assignment
+            foreach ($associations as $assocData) {
+                if ($assocData['association_id'] == $this->id && $assocData['association_type'] == 'Assignment') {
+                    return new RubricAssociation($assocData);
+                }
+            }
+
+            return null;
+        } catch (CanvasApiException $e) {
+            $msg = "Failed to get rubric association for assignment {$this->id}: ";
+            throw new CanvasApiException($msg . $e->getMessage());
+        }
     }
 }

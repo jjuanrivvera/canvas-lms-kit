@@ -16,6 +16,19 @@ use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
+use CanvasLMS\Api\Assignments\Assignment;
+use CanvasLMS\Api\Modules\Module;
+use CanvasLMS\Api\ContentMigrations\ContentMigration;
+use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
+use CanvasLMS\Api\Pages\Page;
+use CanvasLMS\Api\Sections\Section;
+use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
+use CanvasLMS\Api\Quizzes\Quiz;
+use CanvasLMS\Api\Files\File;
+use CanvasLMS\Api\Rubrics\Rubric;
+use CanvasLMS\Api\ExternalTools\ExternalTool;
+use CanvasLMS\Api\Tabs\Tab;
+use CanvasLMS\Objects\OutcomeLink;
 
 /**
  * Course Class
@@ -66,7 +79,7 @@ use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
  * // Fetching all courses from all pages
  * $allCourses = Course::fetchAllPages(['per_page' => 50]);
  *```
- * @package CanvasLMS\Api
+ * @package CanvasLMS\Api\Courses
  */
 class Course extends AbstractBaseApi
 {
@@ -496,7 +509,7 @@ class Course extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->post('/accounts/1/courses', [
+        $response = self::$apiClient->post('/accounts/' . Config::getAccountId() . '/courses', [
             'multipart' => $dto->toApiArray()
         ]);
 
@@ -640,7 +653,7 @@ class Course extends AbstractBaseApi
 
             $updatedCourseData = json_decode($response->getBody(), true);
             $this->populate($updatedCourseData);
-        } catch (CanvasApiException $th) {
+        } catch (CanvasApiException) {
             return false;
         }
 
@@ -661,11 +674,105 @@ class Course extends AbstractBaseApi
                     "event" => "delete"
                 ]
             ]);
-        } catch (CanvasApiException $th) {
+        } catch (CanvasApiException) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Get groups in this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<\CanvasLMS\Api\Groups\Group>
+     * @throws CanvasApiException
+     */
+    public function groups(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch groups');
+        }
+
+        return \CanvasLMS\Api\Groups\Group::fetchByContext('courses', $this->id, $params);
+    }
+
+    /**
+     * Get paginated groups in this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     */
+    public function groupsPaginated(array $params = []): PaginatedResponse
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch groups');
+        }
+
+        return \CanvasLMS\Api\Groups\Group::fetchByContextPaginated('courses', $this->id, $params);
+    }
+
+    /**
+     * Get group categories in this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<\CanvasLMS\Api\GroupCategories\GroupCategory>
+     * @throws CanvasApiException
+     */
+    public function groupCategories(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch group categories');
+        }
+
+        return \CanvasLMS\Api\GroupCategories\GroupCategory::fetchAllPagesAsModels(
+            sprintf('courses/%d/group_categories', $this->id),
+            $params
+        );
+    }
+
+    /**
+     * Get paginated group categories in this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     */
+    public function groupCategoriesPaginated(array $params = []): PaginatedResponse
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch group categories');
+        }
+
+        return \CanvasLMS\Api\GroupCategories\GroupCategory::getPaginatedResponse(
+            sprintf('courses/%d/group_categories', $this->id),
+            $params
+        );
+    }
+
+    /**
+     * Create a group category in this course
+     *
+     * @param array<string, mixed>|\CanvasLMS\Dto\GroupCategories\CreateGroupCategoryDTO $data Group category data
+     * @return \CanvasLMS\Api\GroupCategories\GroupCategory
+     * @throws CanvasApiException
+     */
+    public function createGroupCategory(
+        array|\CanvasLMS\Dto\GroupCategories\CreateGroupCategoryDTO $data
+    ): \CanvasLMS\Api\GroupCategories\GroupCategory {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to create group category');
+        }
+
+        // Transform data to include course_id
+        if (is_array($data)) {
+            $data['course_id'] = $this->id;
+        } else {
+            $data->courseId = $this->id;
+        }
+
+        return \CanvasLMS\Api\GroupCategories\GroupCategory::create($data);
     }
 
     /**
@@ -682,7 +789,7 @@ class Course extends AbstractBaseApi
                     "event" => "conclude"
                 ]
             ]);
-        } catch (CanvasApiException $th) {
+        } catch (CanvasApiException) {
             return false;
         }
 
@@ -1094,6 +1201,160 @@ class Course extends AbstractBaseApi
     }
 
     /**
+     * Get content migrations for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<ContentMigration>
+     * @throws CanvasApiException
+     */
+    public function contentMigrations(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch content migrations');
+        }
+
+        return ContentMigration::fetchByContext('courses', $this->id, $params);
+    }
+
+    /**
+     * Get a specific content migration for this course
+     *
+     * @param int $migrationId Content migration ID
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function contentMigration(int $migrationId): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch content migration');
+        }
+
+        return ContentMigration::findByContext('courses', $this->id, $migrationId);
+    }
+
+    /**
+     * Create a content migration for this course
+     *
+     * @param array<string, mixed>|CreateContentMigrationDTO $data Migration data
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function createContentMigration(array|CreateContentMigrationDTO $data): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to create content migration');
+        }
+
+        return ContentMigration::createInContext('courses', $this->id, $data);
+    }
+
+    /**
+     * Copy content from another course
+     *
+     * @param int $sourceCourseId The course to copy content FROM
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function copyContentFrom(int $sourceCourseId, array $options = []): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to copy content');
+        }
+
+        return ContentMigration::createCourseCopy($this->id, $sourceCourseId, $options);
+    }
+
+    /**
+     * Import content from a Common Cartridge file
+     *
+     * @param string $filePath Path to the .imscc file
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function importCommonCartridge(string $filePath, array $options = []): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to import content');
+        }
+
+        return ContentMigration::importCommonCartridge($this->id, $filePath, $options);
+    }
+
+    /**
+     * Import content from a ZIP file
+     *
+     * @param string $filePath Path to the .zip file
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function importZipFile(string $filePath, array $options = []): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to import content');
+        }
+
+        return ContentMigration::importZipFile($this->id, $filePath, $options);
+    }
+
+    /**
+     * Create a selective course copy
+     *
+     * @param int $sourceCourseId The course to copy content FROM
+     * @param array<string, array<string|int>> $selections Items to copy
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function selectiveCopyFrom(
+        int $sourceCourseId,
+        array $selections,
+        array $options = []
+    ): ContentMigration {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required for selective copy');
+        }
+
+        return ContentMigration::createSelectiveCourseCopy(
+            $this->id,
+            $sourceCourseId,
+            $selections,
+            $options
+        );
+    }
+
+    /**
+     * Copy content with date shifting
+     *
+     * @param int $sourceCourseId The course to copy content FROM
+     * @param string $oldStartDate Original course start date (Y-m-d)
+     * @param string $newStartDate New course start date (Y-m-d)
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function copyWithDateShift(
+        int $sourceCourseId,
+        string $oldStartDate,
+        string $newStartDate,
+        array $options = []
+    ): ContentMigration {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required for date shift copy');
+        }
+
+        return ContentMigration::createCourseCopyWithDateShift(
+            $this->id,
+            $sourceCourseId,
+            $oldStartDate,
+            $newStartDate,
+            $options
+        );
+    }
+
+    /**
      * Get course copy status
      * DEPRECATED: Use Content Migrations API instead
      * Retrieve the status of a course copy operation
@@ -1178,23 +1439,6 @@ class Course extends AbstractBaseApi
      */
     public function enrollments(array $params = []): array
     {
-        return $this->getEnrollmentsAsObjects($params);
-    }
-
-    // Enrollment Relationship Methods
-
-    /**
-     * Get all enrollments for this course as Enrollment objects
-     *
-     * This method fetches all enrollments in the current course.
-     * Use the $params array to filter enrollments by type, state, or other Canvas API parameters.
-     *
-     * @param mixed[] $params Query parameters for filtering enrollments (e.g., ['type[]' => ['StudentEnrollment']]
-     * @return Enrollment[] Array of Enrollment objects
-     * @throws CanvasApiException If the course ID is not set or API request fails
-     */
-    public function getEnrollmentsAsObjects(array $params = []): array
-    {
         if (!isset($this->id) || !$this->id) {
             throw new CanvasApiException('Course ID is required to fetch enrollments');
         }
@@ -1203,6 +1447,9 @@ class Course extends AbstractBaseApi
         Enrollment::setCourse($this);
         return Enrollment::fetchAll($params);
     }
+
+    // Enrollment Relationship Methods
+
 
     /**
      * Get active enrollments for this course
@@ -1216,7 +1463,7 @@ class Course extends AbstractBaseApi
     public function getActiveEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['state[]' => ['active']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -1231,7 +1478,7 @@ class Course extends AbstractBaseApi
     public function getStudentEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['StudentEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -1246,7 +1493,7 @@ class Course extends AbstractBaseApi
     public function getTeacherEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['TeacherEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -1261,7 +1508,7 @@ class Course extends AbstractBaseApi
     public function getTaEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['TaEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -1276,7 +1523,7 @@ class Course extends AbstractBaseApi
     public function getObserverEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['ObserverEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -1291,7 +1538,7 @@ class Course extends AbstractBaseApi
     public function getDesignerEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['DesignerEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -1309,7 +1556,7 @@ class Course extends AbstractBaseApi
             $params['type[]'] = [$enrollmentType];
         }
 
-        $enrollments = $this->getEnrollmentsAsObjects($params);
+        $enrollments = $this->enrollments($params);
         return count($enrollments) > 0;
     }
 
@@ -1368,7 +1615,7 @@ class Course extends AbstractBaseApi
      */
     public function getTotalEnrollmentCount(array $params = []): int
     {
-        return count($this->getEnrollmentsAsObjects($params));
+        return count($this->enrollments($params));
     }
 
     /**
@@ -1376,7 +1623,7 @@ class Course extends AbstractBaseApi
      *
      * This returns the raw enrollments array that may be embedded in the course object
      * from certain Canvas API calls. For fetching current enrollments from the API,
-     * use getEnrollmentsAsObjects() instead.
+     * use enrollments() instead.
      *
      * @return mixed[]|null Raw enrollments data array or null
      */
@@ -2454,39 +2701,6 @@ class Course extends AbstractBaseApi
         $this->defaultDueTime = $defaultDueTime;
     }
 
-    /**
-     * Get calendar events for this course
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return CalendarEvent[]
-     * @throws CanvasApiException
-     */
-    public function getCalendarEvents(array $params = []): array
-    {
-        if (!$this->id) {
-            throw new CanvasApiException('Course ID is required to get calendar events');
-        }
-
-        $params['context_codes'] = [sprintf('course_%d', $this->id)];
-        return CalendarEvent::fetchAll($params);
-    }
-
-    /**
-     * Get paginated calendar events for this course
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public function getCalendarEventsPaginated(array $params = []): PaginatedResponse
-    {
-        if (!$this->id) {
-            throw new CanvasApiException('Course ID is required to get calendar events');
-        }
-
-        $params['context_codes'] = [sprintf('course_%d', $this->id)];
-        return CalendarEvent::fetchAllPaginated($params);
-    }
 
     /**
      * Create a calendar event for this course
@@ -2505,6 +2719,498 @@ class Course extends AbstractBaseApi
         $dto->contextCode = sprintf('course_%d', $this->id);
         return CalendarEvent::create($dto);
     }
+
+    // Assignment Relationship Methods
+
+    /**
+     * Get assignments for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Assignment[]
+     * @throws CanvasApiException
+     */
+    public function assignments(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch assignments');
+        }
+
+        Assignment::setCourse($this);
+        return Assignment::fetchAll($params);
+    }
+
+
+    // Module Relationship Methods
+
+    /**
+     * Get modules for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Module[]
+     * @throws CanvasApiException
+     */
+    public function modules(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch modules');
+        }
+
+        Module::setCourse($this);
+        return Module::fetchAll($params);
+    }
+
+
+
+    // Page Relationship Methods
+
+    /**
+     * Get pages for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Page[]
+     * @throws CanvasApiException
+     */
+    public function pages(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch pages');
+        }
+
+        Page::setCourse($this);
+        return Page::fetchAll($params);
+    }
+
+
+    // Section Relationship Methods
+
+    /**
+     * Get sections for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Section[]
+     * @throws CanvasApiException
+     */
+    public function sections(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch sections');
+        }
+
+        Section::setCourse($this);
+        return Section::fetchAll($params);
+    }
+
+
+    // Discussion Topic Relationship Methods
+
+    /**
+     * Get discussion topics for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return DiscussionTopic[]
+     * @throws CanvasApiException
+     */
+    public function discussionTopics(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch discussion topics');
+        }
+
+        DiscussionTopic::setCourse($this);
+        return DiscussionTopic::fetchAll($params);
+    }
+
+
+    // Quiz Relationship Methods
+
+    /**
+     * Get quizzes for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Quiz[]
+     * @throws CanvasApiException
+     */
+    public function quizzes(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch quizzes');
+        }
+
+        Quiz::setCourse($this);
+        return Quiz::fetchAll($params);
+    }
+
+
+    // File Relationship Methods
+
+    /**
+     * Get files for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return File[]
+     * @throws CanvasApiException
+     */
+    public function files(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch files');
+        }
+
+        return File::fetchByContext('courses', $this->id, $params);
+    }
+
+    /**
+     * Get calendar events for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return CalendarEvent[]
+     * @throws CanvasApiException
+     */
+    public function calendarEvents(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch calendar events');
+        }
+        return CalendarEvent::fetchByContext('course', $this->id, $params);
+    }
+
+
+    // Rubric Relationship Methods
+
+    /**
+     * Get rubrics for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<Rubric>
+     * @throws CanvasApiException
+     */
+    public function rubrics(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch rubrics');
+        }
+
+        return Rubric::fetchByContext('courses', $this->id, $params);
+    }
+
+
+    // External Tool Relationship Methods
+
+    /**
+     * Get external tools for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return ExternalTool[]
+     * @throws CanvasApiException
+     */
+    public function externalTools(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch external tools');
+        }
+
+        return ExternalTool::fetchByContext('courses', $this->id, $params);
+    }
+
+
+    // Tab Relationship Methods
+
+    /**
+     * Get tabs for this course
+     *
+     * @return Tab[]
+     * @throws CanvasApiException
+     */
+    public function tabs(): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch tabs');
+        }
+
+        Tab::setCourse($this);
+        return Tab::fetchAll();
+    }
+
+    /**
+     * Get outcomes for this course.
+     * Note: This returns OutcomeLink objects as per Canvas API.
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, OutcomeLink> Array of OutcomeLink objects
+     * @throws CanvasApiException
+     */
+    public function outcomes(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch outcomes');
+        }
+
+        // Get the root outcome group for this course
+        $rootGroup = \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::getRootGroup('courses', $this->id);
+
+        // Get outcomes from the root group (returns OutcomeLink objects)
+        return $rootGroup->outcomes($params);
+    }
+
+    /**
+     * Get all outcome links for this course (across all groups).
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, OutcomeLink> Array of OutcomeLink objects
+     * @throws CanvasApiException
+     */
+    public function outcomeLinks(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch outcome links');
+        }
+
+        return \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::fetchAllLinksByContext('courses', $this->id, $params);
+    }
+
+    /**
+     * Get all feature flags for this course.
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, \CanvasLMS\Api\FeatureFlags\FeatureFlag> Array of FeatureFlag objects
+     * @throws CanvasApiException
+     */
+    public function featureFlags(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch feature flags');
+        }
+
+        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::fetchByContext('courses', $this->id, $params);
+    }
+
+    /**
+     * Get a specific feature flag for this course.
+     *
+     * @param string $featureName The symbolic name of the feature
+     * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
+     * @throws CanvasApiException
+     */
+    public function getFeatureFlag(string $featureName): \CanvasLMS\Api\FeatureFlags\FeatureFlag
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to get feature flag');
+        }
+
+        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::findByContext('courses', $this->id, $featureName);
+    }
+
+    /**
+     * Update a feature flag for this course.
+     *
+     * @param string $featureName The symbolic name of the feature
+     * @param array<string, mixed>|\CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO $data Update data
+     * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
+     * @throws CanvasApiException
+     */
+    public function setFeatureFlag(
+        string $featureName,
+        array|\CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO $data
+    ): \CanvasLMS\Api\FeatureFlags\FeatureFlag {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to set feature flag');
+        }
+
+        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::updateByContext('courses', $this->id, $featureName, $data);
+    }
+
+    /**
+     * Remove a feature flag for this course.
+     *
+     * @param string $featureName The symbolic name of the feature
+     * @return bool
+     * @throws CanvasApiException
+     */
+    public function removeFeatureFlag(string $featureName): bool
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to remove feature flag');
+        }
+
+        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::deleteByContext('courses', $this->id, $featureName);
+    }
+
+    /**
+     * Create a new outcome directly in this course.
+     *
+     * @param array<string, mixed>|\CanvasLMS\Dto\Outcomes\CreateOutcomeDTO $data Outcome data
+     * @param int|null $groupId The group to create in (null for root group)
+     * @return OutcomeLink
+     * @throws CanvasApiException
+     */
+    public function createOutcome(
+        array|\CanvasLMS\Dto\Outcomes\CreateOutcomeDTO $data,
+        ?int $groupId = null
+    ): OutcomeLink {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to create outcomes');
+        }
+
+        if ($groupId) {
+            $group = \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::findByContext('courses', $this->id, $groupId);
+        } else {
+            $group = \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::getRootGroup('courses', $this->id);
+        }
+
+        return $group->createOutcome($data);
+    }
+
+    /**
+     * Link an existing outcome to this course.
+     *
+     * @param int $outcomeId The outcome ID to link
+     * @param int|null $groupId The group to link into (null for root group)
+     * @param int|null $moveFrom The group ID to move from (optional)
+     * @return OutcomeLink
+     * @throws CanvasApiException
+     */
+    public function linkOutcome(int $outcomeId, ?int $groupId = null, ?int $moveFrom = null): OutcomeLink
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to link outcomes');
+        }
+
+        if ($groupId) {
+            $group = \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::findByContext('courses', $this->id, $groupId);
+        } else {
+            $group = \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::getRootGroup('courses', $this->id);
+        }
+
+        return $group->linkOutcome($outcomeId, $moveFrom);
+    }
+
+    /**
+     * Get outcome groups for this course
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, \CanvasLMS\Api\OutcomeGroups\OutcomeGroup> Array of OutcomeGroup objects
+     * @throws CanvasApiException
+     */
+    public function outcomeGroups(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch outcome groups');
+        }
+
+        return \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::fetchByContext('courses', $this->id, $params);
+    }
+
+    /**
+     * Get outcome results for this course
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, \CanvasLMS\Api\OutcomeResults\OutcomeResult> Array of OutcomeResult objects
+     * @throws CanvasApiException
+     */
+    public function outcomeResults(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch outcome results');
+        }
+
+        return \CanvasLMS\Api\OutcomeResults\OutcomeResult::fetchByCourse($this->id, $params);
+    }
+
+    /**
+     * Fetch outcome rollups for this course.
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     *                                   (aggregate, aggregate_stat, user_ids, outcome_ids, etc.)
+     * @return array<string, mixed> Rollup data with rollups and linked data
+     * @throws CanvasApiException
+     */
+    public function outcomeRollups(array $params = []): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch outcome rollups');
+        }
+
+        $endpoint = sprintf('courses/%d/outcome_rollups', $this->id);
+
+        $response = self::$apiClient->get($endpoint, [
+            'query' => $params
+        ]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * Import outcomes to this course from a CSV file
+     *
+     * @param string $filePath Path to the CSV file
+     * @param int|null $groupId Optional outcome group ID to import into
+     * @param string $importType Import type (default: 'instructure_csv')
+     * @return \CanvasLMS\Api\OutcomeImports\OutcomeImport
+     * @throws CanvasApiException
+     */
+    public function importOutcomes(
+        string $filePath,
+        ?int $groupId = null,
+        string $importType = 'instructure_csv'
+    ): \CanvasLMS\Api\OutcomeImports\OutcomeImport {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to import outcomes');
+        }
+
+        return \CanvasLMS\Api\OutcomeImports\OutcomeImport::importToContext(
+            'courses',
+            $this->id,
+            $filePath,
+            $groupId,
+            $importType
+        );
+    }
+
+    /**
+     * Import outcomes to this course from CSV data
+     *
+     * @param string $csvData Raw CSV data
+     * @param int|null $groupId Optional outcome group ID to import into
+     * @param string $importType Import type (default: 'instructure_csv')
+     * @return \CanvasLMS\Api\OutcomeImports\OutcomeImport
+     * @throws CanvasApiException
+     */
+    public function importOutcomesFromData(
+        string $csvData,
+        ?int $groupId = null,
+        string $importType = 'instructure_csv'
+    ): \CanvasLMS\Api\OutcomeImports\OutcomeImport {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to import outcomes');
+        }
+
+        return \CanvasLMS\Api\OutcomeImports\OutcomeImport::importDataToContext(
+            'courses',
+            $this->id,
+            $csvData,
+            $groupId,
+            $importType
+        );
+    }
+
+    /**
+     * Get outcome import status for this course
+     *
+     * @param int|string $importId Import ID or 'latest'
+     * @return \CanvasLMS\Api\OutcomeImports\OutcomeImport
+     * @throws CanvasApiException
+     */
+    public function getOutcomeImportStatus(int|string $importId): \CanvasLMS\Api\OutcomeImports\OutcomeImport
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to get import status');
+        }
+
+        return \CanvasLMS\Api\OutcomeImports\OutcomeImport::getStatus('courses', $this->id, $importId);
+    }
+
 
     /**
      * Set course timetable
@@ -2618,5 +3324,89 @@ class Course extends AbstractBaseApi
 
         $response = self::$apiClient->post($endpoint, $data);
         return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Fetch course aggregate outcome rollup.
+     *
+     * @param string $aggregateStat Statistic type (mean, median)
+     * @param array<string, mixed> $params Additional query parameters
+     * @return array<string, mixed> Rollup data with aggregate results
+     * @throws CanvasApiException
+     */
+    public function outcomeRollupsAggregate(string $aggregateStat = 'mean', array $params = []): array
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch outcome rollups aggregate');
+        }
+
+        $params['aggregate'] = 'course';
+        $params['aggregate_stat'] = $aggregateStat;
+
+        $endpoint = sprintf('courses/%d/outcome_rollups', $this->id);
+
+        $response = self::$apiClient->get($endpoint, [
+            'query' => $params
+        ]);
+
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * Export outcome rollups to CSV for this course.
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return string CSV data
+     * @throws CanvasApiException
+     */
+    public function outcomeRollupsExportCSV(array $params = []): string
+    {
+        self::checkApiClient();
+
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to export outcome rollups');
+        }
+
+        $params['export_format'] = 'csv';
+        $endpoint = sprintf('courses/%d/outcome_rollups.csv', $this->id);
+
+        $response = self::$apiClient->get($endpoint, [
+            'query' => $params
+        ]);
+
+        return $response->getBody()->getContents();
+    }
+
+    /**
+     * Get conferences for this course.
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<\CanvasLMS\Api\Conferences\Conference>
+     * @throws CanvasApiException
+     */
+    public function conferences(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch conferences');
+        }
+        return \CanvasLMS\Api\Conferences\Conference::fetchByCourse($this->id, $params);
+    }
+
+    /**
+     * Create a conference for this course.
+     *
+     * @param array<string, mixed>|\CanvasLMS\Dto\Conferences\CreateConferenceDTO $data Conference data
+     * @return \CanvasLMS\Api\Conferences\Conference
+     * @throws CanvasApiException
+     */
+    public function createConference(
+        array|\CanvasLMS\Dto\Conferences\CreateConferenceDTO $data
+    ): \CanvasLMS\Api\Conferences\Conference {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to create conference');
+        }
+        return \CanvasLMS\Api\Conferences\Conference::createForCourse($this->id, $data);
     }
 }

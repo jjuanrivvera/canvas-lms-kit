@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace CanvasLMS\Api\DiscussionTopics;
 
 use CanvasLMS\Api\AbstractBaseApi;
+use CanvasLMS\Api\Assignments\Assignment;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Users\User;
 use CanvasLMS\Dto\DiscussionTopics\CreateDiscussionTopicDTO;
 use CanvasLMS\Dto\DiscussionTopics\UpdateDiscussionTopicDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -1902,6 +1904,90 @@ class DiscussionTopic extends AbstractBaseApi
             return true;
         } catch (CanvasApiException) {
             return false;
+        }
+    }
+
+    // Relationship Methods
+
+    /**
+     * Get the course this discussion topic belongs to
+     *
+     * @return Course|null
+     */
+    public function course(): ?Course
+    {
+        return isset(self::$course) ? self::$course : null;
+    }
+
+    /**
+     * Get the author of this discussion topic
+     *
+     * @example
+     * ```php
+     * $course = Course::find(123);
+     * DiscussionTopic::setCourse($course);
+     *
+     * $topic = DiscussionTopic::find(456);
+     * $author = $topic->author();
+     *
+     * if ($author) {
+     *     echo "Posted by: {$author->name}\n";
+     *     echo "Email: {$author->email}\n";
+     * }
+     * ```
+     *
+     * @return User|null
+     * @throws CanvasApiException
+     */
+    public function author(): ?User
+    {
+        if (!$this->userId) {
+            return null;
+        }
+
+        try {
+            return User::find($this->userId);
+        } catch (\Exception $e) {
+            throw new CanvasApiException("Could not load discussion topic author: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get the assignment associated with this discussion (if graded)
+     *
+     * @example
+     * ```php
+     * $course = Course::find(123);
+     * DiscussionTopic::setCourse($course);
+     *
+     * $topic = DiscussionTopic::find(456);
+     * $assignment = $topic->assignment();
+     *
+     * if ($assignment) {
+     *     echo "This is a graded discussion\n";
+     *     echo "Points possible: {$assignment->pointsPossible}\n";
+     *     echo "Due date: {$assignment->dueAt}\n";
+     * } else {
+     *     echo "This is an ungraded discussion\n";
+     * }
+     * ```
+     *
+     * @return Assignment|null
+     * @throws CanvasApiException
+     */
+    public function assignment(): ?Assignment
+    {
+        if (!$this->assignmentId) {
+            return null;
+        }
+
+        try {
+            if (isset(self::$course)) {
+                Assignment::setCourse(self::$course);
+            }
+            return Assignment::find($this->assignmentId);
+        } catch (\Exception $e) {
+            throw new CanvasApiException("Could not load associated assignment: " . $e->getMessage());
         }
     }
 }

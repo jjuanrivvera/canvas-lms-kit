@@ -12,6 +12,9 @@ use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
+use CanvasLMS\Api\Rubrics\Rubric;
+use CanvasLMS\Api\Rubrics\RubricAssociation;
+use CanvasLMS\Dto\Rubrics\CreateRubricDTO;
 
 /**
  * Account Class
@@ -721,5 +724,103 @@ class Account extends AbstractBaseApi
         $dto = $data instanceof CreateCalendarEventDTO ? $data : new CreateCalendarEventDTO($data);
         $dto->contextCode = sprintf('account_%d', $this->id);
         return CalendarEvent::create($dto);
+    }
+
+    /**
+     * Get rubrics for this account
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<int, Rubric>
+     * @throws CanvasApiException
+     */
+    public function getRubrics(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Account ID is required to get rubrics');
+        }
+
+        $endpoint = sprintf('accounts/%d/rubrics', $this->id);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $responseData = json_decode($response->getBody(), true);
+
+        return array_map(function ($rubricData) {
+            return new Rubric($rubricData);
+        }, $responseData);
+    }
+
+    /**
+     * Get paginated rubrics for this account
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return PaginatedResponse
+     * @throws CanvasApiException
+     */
+    public function getRubricsPaginated(array $params = []): PaginatedResponse
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Account ID is required to get rubrics');
+        }
+
+        $endpoint = sprintf('accounts/%d/rubrics', $this->id);
+        return self::getPaginatedResponse($endpoint, $params);
+    }
+
+    /**
+     * Create a rubric for this account
+     *
+     * @param CreateRubricDTO|array<string, mixed> $data
+     * @return Rubric
+     * @throws CanvasApiException
+     */
+    public function createRubric($data): Rubric
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Account ID is required to create rubric');
+        }
+
+        self::checkApiClient();
+
+        if (is_array($data)) {
+            $data = new CreateRubricDTO($data);
+        }
+
+        $endpoint = sprintf('accounts/%d/rubrics', $this->id);
+        $response = self::$apiClient->post($endpoint, $data->toApiArray());
+        $responseData = json_decode($response->getBody(), true);
+
+        // Handle non-standard response format
+        if (isset($responseData['rubric'])) {
+            $rubric = new Rubric($responseData['rubric']);
+            if (isset($responseData['rubric_association'])) {
+                $rubric->association = new RubricAssociation($responseData['rubric_association']);
+            }
+            return $rubric;
+        }
+
+        // Fallback to standard response
+        return new Rubric($responseData);
+    }
+
+    /**
+     * Find a rubric by ID in this account
+     *
+     * @param int $rubricId The rubric ID
+     * @param array<string, mixed> $params Query parameters
+     * @return Rubric
+     * @throws CanvasApiException
+     */
+    public function findRubric(int $rubricId, array $params = []): Rubric
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Account ID is required to find rubric');
+        }
+
+        self::checkApiClient();
+
+        $endpoint = sprintf('accounts/%d/rubrics/%d', $this->id, $rubricId);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $data = json_decode($response->getBody(), true);
+
+        return new Rubric($data);
     }
 }

@@ -7,6 +7,103 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-01-13
+
+### Added
+- Conferences API for web conferencing integration (#67)
+  - **Conference** class for managing web conferences with BigBlueButton, Zoom, and other providers
+  - Multi-context support for both Course and Group contexts
+  - **ConferenceRecording** object for managing conference recordings
+  - Special actions: `join()` method for joining conferences, `getRecordings()` for retrieving recordings
+  - **CreateConferenceDTO** and **UpdateConferenceDTO** for handling complex provider settings
+  - Provider-specific settings support through flexible array structures
+  - Integration with Course class via `conferences()` and `createConference()` methods
+  - Participant management and invitation capabilities
+  - Support for long-running conferences and advanced settings
+  - Comprehensive test coverage for all conference operations
+- Feature Flags API for managing Canvas feature toggles (#68)
+  - **FeatureFlag** class for managing feature states at Account/Course/User levels
+  - Account-as-Default pattern implementation for multi-context support
+  - Support for feature states (off, allowed, on) with inheritance hierarchy
+  - Feature flag locking and hiding capabilities
+  - Beta and development feature identification
+  - Integration with Course and User classes via instance methods
+  - **UpdateFeatureFlagDTO** for managing feature flag updates with validation
+  - Convenience methods for enable/disable/allow operations
+  - Context-specific feature flag management
+- Outcomes API for learning objectives and competency tracking (#64)
+  - **Outcome** class (`Api\Outcomes`) with Account-as-Default pattern for managing learning outcomes
+  - **OutcomeGroup** class (`Api\OutcomeGroups`) for hierarchical organization of outcomes with global context support
+  - **OutcomeResult** class (`Api\OutcomeResults`) for tracking individual student mastery (context-specific only)
+  - **OutcomeImport** class (`Api\OutcomeImports`) for bulk importing outcomes from CSV files with async processing
+  - Outcome rollups integrated into Course class (`outcomeRollups()`, `outcomeRollupsAggregate()`, `outcomeRollupsExportCSV()`)
+  - Support for multiple calculation methods (decaying average, n_mastery, latest, highest, average)
+  - Rating scales configuration with mastery points
+  - Outcome alignment with assignments and rubrics
+  - Bulk import/export capabilities for outcome standards
+  - CSV template generation and validation for imports
+  - Async import status tracking with progress monitoring
+  - Error handling and reporting for failed imports
+  - Vendor GUID support for external standard integration
+  - Course instance methods for context-specific outcome operations and imports
+  - Comprehensive DTOs for create/update operations with validation
+  - Full support for competency-based education workflows
+- Complete Groups API implementation with student collaboration features (#63)
+  - **Group** class enhanced with pagination support, activity streams, permissions, and membership management
+  - **GroupCategory** class for organizing groups within courses with bulk member assignment
+  - **GroupMembership** class for managing group membership, moderator status, and invitations
+  - Added relationship methods to Course and User classes for group-related operations
+  - Full support for student group collaboration workflows and self-signup groups
+  - Comprehensive test coverage for all group-related functionality
+- Support for current user endpoints using Canvas "self" pattern (#87)
+  - Added `User::self()` static method to get instance for current authenticated user
+  - Implemented "self" support for Canvas API endpoints that actually support it:
+    - `getActivityStream()` - Get current user's activity stream
+    - `getTodo()` - Get current user's todo items
+    - `getProfile()` - Get current user's profile
+    - `groups()` - Get current user's groups (special handling for /users/self/groups)
+  - Other User methods require numeric user ID and throw exception when ID not set
+  - Added comprehensive tests for self pattern functionality
+  - No breaking changes - existing code continues to work unchanged
+- Content Migrations API for course content import/export workflows (#61, #89)
+  - **ContentMigration** class with multi-context support (Account/Course/Group/User)
+  - **MigrationIssue** class for handling migration warnings, errors, and todos
+  - **Migrator** read-only object for available migration systems
+  - Support for various migration types: course copy, ZIP files, Common Cartridge, QTI, Moodle
+  - Integration with Progress API for tracking async operations
+  - File upload handling with pre-attachment support
+  - Selective import functionality with copy parameters
+  - Date shifting options for course content
+  - Asset ID mapping for course migrations
+  - Comprehensive DTOs for create/update operations with complex nested settings
+  - Context-specific methods added to Course, Group, and User classes for content migrations (#89)
+  - Full test coverage for all context-specific content migration methods (#89)
+
+### Fixed
+- Fixed hardcoded account ID in Course::create() method to use configured account ID from Config class (#84)
+- Fixed hardcoded account ID in User::create() method to use configured account ID from Config class (#84)
+- Both methods now properly use Config::getAccountId() which defaults to 1 when not explicitly configured (#84)
+- Added tests to verify correct account ID usage in multi-tenant environments and default behavior (#84)
+- Fixed MigrationIssue property update methods to use direct property assignment instead of populate() (#89)
+- Improved file resource management in ContentMigration with proper try-finally blocks (#89)
+- Added constants for magic numbers in ContentMigration polling logic (#89)
+
+### Changed
+- Enhanced User relationship methods to use pagination for groups listing (#63)
+- Refactored Rubric API classes to follow SDK conventions for context handling (#80)
+  - Rubric class now uses `setCourse()` pattern like other API classes
+  - Removed context parameters from all Rubric methods
+  - Account-scoped rubric operations moved to Account class (`getRubrics()`, `createRubric()`, etc.)
+  - RubricAssessment simplified to accept rubric_association_id directly
+  - RubricAssociation no longer accepts courseId parameters
+  - All classes now follow consistent context pattern used throughout the SDK
+  - Fixed RubricAssessment::rubric() and RubricAssociation::rubric() methods to properly use setCourse() pattern
+- Updated Rubrics API classes (Rubric, RubricAssessment, RubricAssociation) to support array-based interface for consistency with the rest of the SDK (#78)
+  - `create()` and `update()` methods now accept both arrays and DTOs as input
+  - Added comprehensive tests for array input support
+- Extracted multipart building logic to dedicated method in ContentMigration class for better code organization (#89)
+- Removed deprecated static properties and methods from MigrationIssue class (#89)
+
 ## [1.0.1] - 2025-08-01
 
 ### Fixed

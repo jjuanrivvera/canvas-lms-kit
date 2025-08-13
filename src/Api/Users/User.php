@@ -6,6 +6,7 @@ use Exception;
 use CanvasLMS\Config;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Enrollments\Enrollment;
+use CanvasLMS\Api\Groups\Group;
 use CanvasLMS\Dto\Users\UpdateUserDTO;
 use CanvasLMS\Dto\Users\CreateUserDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -17,12 +18,15 @@ use CanvasLMS\Objects\TodoItem;
 use CanvasLMS\Objects\UpcomingEvent;
 use CanvasLMS\Api\Assignments\Assignment;
 use CanvasLMS\Api\Files\File;
+use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Objects\Profile;
 use CanvasLMS\Objects\Avatar;
 use CanvasLMS\Objects\CourseNickname;
 use CanvasLMS\Objects\PageView;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
+use CanvasLMS\Api\ContentMigrations\ContentMigration;
+use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 
 /**
  * User Class
@@ -31,10 +35,22 @@ use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
  * and find users from the Canvas LMS system. It utilizes Data Transfer Objects (DTOs)
  * for handling user creation and updates.
  *
+ * The User class supports Canvas's "self" pattern, allowing users to access their own
+ * data without knowing their user ID. The Canvas API documentation states: "the :user_id
+ * parameter can always be replaced with self if the requesting user is asking for his/her
+ * own information."
+ *
  * Usage Examples:
  *
  * ```php
- * // Creating a new user
+ * // Current user operations (using the self pattern)
+ * $currentUser = User::self();
+ * $profile = $currentUser->getProfile();
+ * $courses = $currentUser->courses();
+ * $todos = $currentUser->getTodoItems();
+ * $groups = $currentUser->groups();
+ *
+ * // Creating a new user (admin operation)
  * $userData = [
  *     'username' => 'john_doe',
  *     'email' => 'john.doe@example.com',
@@ -42,17 +58,17 @@ use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
  * ];
  * $user = User::create($userData);
  *
- * // Updating an existing user
+ * // Updating an existing user (admin operation)
  * $updatedData = [
  *     'email' => 'new_john.doe@example.com',
  *     // ... other updated data ...
  * ];
  * $updatedUser = User::update(123, $updatedData); // where 123 is the user ID
  *
- * // Finding a user by ID
+ * // Finding a user by ID (admin operation)
  * $user = User::find(123);
  *
- * // Fetching all users (first page only)
+ * // Fetching all users (admin operation - first page only)
  * $users = User::fetchAll();
  *
  * // Fetching users with pagination support
@@ -69,7 +85,7 @@ use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
  * $allUsers = User::fetchAllPages(['per_page' => 50]);
  * ```
  *
- * @package CanvasLMS\Api
+ * @package CanvasLMS\Api\Users
  */
 class User extends AbstractBaseApi
 {
@@ -210,6 +226,48 @@ class User extends AbstractBaseApi
     public ?bool $canUpdateName = null;
 
     /**
+     * Get an instance representing the current authenticated user.
+     *
+     * This method returns a User instance configured to use Canvas's "self" identifier,
+     * allowing access to the current user's data without knowing their user ID.
+     *
+     * Note: Only specific Canvas API endpoints support the "self" identifier:
+     * - Activity stream endpoints (getActivityStream, getActivityStreamSummary, hideStreamItem)
+     * - Todo and upcoming events (getTodoItems, getUpcomingEvents)
+     * - Profile and avatar endpoints (getProfile, getAvatarOptions)
+     * - Course nicknames (getCourseNicknames, setCourseNickname, etc.)
+     * - Groups endpoint (groups() method uses /users/self/groups)
+     *
+     * Methods that do NOT support self:
+     * - File operations (use numeric user ID)
+     * - Custom data storage
+     * - Page views
+     * - Most other endpoints
+     *
+     * @example
+     * ```php
+     * // Get current user's profile
+     * $currentUser = User::self();
+     * $profile = $currentUser->getProfile();
+     *
+     * // Get current user's todo items
+     * $todos = $currentUser->getTodoItems();
+     *
+     * // Get current user's groups
+     * $groups = $currentUser->groups();
+     * ```
+     *
+     * @return self A User instance configured for the current authenticated user
+     */
+    public static function self(): self
+    {
+        $instance = new self([]);
+        // Don't set the id property - let it remain uninitialized
+        // Methods that support 'self' will use it when id is not set
+        return $instance;
+    }
+
+    /**
      * Create a new User instance.
      * @param mixed[]|CreateUserDTO $userData
      * @return self
@@ -234,7 +292,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->post('/accounts/1/users', [
+        $response = self::$apiClient->post('/accounts/' . Config::getAccountId() . '/users', [
             'multipart' => $dto->toApiArray()
         ]);
         return new self(json_decode($response->getBody(), true));
@@ -251,7 +309,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get("/users/{$id}");
-        return new self(json_decode($response->getBody(), true));
+        return new self(json_decode($response->getBody()->getContents(), true));
     }
 
     /**
@@ -440,29 +498,15 @@ class User extends AbstractBaseApi
      */
     public function enrollments(array $params = []): array
     {
-        return $this->getEnrollmentsAsObjects($params);
-    }
-
-    // Enrollment Relationship Methods
-
-    /**
-     * Get all enrollments for this user as Enrollment objects
-     *
-     * This method fetches enrollments across all courses for the current user.
-     * Use the $params array to filter enrollments by type, state, or other Canvas API parameters.
-     *
-     * @param mixed[] $params Query parameters for filtering enrollments (e.g., ['type[]' => ['StudentEnrollment']])
-     * @return Enrollment[] Array of Enrollment objects
-     * @throws CanvasApiException If the user ID is not set or API request fails
-     */
-    public function getEnrollmentsAsObjects(array $params = []): array
-    {
         if (!$this->id) {
             throw new CanvasApiException('User ID is required to fetch enrollments');
         }
 
         return Enrollment::fetchAllByUser($this->id, $params);
     }
+
+    // Enrollment Relationship Methods
+
 
     /**
      * Get enrollments for this user in a specific course
@@ -499,7 +543,7 @@ class User extends AbstractBaseApi
     public function getActiveEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['state[]' => ['active']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -514,7 +558,7 @@ class User extends AbstractBaseApi
     public function getStudentEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['StudentEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -529,7 +573,7 @@ class User extends AbstractBaseApi
     public function getTeacherEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['TeacherEnrollment']]);
-        return $this->getEnrollmentsAsObjects($params);
+        return $this->enrollments($params);
     }
 
     /**
@@ -580,7 +624,7 @@ class User extends AbstractBaseApi
      *
      * This returns the raw enrollments array that may be embedded in the user object
      * from certain Canvas API calls. For fetching current enrollments from the API,
-     * use getEnrollmentsAsObjects() instead.
+     * use enrollments() instead.
      *
      * @return mixed[]|null Raw enrollments data array or null
      */
@@ -1088,7 +1132,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to fetch missing submissions');
         }
 
@@ -1196,7 +1240,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to set custom data');
         }
 
@@ -1231,7 +1275,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to get custom data');
         }
 
@@ -1443,7 +1487,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to split user');
         }
 
@@ -1546,7 +1590,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to get calendar events');
         }
 
@@ -1570,7 +1614,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        if (!$this->id) {
+        if (!isset($this->id)) {
             throw new CanvasApiException('User ID is required to get calendar events');
         }
 
@@ -1594,5 +1638,254 @@ class User extends AbstractBaseApi
         $dto = $data instanceof CreateCalendarEventDTO ? $data : new CreateCalendarEventDTO($data);
         $dto->contextCode = sprintf('user_%d', $this->id);
         return CalendarEvent::create($dto);
+    }
+
+    // Additional Relationship Methods
+
+
+    /**
+     * Get groups for this user
+     *
+     * Note: This method supports the 'self' identifier for the current user
+     * when called on an instance returned by User::self().
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Group[]
+     * @throws CanvasApiException
+     */
+    public function groups(array $params = []): array
+    {
+        self::checkApiClient();
+
+        if (!isset($this->id)) {
+            // Special case: Canvas supports /users/self/groups endpoint
+            $response = self::$apiClient->get('users/self/groups', ['query' => $params]);
+            $groupsData = json_decode($response->getBody(), true);
+
+            return array_map(function ($groupData) {
+                return new Group($groupData);
+            }, $groupsData);
+        }
+
+        // For regular users with IDs, use the standard method
+        return Group::fetchUserGroups($this->id, $params);
+    }
+
+
+    /**
+     * Get courses for this user
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Course[]
+     * @throws CanvasApiException
+     */
+    public function courses(array $params = []): array
+    {
+        self::checkApiClient();
+
+        if (!isset($this->id)) {
+            throw new CanvasApiException('User ID is required to get courses');
+        }
+
+        $endpoint = sprintf('users/%d/courses', $this->id);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $coursesData = json_decode($response->getBody(), true);
+
+        $courses = [];
+        foreach ($coursesData as $courseData) {
+            $courses[] = new Course($courseData);
+        }
+
+        return $courses;
+    }
+
+
+    /**
+     * Get files for this user
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return File[]
+     * @throws CanvasApiException
+     */
+    public function files(array $params = []): array
+    {
+        if (!isset($this->id)) {
+            throw new CanvasApiException('User ID is required to get files');
+        }
+
+        return File::fetchUserFiles($this->id, $params);
+    }
+
+    /**
+     * Get content migrations for this user
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<ContentMigration>
+     * @throws CanvasApiException
+     */
+    public function contentMigrations(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to fetch content migrations');
+        }
+
+        return ContentMigration::fetchByContext('users', $this->id, $params);
+    }
+
+    /**
+     * Get all feature flags for this user.
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, \CanvasLMS\Api\FeatureFlags\FeatureFlag> Array of FeatureFlag objects
+     * @throws CanvasApiException
+     */
+    public function featureFlags(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to fetch feature flags');
+        }
+
+        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::fetchByContext('users', $this->id, $params);
+    }
+
+    /**
+     * Get a specific feature flag for this user.
+     *
+     * @param string $featureName The symbolic name of the feature
+     * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
+     * @throws CanvasApiException
+     */
+    public function getFeatureFlag(string $featureName): \CanvasLMS\Api\FeatureFlags\FeatureFlag
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to get feature flag');
+        }
+
+        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::findByContext('users', $this->id, $featureName);
+    }
+
+    /**
+     * Update a feature flag for this user.
+     *
+     * @param string $featureName The symbolic name of the feature
+     * @param array<string, mixed>|\CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO $data Update data
+     * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
+     * @throws CanvasApiException
+     */
+    public function setFeatureFlag(
+        string $featureName,
+        array|\CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO $data
+    ): \CanvasLMS\Api\FeatureFlags\FeatureFlag {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to set feature flag');
+        }
+
+        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::updateByContext('users', $this->id, $featureName, $data);
+    }
+
+    /**
+     * Remove a feature flag for this user.
+     *
+     * @param string $featureName The symbolic name of the feature
+     * @return bool
+     * @throws CanvasApiException
+     */
+    public function removeFeatureFlag(string $featureName): bool
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to remove feature flag');
+        }
+
+        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::deleteByContext('users', $this->id, $featureName);
+    }
+
+    /**
+     * Get a specific content migration for this user
+     *
+     * @param int $migrationId Content migration ID
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function contentMigration(int $migrationId): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to fetch content migration');
+        }
+
+        return ContentMigration::findByContext('users', $this->id, $migrationId);
+    }
+
+    /**
+     * Create a content migration for this user
+     *
+     * @param array<string, mixed>|CreateContentMigrationDTO $data Migration data
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function createContentMigration(array|CreateContentMigrationDTO $data): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to create content migration');
+        }
+
+        return ContentMigration::createInContext('users', $this->id, $data);
+    }
+
+    /**
+     * Import content from a Common Cartridge file
+     *
+     * @param string $filePath Path to the .imscc file
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function importCommonCartridge(string $filePath, array $options = []): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to import content');
+        }
+
+        $migration = ContentMigration::createInContext('users', $this->id, array_merge($options, [
+            'migration_type' => ContentMigration::TYPE_COMMON_CARTRIDGE,
+            'pre_attachment' => [
+                'name' => basename($filePath),
+                'size' => filesize($filePath)
+            ]
+        ]));
+
+        if ($migration->isFileUploadPending()) {
+            $migration->processFileUpload($filePath);
+        }
+
+        return $migration;
+    }
+
+    /**
+     * Import content from a ZIP file
+     *
+     * @param string $filePath Path to the .zip file
+     * @param array<string, mixed> $options Additional options
+     * @return ContentMigration
+     * @throws CanvasApiException
+     */
+    public function importZipFile(string $filePath, array $options = []): ContentMigration
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('User ID is required to import content');
+        }
+
+        $migration = ContentMigration::createInContext('users', $this->id, array_merge($options, [
+            'migration_type' => ContentMigration::TYPE_ZIP_FILE,
+            'pre_attachment' => [
+                'name' => basename($filePath),
+                'size' => filesize($filePath)
+            ]
+        ]));
+
+        if ($migration->isFileUploadPending()) {
+            $migration->processFileUpload($filePath);
+        }
+
+        return $migration;
     }
 }

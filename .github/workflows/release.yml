@@ -102,13 +102,16 @@ jobs:
     
     steps:
       - name: Notify Packagist
-        if: secrets.PACKAGIST_USERNAME != '' && secrets.PACKAGIST_API_TOKEN != ''
+        env:
+          PACKAGIST_USERNAME: ${{ secrets.PACKAGIST_USERNAME }}
+          PACKAGIST_API_TOKEN: ${{ secrets.PACKAGIST_API_TOKEN }}
         run: |
-          curl -XPOST -H'content-type:application/json' \
-            'https://packagist.org/api/update-package?username=${{ secrets.PACKAGIST_USERNAME }}&apiToken=${{ secrets.PACKAGIST_API_TOKEN }}' \
-            -d'{"repository":{"url":"https://github.com/jjuanrivvera/canvas-lms-kit"}}'
-            
-      - name: Packagist update reminder
-        if: secrets.PACKAGIST_USERNAME == '' || secrets.PACKAGIST_API_TOKEN == ''
-        run: |
-          echo "::warning::Packagist webhook not configured. Please update Packagist manually or add PACKAGIST_USERNAME and PACKAGIST_API_TOKEN secrets."
+          if [[ -n "$PACKAGIST_USERNAME" && -n "$PACKAGIST_API_TOKEN" ]]; then
+            echo "Updating Packagist..."
+            curl -XPOST -H'content-type:application/json' \
+              "https://packagist.org/api/update-package?username=$PACKAGIST_USERNAME&apiToken=$PACKAGIST_API_TOKEN" \
+              -d'{"repository":{"url":"https://github.com/jjuanrivvera/canvas-lms-kit"}}'
+          else
+            echo "::warning::Packagist webhook not configured. Please update Packagist manually."
+            echo "::warning::Add PACKAGIST_USERNAME and PACKAGIST_API_TOKEN secrets in repository settings."
+          fi
