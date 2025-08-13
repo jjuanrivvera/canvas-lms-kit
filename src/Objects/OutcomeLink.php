@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Objects;
 
-use CanvasLMS\Api\Outcomes\Outcome\Outcome;
-use CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup;
+use CanvasLMS\Api\Outcomes\Outcome;
+use CanvasLMS\Api\OutcomeGroups\OutcomeGroup;
 
 /**
  * OutcomeLink represents the relationship between an outcome and a group.

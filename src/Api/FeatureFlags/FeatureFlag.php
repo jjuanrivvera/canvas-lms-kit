@@ -18,6 +18,7 @@ use CanvasLMS\Interfaces\HttpClientInterface;
  * This class does NOT extend AbstractBaseApi as feature flags don't follow standard CRUD patterns.
  * Instead, it implements custom methods specific to feature flag operations.
  *
+ * @package CanvasLMS\Api\FeatureFlags
  * @see https://canvas.instructure.com/doc/api/feature_flags.html
  */
 class FeatureFlag

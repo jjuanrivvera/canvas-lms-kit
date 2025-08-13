@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\Outcomes;
 
-use CanvasLMS\Api\Outcomes\OutcomeResult\OutcomeResult;
+use CanvasLMS\Api\OutcomeResults\OutcomeResult;
 use CanvasLMS\Config;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;

@@ -20,6 +20,7 @@ use DateTime;
  * web conferences. Conferences can exist in both Course and Group contexts
  * and support multiple conferencing providers like BigBlueButton, Zoom, etc.
  *
+ * @package CanvasLMS\Api\Conferences
  * @see https://canvas.instructure.com/doc/api/conferences.html
  */
 class Conference extends AbstractBaseApi

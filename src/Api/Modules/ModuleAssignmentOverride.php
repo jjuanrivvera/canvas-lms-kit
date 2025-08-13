@@ -15,6 +15,8 @@ namespace CanvasLMS\Api\Modules;
  * The actual API operations are available through the Module class:
  * - Module::listOverrides()
  * - Module::bulkUpdateOverrides()
+ *
+ * @package CanvasLMS\Api\Modules
  */
 class ModuleAssignmentOverride
 {

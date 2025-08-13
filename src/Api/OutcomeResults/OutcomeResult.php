@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Api\Outcomes\OutcomeResult;
+namespace CanvasLMS\Api\OutcomeResults;
 
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -17,6 +17,7 @@ use CanvasLMS\Pagination\PaginatedResponse;
  * Note: OutcomeResult is a read-only resource that requires context (Course or User).
  * Direct fetching without context is not supported by Canvas API.
  *
+ * @package CanvasLMS\Api\OutcomeResults
  * @see https://canvas.instructure.com/doc/api/outcome_results.html
  */
 class OutcomeResult extends AbstractBaseApi

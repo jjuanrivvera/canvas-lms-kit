@@ -113,6 +113,8 @@ use CanvasLMS\Pagination\PaginatedResponse;
  * $module = Module::find(1);
  * $module->delete();
  * ```
+ *
+ * @package CanvasLMS\Api\Modules
  */
 class Module extends AbstractBaseApi
 {

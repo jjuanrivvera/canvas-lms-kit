@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Dto\Outcomes\OutcomeGroup;
 
-use CanvasLMS\Dto\Outcomes\OutcomeGroup\UpdateOutcomeGroupDTO;
+use CanvasLMS\Dto\OutcomeGroups\UpdateOutcomeGroupDTO;
 use PHPUnit\Framework\TestCase;
 
 class UpdateOutcomeGroupDTOTest extends TestCase

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\Outcomes;
 
-use CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup;
+use CanvasLMS\Api\OutcomeGroups\OutcomeGroup;
 use CanvasLMS\Config;
-use CanvasLMS\Dto\Outcomes\OutcomeGroup\CreateOutcomeGroupDTO;
-use CanvasLMS\Dto\Outcomes\OutcomeGroup\UpdateOutcomeGroupDTO;
+use CanvasLMS\Dto\OutcomeGroups\CreateOutcomeGroupDTO;
+use CanvasLMS\Dto\OutcomeGroups\UpdateOutcomeGroupDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Objects\OutcomeLink;

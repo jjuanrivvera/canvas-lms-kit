@@ -7,7 +7,7 @@ use Exception;
 class CanvasApiException extends Exception
 {
     /**
-     * @var array|mixed[]
+     * @var mixed[]
      */
     protected array $errors = [];
 

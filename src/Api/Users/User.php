@@ -85,7 +85,7 @@ use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
  * $allUsers = User::fetchAllPages(['per_page' => 50]);
  * ```
  *
- * @package CanvasLMS\Api
+ * @package CanvasLMS\Api\Users
  */
 class User extends AbstractBaseApi
 {
