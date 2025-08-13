@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Dto\Outcomes\Outcome;
+namespace CanvasLMS\Dto\Outcomes;
 
 use CanvasLMS\Dto\AbstractBaseDto;
 

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Tests\Dto\Outcomes\Outcome;
+namespace CanvasLMS\Tests\Dto\Outcomes;
 
-use CanvasLMS\Dto\Outcomes\Outcome\CreateOutcomeDTO;
+use CanvasLMS\Dto\Outcomes\CreateOutcomeDTO;
 use PHPUnit\Framework\TestCase;
 
 class CreateOutcomeDTOTest extends TestCase

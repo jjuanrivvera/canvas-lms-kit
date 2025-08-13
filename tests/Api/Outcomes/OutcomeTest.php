@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\Outcomes;
 
-use CanvasLMS\Api\Outcomes\Outcome\Outcome;
+use CanvasLMS\Api\Outcomes\Outcome;
 use CanvasLMS\Config;
-use CanvasLMS\Dto\Outcomes\Outcome\CreateOutcomeDTO;
-use CanvasLMS\Dto\Outcomes\Outcome\UpdateOutcomeDTO;
+use CanvasLMS\Dto\Outcomes\CreateOutcomeDTO;
+use CanvasLMS\Dto\Outcomes\UpdateOutcomeDTO;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
 use PHPUnit\Framework\TestCase;

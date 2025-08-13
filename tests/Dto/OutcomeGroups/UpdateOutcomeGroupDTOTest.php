@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Tests\Dto\Outcomes\OutcomeGroup;
+namespace CanvasLMS\Tests\Dto\OutcomeGroups;
 
-use CanvasLMS\Dto\Outcomes\OutcomeGroup\UpdateOutcomeGroupDTO;
+use CanvasLMS\Dto\OutcomeGroups\UpdateOutcomeGroupDTO;
 use PHPUnit\Framework\TestCase;
 
 class UpdateOutcomeGroupDTOTest extends TestCase

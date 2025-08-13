@@ -17,7 +17,11 @@ use CanvasLMS\Exceptions\MissingBaseUrlException;
 use CanvasLMS\Pagination\PaginatedResponse;
 
 /**
+ * HTTP client for Canvas LMS API communication.
  *
+ * Handles all HTTP requests to the Canvas API including authentication via Bearer tokens,
+ * response pagination, error handling, and middleware support. Implements the HttpClientInterface
+ * to provide a consistent API for making requests to Canvas LMS endpoints.
  */
 class HttpClient implements HttpClientInterface
 {

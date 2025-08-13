@@ -16,6 +16,7 @@ use CanvasLMS\Pagination\PaginationResult;
 /**
  * Section API class for managing course sections in Canvas LMS.
  *
+ * @package CanvasLMS\Api\Sections
  * @see https://canvas.instructure.com/doc/api/sections.html
  */
 class Section extends AbstractBaseApi

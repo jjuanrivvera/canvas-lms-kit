@@ -56,6 +56,8 @@ use CanvasLMS\Pagination\PaginationResult;
  *     echo $enrollment->getTypeName() . ': ' . $enrollment->getStateName();
  * }
  * ```
+ *
+ * @package CanvasLMS\Api\Enrollments
  */
 class Enrollment extends AbstractBaseApi
 {

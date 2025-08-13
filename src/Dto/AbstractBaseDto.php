@@ -7,7 +7,11 @@ use Exception;
 use DateTimeInterface;
 
 /**
+ * Abstract base class for Data Transfer Objects (DTOs).
  *
+ * Provides common functionality for all DTO classes including data population,
+ * array transformation for Canvas API multipart format, and date/time handling.
+ * DTOs are used to format and validate data before sending to the Canvas API.
  */
 abstract class AbstractBaseDto
 {

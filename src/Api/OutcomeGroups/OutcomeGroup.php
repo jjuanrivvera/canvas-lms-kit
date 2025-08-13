@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Api\Outcomes\OutcomeGroup;
+namespace CanvasLMS\Api\OutcomeGroups;
 
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Config;
-use CanvasLMS\Dto\Outcomes\Outcome\CreateOutcomeDTO;
-use CanvasLMS\Dto\Outcomes\OutcomeGroup\CreateOutcomeGroupDTO;
-use CanvasLMS\Dto\Outcomes\OutcomeGroup\UpdateOutcomeGroupDTO;
+use CanvasLMS\Dto\Outcomes\CreateOutcomeDTO;
+use CanvasLMS\Dto\OutcomeGroups\CreateOutcomeGroupDTO;
+use CanvasLMS\Dto\OutcomeGroups\UpdateOutcomeGroupDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Objects\OutcomeLink;
 use CanvasLMS\Pagination\PaginatedResponse;
@@ -19,6 +19,7 @@ use CanvasLMS\Pagination\PaginatedResponse;
  * Outcome groups organize learning outcomes in a hierarchical structure,
  * allowing for categorization and management of related outcomes.
  *
+ * @package CanvasLMS\Api\OutcomeGroups
  * @see https://canvas.instructure.com/doc/api/outcome_groups.html
  */
 class OutcomeGroup extends AbstractBaseApi

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Api\Outcomes\Outcome;
+namespace CanvasLMS\Api\Outcomes;
 
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Config;
-use CanvasLMS\Dto\Outcomes\Outcome\CreateOutcomeDTO;
-use CanvasLMS\Dto\Outcomes\Outcome\UpdateOutcomeDTO;
+use CanvasLMS\Dto\Outcomes\CreateOutcomeDTO;
+use CanvasLMS\Dto\Outcomes\UpdateOutcomeDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
 
@@ -18,6 +18,7 @@ use CanvasLMS\Pagination\PaginatedResponse;
  * across assignments and courses. This class follows the Account-as-Default convention
  * for multi-context resources.
  *
+ * @package CanvasLMS\Api\Outcomes
  * @see https://canvas.instructure.com/doc/api/outcomes.html
  */
 class Outcome extends AbstractBaseApi

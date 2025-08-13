@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Api\Outcomes\OutcomeImport;
+namespace CanvasLMS\Api\OutcomeImports;
 
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Config;
@@ -14,6 +14,7 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * Outcome imports allow bulk importing of learning outcomes from CSV files
  * or other supported formats into Canvas LMS.
  *
+ * @package CanvasLMS\Api\OutcomeImports
  * @see https://canvas.instructure.com/doc/api/outcome_imports.html
  */
 class OutcomeImport extends AbstractBaseApi

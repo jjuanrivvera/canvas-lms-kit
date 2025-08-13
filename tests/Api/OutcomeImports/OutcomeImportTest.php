@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Tests\Api\Outcomes;
+namespace CanvasLMS\Tests\Api\OutcomeImports;
 
-use CanvasLMS\Api\Outcomes\OutcomeImport\OutcomeImport;
+use CanvasLMS\Api\OutcomeImports\OutcomeImport;
 use CanvasLMS\Config;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use PHPUnit\Framework\TestCase;
