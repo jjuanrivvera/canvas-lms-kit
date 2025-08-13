@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Tests\Dto\Outcomes\OutcomeGroup;
+namespace CanvasLMS\Tests\Dto\OutcomeGroups;
 
 use CanvasLMS\Dto\OutcomeGroups\CreateOutcomeGroupDTO;
 use PHPUnit\Framework\TestCase;

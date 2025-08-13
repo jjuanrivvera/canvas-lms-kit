@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Tests\Api\Outcomes;
+namespace CanvasLMS\Tests\Api\OutcomeResults;
 
 use CanvasLMS\Api\OutcomeResults\OutcomeResult;
 use CanvasLMS\Config;

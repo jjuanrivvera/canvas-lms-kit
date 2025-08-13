@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CanvasLMS\Tests\Api\Outcomes;
+namespace CanvasLMS\Tests\Api\OutcomeGroups;
 
 use CanvasLMS\Api\OutcomeGroups\OutcomeGroup;
 use CanvasLMS\Config;
