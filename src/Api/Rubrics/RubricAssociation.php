@@ -256,10 +256,10 @@ class RubricAssociation extends AbstractBaseApi
     /**
      * Delete a rubric association
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot delete rubric association without ID");
@@ -273,7 +273,7 @@ class RubricAssociation extends AbstractBaseApi
         $response = self::$apiClient->delete($endpoint);
 
         json_decode($response->getBody(), true);
-        return true;
+        return $this;
     }
 
     /**

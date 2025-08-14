@@ -298,7 +298,7 @@ class RubricAssociationTest extends TestCase
         $association = new RubricAssociation(['id' => 3]);
         $result = $association->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(RubricAssociation::class, $result);
     }
 
     /**

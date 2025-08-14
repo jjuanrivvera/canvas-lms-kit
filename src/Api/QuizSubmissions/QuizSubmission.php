@@ -864,10 +864,10 @@ class QuizSubmission extends AbstractBaseApi
     /**
      * Complete a quiz submission
      *
-     * @return bool True if completed successfully, false on API error
+     * @return self
      * @throws CanvasApiException If no ID set
      */
-    public function complete(): bool
+    public function complete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Quiz submission ID is required for completion');
@@ -875,52 +875,48 @@ class QuizSubmission extends AbstractBaseApi
 
         self::checkContext();
 
-        try {
-            $requestData = [];
-            if ($this->validationToken) {
-                $requestData[] = [
-                    'name' => 'validation_token',
-                    'contents' => $this->validationToken
-                ];
-            }
-            if ($this->attempt) {
-                $requestData[] = [
-                    'name' => 'attempt',
-                    'contents' => (string)$this->attempt
-                ];
-            }
-
-            self::checkApiClient();
-
-            $endpoint = sprintf(
-                'courses/%d/quizzes/%d/submissions/%d/complete',
-                self::$course->getId(),
-                self::$quiz->getId(),
-                $this->id
-            );
-            $response = self::$apiClient->post($endpoint, ['multipart' => $requestData]);
-            $responseData = json_decode($response->getBody()->getContents(), true);
-
-            $submissionData = $responseData['quiz_submissions'][0] ?? $responseData;
-
-            // Update current instance with response data
-            $this->workflowState = $submissionData['workflow_state'] ?? $this->workflowState;
-            $this->finishedAt = $submissionData['finished_at'] ?? $this->finishedAt;
-            $this->score = $submissionData['score'] ?? $this->score;
-
-            return true;
-        } catch (CanvasApiException) {
-            return false;
+        $requestData = [];
+        if ($this->validationToken) {
+            $requestData[] = [
+                'name' => 'validation_token',
+                'contents' => $this->validationToken
+            ];
         }
+        if ($this->attempt) {
+            $requestData[] = [
+                'name' => 'attempt',
+                'contents' => (string)$this->attempt
+            ];
+        }
+
+        self::checkApiClient();
+
+        $endpoint = sprintf(
+            'courses/%d/quizzes/%d/submissions/%d/complete',
+            self::$course->getId(),
+            self::$quiz->getId(),
+            $this->id
+        );
+        $response = self::$apiClient->post($endpoint, ['multipart' => $requestData]);
+        $responseData = json_decode($response->getBody()->getContents(), true);
+
+        $submissionData = $responseData['quiz_submissions'][0] ?? $responseData;
+
+        // Update current instance with response data
+        $this->workflowState = $submissionData['workflow_state'] ?? $this->workflowState;
+        $this->finishedAt = $submissionData['finished_at'] ?? $this->finishedAt;
+        $this->score = $submissionData['score'] ?? $this->score;
+
+        return $this;
     }
 
     /**
      * Save the quiz submission (update if exists)
      *
-     * @return bool True if saved successfully, false on API error
+     * @return self
      * @throws CanvasApiException If no ID set or validation fails
      */
-    public function save(): bool
+    public function save(): self
     {
         if (!$this->id) {
             throw new CanvasApiException(
@@ -928,21 +924,17 @@ class QuizSubmission extends AbstractBaseApi
             );
         }
 
-        try {
-            $updateData = $this->toArray();
-            $updatedSubmission = self::update($this->id, $updateData);
+        $updateData = $this->toArray();
+        $updatedSubmission = self::update($this->id, $updateData);
 
-            // Update current instance properties
-            foreach (get_object_vars($updatedSubmission) as $property => $value) {
-                if (property_exists($this, $property)) {
-                    $this->$property = $value;
-                }
+        // Update current instance properties
+        foreach (get_object_vars($updatedSubmission) as $property => $value) {
+            if (property_exists($this, $property)) {
+                $this->$property = $value;
             }
-
-            return true;
-        } catch (CanvasApiException) {
-            return false;
         }
+
+        return $this;
     }
 
     /**

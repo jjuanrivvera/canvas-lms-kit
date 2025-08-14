@@ -449,10 +449,10 @@ class CalendarEvent extends AbstractBaseApi
      * Delete a calendar event
      *
      * @param array<string, mixed> $params Parameters like 'cancel_reason', 'which'
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(array $params = []): bool
+    public function delete(array $params = []): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot delete calendar event without ID");
@@ -467,7 +467,7 @@ class CalendarEvent extends AbstractBaseApi
         }
 
         self::$apiClient->delete($endpoint, $queryParams);
-        return true;
+        return $this;
     }
 
     /**
@@ -745,10 +745,10 @@ class CalendarEvent extends AbstractBaseApi
      *
      * @param string $which Which events to delete: 'one', 'all', 'following'
      * @param string|null $cancelReason Optional reason for cancellation
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function deleteSeries(string $which = 'one', ?string $cancelReason = null): bool
+    public function deleteSeries(string $which = 'one', ?string $cancelReason = null): self
     {
         if (!in_array($which, ['one', 'all', 'following'])) {
             throw new CanvasApiException("Invalid 'which' parameter. Must be 'one', 'all', or 'following'");

@@ -464,25 +464,19 @@ class Submission extends AbstractBaseApi
      * @throws CanvasApiException
      * @throws Exception
      */
-    public static function markAsRead(int $userId): bool
+    public static function markAsRead(int $userId): self
     {
         self::checkApiClient();
         self::checkContexts();
 
-        try {
-            $endpoint = sprintf(
-                'courses/%d/assignments/%d/submissions/%d/read',
-                self::$course->id,
-                self::$assignment->id,
-                $userId
-            );
-            self::$apiClient->put($endpoint);
-        } catch (CanvasApiException $exception) {
-            error_log('Submission markAsRead failed: ' . $exception->getMessage());
-            return false;
-        }
-
-        return true;
+        $endpoint = sprintf(
+            'courses/%d/assignments/%d/submissions/%d/read',
+            self::$course->id,
+            self::$assignment->id,
+            $userId
+        );
+        self::$apiClient->put($endpoint);
+        return new self([]);
     }
 
     /**
@@ -490,25 +484,19 @@ class Submission extends AbstractBaseApi
      * @throws CanvasApiException
      * @throws Exception
      */
-    public static function markAsUnread(int $userId): bool
+    public static function markAsUnread(int $userId): self
     {
         self::checkApiClient();
         self::checkContexts();
 
-        try {
-            $endpoint = sprintf(
-                'courses/%d/assignments/%d/submissions/%d/read',
-                self::$course->id,
-                self::$assignment->id,
-                $userId
-            );
-            self::$apiClient->delete($endpoint);
-        } catch (CanvasApiException $exception) {
-            error_log('Submission markAsUnread failed: ' . $exception->getMessage());
-            return false;
-        }
-
-        return true;
+        $endpoint = sprintf(
+            'courses/%d/assignments/%d/submissions/%d/read',
+            self::$course->id,
+            self::$assignment->id,
+            $userId
+        );
+        self::$apiClient->delete($endpoint);
+        return new self([]);
     }
 
     /**
@@ -518,7 +506,7 @@ class Submission extends AbstractBaseApi
      * @throws Exception
      * @throws InvalidArgumentException
      */
-    public static function updateGrades(array $gradeData): bool
+    public static function updateGrades(array $gradeData): self
     {
         self::checkApiClient();
         self::checkContexts();
@@ -548,33 +536,27 @@ class Submission extends AbstractBaseApi
             }
         }
 
-        try {
-            $endpoint = sprintf(
-                'courses/%d/assignments/%d/submissions/update_grades',
-                self::$course->id,
-                self::$assignment->id
-            );
+        $endpoint = sprintf(
+            'courses/%d/assignments/%d/submissions/update_grades',
+            self::$course->id,
+            self::$assignment->id
+        );
 
-            self::$apiClient->request('PUT', $endpoint, [
-                'json' => $gradeData
-            ]);
-        } catch (CanvasApiException $exception) {
-            error_log('Submission updateGrades failed: ' . $exception->getMessage());
-            return false;
-        }
-
-        return true;
+        self::$apiClient->request('PUT', $endpoint, [
+            'json' => $gradeData
+        ]);
+        return new self([]);
     }
 
     /**
      * Save the submission (update only - submissions are created via static create method)
+     * @return self
      * @throws CanvasApiException
-     * @throws Exception
      */
-    public function save(): bool
+    public function save(): self
     {
         if (!isset($this->userId)) {
-            throw new Exception('Cannot save submission without user ID');
+            throw new CanvasApiException('Cannot save submission without user ID');
         }
 
         self::checkApiClient();
@@ -590,26 +572,21 @@ class Submission extends AbstractBaseApi
             $this->userId
         );
 
-        try {
-            $response = self::$apiClient->request('PUT', $endpoint, [
-                'multipart' => $dto->toApiArray()
-            ]);
+        $response = self::$apiClient->request('PUT', $endpoint, [
+            'multipart' => $dto->toApiArray()
+        ]);
 
-            $submissionData = json_decode($response->getBody()->getContents(), true);
+        $submissionData = json_decode($response->getBody()->getContents(), true);
 
-            // Update the current instance with the response data
-            foreach ($submissionData as $key => $value) {
-                $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
-                if (property_exists($this, $camelKey) && !is_null($value)) {
-                    $this->{$camelKey} = $value;
-                }
+        // Update the current instance with the response data
+        foreach ($submissionData as $key => $value) {
+            $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+            if (property_exists($this, $camelKey) && !is_null($value)) {
+                $this->{$camelKey} = $value;
             }
-        } catch (CanvasApiException $exception) {
-            error_log('Submission save failed: ' . $exception->getMessage());
-            return false;
         }
 
-        return true;
+        return $this;
     }
 
     // Getter and setter methods for all properties

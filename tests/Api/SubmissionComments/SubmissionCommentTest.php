@@ -238,7 +238,7 @@ class SubmissionCommentTest extends TestCase
 
         $result = SubmissionComment::delete($commentId);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(SubmissionComment::class, $result);
     }
 
     public function testDeleteHandlesException(): void
@@ -250,9 +250,9 @@ class SubmissionCommentTest extends TestCase
             ->with('courses/123/assignments/456/submissions/789/comments/37')
             ->willThrowException(new CanvasApiException('Delete failed'));
 
-        $result = SubmissionComment::delete($commentId);
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Delete failed');
+        SubmissionComment::delete($commentId);
     }
 
     public function testUploadFile(): void
@@ -334,7 +334,7 @@ class SubmissionCommentTest extends TestCase
 
         $result = $comment->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(SubmissionComment::class, $result);
         $this->assertEquals('Modified comment text', $comment->getComment());
         $this->assertEquals('2024-01-15T13:15:00Z', $comment->getEditedAt());
     }
@@ -361,8 +361,8 @@ class SubmissionCommentTest extends TestCase
             ->method('request')
             ->willThrowException(new CanvasApiException('Save failed'));
 
-        $result = $comment->save();
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Save failed');
+        $comment->save();
     }
 }

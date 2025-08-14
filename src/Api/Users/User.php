@@ -406,10 +406,10 @@ class User extends AbstractBaseApi
 
     /**
      * Save the user to the Canvas LMS.
-     * @return bool
-     * @throws Exception
+     * @return self
+     * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
         self::checkApiClient();
 
@@ -421,18 +421,14 @@ class User extends AbstractBaseApi
         $path = $this->id ? "/users/{$this->id}" : "/accounts/{$accountId}/users";
         $method = $this->id ? 'PUT' : 'POST';
 
-        try {
-            $response = self::$apiClient->request($method, $path, [
-                'multipart' => $dto->toApiArray()
-            ]);
+        $response = self::$apiClient->request($method, $path, [
+            'multipart' => $dto->toApiArray()
+        ]);
 
-            $updatedUserData = json_decode($response->getBody(), true);
-            $this->populate($updatedUserData);
-        } catch (CanvasApiException $e) {
-            return false;
-        }
+        $updatedUserData = json_decode($response->getBody(), true);
+        $this->populate($updatedUserData);
 
-        return true;
+        return $this;
     }
 
     /**

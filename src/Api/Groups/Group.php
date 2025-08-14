@@ -327,45 +327,39 @@ class Group extends AbstractBaseApi
     /**
      * Save the group (create or update)
      *
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
-        try {
-            if ($this->id) {
-                $dto = new UpdateGroupDTO($this->toDtoArray());
-                $updated = self::update($this->id, $dto);
-                $this->populate(get_object_vars($updated));
-            } else {
-                $dto = new CreateGroupDTO($this->toDtoArray());
-                $created = self::create($dto);
-                $this->populate(get_object_vars($created));
-            }
-            return true;
-        } catch (\Exception $e) {
-            return false;
+        if ($this->id) {
+            $dto = new UpdateGroupDTO($this->toDtoArray());
+            $updated = self::update($this->id, $dto);
+            $this->populate(get_object_vars($updated));
+        } else {
+            $dto = new CreateGroupDTO($this->toDtoArray());
+            $created = self::create($dto);
+            $this->populate(get_object_vars($created));
         }
+        return $this;
     }
 
     /**
      * Delete the group
      *
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
-            return false;
+            throw new CanvasApiException('Group ID is required for deletion');
         }
 
-        try {
-            self::checkApiClient();
-            $endpoint = sprintf('groups/%d', $this->id);
-            self::$apiClient->delete($endpoint);
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
+        self::checkApiClient();
+        $endpoint = sprintf('groups/%d', $this->id);
+        self::$apiClient->delete($endpoint);
+        return $this;
     }
 
     /**
@@ -476,10 +470,10 @@ class Group extends AbstractBaseApi
      * Invite users to this group
      *
      * @param array<string> $emails Email addresses to invite
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function invite(array $emails): bool
+    public function invite(array $emails): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Group ID is required to invite users');
@@ -494,17 +488,13 @@ class Group extends AbstractBaseApi
 
         self::checkApiClient();
 
-        try {
-            $endpoint = sprintf('groups/%d/invite', $this->id);
-            $data = [];
-            foreach ($emails as $email) {
-                $data[] = ['name' => 'invitees[]', 'contents' => $email];
-            }
-            self::$apiClient->post($endpoint, ['multipart' => $data]);
-            return true;
-        } catch (\Exception $e) {
-            return false;
+        $endpoint = sprintf('groups/%d/invite', $this->id);
+        $data = [];
+        foreach ($emails as $email) {
+            $data[] = ['name' => 'invitees[]', 'contents' => $email];
         }
+        self::$apiClient->post($endpoint, ['multipart' => $data]);
+        return $this;
     }
 
     /**
@@ -516,36 +506,33 @@ class Group extends AbstractBaseApi
      * memberships once and managing them locally.
      *
      * @param int $userId User ID to remove
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function removeUser(int $userId): bool
+    public function removeUser(int $userId): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Group ID is required to remove user from group');
         }
 
-        try {
-            // Find the user's membership
-            $memberships = $this->memberships(['filter_states[]' => 'accepted']);
-            $membershipToDelete = null;
+        // Find the user's membership
+        $memberships = $this->memberships(['filter_states[]' => 'accepted']);
+        $membershipToDelete = null;
 
-            foreach ($memberships as $membership) {
-                if ($membership->userId == $userId) {
-                    $membershipToDelete = $membership;
-                    break;
-                }
+        foreach ($memberships as $membership) {
+            if ($membership->userId == $userId) {
+                $membershipToDelete = $membership;
+                break;
             }
-
-            if (!$membershipToDelete) {
-                return false;
-            }
-
-            // Delete the membership
-            return $membershipToDelete->delete();
-        } catch (\Exception $e) {
-            return false;
         }
+
+        if (!$membershipToDelete) {
+            throw new CanvasApiException('User not found in group');
+        }
+
+        // Delete the membership
+        $membershipToDelete->delete();
+        return $this;
     }
 
     /**

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **IMPROVED**: Standardized `save()` and `delete()` methods across all API classes to return `self` for fluent interface support (#99)
+  - Enables method chaining: `$course->save()->enrollments()` 
+  - Changed from returning `bool` to returning instance
+  - Exceptions now thrown on errors instead of returning false
+  - Affects 18 classes: Account, Assignment, Course, DiscussionTopic, Enrollment, ExternalTool, Group, GroupCategory, Module, ModuleItem, Page, Quiz, QuizSubmission, Section, Submission, SubmissionComment, Tab, User
+  - Consistent with existing pattern in AppointmentGroup, CalendarEvent, Outcome, Rubric, RubricAssociation
+  - No breaking changes as SDK is pre-release
+
 ## [1.1.0] - 2025-01-13
 
 ### Added

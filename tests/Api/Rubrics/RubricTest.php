@@ -412,7 +412,7 @@ class RubricTest extends TestCase
 
         $result = $rubric->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Rubric::class, $result);
     }
 
     /**

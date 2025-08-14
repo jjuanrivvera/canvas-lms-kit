@@ -481,7 +481,7 @@ class DiscussionTopicTest extends TestCase
 
         $result = $discussionTopic->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(DiscussionTopic::class, $result);
         $this->assertEquals(1, $discussionTopic->getId());
         $this->assertEquals('New Discussion Topic', $discussionTopic->getTitle());
     }
@@ -526,7 +526,7 @@ class DiscussionTopicTest extends TestCase
         $discussionTopic = new DiscussionTopic(['id' => 1]);
         $result = $discussionTopic->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(DiscussionTopic::class, $result);
     }
 
     public function testDeleteThrowsExceptionWhenIdIsMissing(): void

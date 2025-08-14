@@ -111,7 +111,11 @@ $course->update([
     'name' => 'Advanced PHP Programming'
 ]);
 
-// Delete a course
+// Save changes with fluent interface support
+$course->name = 'Updated Course Name';
+$course->save()->enrollments(); // Save and immediately get enrollments
+
+// Delete a course (also returns self for chaining)
 $course->delete();
 ```
 
@@ -138,6 +142,42 @@ $submission->grade([
 ]);
 ```
 
+### Working with Modules and Module Items
+
+```php
+use CanvasLMS\Api\Modules\Module;
+use CanvasLMS\Api\Modules\ModuleItem;
+
+// Get course and set context
+$course = Course::find(123);
+Module::setCourse($course);
+
+// Create a module
+$module = Module::create([
+    'name' => 'Week 1: Introduction',
+    'position' => 1,
+    'published' => true
+]);
+
+// Add items to the module (requires both course and module context)
+ModuleItem::setCourse($course);
+ModuleItem::setModule($module);
+
+// Add an assignment to the module
+$item = ModuleItem::create([
+    'title' => 'Week 1 Assignment',
+    'type' => 'Assignment',
+    'content_id' => $assignment->id,
+    'position' => 1,
+    'completion_requirement' => [
+        'type' => 'must_submit'
+    ]
+]);
+
+// Or use the course instance method (recommended)
+$modules = $course->modules();
+```
+
 ### Working with Current User
 
 ```php
@@ -149,7 +189,7 @@ $currentUser = User::self();
 // Canvas supports 'self' for these endpoints:
 $profile = $currentUser->getProfile();
 $activityStream = $currentUser->getActivityStream();
-$todoItems = $currentUser->getTodo();
+// Note: getTodo() method coming soon in next release
 $groups = $currentUser->groups();
 
 // Other methods require explicit user ID
@@ -262,11 +302,46 @@ $groupFiles = File::fetchByContext('groups', 789);
 - **Groups** (Account/Course/User)
 - **Content Migrations** (Account/Course/Group/User)
 
+### Working with Course-Scoped Resources
+
+Some Canvas resources are strictly course-scoped and require setting the course context before use:
+
+```php
+use CanvasLMS\Api\Pages\Page;
+use CanvasLMS\Api\Quizzes\Quiz;
+use CanvasLMS\Api\Modules\Module;
+use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
+use CanvasLMS\Api\Courses\Course;
+
+// Get your course
+$course = Course::find(123);
+
+// Option 1: Set context for each API (required for direct API calls)
+Page::setCourse($course);
+Quiz::setCourse($course);
+Module::setCourse($course);
+DiscussionTopic::setCourse($course);
+
+// Now you can use the APIs directly
+$pages = Page::fetchAll();
+$quizzes = Quiz::fetchAll();
+$modules = Module::fetchAll();
+$discussions = DiscussionTopic::fetchAll();
+
+// Option 2: Use course instance methods (recommended - no context setup needed)
+$pages = $course->pages();
+$quizzes = $course->quizzes();
+$modules = $course->modules();
+$discussions = $course->discussionTopics();
+```
+
+**Important:** These APIs will throw an exception if you try to use them without setting the course context first.
+
 ### Learning Outcomes
 
 ```php
-use CanvasLMS\Api\Outcomes\Outcome\Outcome;
-use CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup;
+use CanvasLMS\Api\Outcomes\Outcome;
+use CanvasLMS\Api\OutcomeGroups\OutcomeGroup;
 
 // Create an outcome group
 $group = OutcomeGroup::create([
@@ -450,6 +525,30 @@ foreach ($paginator as $page) {
     foreach ($page as $course) {
         // Process each course
     }
+}
+```
+
+### Fluent Interface & Method Chaining
+
+All `save()` and `delete()` methods return the instance, enabling method chaining:
+
+```php
+// Save and continue working with the object
+$course->name = 'New Name';
+$enrollments = $course->save()->enrollments();
+
+// Chain multiple operations
+$assignment = new Assignment();
+$assignment->name = 'Final Project';
+$assignment->points_possible = 100;
+$submissions = $assignment->save()->getSubmissions();
+
+// Error handling with fluent interface
+try {
+    $user->email = 'new@example.com';
+    $user->save()->enrollments(); // Save and get enrollments
+} catch (CanvasApiException $e) {
+    // Handle error - no more silent failures!
 }
 ```
 

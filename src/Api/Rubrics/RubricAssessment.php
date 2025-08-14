@@ -312,10 +312,10 @@ class RubricAssessment extends AbstractBaseApi
     /**
      * Delete a rubric assessment
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot delete rubric assessment without ID");
@@ -332,7 +332,7 @@ class RubricAssessment extends AbstractBaseApi
 
         $response = self::$apiClient->delete($endpoint);
         json_decode($response->getBody(), true);
-        return true;
+        return $this;
     }
 
     /**

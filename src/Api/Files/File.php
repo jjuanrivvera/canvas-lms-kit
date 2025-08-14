@@ -564,18 +564,13 @@ class File extends AbstractBaseApi
 
     /**
      * Delete the file
-     * @return bool
+     * @return self
      */
-    public function delete(): bool
+    public function delete(): self
     {
         self::checkApiClient();
-
-        try {
-            self::$apiClient->delete("/files/{$this->id}");
-            return true;
-        } catch (CanvasApiException $e) {
-            return false;
-        }
+        self::$apiClient->delete("/files/{$this->id}");
+        return $this;
     }
 
     /**

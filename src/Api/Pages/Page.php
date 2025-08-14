@@ -933,10 +933,10 @@ class Page extends AbstractBaseApi
     /**
      * Save the current page (create or update)
      *
-     * @return bool True if save was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
         // Check for required fields before trying to save
         if (!$this->url && empty($this->title)) {
@@ -953,53 +953,45 @@ class Page extends AbstractBaseApi
             }
         }
 
-        try {
-            if ($this->url) {
-                // Update existing page
-                $updateData = $this->toDtoArray();
-                if (empty($updateData)) {
-                    return true; // Nothing to update
-                }
-
-                $updatedPage = self::update($this->url, $updateData);
-                $this->populate($updatedPage->toArray());
-            } else {
-                // Create new page
-                $createData = $this->toDtoArray();
-
-                $newPage = self::create($createData);
-                $this->populate($newPage->toArray());
+        if ($this->url) {
+            // Update existing page
+            $updateData = $this->toDtoArray();
+            if (empty($updateData)) {
+                return $this; // Nothing to update
             }
 
-            return true;
-        } catch (CanvasApiException) {
-            return false;
+            $updatedPage = self::update($this->url, $updateData);
+            $this->populate($updatedPage->toArray());
+        } else {
+            // Create new page
+            $createData = $this->toDtoArray();
+
+            $newPage = self::create($createData);
+            $this->populate($newPage->toArray());
         }
+
+        return $this;
     }
 
     /**
      * Delete the page
      *
-     * @return bool True if deletion was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->url) {
             throw new CanvasApiException('Page URL is required for deletion');
         }
 
-        try {
-            self::checkCourse();
-            self::checkApiClient();
+        self::checkCourse();
+        self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, urlencode($this->url));
-            self::$apiClient->delete($endpoint);
+        $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, urlencode($this->url));
+        self::$apiClient->delete($endpoint);
 
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        return $this;
     }
 
     /**
@@ -1032,87 +1024,71 @@ class Page extends AbstractBaseApi
      * Set a page as the course front page
      *
      * @param string $pageUrl Page URL slug to set as front page
-     * @return bool True if successful
+     * @return self
      * @throws CanvasApiException
      */
-    public static function setAsFrontPage(string $pageUrl): bool
+    public static function setAsFrontPage(string $pageUrl): self
     {
         self::checkCourse();
         self::checkApiClient();
 
-        try {
-            $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, rawurlencode($pageUrl));
-            $data = ['wiki_page' => ['front_page' => true]];
-            self::$apiClient->put($endpoint, ['multipart' => $data]);
-
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, rawurlencode($pageUrl));
+        $data = ['wiki_page' => ['front_page' => true]];
+        self::$apiClient->put($endpoint, ['multipart' => $data]);
+        return new self([]);
     }
 
     /**
      * Make this page the course front page
      *
-     * @return bool True if successful
+     * @return self
      * @throws CanvasApiException
      */
-    public function makeFrontPage(): bool
+    public function makeFrontPage(): self
     {
         if (!$this->url) {
             throw new CanvasApiException('Page URL is required');
         }
 
-        $result = self::setAsFrontPage($this->url);
-        if ($result) {
-            $this->frontPage = true;
-        }
-
-        return $result;
+        self::setAsFrontPage($this->url);
+        $this->frontPage = true;
+        return $this;
     }
 
     /**
      * Publish the page
      *
-     * @return bool True if successful
+     * @return self
      * @throws CanvasApiException
      */
-    public function publish(): bool
+    public function publish(): self
     {
         if (!$this->url) {
             throw new CanvasApiException('Page URL is required');
         }
 
-        try {
-            $updatedPage = self::update($this->url, ['published' => true]);
-            $this->published = $updatedPage->published;
-            $this->workflowState = $updatedPage->workflowState;
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        $updatedPage = self::update($this->url, ['published' => true]);
+        $this->published = $updatedPage->published;
+        $this->workflowState = $updatedPage->workflowState;
+        return $this;
     }
 
     /**
      * Unpublish the page
      *
-     * @return bool True if successful
+     * @return self
      * @throws CanvasApiException
      */
-    public function unpublish(): bool
+    public function unpublish(): self
     {
         if (!$this->url) {
             throw new CanvasApiException('Page URL is required');
         }
 
-        try {
-            $updatedPage = self::update($this->url, ['published' => false]);
-            $this->published = $updatedPage->published;
-            $this->workflowState = $updatedPage->workflowState;
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        $updatedPage = self::update($this->url, ['published' => false]);
+        $this->published = $updatedPage->published;
+        $this->workflowState = $updatedPage->workflowState;
+        return $this;
     }
 
     /**
@@ -1175,22 +1151,18 @@ class Page extends AbstractBaseApi
      * Update the URL slug for this page
      *
      * @param string $newSlug New URL slug
-     * @return bool True if successful
+     * @return self
      * @throws CanvasApiException
      */
-    public function updateUrlSlug(string $newSlug): bool
+    public function updateUrlSlug(string $newSlug): self
     {
         if (!$this->url) {
             throw new CanvasApiException('Current page URL is required');
         }
 
-        try {
-            $updatedPage = self::update($this->url, ['url' => $newSlug]);
-            $this->url = $updatedPage->url;
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        $updatedPage = self::update($this->url, ['url' => $newSlug]);
+        $this->url = $updatedPage->url;
+        return $this;
     }
 
     /**

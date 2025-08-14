@@ -1307,10 +1307,10 @@ class ExternalTool extends AbstractBaseApi
     /**
      * Save the current external tool (create or update)
      *
-     * @return bool True if save was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
         if (!$this->id && empty($this->name)) {
             throw new CanvasApiException('External tool name is required');
@@ -1350,65 +1350,61 @@ class ExternalTool extends AbstractBaseApi
             throw new CanvasApiException('Invalid or insecure icon URL. Only HTTPS URLs are allowed.');
         }
 
-        try {
-            if ($this->id) {
-                $updateData = $this->toDtoArray();
-                if (empty($updateData)) {
-                    return true;
-                }
+        if ($this->id) {
+            $updateData = $this->toDtoArray();
+            if (empty($updateData)) {
+                return $this;
+            }
 
-                if (!$this->contextType || !$this->contextId) {
-                    throw new CanvasApiException('Context information required for update');
-                }
+            if (!$this->contextType || !$this->contextId) {
+                throw new CanvasApiException('Context information required for update');
+            }
 
+            // Ensure context type is plural (e.g., 'account' -> 'accounts', 'course' -> 'courses')
+            $pluralContext = $this->contextType . 's';
+            if (substr($pluralContext, -2) === 'ss') {
+                $pluralContext = substr($pluralContext, 0, -1);
+            }
+
+            $updatedTool = self::updateInContext(
+                $pluralContext,
+                $this->contextId,
+                $this->id,
+                $updateData
+            );
+            $this->populate($updatedTool->toArray());
+        } else {
+            $createData = $this->toDtoArray();
+
+            // Create in account context by default if no context is set
+            if ($this->contextType && $this->contextId) {
                 // Ensure context type is plural (e.g., 'account' -> 'accounts', 'course' -> 'courses')
                 $pluralContext = $this->contextType . 's';
                 if (substr($pluralContext, -2) === 'ss') {
                     $pluralContext = substr($pluralContext, 0, -1);
                 }
 
-                $updatedTool = self::updateInContext(
+                $newTool = self::createInContext(
                     $pluralContext,
                     $this->contextId,
-                    $this->id,
-                    $updateData
+                    $createData
                 );
-                $this->populate($updatedTool->toArray());
             } else {
-                $createData = $this->toDtoArray();
-
-                // Create in account context by default if no context is set
-                if ($this->contextType && $this->contextId) {
-                    // Ensure context type is plural (e.g., 'account' -> 'accounts', 'course' -> 'courses')
-                    $pluralContext = $this->contextType . 's';
-                    if (substr($pluralContext, -2) === 'ss') {
-                        $pluralContext = substr($pluralContext, 0, -1);
-                    }
-
-                    $newTool = self::createInContext(
-                        $pluralContext,
-                        $this->contextId,
-                        $createData
-                    );
-                } else {
-                    $newTool = self::create($createData);
-                }
-                $this->populate($newTool->toArray());
+                $newTool = self::create($createData);
             }
-
-            return true;
-        } catch (CanvasApiException) {
-            return false;
+            $this->populate($newTool->toArray());
         }
+
+        return $this;
     }
 
     /**
      * Delete the external tool
      *
-     * @return bool True if deletion was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException('External tool ID is required for deletion');
@@ -1418,21 +1414,17 @@ class ExternalTool extends AbstractBaseApi
             throw new CanvasApiException('Context information required for deletion');
         }
 
-        try {
-            self::checkApiClient();
+        self::checkApiClient();
 
-            // Ensure context type is plural (e.g., 'account' -> 'accounts', 'course' -> 'courses')
-            $pluralContext = $this->contextType . 's';
-            if (substr($pluralContext, -2) === 'ss') {
-                $pluralContext = substr($pluralContext, 0, -1);
-            }
-            $endpoint = sprintf('%s/%d/external_tools/%d', $pluralContext, $this->contextId, $this->id);
-            self::$apiClient->delete($endpoint);
-
-            return true;
-        } catch (CanvasApiException) {
-            return false;
+        // Ensure context type is plural (e.g., 'account' -> 'accounts', 'course' -> 'courses')
+        $pluralContext = $this->contextType . 's';
+        if (substr($pluralContext, -2) === 'ss') {
+            $pluralContext = substr($pluralContext, 0, -1);
         }
+        $endpoint = sprintf('%s/%d/external_tools/%d', $pluralContext, $this->contextId, $this->id);
+        self::$apiClient->delete($endpoint);
+
+        return $this;
     }
 
     /**

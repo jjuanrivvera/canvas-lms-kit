@@ -208,7 +208,7 @@ class GroupTest extends TestCase
 
         $result = $group->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Group::class, $result);
     }
 
     public function testSave(): void
@@ -232,7 +232,7 @@ class GroupTest extends TestCase
 
         $result = $group->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Group::class, $result);
         $this->assertEquals(123, $group->id);
     }
 
@@ -407,7 +407,7 @@ class GroupTest extends TestCase
 
         $result = $group->invite(['test@example.com']);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Group::class, $result);
     }
 
     public function testInviteWithInvalidEmail(): void
@@ -451,7 +451,7 @@ class GroupTest extends TestCase
 
         $result = $group->removeUser(789);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Group::class, $result);
     }
 
     public function testFetchByContext(): void
