@@ -170,8 +170,8 @@ class QuizSubmission extends AbstractBaseApi
 
 ### Read-Only API Class Example (GET endpoints only)
 ```php
-// src/Api/OutcomeResult/OutcomeResult.php
-namespace CanvasLMS\Api\Outcomes\OutcomeResult;
+// src/Api/OutcomeResults/OutcomeResult.php
+namespace CanvasLMS\Api\OutcomeResults;
 
 class OutcomeResult  // Note: Does not extend AbstractBaseApi
 {
