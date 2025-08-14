@@ -299,10 +299,10 @@ class OutcomeGroup extends AbstractBaseApi
     /**
      * Delete an outcome group.
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id || !$this->contextType || !$this->contextId) {
             throw new CanvasApiException('Group ID and context are required to delete');
@@ -315,9 +315,9 @@ class OutcomeGroup extends AbstractBaseApi
             $this->id
         );
 
-        $response = self::$apiClient->delete($endpoint);
+        self::$apiClient->delete($endpoint);
 
-        return $response->getStatusCode() === 200 || $response->getStatusCode() === 204;
+        return $this;
     }
 
     /**

@@ -327,10 +327,10 @@ class Rubric extends AbstractBaseApi
     /**
      * Delete a rubric
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot delete rubric without ID");
@@ -345,7 +345,7 @@ class Rubric extends AbstractBaseApi
         $endpoint = sprintf('%ss/%d/rubrics/%d', $this->contextType, $this->contextId, $this->id);
         self::$apiClient->delete($endpoint);
 
-        return true;
+        return $this;
     }
 
     /**
