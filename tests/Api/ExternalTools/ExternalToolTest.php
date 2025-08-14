@@ -359,7 +359,7 @@ class ExternalToolTest extends TestCase
         
         $result = $tool->save();
         
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ExternalTool::class, $result);
         $this->assertEquals(1, $tool->getId());
     }
 
@@ -391,7 +391,7 @@ class ExternalToolTest extends TestCase
         
         $result = $tool->save();
         
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ExternalTool::class, $result);
     }
 
     public function testSaveThrowsExceptionForMissingName(): void
@@ -445,7 +445,7 @@ class ExternalToolTest extends TestCase
         
         $result = $tool->delete();
         
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ExternalTool::class, $result);
     }
 
     public function testDeleteThrowsExceptionWithoutId(): void

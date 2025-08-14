@@ -275,7 +275,7 @@ class UserTest extends TestCase
 
         $result = $this->user->save();
 
-        $this->assertTrue($result, 'The save method should return true on successful save.');
+        $this->assertInstanceOf(User::class, $result, 'The save method should return User instance on successful save.');
         $this->assertEquals('Test User', $this->user->getName(), 'The user name should be updated after saving.');
     }
 
@@ -283,7 +283,7 @@ class UserTest extends TestCase
      * Test the save user method
      * @return void
      */
-    public function testSaveUserShouldReturnFalseWhenApiThrowsException(): void
+    public function testSaveUserShouldThrowExceptionWhenApiFails(): void
     {
         $this->user->setId(1);
         $this->user->setName('Test User');
@@ -291,9 +291,11 @@ class UserTest extends TestCase
         $this->httpClientMock
             ->expects($this->once())
             ->method('request')
-            ->will($this->throwException(new CanvasApiException()));
+            ->will($this->throwException(new CanvasApiException('API Error')));
 
-        $this->assertFalse($this->user->save());
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('API Error');
+        $this->user->save();
     }
 
     // Relationship Method Tests

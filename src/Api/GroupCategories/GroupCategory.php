@@ -216,45 +216,39 @@ class GroupCategory extends AbstractBaseApi
     /**
      * Save the group category (create or update)
      *
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
-        try {
-            if ($this->id) {
-                $dto = new UpdateGroupCategoryDTO($this->toDtoArray());
-                $updated = self::update($this->id, $dto);
-                $this->populate(get_object_vars($updated));
-            } else {
-                $dto = new CreateGroupCategoryDTO($this->toDtoArray());
-                $created = self::create($dto);
-                $this->populate(get_object_vars($created));
-            }
-            return true;
-        } catch (\Exception $e) {
-            return false;
+        if ($this->id) {
+            $dto = new UpdateGroupCategoryDTO($this->toDtoArray());
+            $updated = self::update($this->id, $dto);
+            $this->populate(get_object_vars($updated));
+        } else {
+            $dto = new CreateGroupCategoryDTO($this->toDtoArray());
+            $created = self::create($dto);
+            $this->populate(get_object_vars($created));
         }
+        return $this;
     }
 
     /**
      * Delete the group category
      *
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
-            return false;
+            throw new CanvasApiException('Group category ID is required for deletion');
         }
 
-        try {
-            self::checkApiClient();
-            $endpoint = sprintf('group_categories/%d', $this->id);
-            self::$apiClient->delete($endpoint);
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
+        self::checkApiClient();
+        $endpoint = sprintf('group_categories/%d', $this->id);
+        self::$apiClient->delete($endpoint);
+        return $this;
     }
 
     /**

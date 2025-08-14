@@ -452,7 +452,7 @@ class SubmissionTest extends TestCase
 
         $result = Submission::markAsRead($userId);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Submission::class, $result);
     }
 
     public function testMarkAsUnread(): void
@@ -465,7 +465,7 @@ class SubmissionTest extends TestCase
 
         $result = Submission::markAsUnread($userId);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Submission::class, $result);
     }
 
     public function testMarkAsReadHandlesException(): void
@@ -477,9 +477,9 @@ class SubmissionTest extends TestCase
             ->with('courses/123/assignments/456/submissions/789/read')
             ->willThrowException(new CanvasApiException('API Error'));
 
-        $result = Submission::markAsRead($userId);
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('API Error');
+        Submission::markAsRead($userId);
     }
 
     public function testUpdateGrades(): void
@@ -498,7 +498,7 @@ class SubmissionTest extends TestCase
 
         $result = Submission::updateGrades($gradeData);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Submission::class, $result);
     }
 
     public function testUpdateGradesHandlesException(): void
@@ -514,9 +514,9 @@ class SubmissionTest extends TestCase
             ->with('PUT', 'courses/123/assignments/456/submissions/update_grades', ['json' => $gradeData])
             ->willThrowException(new CanvasApiException('Bulk update failed'));
 
-        $result = Submission::updateGrades($gradeData);
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Bulk update failed');
+        Submission::updateGrades($gradeData);
     }
 
     public function testSave(): void
@@ -560,7 +560,7 @@ class SubmissionTest extends TestCase
 
         $result = $submission->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Submission::class, $result);
         $this->assertEquals('graded', $submission->getWorkflowState());
     }
 
@@ -587,9 +587,9 @@ class SubmissionTest extends TestCase
             ->method('request')
             ->willThrowException(new CanvasApiException('Save failed'));
 
-        $result = $submission->save();
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Save failed');
+        $submission->save();
     }
 
     public function testFetchAll(): void

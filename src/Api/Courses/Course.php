@@ -631,10 +631,10 @@ class Course extends AbstractBaseApi
 
     /**
      * Save the course to the Canvas LMS system
-     * @return bool
-     * @throws Exception
+     * @return self
+     * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
         self::checkApiClient();
 
@@ -646,39 +646,32 @@ class Course extends AbstractBaseApi
         $path = $data['id'] ? "/courses/{$this->id}" : "/accounts/{$accountId}/courses";
         $method = $data['id'] ? 'PUT' : 'POST';
 
-        try {
-            $response = self::$apiClient->request($method, $path, [
-                'multipart' => $dto->toApiArray()
-            ]);
+        $response = self::$apiClient->request($method, $path, [
+            'multipart' => $dto->toApiArray()
+        ]);
 
-            $updatedCourseData = json_decode($response->getBody(), true);
-            $this->populate($updatedCourseData);
-        } catch (CanvasApiException) {
-            return false;
-        }
+        $updatedCourseData = json_decode($response->getBody(), true);
+        $this->populate($updatedCourseData);
 
-        return true;
+        return $this;
     }
 
     /**
      * Delete the course from the Canvas LMS system
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         self::checkApiClient();
 
-        try {
-            self::$apiClient->delete("/courses/{$this->id}", [
-                "query" => [
-                    "event" => "delete"
-                ]
-            ]);
-        } catch (CanvasApiException) {
-            return false;
-        }
+        self::$apiClient->delete("/courses/{$this->id}", [
+            "query" => [
+                "event" => "delete"
+            ]
+        ]);
 
-        return true;
+        return $this;
     }
 
     /**
@@ -777,23 +770,20 @@ class Course extends AbstractBaseApi
 
     /**
      * Conclude the course in the Canvas LMS system
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function conclude(): bool
+    public function conclude(): self
     {
         self::checkApiClient();
 
-        try {
-            self::$apiClient->delete("/courses/{$this->id}", [
-                "query" => [
-                    "event" => "conclude"
-                ]
-            ]);
-        } catch (CanvasApiException) {
-            return false;
-        }
+        self::$apiClient->delete("/courses/{$this->id}", [
+            "query" => [
+                "event" => "conclude"
+            ]
+        ]);
 
-        return true;
+        return $this;
     }
 
     /**

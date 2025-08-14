@@ -486,7 +486,7 @@ class AssignmentTest extends TestCase
 
         $result = $assignment->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Assignment::class, $result);
         $this->assertEquals(1, $assignment->getId());
         $this->assertEquals('Test Assignment', $assignment->getName());
         $this->assertEquals(100.0, $assignment->getPointsPossible());
@@ -530,7 +530,7 @@ class AssignmentTest extends TestCase
 
         $result = $assignment->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Assignment::class, $result);
         $this->assertEquals('Updated Assignment', $assignment->getName());
         $this->assertEquals(125.0, $assignment->getPointsPossible());
     }
@@ -551,7 +551,7 @@ class AssignmentTest extends TestCase
         $assignment = new Assignment(['id' => 1]);
         $result = $assignment->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Assignment::class, $result);
     }
 
     public function testSaveReturnsFalseOnException(): void
@@ -563,9 +563,10 @@ class AssignmentTest extends TestCase
             ->method('post')
             ->willThrowException(new CanvasApiException('API Error'));
 
-        $result = $assignment->save();
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('API Error');
 
-        $this->assertFalse($result);
+        $assignment->save();
     }
 
     public function testDelete(): void
@@ -578,7 +579,7 @@ class AssignmentTest extends TestCase
 
         $result = $assignment->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Assignment::class, $result);
     }
 
     public function testDeleteWithoutIdThrowsException(): void
@@ -598,9 +599,10 @@ class AssignmentTest extends TestCase
             ->method('delete')
             ->willThrowException(new CanvasApiException('API Error'));
 
-        $result = $assignment->delete();
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('API Error');
 
-        $this->assertFalse($result);
+        $assignment->delete();
     }
 
     public function testDuplicate(): void

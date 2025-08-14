@@ -212,7 +212,7 @@ class ExternalToolAccountContextTest extends TestCase
             ->willReturn($mockResponse);
 
         $result = $tool->delete();
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ExternalTool::class, $result);
     }
 
     public function testDeleteThrowsExceptionWithoutContext(): void
@@ -252,7 +252,7 @@ class ExternalToolAccountContextTest extends TestCase
 
         $result = $tool->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ExternalTool::class, $result);
         $this->assertEquals(60, $tool->id);
     }
 
@@ -281,7 +281,7 @@ class ExternalToolAccountContextTest extends TestCase
 
         $result = $tool->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ExternalTool::class, $result);
         $this->assertEquals(70, $tool->id);
     }
 

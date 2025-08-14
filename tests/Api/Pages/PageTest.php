@@ -594,7 +594,7 @@ class PageTest extends TestCase
 
         $result = $page->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Page::class, $result);
         $this->assertEquals('new-page', $page->getUrl());
     }
 
@@ -627,7 +627,7 @@ class PageTest extends TestCase
 
         $result = $page->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Page::class, $result);
         $this->assertEquals('Updated Title', $page->getTitle());
     }
 
@@ -664,7 +664,7 @@ class PageTest extends TestCase
 
         $result = $page->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Page::class, $result);
     }
 
     public function testDeleteThrowsExceptionForMissingUrl(): void
@@ -733,7 +733,7 @@ class PageTest extends TestCase
 
         $result = Page::setAsFrontPage('test-page');
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Page::class, $result);
     }
 
     public function testMakeFrontPage(): void
@@ -749,7 +749,7 @@ class PageTest extends TestCase
 
         $result = $page->makeFrontPage();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Page::class, $result);
         $this->assertTrue($page->getFrontPage());
     }
 
@@ -790,7 +790,7 @@ class PageTest extends TestCase
 
         $result = $page->publish();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Page::class, $result);
         $this->assertTrue($page->getPublished());
         $this->assertEquals('active', $page->getWorkflowState());
     }
@@ -823,7 +823,7 @@ class PageTest extends TestCase
 
         $result = $page->unpublish();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Page::class, $result);
         $this->assertFalse($page->getPublished());
         $this->assertEquals('unpublished', $page->getWorkflowState());
     }
@@ -896,7 +896,7 @@ class PageTest extends TestCase
 
         $result = $page->updateUrlSlug('new-slug');
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Page::class, $result);
         $this->assertEquals('new-slug', $page->getUrl());
     }
 

@@ -363,7 +363,7 @@ class AccountTest extends TestCase
 
         $result = $this->account->save();
 
-        $this->assertTrue($result, 'The save method should return true on successful save.');
+        $this->assertInstanceOf(Account::class, $result, 'The save method should return Account instance on successful save.');
         $this->assertEquals('Test Account', $this->account->getName());
     }
 
@@ -398,7 +398,7 @@ class AccountTest extends TestCase
 
         $result = $this->account->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Account::class, $result);
     }
 
     /**
@@ -565,7 +565,7 @@ class AccountTest extends TestCase
 
         $result = $this->account->updateSettings($newSettings);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Account::class, $result);
         $this->assertEquals($newSettings, $this->account->settings);
     }
 

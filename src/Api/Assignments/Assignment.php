@@ -1403,10 +1403,10 @@ class Assignment extends AbstractBaseApi
     /**
      * Save the current assignment (create or update)
      *
-     * @return bool True if save was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
         // Check for required fields before trying to save
         if (!$this->id && empty($this->name)) {
@@ -1452,53 +1452,45 @@ class Assignment extends AbstractBaseApi
             }
         }
 
-        try {
-            if ($this->id) {
-                // Update existing assignment
-                $updateData = $this->toDtoArray();
-                if (empty($updateData)) {
-                    return true; // Nothing to update
-                }
-
-                $updatedAssignment = self::update($this->id, $updateData);
-                $this->populate($updatedAssignment->toArray());
-            } else {
-                // Create new assignment
-                $createData = $this->toDtoArray();
-
-                $newAssignment = self::create($createData);
-                $this->populate($newAssignment->toArray());
+        if ($this->id) {
+            // Update existing assignment
+            $updateData = $this->toDtoArray();
+            if (empty($updateData)) {
+                return $this; // Nothing to update
             }
 
-            return true;
-        } catch (CanvasApiException) {
-            return false;
+            $updatedAssignment = self::update($this->id, $updateData);
+            $this->populate($updatedAssignment->toArray());
+        } else {
+            // Create new assignment
+            $createData = $this->toDtoArray();
+
+            $newAssignment = self::create($createData);
+            $this->populate($newAssignment->toArray());
         }
+
+        return $this;
     }
 
     /**
      * Delete the assignment
      *
-     * @return bool True if deletion was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Assignment ID is required for deletion');
         }
 
-        try {
-            self::checkCourse();
-            self::checkApiClient();
+        self::checkCourse();
+        self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/assignments/%d', self::$course->id, $this->id);
-            self::$apiClient->delete($endpoint);
+        $endpoint = sprintf('courses/%d/assignments/%d', self::$course->id, $this->id);
+        self::$apiClient->delete($endpoint);
 
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        return $this;
     }
 
     /**

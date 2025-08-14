@@ -244,7 +244,7 @@ class GroupCategoryTest extends TestCase
 
         $result = $category->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(GroupCategory::class, $result);
     }
 
     public function testSave(): void
@@ -268,7 +268,7 @@ class GroupCategoryTest extends TestCase
 
         $result = $category->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(GroupCategory::class, $result);
         $this->assertEquals(123, $category->id);
     }
 

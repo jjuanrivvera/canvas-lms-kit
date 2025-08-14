@@ -281,7 +281,7 @@ class CourseTest extends TestCase
 
         $result = $this->course->save();
 
-        $this->assertTrue($result, 'The save method should return true on successful save.');
+        $this->assertInstanceOf(Course::class, $result, 'The save method should return Course instance on successful save.');
         $this->assertEquals('Test Course', $this->course->getName(), 'The course name should be updated after saving.');
     }
 
@@ -289,7 +289,7 @@ class CourseTest extends TestCase
      * Test the save course method
      * @return void
      */
-    public function testSaveCourseShouldReturnFalseWhenApiThrowsException(): void
+    public function testSaveCourseShouldThrowExceptionWhenApiFails(): void
     {
         $this->course->setId(1);
         $this->course->setName('Test Course');
@@ -297,9 +297,11 @@ class CourseTest extends TestCase
         $this->httpClientMock
             ->expects($this->once())
             ->method('request')
-            ->will($this->throwException(new CanvasApiException()));
+            ->will($this->throwException(new CanvasApiException('API Error')));
 
-        $this->assertFalse($this->course->save());
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('API Error');
+        $this->course->save();
     }
 
     /**
@@ -323,7 +325,7 @@ class CourseTest extends TestCase
             ->method('delete')
             ->willReturn($response);
 
-        $this->assertTrue($course->delete());
+        $this->assertInstanceOf(Course::class, $course->delete());
     }
 
 
@@ -348,7 +350,7 @@ class CourseTest extends TestCase
             ->method('delete')
             ->willReturn($response);
 
-        $this->assertTrue($course->conclude());
+        $this->assertInstanceOf(Course::class, $course->conclude());
     }
 
 

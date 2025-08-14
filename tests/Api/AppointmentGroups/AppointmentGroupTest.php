@@ -211,7 +211,7 @@ class AppointmentGroupTest extends TestCase
 
         $result = $this->appointmentGroup->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(AppointmentGroup::class, $result);
     }
 
     /**

@@ -288,7 +288,7 @@ class ConferenceTest extends TestCase
 
         $result = $conference->update($updateData);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Conference::class, $result);
         $this->assertEquals('Updated Title', $conference->title);
         $this->assertEquals(90, $conference->duration);
     }
@@ -317,7 +317,7 @@ class ConferenceTest extends TestCase
 
         $result = $conference->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Conference::class, $result);
     }
 
     public function testDeleteWithoutIdThrowsException(): void

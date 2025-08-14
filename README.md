@@ -111,7 +111,11 @@ $course->update([
     'name' => 'Advanced PHP Programming'
 ]);
 
-// Delete a course
+// Save changes with fluent interface support
+$course->name = 'Updated Course Name';
+$course->save()->enrollments(); // Save and immediately get enrollments
+
+// Delete a course (also returns self for chaining)
 $course->delete();
 ```
 
@@ -521,6 +525,30 @@ foreach ($paginator as $page) {
     foreach ($page as $course) {
         // Process each course
     }
+}
+```
+
+### Fluent Interface & Method Chaining
+
+All `save()` and `delete()` methods return the instance, enabling method chaining:
+
+```php
+// Save and continue working with the object
+$course->name = 'New Name';
+$enrollments = $course->save()->enrollments();
+
+// Chain multiple operations
+$assignment = new Assignment();
+$assignment->name = 'Final Project';
+$assignment->points_possible = 100;
+$submissions = $assignment->save()->getSubmissions();
+
+// Error handling with fluent interface
+try {
+    $user->email = 'new@example.com';
+    $user->save()->enrollments(); // Save and get enrollments
+} catch (CanvasApiException $e) {
+    // Handle error - no more silent failures!
 }
 ```
 

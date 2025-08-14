@@ -365,7 +365,7 @@ class SectionTest extends TestCase
 
         $result = $section->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Section::class, $result);
         $this->assertEquals(1001, $section->id);
     }
 
@@ -386,7 +386,7 @@ class SectionTest extends TestCase
 
         $result = $section->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Section::class, $result);
         $this->assertEquals('Updated Name', $section->name);
     }
 
@@ -401,16 +401,17 @@ class SectionTest extends TestCase
 
         $result = $section->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Section::class, $result);
     }
 
     public function testDeleteWithoutId(): void
     {
         $section = new Section([]);
         
-        $result = $section->delete();
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Section ID is required for deletion');
         
-        $this->assertFalse($result);
+        $section->delete();
     }
 
     public function testToDtoArray(): void

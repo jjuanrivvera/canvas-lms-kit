@@ -549,7 +549,7 @@ class QuizSubmissionTest extends TestCase
 
         $result = $submission->complete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(QuizSubmission::class, $result);
         $this->assertEquals('complete', $submission->getWorkflowState());
         $this->assertEquals('2024-01-01T13:00:00Z', $submission->getFinishedAt());
         $this->assertEquals(85.0, $submission->getScore());
@@ -573,9 +573,9 @@ class QuizSubmissionTest extends TestCase
             ->method('post')
             ->willThrowException(new CanvasApiException('API Error'));
 
-        $result = $submission->complete();
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('API Error');
+        $submission->complete();
     }
 
     public function testSave(): void
@@ -601,7 +601,7 @@ class QuizSubmissionTest extends TestCase
 
         $result = $submission->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(QuizSubmission::class, $result);
         $this->assertEquals(90.0, $submission->getScore());
     }
 
@@ -623,9 +623,9 @@ class QuizSubmissionTest extends TestCase
             ->method('put')
             ->willThrowException(new CanvasApiException('API Error'));
 
-        $result = $submission->save();
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('API Error');
+        $submission->save();
     }
 
     public function testIsComplete(): void

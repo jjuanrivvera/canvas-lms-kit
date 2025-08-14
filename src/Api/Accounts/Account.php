@@ -373,10 +373,10 @@ class Account extends AbstractBaseApi
     /**
      * Save the current account instance
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot save account without ID");
@@ -391,16 +391,16 @@ class Account extends AbstractBaseApi
                 $this->$key = $value;
             }
         }
-        return true;
+        return $this;
     }
 
     /**
      * Delete the account (only sub-accounts can be deleted)
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot delete account without ID");
@@ -414,7 +414,7 @@ class Account extends AbstractBaseApi
         $response = self::$apiClient->delete($endpoint);
 
         json_decode($response->getBody(), true);
-        return true;
+        return $this;
     }
 
     /**
@@ -486,10 +486,10 @@ class Account extends AbstractBaseApi
      * Update account settings
      *
      * @param array<string, mixed> $settings Settings to update
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function updateSettings(array $settings): bool
+    public function updateSettings(array $settings): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Account ID is required");
@@ -507,7 +507,7 @@ class Account extends AbstractBaseApi
         // Refresh settings
         $this->settings = $this->getSettings();
 
-        return true;
+        return $this;
     }
 
     /**
