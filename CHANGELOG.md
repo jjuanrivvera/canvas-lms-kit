@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Conversations API for Canvas internal messaging system (#65)
+  - **Conversation** class for managing user conversations and messages
+  - User-scoped resource (all conversations belong to authenticated user)
+  - Support for individual and group conversations
+  - File attachment support via integration with File API
+  - Media comment support for audio/video messages
+  - Batch operations for bulk conversation management
+  - Message threading and forwarding capabilities
+  - **ConversationParticipant** object for participant data
+  - **CreateConversationDTO** for creating new conversations with recipients
+  - **UpdateConversationDTO** for updating conversation properties
+  - **AddMessageDTO** for adding messages to existing conversations
+  - **AddRecipientsDTO** for adding participants to group conversations
+  - Support for complex recipient types (users, courses, groups)
+  - Filtering by scope (unread, starred, archived, sent)
+  - Convenience methods: `markAsRead()`, `markAsUnread()`, `star()`, `unstar()`, `archive()`
+  - Static methods: `markAllAsRead()`, `getUnreadCount()`, `getRunningBatches()`
+  - Comprehensive test coverage for all conversation operations
+
 ### Changed
 - **IMPROVED**: Standardized `save()` and `delete()` methods across all API classes to return `self` for fluent interface support (#99)
   - Enables method chaining: `$course->save()->enrollments()` 
