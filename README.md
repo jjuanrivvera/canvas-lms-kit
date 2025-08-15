@@ -9,7 +9,7 @@
   [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-8892BF.svg?style=flat-square)](https://php.net)
   [![License](https://img.shields.io/github/license/jjuanrivvera/canvas-lms-kit?style=flat-square)](https://github.com/jjuanrivvera/canvas-lms-kit/blob/main/LICENSE)
 
-  **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 40+ APIs implemented.**
+  **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 36 APIs implemented.**
 </div>
 
 ---
@@ -17,7 +17,7 @@
 ## ✨ Why Canvas LMS Kit?
 
 - 🚀 **Production Ready**: Rate limiting, middleware support, battle-tested
-- 📚 **Comprehensive**: 37 Canvas APIs fully implemented
+- 📚 **Comprehensive**: 36 Canvas APIs fully implemented
 - 🛡️ **Type Safe**: Full PHP 8.1+ type declarations and PHPStan level 6
 - 🔧 **Developer Friendly**: Intuitive Active Record pattern - just pass arrays!
 - 📖 **Well Documented**: Extensive examples, guides, and API reference
@@ -123,10 +123,15 @@ $course->delete();
 
 ```php
 use CanvasLMS\Api\Assignments\Assignment;
+use CanvasLMS\Api\Submissions\Submission;
+use CanvasLMS\Api\Courses\Course;
+
+// Set course context for Assignment
+$course = Course::find(123);
+Assignment::setCourse($course);
 
 // Create an assignment - simple array syntax
 $assignment = Assignment::create([
-    'course_id' => 123,
     'name' => 'Final Project',
     'description' => 'Build a web application',
     'points_possible' => 100,
@@ -134,9 +139,11 @@ $assignment = Assignment::create([
     'submission_types' => ['online_upload', 'online_url']
 ]);
 
-// Grade submissions
-$submission = $assignment->getSubmission($studentId);
-$submission->grade([
+// Grade submissions (requires both Course and Assignment context)
+Submission::setCourse($course);
+Submission::setAssignment($assignment);
+
+$submission = Submission::update($studentId, [
     'posted_grade' => 95,
     'comment' => 'Excellent work!'
 ]);
@@ -189,7 +196,7 @@ $currentUser = User::self();
 // Canvas supports 'self' for these endpoints:
 $profile = $currentUser->getProfile();
 $activityStream = $currentUser->getActivityStream();
-// Note: getTodo() method coming soon in next release
+$todos = $currentUser->getTodoItems();
 $groups = $currentUser->groups();
 
 // Other methods require explicit user ID
@@ -421,7 +428,7 @@ foreach ($issues as $issue) {
 
 ## 📊 Supported APIs
 
-### ✅ Currently Implemented (37 APIs)
+### ✅ Currently Implemented (36 APIs)
 
 <details>
 <summary><b>📚 Core Course Management</b></summary>
@@ -467,6 +474,7 @@ foreach ($issues as $issue) {
 - ✅ **Groups** - Student groups and collaboration
 - ✅ **Group Categories** - Organize and manage groups
 - ✅ **Group Memberships** - Group member management
+- ✅ **Conferences** - Web conferencing integration
 - 🔄 **Announcements** - Course announcements (coming soon)
 - 🔄 **Conversations** - Private messaging (coming soon)
 </details>
@@ -558,8 +566,8 @@ try {
 // Efficient relationship loading
 $course = Course::find(123);
 $students = $course->getStudents();
-$assignments = $course->getAssignments();
-$modules = $course->getModules();
+$assignments = $course->assignments();
+$modules = $course->modules();
 ```
 
 ### Context Management (Account-as-Default)
@@ -574,8 +582,8 @@ $migrations = ContentMigration::fetchAll(); // First page of migrations in the a
 
 // Course-specific access via Course instance methods
 $course = Course::find(123);
-$courseGroups = $course->getGroups();              // Groups in this course
-$courseRubrics = $course->getRubrics();            // Rubrics in this course
+$courseGroups = $course->groups();              // Groups in this course
+$courseRubrics = $course->rubrics();            // Rubrics in this course
 $courseMigrations = $course->contentMigrations(); // Migrations in this course
 
 // User-specific access via User instance methods

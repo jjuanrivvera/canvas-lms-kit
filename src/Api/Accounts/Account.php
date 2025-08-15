@@ -41,8 +41,9 @@ use CanvasLMS\Dto\Rubrics\CreateRubricDTO;
  * $account->name = 'Mathematics and Statistics Department';
  * $account->save();
  *
- * // Getting sub-accounts
- * $subAccounts = $account->getSubAccounts();
+ * // Getting sub-accounts (two approaches)
+ * $subAccounts = $account->getSubAccounts();  // Instance method
+ * $subAccounts = Account::fetchSubAccounts(1); // Static method
  *
  * // Getting account settings
  * $settings = $account->getSettings();
@@ -301,6 +302,30 @@ class Account extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = 'course_creation_accounts';
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $responseData = json_decode($response->getBody(), true);
+
+        return array_map(function ($item) {
+            return new self($item);
+        }, $responseData);
+    }
+
+    /**
+     * Fetch sub-accounts for a given account
+     *
+     * Static method to fetch sub-accounts without requiring an Account instance.
+     * Provides direct access to the sub-accounts endpoint.
+     *
+     * @param int $accountId The ID of the parent account
+     * @param array<string, mixed> $params Query parameters (e.g., 'recursive' => true)
+     * @return array<int, self> Array of Account objects
+     * @throws CanvasApiException
+     */
+    public static function fetchSubAccounts(int $accountId, array $params = []): array
+    {
+        self::checkApiClient();
+
+        $endpoint = sprintf('accounts/%d/sub_accounts', $accountId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $responseData = json_decode($response->getBody(), true);
 

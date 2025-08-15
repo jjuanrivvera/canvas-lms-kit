@@ -714,4 +714,77 @@ class AccountTest extends TestCase
         $this->assertEquals(1, $rootAccount->getId());
         $this->assertTrue($rootAccount->isRootAccount());
     }
+
+    /**
+     * Test fetchSubAccounts static method
+     */
+    public function testFetchSubAccounts(): void
+    {
+        $subAccountsData = [
+            ['id' => 2, 'name' => 'Sub Account 1', 'parent_account_id' => 1],
+            ['id' => 3, 'name' => 'Sub Account 2', 'parent_account_id' => 1],
+            ['id' => 4, 'name' => 'Sub Account 3', 'parent_account_id' => 1]
+        ];
+
+        $response = new Response(200, [], json_encode($subAccountsData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('accounts/1/sub_accounts', ['query' => []])
+            ->willReturn($response);
+
+        $subAccounts = Account::fetchSubAccounts(1);
+
+        $this->assertIsArray($subAccounts);
+        $this->assertCount(3, $subAccounts);
+        $this->assertInstanceOf(Account::class, $subAccounts[0]);
+        $this->assertEquals('Sub Account 1', $subAccounts[0]->getName());
+        $this->assertEquals(2, $subAccounts[0]->getId());
+    }
+
+    /**
+     * Test fetchSubAccounts with recursive parameter
+     */
+    public function testFetchSubAccountsWithRecursive(): void
+    {
+        $subAccountsData = [
+            ['id' => 2, 'name' => 'Sub Account 1', 'parent_account_id' => 1],
+            ['id' => 3, 'name' => 'Sub Account 1.1', 'parent_account_id' => 2],
+            ['id' => 4, 'name' => 'Sub Account 1.2', 'parent_account_id' => 2]
+        ];
+
+        $response = new Response(200, [], json_encode($subAccountsData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('accounts/1/sub_accounts', ['query' => ['recursive' => true]])
+            ->willReturn($response);
+
+        $subAccounts = Account::fetchSubAccounts(1, ['recursive' => true]);
+
+        $this->assertIsArray($subAccounts);
+        $this->assertCount(3, $subAccounts);
+        $this->assertInstanceOf(Account::class, $subAccounts[0]);
+    }
+
+    /**
+     * Test fetchSubAccounts returns empty array when no sub-accounts
+     */
+    public function testFetchSubAccountsEmptyResult(): void
+    {
+        $response = new Response(200, [], json_encode([]));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('accounts/99/sub_accounts', ['query' => []])
+            ->willReturn($response);
+
+        $subAccounts = Account::fetchSubAccounts(99);
+
+        $this->assertIsArray($subAccounts);
+        $this->assertCount(0, $subAccounts);
+    }
 }

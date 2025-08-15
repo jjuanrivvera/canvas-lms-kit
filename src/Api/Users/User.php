@@ -47,7 +47,8 @@ use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
  * $currentUser = User::self();
  * $profile = $currentUser->getProfile();
  * $courses = $currentUser->courses();
- * $todos = $currentUser->getTodoItems();
+ * $todos = $currentUser->getTodo();        // Short alias
+ * $todoItems = $currentUser->getTodoItems(); // Full method name
  * $groups = $currentUser->groups();
  *
  * // Creating a new user (admin operation)
@@ -1082,6 +1083,21 @@ class User extends AbstractBaseApi
         return array_map(function ($item) {
             return new TodoItem($item);
         }, $items);
+    }
+
+    /**
+     * Get todo items for the user (alias for getTodoItems)
+     *
+     * Convenience method that provides a shorter alias for getTodoItems().
+     * Returns the list of todo items for this user.
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return TodoItem[]
+     * @throws CanvasApiException
+     */
+    public function getTodo(array $params = []): array
+    {
+        return $this->getTodoItems($params);
     }
 
     /**
