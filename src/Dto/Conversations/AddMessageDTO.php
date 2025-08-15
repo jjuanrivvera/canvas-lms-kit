@@ -2,16 +2,16 @@
 
 namespace CanvasLMS\Dto\Conversations;
 
-use CanvasLMS\Dto\AbstractBaseDto;
-
 /**
  * Class AddMessageDTO
  *
  * Data Transfer Object for adding messages to existing conversations.
+ * This DTO does not extend AbstractBaseDto because Conversations API
+ * requires multipart format which differs from other Canvas APIs.
  *
  * @package CanvasLMS\Dto\Conversations
  */
-class AddMessageDTO extends AbstractBaseDto
+class AddMessageDTO
 {
     /**
      * The message body to be sent
@@ -58,7 +58,24 @@ class AddMessageDTO extends AbstractBaseDto
     public ?bool $userNote = null;
 
     /**
-     * Convert the DTO to Canvas API format
+     * Constructor
+     *
+     * @param array<string, mixed> $data
+     */
+    public function __construct(array $data = [])
+    {
+        foreach ($data as $key => $value) {
+            // Convert snake_case to camelCase
+            $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+
+            if (property_exists($this, $camelKey)) {
+                $this->{$camelKey} = $value;
+            }
+        }
+    }
+
+    /**
+     * Convert the DTO to Canvas API multipart format
      *
      * @return array<int, array<string, string>>
      */

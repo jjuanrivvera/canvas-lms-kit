@@ -2,16 +2,16 @@
 
 namespace CanvasLMS\Dto\Conversations;
 
-use CanvasLMS\Dto\AbstractBaseDto;
-
 /**
  * Class UpdateConversationDTO
  *
  * Data Transfer Object for updating existing conversations.
+ * This DTO does not extend AbstractBaseDto because Conversations API
+ * requires multipart format which differs from other Canvas APIs.
  *
  * @package CanvasLMS\Dto\Conversations
  */
-class UpdateConversationDTO extends AbstractBaseDto
+class UpdateConversationDTO
 {
     /**
      * The workflow state of the conversation (read, unread, archived)
@@ -50,7 +50,24 @@ class UpdateConversationDTO extends AbstractBaseDto
     public ?string $filterMode = null;
 
     /**
-     * Convert the DTO to Canvas API format
+     * Constructor
+     *
+     * @param array<string, mixed> $data
+     */
+    public function __construct(array $data = [])
+    {
+        foreach ($data as $key => $value) {
+            // Convert snake_case to camelCase
+            $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+
+            if (property_exists($this, $camelKey)) {
+                $this->{$camelKey} = $value;
+            }
+        }
+    }
+
+    /**
+     * Convert the DTO to Canvas API multipart format
      *
      * @return array<int, array<string, string>>
      */

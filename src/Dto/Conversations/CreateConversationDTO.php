@@ -2,16 +2,16 @@
 
 namespace CanvasLMS\Dto\Conversations;
 
-use CanvasLMS\Dto\AbstractBaseDto;
-
 /**
  * Class CreateConversationDTO
  *
  * Data Transfer Object for creating new conversations.
+ * This DTO does not extend AbstractBaseDto because Conversations API
+ * requires multipart format which differs from other Canvas APIs.
  *
  * @package CanvasLMS\Dto\Conversations
  */
-class CreateConversationDTO extends AbstractBaseDto
+class CreateConversationDTO
 {
     /**
      * An array of recipient ids. These may be user ids or course/group ids
@@ -101,7 +101,24 @@ class CreateConversationDTO extends AbstractBaseDto
     public ?bool $bulkMessage = null;
 
     /**
-     * Convert the DTO to Canvas API format
+     * Constructor
+     *
+     * @param array<string, mixed> $data
+     */
+    public function __construct(array $data = [])
+    {
+        foreach ($data as $key => $value) {
+            // Convert snake_case to camelCase
+            $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+
+            if (property_exists($this, $camelKey)) {
+                $this->{$camelKey} = $value;
+            }
+        }
+    }
+
+    /**
+     * Convert the DTO to Canvas API multipart format
      *
      * @return array<int, array<string, string>>
      */
