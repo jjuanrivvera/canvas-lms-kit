@@ -9,7 +9,7 @@
   [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-8892BF.svg?style=flat-square)](https://php.net)
   [![License](https://img.shields.io/github/license/jjuanrivvera/canvas-lms-kit?style=flat-square)](https://github.com/jjuanrivvera/canvas-lms-kit/blob/main/LICENSE)
 
-  **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 36 APIs implemented.**
+  **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 37 APIs implemented.**
 </div>
 
 ---
@@ -17,7 +17,7 @@
 ## ✨ Why Canvas LMS Kit?
 
 - 🚀 **Production Ready**: Rate limiting, middleware support, battle-tested
-- 📚 **Comprehensive**: 36 Canvas APIs fully implemented
+- 📚 **Comprehensive**: 37 Canvas APIs fully implemented
 - 🛡️ **Type Safe**: Full PHP 8.1+ type declarations and PHPStan level 6
 - 🔧 **Developer Friendly**: Intuitive Active Record pattern - just pass arrays!
 - 📖 **Well Documented**: Extensive examples, guides, and API reference
@@ -273,6 +273,41 @@ $courseFlag = $course->getFeatureFlag('anonymous_marking');
 $courseFlag->enable();
 ```
 
+### Conversations (Internal Messaging)
+
+```php
+use CanvasLMS\Api\Conversations\Conversation;
+
+// List all conversations for the current user
+$conversations = Conversation::fetchAll(['scope' => 'unread']);
+
+// Create a new conversation
+$conversation = Conversation::create([
+    'recipients' => ['user_123', 'course_456_students'],
+    'subject' => 'Assignment Feedback',
+    'body' => 'Great work on your recent submission!',
+    'group_conversation' => true
+]);
+
+// Add a message to existing conversation
+$conversation->addMessage([
+    'body' => 'Following up on my previous message...',
+    'attachment_ids' => [789] // Attach files
+]);
+
+// Manage conversation state
+$conversation->markAsRead();
+$conversation->star();
+$conversation->archive();
+
+// Batch operations
+Conversation::batchUpdate([1, 2, 3], ['event' => 'mark_as_read']);
+Conversation::markAllAsRead();
+
+// Get unread count
+$unreadCount = Conversation::getUnreadCount();
+```
+
 ### Working with Multi-Context Resources
 
 Some Canvas resources exist in multiple contexts (Account, Course, User, Group). Canvas LMS Kit follows an **Account-as-Default** convention for consistency:
@@ -428,7 +463,7 @@ foreach ($issues as $issue) {
 
 ## 📊 Supported APIs
 
-### ✅ Currently Implemented (36 APIs)
+### ✅ Currently Implemented (37 APIs)
 
 <details>
 <summary><b>📚 Core Course Management</b></summary>
@@ -475,8 +510,8 @@ foreach ($issues as $issue) {
 - ✅ **Group Categories** - Organize and manage groups
 - ✅ **Group Memberships** - Group member management
 - ✅ **Conferences** - Web conferencing integration
+- ✅ **Conversations** - Internal messaging system
 - 🔄 **Announcements** - Course announcements (coming soon)
-- 🔄 **Conversations** - Private messaging (coming soon)
 </details>
 
 <details>

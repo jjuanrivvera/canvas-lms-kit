@@ -4,9 +4,6 @@ namespace Tests\Api\Conversations;
 
 use CanvasLMS\Api\Conversations\Conversation;
 use CanvasLMS\Dto\Conversations\CreateConversationDTO;
-use CanvasLMS\Dto\Conversations\UpdateConversationDTO;
-use CanvasLMS\Dto\Conversations\AddMessageDTO;
-use CanvasLMS\Dto\Conversations\AddRecipientsDTO;
 use CanvasLMS\Http\HttpClient;
 use PHPUnit\Framework\TestCase;
 use GuzzleHttp\Psr7\Response;
@@ -183,11 +180,27 @@ class ConversationTest extends TestCase
             ->method('post')
             ->with(
                 '/conversations',
-                $this->callback(function ($data) {
+                $this->callback(function ($options) {
                     // Check that the data is in the expected multipart format
-                    return isset($data['recipients[]']) &&
-                           isset($data['body']) &&
-                           $data['body'] === 'Hello everyone!';
+                    if (!isset($options['multipart']) || !is_array($options['multipart'])) {
+                        return false;
+                    }
+                    
+                    $hasRecipients = false;
+                    $hasBody = false;
+                    $bodyContent = '';
+                    
+                    foreach ($options['multipart'] as $field) {
+                        if ($field['name'] === 'recipients[]') {
+                            $hasRecipients = true;
+                        }
+                        if ($field['name'] === 'body') {
+                            $hasBody = true;
+                            $bodyContent = $field['contents'];
+                        }
+                    }
+                    
+                    return $hasRecipients && $hasBody && $bodyContent === 'Hello everyone!';
                 })
             )
             ->willReturn($mockResponse);
@@ -252,9 +265,25 @@ class ConversationTest extends TestCase
             ->method('put')
             ->with(
                 '/conversations/123',
-                $this->callback(function ($data) {
-                    return isset($data['conversation[starred]']) &&
-                           isset($data['conversation[workflow_state]']);
+                $this->callback(function ($options) {
+                    // Check that the data is in the expected multipart format
+                    if (!isset($options['multipart']) || !is_array($options['multipart'])) {
+                        return false;
+                    }
+                    
+                    $hasStarred = false;
+                    $hasWorkflowState = false;
+                    
+                    foreach ($options['multipart'] as $field) {
+                        if ($field['name'] === 'conversation[starred]') {
+                            $hasStarred = true;
+                        }
+                        if ($field['name'] === 'conversation[workflow_state]') {
+                            $hasWorkflowState = true;
+                        }
+                    }
+                    
+                    return $hasStarred && $hasWorkflowState;
                 })
             )
             ->willReturn($mockResponse);
@@ -311,8 +340,23 @@ class ConversationTest extends TestCase
             ->method('post')
             ->with(
                 '/conversations/123/add_message',
-                $this->callback(function ($data) {
-                    return $data['body'] === 'This is a new message';
+                $this->callback(function ($options) {
+                    // Check that the data is in the expected multipart format
+                    if (!isset($options['multipart']) || !is_array($options['multipart'])) {
+                        return false;
+                    }
+                    
+                    $hasBody = false;
+                    $bodyContent = '';
+                    
+                    foreach ($options['multipart'] as $field) {
+                        if ($field['name'] === 'body') {
+                            $hasBody = true;
+                            $bodyContent = $field['contents'];
+                        }
+                    }
+                    
+                    return $hasBody && $bodyContent === 'This is a new message';
                 })
             )
             ->willReturn($mockResponse);
@@ -370,8 +414,20 @@ class ConversationTest extends TestCase
             ->method('post')
             ->with(
                 '/conversations/123/remove_messages',
-                $this->callback(function ($data) {
-                    return isset($data['remove[]']);
+                $this->callback(function ($options) {
+                    // Check that the data is in the expected multipart format
+                    if (!isset($options['multipart']) || !is_array($options['multipart'])) {
+                        return false;
+                    }
+                    
+                    $removeCount = 0;
+                    foreach ($options['multipart'] as $field) {
+                        if ($field['name'] === 'remove[]') {
+                            $removeCount++;
+                        }
+                    }
+                    
+                    return $removeCount === 3; // We're removing 3 messages
                 })
             )
             ->willReturn($mockResponse);
@@ -398,9 +454,25 @@ class ConversationTest extends TestCase
             ->method('put')
             ->with(
                 '/conversations',
-                $this->callback(function ($data) {
-                    return isset($data['conversation_ids[]']) &&
-                           isset($data['event']);
+                $this->callback(function ($options) {
+                    // Check that the data is in the expected multipart format
+                    if (!isset($options['multipart']) || !is_array($options['multipart'])) {
+                        return false;
+                    }
+                    
+                    $conversationCount = 0;
+                    $hasEvent = false;
+                    
+                    foreach ($options['multipart'] as $field) {
+                        if ($field['name'] === 'conversation_ids[]') {
+                            $conversationCount++;
+                        }
+                        if ($field['name'] === 'event' && $field['contents'] === 'mark_as_read') {
+                            $hasEvent = true;
+                        }
+                    }
+                    
+                    return $conversationCount === 3 && $hasEvent;
                 })
             )
             ->willReturn($mockResponse);

@@ -60,39 +60,39 @@ class AddMessageDTO extends AbstractBaseDto
     /**
      * Convert the DTO to Canvas API format
      *
-     * @return array<string, mixed>
+     * @return array<int, array<string, string>>
      */
     public function toApiArray(): array
     {
         $data = [];
 
         // Required field
-        $data['body'] = $this->body;
+        $data[] = ['name' => 'body', 'contents' => $this->body];
 
         // Optional fields
         if ($this->attachmentIds !== null) {
             foreach ($this->attachmentIds as $attachmentId) {
-                $data['attachment_ids[]'] = $attachmentId;
+                $data[] = ['name' => 'attachment_ids[]', 'contents' => (string)$attachmentId];
             }
         }
         if ($this->mediaCommentId !== null) {
-            $data['media_comment_id'] = $this->mediaCommentId;
+            $data[] = ['name' => 'media_comment_id', 'contents' => $this->mediaCommentId];
         }
         if ($this->mediaCommentType !== null) {
-            $data['media_comment_type'] = $this->mediaCommentType;
+            $data[] = ['name' => 'media_comment_type', 'contents' => $this->mediaCommentType];
         }
         if ($this->recipients !== null) {
             foreach ($this->recipients as $recipient) {
-                $data['recipients[]'] = $recipient;
+                $data[] = ['name' => 'recipients[]', 'contents' => $recipient];
             }
         }
         if ($this->includedMessages !== null) {
             foreach ($this->includedMessages as $messageId) {
-                $data['included_messages[]'] = $messageId;
+                $data[] = ['name' => 'included_messages[]', 'contents' => (string)$messageId];
             }
         }
         if ($this->userNote !== null) {
-            $data['user_note'] = $this->userNote ? '1' : '0';
+            $data[] = ['name' => 'user_note', 'contents' => $this->userNote ? '1' : '0'];
         }
 
         return $data;

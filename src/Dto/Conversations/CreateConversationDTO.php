@@ -95,57 +95,68 @@ class CreateConversationDTO extends AbstractBaseDto
     public ?string $contextCode = null;
 
     /**
+     * Whether to send as a bulk message to each recipient
+     * @var bool|null
+     */
+    public ?bool $bulkMessage = null;
+
+    /**
      * Convert the DTO to Canvas API format
      *
-     * @return array<string, mixed>
+     * @return array<int, array<string, string>>
      */
     public function toApiArray(): array
     {
         $data = [];
 
         // Required fields
-        foreach ($this->recipients as $recipient) {
-            $data['recipients[]'] = $recipient;
+        if (!empty($this->recipients)) {
+            foreach ($this->recipients as $recipient) {
+                $data[] = ['name' => 'recipients[]', 'contents' => $recipient];
+            }
         }
-        $data['body'] = $this->body;
+        $data[] = ['name' => 'body', 'contents' => $this->body];
 
         // Optional fields
         if ($this->subject !== null) {
-            $data['subject'] = $this->subject;
+            $data[] = ['name' => 'subject', 'contents' => $this->subject];
         }
         if ($this->forceNew !== null) {
-            $data['force_new'] = $this->forceNew ? '1' : '0';
+            $data[] = ['name' => 'force_new', 'contents' => $this->forceNew ? '1' : '0'];
         }
         if ($this->groupConversation !== null) {
-            $data['group_conversation'] = $this->groupConversation ? '1' : '0';
+            $data[] = ['name' => 'group_conversation', 'contents' => $this->groupConversation ? '1' : '0'];
         }
         if ($this->attachmentIds !== null) {
             foreach ($this->attachmentIds as $attachmentId) {
-                $data['attachment_ids[]'] = $attachmentId;
+                $data[] = ['name' => 'attachment_ids[]', 'contents' => (string)$attachmentId];
             }
         }
         if ($this->mediaCommentId !== null) {
-            $data['media_comment_id'] = $this->mediaCommentId;
+            $data[] = ['name' => 'media_comment_id', 'contents' => $this->mediaCommentId];
         }
         if ($this->mediaCommentType !== null) {
-            $data['media_comment_type'] = $this->mediaCommentType;
+            $data[] = ['name' => 'media_comment_type', 'contents' => $this->mediaCommentType];
         }
         if ($this->mode !== null) {
-            $data['mode'] = $this->mode;
+            $data[] = ['name' => 'mode', 'contents' => $this->mode];
         }
         if ($this->scope !== null) {
-            $data['scope'] = $this->scope;
+            $data[] = ['name' => 'scope', 'contents' => $this->scope];
         }
         if ($this->filter !== null) {
             foreach ($this->filter as $filterItem) {
-                $data['filter[]'] = $filterItem;
+                $data[] = ['name' => 'filter[]', 'contents' => $filterItem];
             }
         }
         if ($this->filterMode !== null) {
-            $data['filter_mode'] = $this->filterMode;
+            $data[] = ['name' => 'filter_mode', 'contents' => $this->filterMode];
         }
         if ($this->contextCode !== null) {
-            $data['context_code'] = $this->contextCode;
+            $data[] = ['name' => 'context_code', 'contents' => $this->contextCode];
+        }
+        if ($this->bulkMessage !== null) {
+            $data[] = ['name' => 'bulk_message', 'contents' => $this->bulkMessage ? '1' : '0'];
         }
 
         return $data;

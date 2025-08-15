@@ -165,7 +165,7 @@ class Conversation extends AbstractBaseApi
             $data = new CreateConversationDTO($data);
         }
 
-        $response = self::$apiClient->post(self::$endpoint, $data->toApiArray());
+        $response = self::$apiClient->post(self::$endpoint, ['multipart' => $data->toApiArray()]);
         $responseData = json_decode($response->getBody(), true);
 
         // Handle async mode where response might be empty
@@ -195,22 +195,21 @@ class Conversation extends AbstractBaseApi
             if (is_array($data)) {
                 $data = new UpdateConversationDTO($data);
             }
-            $updateData = $data->toApiArray();
+            $response = self::$apiClient->put(self::$endpoint . '/' . $this->id, ['multipart' => $data->toApiArray()]);
         } else {
             // Build update data from current object state
             $updateData = [];
             if ($this->workflowState !== null) {
-                $updateData['conversation[workflow_state]'] = $this->workflowState;
+                $updateData[] = ['name' => 'conversation[workflow_state]', 'contents' => $this->workflowState];
             }
             if ($this->subscribed !== null) {
-                $updateData['conversation[subscribed]'] = $this->subscribed;
+                $updateData[] = ['name' => 'conversation[subscribed]', 'contents' => $this->subscribed ? '1' : '0'];
             }
             if ($this->starred !== null) {
-                $updateData['conversation[starred]'] = $this->starred;
+                $updateData[] = ['name' => 'conversation[starred]', 'contents' => $this->starred ? '1' : '0'];
             }
+            $response = self::$apiClient->put(self::$endpoint . '/' . $this->id, ['multipart' => $updateData]);
         }
-
-        $response = self::$apiClient->put(self::$endpoint . '/' . $this->id, $updateData);
         $responseData = json_decode($response->getBody(), true);
 
         $this->populate($responseData);
@@ -246,7 +245,7 @@ class Conversation extends AbstractBaseApi
 
         $response = self::$apiClient->post(
             self::$endpoint . '/' . $this->id . '/add_message',
-            $data->toApiArray()
+            ['multipart' => $data->toApiArray()]
         );
 
         $responseData = json_decode($response->getBody(), true);
@@ -271,7 +270,7 @@ class Conversation extends AbstractBaseApi
 
         $response = self::$apiClient->post(
             self::$endpoint . '/' . $this->id . '/add_recipients',
-            $data->toApiArray()
+            ['multipart' => $data->toApiArray()]
         );
 
         $responseData = json_decode($response->getBody(), true);
@@ -290,12 +289,15 @@ class Conversation extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        // Canvas expects 'remove[]' format for array parameters
-        $data = ['remove[]' => $messageIds];
+        // Build multipart format for array parameters
+        $data = [];
+        foreach ($messageIds as $messageId) {
+            $data[] = ['name' => 'remove[]', 'contents' => (string)$messageId];
+        }
 
         $response = self::$apiClient->post(
             self::$endpoint . '/' . $this->id . '/remove_messages',
-            $data
+            ['multipart' => $data]
         );
 
         $responseData = json_decode($response->getBody(), true);
@@ -316,11 +318,18 @@ class Conversation extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        // Build array with conversation_ids[] format for array parameters
-        $updateData = ['conversation_ids[]' => $conversationIds];
-        $updateData = array_merge($updateData, $data);
+        // Build multipart format for array parameters
+        $updateData = [];
+        foreach ($conversationIds as $conversationId) {
+            $updateData[] = ['name' => 'conversation_ids[]', 'contents' => (string)$conversationId];
+        }
 
-        $response = self::$apiClient->put(self::$endpoint, $updateData);
+        // Add other data fields
+        foreach ($data as $key => $value) {
+            $updateData[] = ['name' => $key, 'contents' => (string)$value];
+        }
+
+        $response = self::$apiClient->put(self::$endpoint, ['multipart' => $updateData]);
 
         return json_decode($response->getBody(), true);
     }

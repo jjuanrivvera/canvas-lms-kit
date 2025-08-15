@@ -23,14 +23,14 @@ class AddRecipientsDTO extends AbstractBaseDto
     /**
      * Convert the DTO to Canvas API format
      *
-     * @return array<string, mixed>
+     * @return array<int, array<string, string>>
      */
     public function toApiArray(): array
     {
         $data = [];
 
         foreach ($this->recipients as $recipient) {
-            $data['recipients[]'] = $recipient;
+            $data[] = ['name' => 'recipients[]', 'contents' => $recipient];
         }
 
         return $data;

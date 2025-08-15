@@ -52,31 +52,31 @@ class UpdateConversationDTO extends AbstractBaseDto
     /**
      * Convert the DTO to Canvas API format
      *
-     * @return array<string, mixed>
+     * @return array<int, array<string, string>>
      */
     public function toApiArray(): array
     {
         $data = [];
 
         if ($this->workflowState !== null) {
-            $data['conversation[workflow_state]'] = $this->workflowState;
+            $data[] = ['name' => 'conversation[workflow_state]', 'contents' => $this->workflowState];
         }
         if ($this->subscribed !== null) {
-            $data['conversation[subscribed]'] = $this->subscribed ? '1' : '0';
+            $data[] = ['name' => 'conversation[subscribed]', 'contents' => $this->subscribed ? '1' : '0'];
         }
         if ($this->starred !== null) {
-            $data['conversation[starred]'] = $this->starred ? '1' : '0';
+            $data[] = ['name' => 'conversation[starred]', 'contents' => $this->starred ? '1' : '0'];
         }
         if ($this->scope !== null) {
-            $data['scope'] = $this->scope;
+            $data[] = ['name' => 'scope', 'contents' => $this->scope];
         }
         if ($this->filter !== null) {
             foreach ($this->filter as $filterItem) {
-                $data['filter[]'] = $filterItem;
+                $data[] = ['name' => 'filter[]', 'contents' => $filterItem];
             }
         }
         if ($this->filterMode !== null) {
-            $data['filter_mode'] = $this->filterMode;
+            $data[] = ['name' => 'filter_mode', 'contents' => $this->filterMode];
         }
 
         return $data;
