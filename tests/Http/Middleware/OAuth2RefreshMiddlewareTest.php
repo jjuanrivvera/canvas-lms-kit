@@ -46,6 +46,8 @@ class OAuth2RefreshMiddlewareTest extends TestCase
         parent::tearDown();
         Config::clearOAuthTokens();
         Config::useApiKey();
+        // Reset OAuth HTTP client
+        \CanvasLMS\Auth\OAuth::setHttpClient(null);
     }
     
     /**
@@ -78,12 +80,29 @@ class OAuth2RefreshMiddlewareTest extends TestCase
         Config::setOAuthRefreshToken('refresh_token');
         Config::setOAuthExpiresAt(time() + 200); // Expires in 200 seconds
         
-        // Mock refresh token response
+        // Create a mock HTTP client for OAuth class
+        $mockOAuthClient = $this->createMock(\CanvasLMS\Interfaces\HttpClientInterface::class);
+        
+        // Create a mock response with proper body
+        $mockResponse = new Response(200, [], json_encode([
+            'access_token' => 'new_token',
+            'expires_in' => 3600
+        ]));
+        
+        $mockOAuthClient->expects($this->once())
+            ->method('request')
+            ->with(
+                $this->equalTo('POST'),
+                $this->stringContains('/login/oauth2/token'),
+                $this->arrayHasKey('form_params')
+            )
+            ->willReturn($mockResponse);
+        
+        // Set the mock client for OAuth
+        \CanvasLMS\Auth\OAuth::setHttpClient($mockOAuthClient);
+        
+        // Mock the actual API request
         $this->mockHandler->append(
-            new Response(200, [], json_encode([
-                'access_token' => 'new_token',
-                'expires_in' => 3600
-            ])),
             new Response(200, [], json_encode(['courses' => []]))
         );
         
@@ -92,21 +111,13 @@ class OAuth2RefreshMiddlewareTest extends TestCase
             'base_uri' => 'https://canvas.test.com'
         ]);
         
-        // Make API request
-        $response = $client->post('/login/oauth2/token', [
-            'form_params' => [
-                'grant_type' => 'refresh_token',
-                'client_id' => 'test_client_id',
-                'client_secret' => 'test_client_secret',
-                'refresh_token' => 'refresh_token'
-            ]
-        ]);
+        // Make API request that will trigger token refresh
+        $response = $client->get('/api/v1/courses');
         
         $this->assertEquals(200, $response->getStatusCode());
         
         // Verify token was refreshed
-        $body = json_decode($response->getBody()->getContents(), true);
-        $this->assertEquals('new_token', $body['access_token']);
+        $this->assertEquals('new_token', Config::getOAuthToken());
     }
     
     /**

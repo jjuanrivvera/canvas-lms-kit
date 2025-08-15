@@ -332,9 +332,9 @@ class OAuth
     /**
      * Set the HTTP client for OAuth operations
      *
-     * @param HttpClientInterface $client The HTTP client to use
+     * @param HttpClientInterface|null $client The HTTP client to use, or null to reset
      */
-    public static function setHttpClient(HttpClientInterface $client): void
+    public static function setHttpClient(?HttpClientInterface $client): void
     {
         self::$httpClient = $client;
     }
