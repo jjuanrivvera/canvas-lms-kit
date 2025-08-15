@@ -102,6 +102,11 @@ class OAuth
             ]);
 
             $body = $response->getBody()->getContents();
+
+            if (!$body) {
+                throw new CanvasApiException('Empty response from OAuth token endpoint');
+            }
+
             $data = json_decode($body, true);
 
             if (!$data || !isset($data['access_token'])) {
@@ -178,6 +183,11 @@ class OAuth
             ]);
 
             $body = $response->getBody()->getContents();
+
+            if (!$body) {
+                throw new OAuthRefreshFailedException('Empty response from token refresh');
+            }
+
             $data = json_decode($body, true);
 
             if (!$data || !isset($data['access_token'])) {
@@ -296,9 +306,14 @@ class OAuth
             $response = $client->request('POST', $baseUrl . '/login/session_token', $options);
 
             $body = $response->getBody()->getContents();
+
+            if (!$body) {
+                throw new CanvasApiException('Empty response from session token endpoint');
+            }
+
             $data = json_decode($body, true);
 
-            if (!isset($data['session_url'])) {
+            if (!$data || !isset($data['session_url'])) {
                 throw new CanvasApiException('Invalid response from session token endpoint');
             }
 
