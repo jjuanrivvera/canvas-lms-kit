@@ -101,7 +101,8 @@ class OAuth
                 'form_params' => $params
             ]);
 
-            $data = json_decode($response->getBody()->getContents(), true);
+            $body = $response->getBody()->getContents();
+            $data = json_decode($body, true);
 
             if (!$data || !isset($data['access_token'])) {
                 throw new CanvasApiException('Invalid response from OAuth token endpoint');
@@ -125,7 +126,11 @@ class OAuth
             return $data;
         } catch (RequestException $e) {
             $response = $e->getResponse();
-            $error = $response ? $response->getBody()->getContents() : $e->getMessage();
+            if ($response) {
+                $error = $response->getBody()->getContents();
+            } else {
+                $error = $e->getMessage();
+            }
             throw new CanvasApiException('OAuth code exchange failed: ' . $error);
         }
     }
@@ -172,7 +177,8 @@ class OAuth
                 ]
             ]);
 
-            $data = json_decode($response->getBody()->getContents(), true);
+            $body = $response->getBody()->getContents();
+            $data = json_decode($body, true);
 
             if (!$data || !isset($data['access_token'])) {
                 throw new OAuthRefreshFailedException('Invalid response from token refresh');
@@ -187,7 +193,11 @@ class OAuth
             return $data;
         } catch (RequestException $e) {
             $response = $e->getResponse();
-            $error = $response ? $response->getBody()->getContents() : $e->getMessage();
+            if ($response) {
+                $error = $response->getBody()->getContents();
+            } else {
+                $error = $e->getMessage();
+            }
             throw new OAuthRefreshFailedException('Token refresh failed: ' . $error);
         }
     }
@@ -237,7 +247,11 @@ class OAuth
             return $body ? json_decode($body, true) ?? [] : [];
         } catch (RequestException $e) {
             $response = $e->getResponse();
-            $error = $response ? $response->getBody()->getContents() : $e->getMessage();
+            if ($response) {
+                $error = $response->getBody()->getContents();
+            } else {
+                $error = $e->getMessage();
+            }
             throw new CanvasApiException('Token revocation failed: ' . $error);
         }
     }
@@ -281,7 +295,8 @@ class OAuth
 
             $response = $client->request('POST', $baseUrl . '/login/session_token', $options);
 
-            $data = json_decode($response->getBody()->getContents(), true);
+            $body = $response->getBody()->getContents();
+            $data = json_decode($body, true);
 
             if (!isset($data['session_url'])) {
                 throw new CanvasApiException('Invalid response from session token endpoint');
@@ -290,7 +305,11 @@ class OAuth
             return $data['session_url'];
         } catch (RequestException $e) {
             $response = $e->getResponse();
-            $error = $response ? $response->getBody()->getContents() : $e->getMessage();
+            if ($response) {
+                $error = $response->getBody()->getContents();
+            } else {
+                $error = $e->getMessage();
+            }
             throw new CanvasApiException('Session token creation failed: ' . $error);
         }
     }
