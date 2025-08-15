@@ -66,6 +66,8 @@ composer require jjuanrivvera/canvas-lms-kit
 
 ## ⚙️ Configuration
 
+### API Key Authentication (Simple)
+
 ```php
 use CanvasLMS\Config;
 
@@ -81,6 +83,54 @@ Config::setMiddleware([
     'retry' => ['max_attempts' => 3],
     'rate_limit' => ['wait_on_limit' => true],
 ]);
+```
+
+### OAuth 2.0 Authentication (User-Based) 🆕
+
+Canvas LMS Kit now supports OAuth 2.0 for user-specific authentication with automatic token refresh!
+
+```php
+use CanvasLMS\Config;
+use CanvasLMS\Auth\OAuth;
+
+// Configure OAuth credentials
+Config::setOAuthClientId('your-client-id');
+Config::setOAuthClientSecret('your-client-secret');
+Config::setOAuthRedirectUri('https://yourapp.com/oauth/callback');
+Config::setBaseUrl('https://canvas.instructure.com');
+
+// Step 1: Get authorization URL
+$authUrl = OAuth::getAuthorizationUrl(['state' => 'random-state']);
+// Redirect user to $authUrl
+
+// Step 2: Handle callback
+$tokenData = OAuth::exchangeCode($_GET['code']);
+
+// Step 3: Use OAuth mode
+Config::useOAuth();
+
+// Now all API calls use OAuth with automatic token refresh!
+$courses = Course::fetchAll(); // User's courses
+```
+
+### Environment Variable Configuration
+
+Perfect for containerized deployments and 12-factor apps:
+
+```bash
+# .env file
+CANVAS_BASE_URL=https://canvas.instructure.com
+CANVAS_API_KEY=your-api-key
+# OR for OAuth:
+CANVAS_OAUTH_CLIENT_ID=your-client-id
+CANVAS_OAUTH_CLIENT_SECRET=your-client-secret
+CANVAS_AUTH_MODE=oauth
+```
+
+```php
+// Auto-detect from environment
+Config::autoDetectFromEnvironment();
+// Ready to use!
 ```
 
 ## 💡 Usage Examples
