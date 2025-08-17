@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-01-17
+
 ### Added
+- OAuth 2.0 authentication support (#44)
+  - Full OAuth 2.0 implementation with client credentials flow
+  - Automatic token management and refresh
+  - Secure token storage and handling
+  - Comprehensive middleware support for OAuth workflows
+  - Backward compatible with existing API key authentication
 - Conversations API for Canvas internal messaging system (#65)
   - **Conversation** class for managing user conversations and messages
   - User-scoped resource (all conversations belong to authenticated user)
@@ -191,5 +199,8 @@ Canvas LMS Kit is now production-ready with 90% Canvas API coverage, rate limiti
 - Contributing guidelines
 - Wiki with implementation guides
 
-[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/jjuanrivvera/canvas-lms-kit/releases/tag/v1.0.0
