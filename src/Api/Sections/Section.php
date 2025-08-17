@@ -362,4 +362,15 @@ class Section extends AbstractBaseApi
         $params = array_merge($params, ['type[]' => ['StudentEnrollment']]);
         return $this->enrollments($params);
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/sections', self::$course->getId());
+    }
 }

@@ -43,14 +43,15 @@ class OutcomeTest extends TestCase
             ]
         ];
 
-        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')
-            ->willReturn($expectedData);
+        $mockStream = $this->createMock(\Psr\Http\Message\StreamInterface::class);
+        $mockStream->method('getContents')->willReturn(json_encode($expectedData));
+        
+        $this->mockResponse->method('getBody')->willReturn($mockStream);
         
         $this->mockClient->expects($this->once())
-            ->method('getPaginated')
+            ->method('get')
             ->with('accounts/1/outcome_groups/global/outcomes', ['query' => []])
-            ->willReturn($mockPaginatedResponse);
+            ->willReturn($this->mockResponse);
         
         $outcomes = Outcome::fetchAll();
         

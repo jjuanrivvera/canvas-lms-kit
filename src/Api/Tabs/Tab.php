@@ -472,4 +472,15 @@ class Tab extends AbstractBaseApi
 
         return $data;
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/tabs', self::$course->getId());
+    }
 }

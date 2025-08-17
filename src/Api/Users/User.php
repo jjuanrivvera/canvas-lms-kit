@@ -10,7 +10,6 @@ use CanvasLMS\Api\Groups\Group;
 use CanvasLMS\Dto\Users\UpdateUserDTO;
 use CanvasLMS\Dto\Users\CreateUserDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Objects\ActivityStreamItem;
 use CanvasLMS\Objects\ActivityStreamSummary;
@@ -69,21 +68,23 @@ use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
  * // Finding a user by ID (admin operation)
  * $user = User::find(123);
  *
- * // Fetching all users (admin operation - first page only)
- * $users = User::fetchAll();
+ * // Get first page of users (memory efficient)
+ * $users = User::get();
+ * $users = User::get(['per_page' => 100]); // Custom page size
  *
- * // Fetching users with pagination support
- * $paginatedResponse = User::fetchAllPaginated(['per_page' => 10]);
- * $users = $paginatedResponse->getJsonData();
- * $pagination = $paginatedResponse->toPaginationResult($users);
+ * // Get ALL users from all pages (⚠️ CAUTION: Could be thousands!)
+ * $allUsers = User::all(); // Be very careful with large institutions
  *
- * // Fetching a specific page of users
- * $paginationResult = User::fetchPage(['page' => 2, 'per_page' => 10]);
- * $users = $paginationResult->getData();
- * $hasNext = $paginationResult->hasNext();
+ * // Get paginated results with metadata (recommended for user lists)
+ * $paginated = User::paginate(['per_page' => 100]);
+ * echo "Showing {$paginated->getPerPage()} of {$paginated->getTotalCount()} users";
  *
- * // Fetching all users from all pages
- * $allUsers = User::fetchAllPages(['per_page' => 50]);
+ * // Process in batches for large datasets
+ * $page = 1;
+ * do {
+ *     $batch = User::paginate(['page' => $page++, 'per_page' => 500]);
+ *     // Process batch...
+ * } while ($batch->hasNextPage());
  * ```
  *
  * @package CanvasLMS\Api\Users
@@ -347,62 +348,13 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * Fetch all users
-     * @param mixed[] $params
-     * @return User[]
-     * @throws CanvasApiException
+     * Get the API endpoint for this resource
+     * @return string
      */
-    public static function fetchAll(array $params = []): array
-    {
-        self::checkApiClient();
-
-        $accountId = Config::getAccountId();
-
-        $response = self::$apiClient->get("/accounts/{$accountId}/users", [
-            'query' => $params
-        ]);
-
-        $users = json_decode($response->getBody(), true);
-
-        return array_map(function ($user) {
-            return new self($user);
-        }, $users);
-    }
-
-    /**
-     * Fetch users with pagination support
-     * @param mixed[] $params Query parameters for the request
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
-        return self::getPaginatedResponse("/accounts/{$accountId}/users", $params);
-    }
-
-    /**
-     * Fetch users from a specific page
-     * @param mixed[] $params Query parameters for the request
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Fetch all users from all pages
-     * @param mixed[] $params Query parameters for the request
-     * @return User[]
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        $accountId = Config::getAccountId();
-        return self::fetchAllPagesAsModels("/accounts/{$accountId}/users", $params);
+        return sprintf('accounts/%d/users', $accountId);
     }
 
     /**

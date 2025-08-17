@@ -10,8 +10,8 @@ use CanvasLMS\Dto\Modules\UpdateModuleDTO;
 use CanvasLMS\Dto\Modules\CreateModuleItemDTO;
 use CanvasLMS\Dto\Modules\BulkUpdateModuleAssignmentOverridesDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Module Class
@@ -997,5 +997,16 @@ class Module extends AbstractBaseApi
         }
 
         return $prerequisites;
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/modules', self::$course->getId());
     }
 }

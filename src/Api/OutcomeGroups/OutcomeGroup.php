@@ -12,6 +12,7 @@ use CanvasLMS\Dto\OutcomeGroups\UpdateOutcomeGroupDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Objects\OutcomeLink;
 use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * OutcomeGroup API class for managing hierarchical outcome groups in Canvas LMS.
@@ -91,16 +92,17 @@ class OutcomeGroup extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses)
      * @param int $contextId Context ID
      * @param array<string, mixed> $params Optional query parameters
-     * @return PaginatedResponse
+     * @return PaginationResult
      * @throws CanvasApiException
      */
     public static function fetchByContextPaginated(
         string $contextType,
         int $contextId,
         array $params = []
-    ): PaginatedResponse {
+    ): PaginationResult {
         $endpoint = sprintf('%s/%d/outcome_groups', $contextType, $contextId);
-        return self::getPaginatedResponse($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        return self::createPaginationResult($paginatedResponse);
     }
 
     /**
@@ -577,10 +579,10 @@ class OutcomeGroup extends AbstractBaseApi
      * Fetch paginated outcome links (defaults to Account context).
      *
      * @param array<string, mixed> $params Optional query parameters
-     * @return PaginatedResponse
+     * @return PaginationResult
      * @throws CanvasApiException
      */
-    public static function fetchAllLinksPaginated(array $params = []): PaginatedResponse
+    public static function fetchAllLinksPaginated(array $params = []): PaginationResult
     {
         $accountId = Config::getAccountId();
 
@@ -588,7 +590,8 @@ class OutcomeGroup extends AbstractBaseApi
             throw new CanvasApiException('Account ID must be configured to fetch outcome links');
         }
 
-        return self::fetchAllLinksByContextPaginated('accounts', $accountId, $params);
+        $paginatedResponse = self::fetchAllLinksByContextPaginated('accounts', $accountId, $params);
+        return self::createPaginationResult($paginatedResponse);
     }
 
     /**
@@ -600,7 +603,7 @@ class OutcomeGroup extends AbstractBaseApi
      * @return PaginatedResponse
      * @throws CanvasApiException
      */
-    public static function fetchAllLinksByContextPaginated(
+    private static function fetchAllLinksByContextPaginated(
         string $contextType,
         int $contextId,
         array $params = []
@@ -631,5 +634,18 @@ class OutcomeGroup extends AbstractBaseApi
         }
 
         return $path;
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     */
+    protected static function getEndpoint(): string
+    {
+        $accountId = Config::getAccountId();
+        if (empty($accountId)) {
+            throw new CanvasApiException("Account ID must be set in Config for OutcomeGroup operations");
+        }
+        return "accounts/{$accountId}/outcome_groups";
     }
 }

@@ -9,7 +9,7 @@ use CanvasLMS\Config;
 use CanvasLMS\Dto\Outcomes\CreateOutcomeDTO;
 use CanvasLMS\Dto\Outcomes\UpdateOutcomeDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Outcome API class for managing learning outcomes in Canvas LMS.
@@ -46,40 +46,22 @@ class Outcome extends AbstractBaseApi
     public ?array $alignments = null;
 
     /**
-     * Fetch all outcomes (defaults to Account context).
+     * Get the endpoint for this resource.
      *
-     * @param array<string, mixed> $params Optional query parameters
-     * @return array<int, static> Array of Outcome objects
+     * @return string
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
 
         if (!$accountId) {
-            throw new CanvasApiException('Account ID must be configured to fetch outcomes');
+            throw new CanvasApiException('Account ID must be configured');
         }
 
-        return self::fetchByContext('accounts', $accountId, $params);
+        return sprintf('accounts/%d/outcome_groups/global/outcomes', $accountId);
     }
 
-    /**
-     * Fetch paginated outcomes (defaults to Account context).
-     *
-     * @param array<string, mixed> $params Optional query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchPaginated(array $params = []): PaginatedResponse
-    {
-        $accountId = Config::getAccountId();
-
-        if (!$accountId) {
-            throw new CanvasApiException('Account ID must be configured to fetch outcomes');
-        }
-
-        return self::fetchByContextPaginated('accounts', $accountId, $params);
-    }
 
     /**
      * Fetch outcomes by specific context.
@@ -93,7 +75,10 @@ class Outcome extends AbstractBaseApi
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
         $endpoint = sprintf('%s/%d/outcome_groups/global/outcomes', $contextType, $contextId);
-        return self::fetchAllPagesAsModels($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->fetchAllPages();
+
+        return array_map(fn($data) => new static($data), $allData);
     }
 
     /**
@@ -102,16 +87,17 @@ class Outcome extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses)
      * @param int $contextId Context ID
      * @param array<string, mixed> $params Optional query parameters
-     * @return PaginatedResponse
+     * @return PaginationResult
      * @throws CanvasApiException
      */
     public static function fetchByContextPaginated(
         string $contextType,
         int $contextId,
         array $params = []
-    ): PaginatedResponse {
+    ): PaginationResult {
         $endpoint = sprintf('%s/%d/outcome_groups/global/outcomes', $contextType, $contextId);
-        return self::getPaginatedResponse($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        return self::createPaginationResult($paginatedResponse);
     }
 
     /**

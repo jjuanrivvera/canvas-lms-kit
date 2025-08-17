@@ -461,4 +461,17 @@ class RubricAssessment extends AbstractBaseApi
             "Rubric assessments must be accessed through specific rubric associations."
         );
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * Note: RubricAssessment is a nested resource under RubricAssociation
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        throw new CanvasApiException(
+            'RubricAssessment does not support direct endpoint access. Use context-specific methods.'
+        );
+    }
 }

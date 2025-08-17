@@ -353,4 +353,17 @@ class Conference extends AbstractBaseApi
             }
         }
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * Note: Conference endpoints are context-specific and this should not be used directly
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        throw new CanvasApiException(
+            'Conference does not support direct endpoint access. Use context-specific methods like listForCourse()'
+        );
+    }
 }

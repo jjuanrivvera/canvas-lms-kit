@@ -1072,4 +1072,16 @@ class QuizSubmission extends AbstractBaseApi
             'validation_token' => $this->validationToken
         ];
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        self::checkQuiz();
+        return sprintf('courses/%d/quizzes/%d/submissions', self::$course->getId(), self::$quiz->getId());
+    }
 }

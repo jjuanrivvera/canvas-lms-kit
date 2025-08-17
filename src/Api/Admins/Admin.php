@@ -455,4 +455,17 @@ class Admin extends AbstractBaseApi
         $this->roleId = $roleId;
         return $this;
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     */
+    protected static function getEndpoint(): string
+    {
+        $accountId = Config::getAccountId();
+        if (empty($accountId)) {
+            throw new CanvasApiException("Account ID must be set in Config for Admin operations");
+        }
+        return "accounts/{$accountId}/admins";
+    }
 }

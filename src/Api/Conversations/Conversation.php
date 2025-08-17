@@ -460,4 +460,13 @@ class Conversation extends AbstractBaseApi
         $this->workflowState = 'archived';
         return $this->save();
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     */
+    protected static function getEndpoint(): string
+    {
+        return 'conversations';
+    }
 }

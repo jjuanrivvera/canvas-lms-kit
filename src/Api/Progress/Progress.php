@@ -600,4 +600,13 @@ class Progress extends AbstractBaseApi
             'Progress API does not support listing all progress objects. Use find() with specific ID.'
         );
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     */
+    protected static function getEndpoint(): string
+    {
+        return 'progress';
+    }
 }

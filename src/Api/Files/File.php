@@ -3,12 +3,9 @@
 namespace CanvasLMS\Api\Files;
 
 use Exception;
-use CanvasLMS\Config;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Dto\Files\UploadFileDto;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginationResult;
-use CanvasLMS\Pagination\PaginatedResponse;
 
 /**
  * File Class
@@ -408,74 +405,26 @@ class File extends AbstractBaseApi
     }
 
     /**
-     * Fetch all files from current user's personal files
+     * Get the endpoint for this resource.
+     * Files default to current user context.
      *
-     * NOTE: Unlike other API classes (Course, User) that fetch from the account
-     * level, File::fetchAll() returns the current user's personal files. This is
-     * because files in Canvas are inherently context-specific and there is no
-     * global "all files" endpoint.
-     *
-     * For specific contexts, use:
-     * - fetchCourseFiles() for course files
-     * - fetchUserFiles() for a specific user's files
-     * - fetchGroupFiles() for group files
-     *
-     * @param mixed[] $params Query parameters for filtering/pagination
-     * @return File[]
-     * @throws CanvasApiException
+     * @return string
      */
-    public static function fetchAll(array $params = []): array
+    protected static function getEndpoint(): string
     {
-        self::checkApiClient();
-
-        // Fetch files from current user's personal files as default
-        $response = self::$apiClient->get('/users/self/files', [
-            'query' => $params
-        ]);
-
-        $files = json_decode($response->getBody(), true);
-
-        return array_map(function ($fileData) {
-            $file = new self($fileData);
-            // Set context information
-            $file->contextType = 'user';
-            $file->contextId = null; // 'self' user ID is not known at this point
-            return $file;
-        }, $files);
+        return '/users/self/files';
     }
 
     /**
-     * Fetch files with pagination support from current user's personal files
-     * @param mixed[] $params Query parameters for the request
-     * @return PaginatedResponse
-     * @throws CanvasApiException
+     * Get first page of files from current user's personal files.
+     * Overrides base to set context information.
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<static>
      */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    public static function get(array $params = []): array
     {
-        return self::getPaginatedResponse('/users/self/files', $params);
-    }
-
-    /**
-     * Fetch files from a specific page from current user's personal files
-     * @param mixed[] $params Query parameters for the request
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Fetch all files from all pages from current user's personal files
-     * @param mixed[] $params Query parameters for the request
-     * @return File[]
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        $files = self::fetchAllPagesAsModels('/users/self/files', $params);
+        $files = parent::get($params);
 
         // Set context information on each file
         foreach ($files as $file) {
@@ -485,6 +434,29 @@ class File extends AbstractBaseApi
 
         return $files;
     }
+
+    /**
+     * Get all files from current user's personal files.
+     * Overrides base to set context information.
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<static>
+     */
+    public static function all(array $params = []): array
+    {
+        $files = parent::all($params);
+
+        // Set context information on each file
+        foreach ($files as $file) {
+            $file->contextType = 'user';
+            $file->contextId = null; // 'self' user ID is not known at this point
+        }
+
+        return $files;
+    }
+
+
+
 
     /**
      * Fetch files from a specific context
@@ -498,7 +470,10 @@ class File extends AbstractBaseApi
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
         $endpoint = sprintf('%s/%d/files', $contextType, $contextId);
-        $files = self::fetchAllPagesAsModels($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->fetchAllPages();
+
+        $files = array_map(fn($data) => new self($data), $allData);
 
         // Set context information on each file
         $singularContext = rtrim($contextType, 's');

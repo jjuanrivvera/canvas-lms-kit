@@ -12,7 +12,6 @@ use CanvasLMS\Dto\Groups\CreateGroupMembershipDTO;
 use CanvasLMS\Dto\Groups\UpdateGroupDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Api\ContentMigrations\ContentMigration;
 use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 
@@ -21,6 +20,35 @@ use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
  *
  * Provides functionality to manage groups in Canvas LMS.
  * Groups can be used for collaborative work, discussions, and assignments.
+ *
+ * Usage Examples:
+ *
+ * ```php
+ * // Create a group (defaults to account context)
+ * $group = Group::create([
+ *     'name' => 'Study Group Alpha',
+ *     'description' => 'Weekly study sessions'
+ * ]);
+ *
+ * // Get first page of groups (memory efficient)
+ * $groups = Group::get();
+ *
+ * // Get ALL groups (⚠️ Be cautious with large institutions)
+ * $allGroups = Group::all();
+ *
+ * // Get paginated groups (recommended for listings)
+ * $paginated = Group::paginate(['per_page' => 50]);
+ * foreach ($paginated->getData() as $group) {
+ *     echo $group->name . ' (' . $group->membersCount . ' members)';
+ * }
+ *
+ * // Get groups for a specific course
+ * $course = Course::find(123);
+ * $courseGroups = $course->groups(); // Returns first page only
+ *
+ * // To get ALL groups for a course:
+ * $groups = Group::fetchByContext('courses', 123, true); // true = all pages
+ * ```
  *
  * @see https://canvas.instructure.com/doc/api/groups.html
  *
@@ -170,55 +198,13 @@ class Group extends AbstractBaseApi
     }
 
     /**
-     * List groups in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<Group>
-     * @throws CanvasApiException
-     * @deprecated Use fetchAllPaginated(), fetchPage(), or fetchAllPages() for better pagination support
+     * Get the API endpoint for this resource
+     * @return string
      */
-    public static function fetchAll(array $params = []): array
-    {
-        return self::fetchAllPages($params);
-    }
-
-    /**
-     * Get paginated groups in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
-        return self::getPaginatedResponse(sprintf('accounts/%d/groups', $accountId), $params);
-    }
-
-    /**
-     * Get a single page of groups in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Get all pages of groups in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<Group>
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        $accountId = Config::getAccountId();
-        return self::fetchAllPagesAsModels(sprintf('accounts/%d/groups', $accountId), $params);
+        return sprintf('accounts/%d/groups', $accountId);
     }
 
     /**

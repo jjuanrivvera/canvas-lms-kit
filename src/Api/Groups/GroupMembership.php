@@ -536,4 +536,18 @@ class GroupMembership extends AbstractBaseApi
     {
         $this->justCreated = $justCreated;
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * Note: GroupMembership is a nested resource under Group
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        throw new CanvasApiException(
+            'GroupMembership does not support direct endpoint access. ' .
+            'Use context-specific methods like createForGroup()'
+        );
+    }
 }

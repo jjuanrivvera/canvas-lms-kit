@@ -27,18 +27,21 @@ class ExternalToolAccountContextTest extends TestCase
 
     public function testFetchAllUsesAccountContext(): void
     {
-        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
-            ->willReturn([
-                ['id' => 1, 'name' => 'Tool 1', 'consumer_key' => 'key1'],
-                ['id' => 2, 'name' => 'Tool 2', 'consumer_key' => 'key2']
-            ]);
+        $toolsData = [
+            ['id' => 1, 'name' => 'Tool 1', 'consumer_key' => 'key1'],
+            ['id' => 2, 'name' => 'Tool 2', 'consumer_key' => 'key2']
+        ];
+
+        $mockStream = $this->createMock(\Psr\Http\Message\StreamInterface::class);
+        $mockStream->method('getContents')->willReturn(json_encode($toolsData));
+        
+        $mockResponse = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
+        $mockResponse->method('getBody')->willReturn($mockStream);
 
         $this->mockClient->expects($this->once())
-            ->method('getPaginated')
+            ->method('get')
             ->with('accounts/1/external_tools', ['query' => []])
-            ->willReturn($mockPaginatedResponse);
+            ->willReturn($mockResponse);
 
         $tools = ExternalTool::fetchAll();
 

@@ -39,15 +39,11 @@ class RubricAccountContextTest extends TestCase
         ];
         
         $mockResponse = new Response(200, [], json_encode($rubricsData));
-        $paginatedResponse = $this->createMock(PaginatedResponse::class);
-        $paginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
-            ->willReturn($rubricsData);
         
         $this->httpClientMock->expects($this->once())
-            ->method('getPaginated')
+            ->method('get')
             ->with('accounts/1/rubrics', ['query' => []])
-            ->willReturn($paginatedResponse);
+            ->willReturn($mockResponse);
         
         $rubrics = Rubric::fetchAll();
         
@@ -220,7 +216,7 @@ class RubricAccountContextTest extends TestCase
     /**
      * Test paginated fetch
      */
-    public function testFetchAllPaginated(): void
+    public function testPaginate(): void
     {
         $paginatedResponse = $this->createMock(PaginatedResponse::class);
         
@@ -229,9 +225,9 @@ class RubricAccountContextTest extends TestCase
             ->with('accounts/1/rubrics', ['query' => ['per_page' => 10]])
             ->willReturn($paginatedResponse);
         
-        $result = Rubric::fetchAllPaginated(['per_page' => 10]);
+        $result = Rubric::paginate(['per_page' => 10]);
         
-        $this->assertSame($paginatedResponse, $result);
+        $this->assertInstanceOf(\CanvasLMS\Pagination\PaginationResult::class, $result);
     }
 
     /**

@@ -33,7 +33,7 @@ Config::setApiKey('your-api-key');
 Config::setBaseUrl('https://canvas.instructure.com');
 
 // It's that simple!
-$courses = Course::fetchAll();
+$courses = Course::get();  // Get first page
 foreach ($courses as $course) {
     echo $course->name . "\n";
 }
@@ -110,7 +110,7 @@ $tokenData = OAuth::exchangeCode($_GET['code']);
 Config::useOAuth();
 
 // Now all API calls use OAuth with automatic token refresh!
-$courses = Course::fetchAll(); // User's courses
+$courses = Course::get(); // User's courses (first page)
 ```
 
 ### Environment Variable Configuration
@@ -140,11 +140,16 @@ Config::autoDetectFromEnvironment();
 ```php
 use CanvasLMS\Api\Courses\Course;
 
-// List courses (first page with Canvas default limit)
-$courses = Course::fetchAll();
+// Get first page of courses (memory efficient)
+$courses = Course::get();
 
-// Get ALL courses across all pages
-$allCourses = Course::fetchAllPages();
+// Get ALL courses across all pages automatically
+// ⚠️ Warning: Be cautious with large datasets (1000+ items)
+$allCourses = Course::all();
+
+// Get paginated results with metadata (recommended for large datasets)
+$paginated = Course::paginate(['per_page' => 50]);
+echo "Total courses: " . $paginated->getTotalCount();
 
 // Find a specific course
 $course = Course::find(123);
@@ -302,8 +307,9 @@ $file = File::upload([
 use CanvasLMS\Api\FeatureFlags\FeatureFlag;
 use CanvasLMS\Api\Courses\Course;
 
-// List all feature flags for the account
-$flags = FeatureFlag::fetchAll();
+// Get feature flags for the account
+$flags = FeatureFlag::get();     // First page
+$allFlags = FeatureFlag::all();  // All flags
 
 // Get a specific feature flag
 $flag = FeatureFlag::find('new_gradebook');
@@ -328,8 +334,9 @@ $courseFlag->enable();
 ```php
 use CanvasLMS\Api\Conversations\Conversation;
 
-// List all conversations for the current user
-$conversations = Conversation::fetchAll(['scope' => 'unread']);
+// Get conversations for the current user
+$conversations = Conversation::get(['scope' => 'unread']); // First page
+$allConversations = Conversation::all(['scope' => 'unread']); // All pages
 
 // Create a new conversation
 $conversation = Conversation::create([
@@ -369,10 +376,10 @@ use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Api\Files\File;
 
 // Direct calls default to Account context
-$rubrics = Rubric::fetchAll();           // Account-level rubrics
-$tools = ExternalTool::fetchAll();       // Account-level external tools  
-$events = CalendarEvent::fetchAll();     // Account-level calendar events
-$files = File::fetchAll();               // Exception: User files (no account context)
+$rubrics = Rubric::get();           // Account-level rubrics (first page)
+$tools = ExternalTool::get();       // Account-level external tools (first page)
+$events = CalendarEvent::get();     // Account-level calendar events (first page)
+$files = File::get();               // Exception: User files (no account context)
 
 // Course-specific access through Course instance
 $course = Course::find(123);
@@ -393,6 +400,41 @@ $groupFiles = File::fetchByContext('groups', 789);
 - **Files** (User/Course/Group) - No Account context
 - **Groups** (Account/Course/User)
 - **Content Migrations** (Account/Course/Group/User)
+
+### Performance Considerations & Memory Usage
+
+When working with large Canvas instances (universities, enterprise organizations), be mindful of memory usage:
+
+```php
+// ✅ GOOD: Memory-efficient for large datasets
+$result = User::paginate(['per_page' => 100]);
+while ($result) {
+    foreach ($result->getData() as $user) {
+        // Process batch of 100 users
+    }
+    $result = $result->hasNextPage() ? $result->getNextPage() : null;
+}
+
+// ✅ GOOD: Get only what you need
+$recentCourses = Course::get(['per_page' => 20]); // Just first 20
+
+// ⚠️ CAUTION: Loads entire dataset into memory
+$allUsers = User::all();  // Could be 50,000+ users!
+$allEnrollments = Enrollment::all(); // Could be millions!
+
+// ⚠️ BETTER: Process in batches for large datasets
+$page = 1;
+do {
+    $batch = Enrollment::paginate(['page' => $page++, 'per_page' => 500]);
+    // Process batch
+} while ($batch->hasNextPage());
+```
+
+**Memory Guidelines:**
+- Use `get()` for dashboards and quick views (1 API call)
+- Use `paginate()` for large datasets and UI tables (controlled memory)
+- Use `all()` only when you need complete data AND know it's reasonably sized
+- Consider your server's memory limit when using `all()` on production data
 
 ### Working with Course-Scoped Resources
 
@@ -415,19 +457,29 @@ Module::setCourse($course);
 DiscussionTopic::setCourse($course);
 
 // Now you can use the APIs directly
-$pages = Page::fetchAll();
-$quizzes = Quiz::fetchAll();
-$modules = Module::fetchAll();
-$discussions = DiscussionTopic::fetchAll();
+$pages = Page::get();         // Get first page
+$quizzes = Quiz::all();       // Get all quizzes
+$modules = Module::get();     // Get first page
+$discussions = DiscussionTopic::all(); // Get all discussions
 
 // Option 2: Use course instance methods (recommended - no context setup needed)
-$pages = $course->pages();
-$quizzes = $course->quizzes();
-$modules = $course->modules();
-$discussions = $course->discussionTopics();
+$pages = $course->pages();          // Returns first page only
+$quizzes = $course->quizzes();      // Returns first page only
+$modules = $course->modules();      // Returns first page only
+$discussions = $course->discussionTopics(); // Returns first page only
 ```
 
-**Important:** These APIs will throw an exception if you try to use them without setting the course context first.
+**Important Notes:**
+1. These APIs will throw an exception if you try to use them without setting the course context first.
+2. **Relationship methods return FIRST PAGE ONLY** for performance. To get all items:
+   ```php
+   // Get ALL modules for a course
+   Module::setCourse($course);
+   $allModules = Module::all();  // Gets all pages
+   
+   // Or paginate for control
+   $paginated = Module::paginate(['per_page' => 50]);
+   ```
 
 ### Learning Outcomes
 
@@ -603,21 +655,30 @@ Config::setContext('test');
 $testCourse = Course::find(456);
 ```
 
-### Pagination Support
+### Pagination Support (Simplified API)
 
 ```php
-// Get first page with Canvas default limit
-$courses = Course::fetchAll(); 
+// Three simple methods for all your pagination needs:
 
-// Get ALL items across all pages automatically
-$allCourses = Course::fetchAllPages();
+// 1. get() - Fetch first page only (fast, memory efficient)
+$courses = Course::get(['per_page' => 100]); 
 
-// Manual pagination control
-$paginator = Course::fetchAllPaginated(['per_page' => 50]);
-foreach ($paginator as $page) {
-    foreach ($page as $course) {
-        // Process each course
-    }
+// 2. all() - Fetch ALL items across all pages automatically
+$allCourses = Course::all();
+
+// 3. paginate() - Get results with pagination metadata
+$result = Course::paginate(['per_page' => 50]);
+echo "Page {$result->getCurrentPage()} of {$result->getTotalPages()}";
+echo "Total courses: {$result->getTotalCount()}";
+
+// Access the data
+foreach ($result->getData() as $course) {
+    echo $course->name;
+}
+
+// Navigate pages
+if ($result->hasNextPage()) {
+    $nextPage = $result->getNextPage();
 }
 ```
 
@@ -661,9 +722,10 @@ Canvas LMS Kit uses the **Account-as-Default** convention for multi-context reso
 
 ```php
 // Direct API calls use Account context (Config::getAccountId())
-$groups = Group::fetchAll();              // First page of groups in the account
-$rubrics = Rubric::fetchAll();            // First page of rubrics in the account
-$migrations = ContentMigration::fetchAll(); // First page of migrations in the account
+$groups = Group::get();              // First page of groups in the account
+$allGroups = Group::all();           // All groups in the account
+$rubrics = Rubric::get();            // First page of rubrics in the account
+$migrations = ContentMigration::all(); // All migrations in the account
 
 // Course-specific access via Course instance methods
 $course = Course::find(123);

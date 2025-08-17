@@ -102,15 +102,16 @@ class GroupCategoryTest extends TestCase
             ['id' => 2, 'name' => 'Category 2']
         ];
 
-        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
-            ->willReturn($categoriesData);
+        $this->mockStream->method('getContents')
+            ->willReturn(json_encode($categoriesData));
+        
+        $this->mockResponse->method('getBody')
+            ->willReturn($this->mockStream);
         
         $this->mockHttpClient->expects($this->once())
-            ->method('getPaginated')
+            ->method('get')
             ->with('accounts/1/group_categories', ['query' => []])
-            ->willReturn($mockPaginatedResponse);
+            ->willReturn($this->mockResponse);
 
         $categories = GroupCategory::fetchAll();
 
@@ -127,15 +128,13 @@ class GroupCategoryTest extends TestCase
             ['id' => 2, 'name' => 'Account Category 2']
         ];
 
-        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
-            ->willReturn($categoriesData);
+        $this->mockStream->method('getContents')->willReturn(json_encode($categoriesData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->mockHttpClient->expects($this->once())
-            ->method('getPaginated')
+            ->method('get')
             ->with('accounts/1/group_categories', ['query' => []])
-            ->willReturn($mockPaginatedResponse);
+            ->willReturn($this->mockResponse);
 
         $categories = GroupCategory::fetchAll();
 

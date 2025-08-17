@@ -8,7 +8,6 @@ use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Dto\Accounts\CreateAccountDTO;
 use CanvasLMS\Dto\Accounts\UpdateAccountDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
@@ -209,65 +208,12 @@ class Account extends AbstractBaseApi
     }
 
     /**
-     * Get a list of accounts the current user can view or manage
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<int, self>
-     * @throws CanvasApiException
+     * Get the API endpoint for this resource
+     * @return string
      */
-    public static function fetchAll(array $params = []): array
+    protected static function getEndpoint(): string
     {
-        self::checkApiClient();
-
-        $endpoint = 'accounts';
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody(), true);
-
-        return array_map(function ($item) {
-            return new self($item);
-        }, $responseData);
-    }
-
-    /**
-     * Get accounts with pagination support
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkApiClient();
-
-        $endpoint = 'accounts';
-        return self::getPaginatedResponse($endpoint, $params);
-    }
-
-    /**
-     * Get a specific page of accounts
-     *
-     * @param array<string, mixed> $params Query parameters including page and per_page
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        $data = self::convertPaginatedResponseToModels($paginatedResponse);
-
-        return $paginatedResponse->toPaginationResult($data);
-    }
-
-    /**
-     * Get all accounts from all pages
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<int, self>
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        return self::fetchAllPagesAsModels('accounts', $params);
+        return 'accounts';
     }
 
     /**
