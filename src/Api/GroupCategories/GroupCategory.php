@@ -116,55 +116,19 @@ class GroupCategory extends AbstractBaseApi
     }
 
     /**
-     * List group categories in current account
+     * Get the endpoint for this resource.
      *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<GroupCategory>
+     * @return string
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
-    {
-        return self::fetchAllPages($params);
-    }
-
-    /**
-     * Get paginated group categories in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
-        return self::getPaginatedResponse(sprintf('accounts/%d/group_categories', $accountId), $params);
+        return sprintf('accounts/%d/group_categories', $accountId);
     }
 
-    /**
-     * Get a single page of group categories in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
 
-    /**
-     * Get all pages of group categories in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<GroupCategory>
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        $accountId = Config::getAccountId();
-        return self::fetchAllPagesAsModels(sprintf('accounts/%d/group_categories', $accountId), $params);
-    }
+
 
 
     /**

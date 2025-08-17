@@ -1338,4 +1338,15 @@ class Page extends AbstractBaseApi
             throw new CanvasApiException("Could not load user who last edited page: " . $e->getMessage());
         }
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/pages', self::$course->getId());
+    }
 }

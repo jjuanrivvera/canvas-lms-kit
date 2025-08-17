@@ -12,7 +12,6 @@ use CanvasLMS\Dto\Groups\CreateGroupMembershipDTO;
 use CanvasLMS\Dto\Groups\UpdateGroupDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Api\ContentMigrations\ContentMigration;
 use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 
@@ -170,55 +169,13 @@ class Group extends AbstractBaseApi
     }
 
     /**
-     * List groups in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<Group>
-     * @throws CanvasApiException
-     * @deprecated Use fetchAllPaginated(), fetchPage(), or fetchAllPages() for better pagination support
+     * Get the API endpoint for this resource
+     * @return string
      */
-    public static function fetchAll(array $params = []): array
-    {
-        return self::fetchAllPages($params);
-    }
-
-    /**
-     * Get paginated groups in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
-        return self::getPaginatedResponse(sprintf('accounts/%d/groups', $accountId), $params);
-    }
-
-    /**
-     * Get a single page of groups in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Get all pages of groups in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<Group>
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        $accountId = Config::getAccountId();
-        return self::fetchAllPagesAsModels(sprintf('accounts/%d/groups', $accountId), $params);
+        return sprintf('accounts/%d/groups', $accountId);
     }
 
     /**

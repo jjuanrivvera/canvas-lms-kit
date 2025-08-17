@@ -1391,4 +1391,15 @@ class Quiz extends AbstractBaseApi
         QuizSubmission::setQuiz($this);
         return QuizSubmission::fetchPage($params);
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/quizzes', self::$course->getId());
+    }
 }

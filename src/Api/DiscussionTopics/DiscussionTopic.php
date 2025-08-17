@@ -1982,4 +1982,15 @@ class DiscussionTopic extends AbstractBaseApi
             throw new CanvasApiException("Could not load associated assignment: " . $e->getMessage());
         }
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/discussion_topics', self::$course->getId());
+    }
 }

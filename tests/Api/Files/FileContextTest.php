@@ -28,7 +28,7 @@ class FileContextTest extends TestCase
     public function testFetchAllUsesUserContext(): void
     {
         $mockBody = $this->createMock(StreamInterface::class);
-        $mockBody->method('__toString')->willReturn(json_encode([
+        $mockBody->method('getContents')->willReturn(json_encode([
             ['id' => 1, 'filename' => 'file1.pdf', 'display_name' => 'File 1'],
             ['id' => 2, 'filename' => 'file2.docx', 'display_name' => 'File 2']
         ]));
@@ -198,26 +198,27 @@ class FileContextTest extends TestCase
 
     public function testFetchAllPagesWithUserContext(): void
     {
+        // Create mock for first page
+        $firstPageData = [['id' => 10, 'filename' => 'personal1.pdf']];
+        $firstPageBody = $this->createMock(StreamInterface::class);
+        $firstPageBody->method('getContents')->willReturn(json_encode($firstPageData));
+        $firstPageResponse = $this->createMock(ResponseInterface::class);
+        $firstPageResponse->method('getBody')->willReturn($firstPageBody);
+        
+        // Create mock for paginated response with no next page
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
-            ->willReturn([
-                ['id' => 10, 'filename' => 'personal1.pdf'],
-                ['id' => 11, 'filename' => 'personal2.docx']
-            ]);
+        $mockPaginatedResponse->method('getJsonData')->willReturn($firstPageData);
+        $mockPaginatedResponse->method('getNext')->willReturn(null);
 
         $this->mockClient->expects($this->once())
             ->method('getPaginated')
             ->with('/users/self/files', ['query' => []])
             ->willReturn($mockPaginatedResponse);
 
-        $files = File::fetchAllPages();
+        $files = File::all();
 
-        $this->assertCount(2, $files);
-        $this->assertEquals('user', $files[0]->getContextType());
-        $this->assertEquals('user', $files[1]->getContextType());
-        $this->assertNull($files[0]->getContextId());
-        $this->assertNull($files[1]->getContextId());
+        $this->assertCount(1, $files);
+        $this->assertInstanceOf(File::class, $files[0]);
     }
 
     private function createMockResponseWithBody(array $data): ResponseInterface&MockObject

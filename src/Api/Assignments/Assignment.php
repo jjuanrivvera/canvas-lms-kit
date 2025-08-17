@@ -10,10 +10,10 @@ use CanvasLMS\Dto\Assignments\CreateAssignmentDTO;
 use CanvasLMS\Dto\Assignments\UpdateAssignmentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Api\Submissions\Submission;
 use CanvasLMS\Api\Rubrics\Rubric;
 use CanvasLMS\Api\Rubrics\RubricAssociation;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Assignments API
@@ -1671,5 +1671,16 @@ class Assignment extends AbstractBaseApi
             $msg = "Failed to get rubric association for assignment {$this->id}: ";
             throw new CanvasApiException($msg . $e->getMessage());
         }
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/assignments', self::$course->getId());
     }
 }

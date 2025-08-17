@@ -10,7 +10,6 @@ use CanvasLMS\Dto\ExternalTools\CreateExternalToolDTO;
 use CanvasLMS\Dto\ExternalTools\UpdateExternalToolDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS External Tools API
@@ -1076,34 +1075,52 @@ class ExternalTool extends AbstractBaseApi
     }
 
     /**
-     * Fetch all external tools in the default account context
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return array<ExternalTool> Array of ExternalTool objects
-     * @throws CanvasApiException
-     * @deprecated Use fetchAllPaginated(), fetchPage(), or fetchAllPages() for better pagination support
+     * Get the API endpoint for this resource
+     * @return string
      */
-    public static function fetchAll(array $params = []): array
+    protected static function getEndpoint(): string
     {
-        return self::fetchAllPages($params);
+        $accountId = Config::getAccountId();
+        return sprintf('accounts/%d/external_tools', $accountId);
     }
 
     /**
-     * Get all pages of external tools in current account
+     * Get first page of external tools.
+     * Overrides base to set context information.
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<self>
-     * @throws CanvasApiException
+     * @return array<static>
      */
-    public static function fetchAllPages(array $params = []): array
+    public static function get(array $params = []): array
     {
+        $tools = parent::get($params);
         $accountId = Config::getAccountId();
-        $tools = self::fetchAllPagesAsModels(sprintf('accounts/%d/external_tools', $accountId), $params);
 
         // Set context information on each tool
         foreach ($tools as $tool) {
-            $tool->contextType = 'account';
-            $tool->contextId = $accountId;
+            $tool->setContextType('account');
+            $tool->setContextId($accountId);
+        }
+
+        return $tools;
+    }
+
+    /**
+     * Get all external tools.
+     * Overrides base to set context information.
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<static>
+     */
+    public static function all(array $params = []): array
+    {
+        $tools = parent::all($params);
+        $accountId = Config::getAccountId();
+
+        // Set context information on each tool
+        foreach ($tools as $tool) {
+            $tool->setContextType('account');
+            $tool->setContextId($accountId);
         }
 
         return $tools;
@@ -1132,18 +1149,6 @@ class ExternalTool extends AbstractBaseApi
         return $tools;
     }
 
-    /**
-     * Get paginated external tools in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        $accountId = Config::getAccountId();
-        return self::getPaginatedResponse(sprintf('accounts/%d/external_tools', $accountId), $params);
-    }
 
     /**
      * Get paginated external tools for a specific context
@@ -1162,18 +1167,6 @@ class ExternalTool extends AbstractBaseApi
         return self::getPaginatedResponse(sprintf('%s/%d/external_tools', $contextType, $contextId), $params);
     }
 
-    /**
-     * Get a single page of external tools in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
 
 
     /**

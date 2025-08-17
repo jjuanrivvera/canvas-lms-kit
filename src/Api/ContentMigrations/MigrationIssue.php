@@ -8,8 +8,8 @@ use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Dto\ContentMigrations\UpdateMigrationIssueDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 use DateTime;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Migration Issues API

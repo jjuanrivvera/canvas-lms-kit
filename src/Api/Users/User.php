@@ -10,7 +10,6 @@ use CanvasLMS\Api\Groups\Group;
 use CanvasLMS\Dto\Users\UpdateUserDTO;
 use CanvasLMS\Dto\Users\CreateUserDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Objects\ActivityStreamItem;
 use CanvasLMS\Objects\ActivityStreamSummary;
@@ -347,62 +346,13 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * Fetch all users
-     * @param mixed[] $params
-     * @return User[]
-     * @throws CanvasApiException
+     * Get the API endpoint for this resource
+     * @return string
      */
-    public static function fetchAll(array $params = []): array
-    {
-        self::checkApiClient();
-
-        $accountId = Config::getAccountId();
-
-        $response = self::$apiClient->get("/accounts/{$accountId}/users", [
-            'query' => $params
-        ]);
-
-        $users = json_decode($response->getBody(), true);
-
-        return array_map(function ($user) {
-            return new self($user);
-        }, $users);
-    }
-
-    /**
-     * Fetch users with pagination support
-     * @param mixed[] $params Query parameters for the request
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
-        return self::getPaginatedResponse("/accounts/{$accountId}/users", $params);
-    }
-
-    /**
-     * Fetch users from a specific page
-     * @param mixed[] $params Query parameters for the request
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Fetch all users from all pages
-     * @param mixed[] $params Query parameters for the request
-     * @return User[]
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        $accountId = Config::getAccountId();
-        return self::fetchAllPagesAsModels("/accounts/{$accountId}/users", $params);
+        return sprintf('accounts/%d/users', $accountId);
     }
 
     /**

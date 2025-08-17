@@ -28,6 +28,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive test coverage for all conversation operations
 
 ### Changed
+- **IMPROVED**: Simplified pagination API to three clear, intuitive methods
+  - `get()` - Fetch first page only (fast, memory efficient)
+  - `all()` - Fetch all pages automatically (handles pagination transparently)
+  - `paginate()` - Get results with pagination metadata (PaginationResult)
+  - Old method names (`fetchAll`, `fetchAllPages`, `fetchAllPaginated`, `fetchPage`) still work via aliases for backward compatibility
+  - Added `getEndpoint()` method to all API classes for consistency
+  - Context-aware behavior preserved for Files (user context) and ExternalTools (account context)
+  - Updated all tests and documentation to use new method names
+  - No breaking changes - existing code continues to work with aliases
 - **IMPROVED**: Standardized `save()` and `delete()` methods across all API classes to return `self` for fluent interface support (#99)
   - Enables method chaining: `$course->save()->enrollments()` 
   - Changed from returning `bool` to returning instance

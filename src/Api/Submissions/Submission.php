@@ -958,4 +958,16 @@ class Submission extends AbstractBaseApi
             throw new CanvasApiException("Could not load grader: " . $e->getMessage());
         }
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        self::checkAssignment();
+        return sprintf('courses/%d/assignments/%d/submissions', self::$course->getId(), self::$assignment->getId());
+    }
 }

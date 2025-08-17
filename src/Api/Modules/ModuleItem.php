@@ -10,10 +10,10 @@ use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Dto\Modules\CreateModuleItemDTO;
 use CanvasLMS\Dto\Modules\UpdateModuleItemDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Objects\CompletionRequirement;
 use CanvasLMS\Objects\ContentDetails;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Module Item Class
@@ -811,5 +811,17 @@ class ModuleItem extends AbstractBaseApi
     public function setIframe(?array $iframe): void
     {
         $this->iframe = $iframe;
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        self::checkModule();
+        return sprintf("courses/%d/modules/%d/items", self::$course->getId(), self::$module->getId());
     }
 }

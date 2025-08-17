@@ -12,7 +12,6 @@ use CanvasLMS\Dto\ContentMigrations\UpdateContentMigrationDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Objects\Migrator;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 use DateTime;
 
 /**
@@ -181,56 +180,15 @@ class ContentMigration extends AbstractBaseApi
         return new self($data);
     }
 
-    /**
-     * List content migrations in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<ContentMigration>
-     * @throws CanvasApiException
-     * @deprecated Use fetchAllPaginated(), fetchPage(), or fetchAllPages() for better pagination support
-     */
-    public static function fetchAll(array $params = []): array
-    {
-        return self::fetchAllPages($params);
-    }
 
     /**
-     * Get paginated content migrations in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
+     * Get the API endpoint for this resource
+     * @return string
      */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
-        return self::getPaginatedResponse(sprintf('accounts/%d/content_migrations', $accountId), $params);
-    }
-
-    /**
-     * Get a single page of content migrations in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Get all pages of content migrations in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<ContentMigration>
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        $accountId = Config::getAccountId();
-        return self::fetchAllPagesAsModels(sprintf('accounts/%d/content_migrations', $accountId), $params);
+        return sprintf('accounts/%d/content_migrations', $accountId);
     }
 
     /**

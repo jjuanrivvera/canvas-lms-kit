@@ -9,8 +9,8 @@ use CanvasLMS\Config;
 use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Interfaces\ApiInterface;
 use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Abstract base class for Canvas LMS API resources.
@@ -18,6 +18,8 @@ use CanvasLMS\Pagination\PaginatedResponse;
  * Provides common functionality for all API resource classes including CRUD operations,
  * pagination support, HTTP client management, and data population from API responses.
  * Implements the Active Record pattern for Canvas API interactions.
+ *
+ * @phpstan-consistent-constructor
  */
 abstract class AbstractBaseApi implements ApiInterface
 {
@@ -31,11 +33,10 @@ abstract class AbstractBaseApi implements ApiInterface
      * @var mixed[]
      */
     protected static array $methodAliases = [
-        'fetchAll' => ['all', 'get', 'getAll'],
-        'find' => ['one', 'getOne'],
-        'fetchAllPaginated' => ['allPaginated', 'getPaginated'],
-        'fetchAllPages' => ['allPages', 'getPages'],
-        'fetchPage' => ['page', 'getPage']
+        'get' => ['fetch', 'list', 'fetchAll'],
+        'all' => ['fetchAllPages', 'getAll'],
+        'paginate' => ['getPaginated', 'withPagination', 'fetchPage'],
+        'find' => ['one', 'getOne']
     ];
 
     /**
@@ -121,7 +122,7 @@ abstract class AbstractBaseApi implements ApiInterface
         $data = get_object_vars($this);
 
         // Format DateTime objects and handle other specific transformations
-        foreach ($data as $key => &$value) {
+        foreach ($data as &$value) {
             if ($value instanceof DateTime) {
                 $value = $value->format('c'); // Convert DateTime to ISO 8601 string
             }
@@ -186,7 +187,6 @@ abstract class AbstractBaseApi implements ApiInterface
         $data = $paginatedResponse->getJsonData();
 
         return array_map(function ($item) {
-            /** @phpstan-ignore-next-line */
             return new static($item);
         }, $data);
     }
@@ -203,7 +203,6 @@ abstract class AbstractBaseApi implements ApiInterface
         $allData = $paginatedResponse->fetchAllPages();
 
         return array_map(function ($item) {
-            /** @phpstan-ignore-next-line */
             return new static($item);
         }, $allData);
     }
@@ -217,6 +216,75 @@ abstract class AbstractBaseApi implements ApiInterface
     {
         $models = self::convertPaginatedResponseToModels($paginatedResponse);
         return $paginatedResponse->toPaginationResult($models);
+    }
+
+    /**
+     * Get first page of results
+     * @param array<string, mixed> $params Query parameters
+     * @return array<static>
+     */
+    public static function get(array $params = []): array
+    {
+        static::checkApiClient();
+        $endpoint = static::getEndpoint();
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+
+        $data = json_decode($response->getBody()->getContents(), true);
+
+        if (!is_array($data)) {
+            return [];
+        }
+
+        return array_map(fn($item) => new static($item), $data);
+    }
+
+    /**
+     * Get all pages of results
+     * @param array<string, mixed> $params Query parameters
+     * @return array<static>
+     */
+    public static function all(array $params = []): array
+    {
+        static::checkApiClient();
+        $allData = [];
+        $endpoint = static::getEndpoint();
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+
+        do {
+            $data = $paginatedResponse->getJsonData();
+            foreach ($data as $item) {
+                $allData[] = new static($item);
+            }
+            $paginatedResponse = $paginatedResponse->getNext();
+        } while ($paginatedResponse !== null);
+
+        return $allData;
+    }
+
+    /**
+     * Get paginated results with metadata
+     * @param array<string, mixed> $params Query parameters
+     * @return PaginationResult
+     */
+    public static function paginate(array $params = []): PaginationResult
+    {
+        static::checkApiClient();
+        $endpoint = static::getEndpoint();
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+
+        $data = array_map(fn($item) => new static($item), $paginatedResponse->getJsonData());
+        return $paginatedResponse->toPaginationResult($data);
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * Subclasses should override this to provide their specific endpoint
+     * @return string
+     */
+    protected static function getEndpoint(): string
+    {
+        // This should be overridden by subclasses
+        throw new \RuntimeException('Subclasses must implement getEndpoint()');
     }
 
     /**
