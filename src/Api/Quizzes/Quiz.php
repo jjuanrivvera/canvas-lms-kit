@@ -1195,10 +1195,10 @@ class Quiz extends AbstractBaseApi
     /**
      * Save the current quiz (create or update)
      *
-     * @return bool True if save was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
         // Check for required fields before trying to save
         if (!$this->id && empty($this->title)) {
@@ -1238,109 +1238,93 @@ class Quiz extends AbstractBaseApi
             }
         }
 
-        try {
-            if ($this->id) {
-                // Update existing quiz
-                $updateData = $this->toDtoArray();
-                if (empty($updateData)) {
-                    return true; // Nothing to update
-                }
-
-                $updatedQuiz = self::update($this->id, $updateData);
-                // Update current instance with response data
-                foreach ($updatedQuiz->toArray() as $key => $value) {
-                    $property = lcfirst(str_replace('_', '', ucwords($key, '_')));
-                    if ($this->isSafeToUpdateProperty($property)) {
-                        $this->{$property} = $value;
-                    }
-                }
-            } else {
-                // Create new quiz
-                $createData = $this->toDtoArray();
-
-                $newQuiz = self::create($createData);
-                // Update current instance with response data
-                foreach ($newQuiz->toArray() as $key => $value) {
-                    $property = lcfirst(str_replace('_', '', ucwords($key, '_')));
-                    if ($this->isSafeToUpdateProperty($property)) {
-                        $this->{$property} = $value;
-                    }
-                }
+        if ($this->id) {
+            // Update existing quiz
+            $updateData = $this->toDtoArray();
+            if (empty($updateData)) {
+                return $this; // Nothing to update
             }
 
-            return true;
-        } catch (CanvasApiException) {
-            return false;
+            $updatedQuiz = self::update($this->id, $updateData);
+            // Update current instance with response data
+            foreach ($updatedQuiz->toArray() as $key => $value) {
+                $property = lcfirst(str_replace('_', '', ucwords($key, '_')));
+                if ($this->isSafeToUpdateProperty($property)) {
+                    $this->{$property} = $value;
+                }
+            }
+        } else {
+            // Create new quiz
+            $createData = $this->toDtoArray();
+
+            $newQuiz = self::create($createData);
+            // Update current instance with response data
+            foreach ($newQuiz->toArray() as $key => $value) {
+                $property = lcfirst(str_replace('_', '', ucwords($key, '_')));
+                if ($this->isSafeToUpdateProperty($property)) {
+                    $this->{$property} = $value;
+                }
+            }
         }
+
+        return $this;
     }
 
     /**
      * Delete the quiz
      *
-     * @return bool True if deletion was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Quiz ID is required for deletion');
         }
 
-        try {
-            self::checkCourse();
-            self::checkApiClient();
+        self::checkCourse();
+        self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/quizzes/%d', self::$course->id, $this->id);
-            self::$apiClient->delete($endpoint);
+        $endpoint = sprintf('courses/%d/quizzes/%d', self::$course->id, $this->id);
+        self::$apiClient->delete($endpoint);
 
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        return $this;
     }
 
     /**
      * Publish the quiz
      *
-     * @return bool True if publish was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function publish(): bool
+    public function publish(): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Quiz ID is required for publishing');
         }
 
-        try {
-            $updatedQuiz = self::update($this->id, ['published' => true]);
-            $this->published = $updatedQuiz->published;
-            $this->workflowState = $updatedQuiz->workflowState;
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        $updatedQuiz = self::update($this->id, ['published' => true]);
+        $this->published = $updatedQuiz->published;
+        $this->workflowState = $updatedQuiz->workflowState;
+        return $this;
     }
 
     /**
      * Unpublish the quiz
      *
-     * @return bool True if unpublish was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function unpublish(): bool
+    public function unpublish(): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Quiz ID is required for unpublishing');
         }
 
-        try {
-            $updatedQuiz = self::update($this->id, ['published' => false]);
-            $this->published = $updatedQuiz->published;
-            $this->workflowState = $updatedQuiz->workflowState;
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        $updatedQuiz = self::update($this->id, ['published' => false]);
+        $this->published = $updatedQuiz->published;
+        $this->workflowState = $updatedQuiz->workflowState;
+        return $this;
     }
 
     /**
@@ -1406,5 +1390,16 @@ class Quiz extends AbstractBaseApi
         QuizSubmission::setCourse(self::$course);
         QuizSubmission::setQuiz($this);
         return QuizSubmission::fetchPage($params);
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/quizzes', self::$course->getId());
     }
 }

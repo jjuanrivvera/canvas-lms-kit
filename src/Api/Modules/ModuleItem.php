@@ -10,10 +10,10 @@ use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Dto\Modules\CreateModuleItemDTO;
 use CanvasLMS\Dto\Modules\UpdateModuleItemDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Objects\CompletionRequirement;
 use CanvasLMS\Objects\ContentDetails;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Module Item Class
@@ -459,11 +459,10 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Save the module item
-     * @return bool
+     * @return self
      * @throws CanvasApiException
-     * @throws Exception
      */
-    public function save(): bool
+    public function save(): self
     {
         self::checkApiClient();
         self::checkCourse();
@@ -477,118 +476,85 @@ class ModuleItem extends AbstractBaseApi
             : sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id);
         $method = isset($data['id']) ? 'PUT' : 'POST';
 
-        try {
-            $response = self::$apiClient->request($method, $path, [
-                'multipart' => $dto->toApiArray()
-            ]);
+        $response = self::$apiClient->request($method, $path, [
+            'multipart' => $dto->toApiArray()
+        ]);
 
-            $moduleItemData = json_decode($response->getBody()->getContents(), true);
-            $this->populate($moduleItemData);
-        } catch (CanvasApiException $exception) {
-            // Log the error for debugging
-            error_log('ModuleItem operation failed: ' . $exception->getMessage());
-            return false;
-        }
+        $moduleItemData = json_decode($response->getBody()->getContents(), true);
+        $this->populate($moduleItemData);
 
-        return true;
+        return $this;
     }
 
     /**
      * Delete a module item
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         self::checkApiClient();
         self::checkCourse();
         self::checkModule();
 
-        try {
-            $endpoint = sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $this->id);
-            self::$apiClient->delete($endpoint);
-        } catch (CanvasApiException $exception) {
-            // Log the error for debugging
-            error_log('ModuleItem operation failed: ' . $exception->getMessage());
-            return false;
-        }
+        $endpoint = sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $this->id);
+        self::$apiClient->delete($endpoint);
 
-        return true;
+        return $this;
     }
 
     /**
      * Mark module item as read (fulfills must_view completion requirement)
      * Cannot be used on locked or unpublished items
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function markAsRead(): bool
+    public function markAsRead(): self
     {
         self::checkApiClient();
         self::checkCourse();
         self::checkModule();
 
-        try {
-            $endpoint = sprintf(
-                'courses/%d/modules/%d/items/%d/mark_read',
-                self::$course->id,
-                self::$module->id,
-                $this->id
-            );
-            self::$apiClient->post($endpoint);
-        } catch (CanvasApiException $exception) {
-            // Log the error for debugging
-            error_log('ModuleItem operation failed: ' . $exception->getMessage());
-            return false;
-        }
-
-        return true;
+        $endpoint = sprintf(
+            'courses/%d/modules/%d/items/%d/mark_read',
+            self::$course->id,
+            self::$module->id,
+            $this->id
+        );
+        self::$apiClient->post($endpoint);
+        return $this;
     }
 
     /**
      * Mark module item as done (manual completion marking)
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function markAsDone(): bool
+    public function markAsDone(): self
     {
         self::checkApiClient();
         self::checkCourse();
         self::checkModule();
 
-        try {
-            $endpoint = sprintf('courses/%d/modules/%d/items/%d/done', self::$course->id, self::$module->id, $this->id);
-            self::$apiClient->put($endpoint);
-        } catch (CanvasApiException $exception) {
-            // Log the error for debugging
-            error_log('ModuleItem operation failed: ' . $exception->getMessage());
-            return false;
-        }
-
-        return true;
+        $endpoint = sprintf('courses/%d/modules/%d/items/%d/done', self::$course->id, self::$module->id, $this->id);
+        self::$apiClient->put($endpoint);
+        return $this;
     }
 
     /**
      * Mark module item as not done (removes manual completion marking)
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function markAsNotDone(): bool
+    public function markAsNotDone(): self
     {
         self::checkApiClient();
         self::checkCourse();
         self::checkModule();
 
-        try {
-            $endpoint = sprintf('courses/%d/modules/%d/items/%d/done', self::$course->id, self::$module->id, $this->id);
-            self::$apiClient->delete($endpoint);
-        } catch (CanvasApiException $exception) {
-            // Log the error for debugging
-            error_log('ModuleItem operation failed: ' . $exception->getMessage());
-            return false;
-        }
-
-        return true;
+        $endpoint = sprintf('courses/%d/modules/%d/items/%d/done', self::$course->id, self::$module->id, $this->id);
+        self::$apiClient->delete($endpoint);
+        return $this;
     }
 
     /**
@@ -845,5 +811,17 @@ class ModuleItem extends AbstractBaseApi
     public function setIframe(?array $iframe): void
     {
         $this->iframe = $iframe;
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        self::checkModule();
+        return sprintf("courses/%d/modules/%d/items", self::$course->getId(), self::$module->getId());
     }
 }

@@ -9,7 +9,7 @@
   [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-8892BF.svg?style=flat-square)](https://php.net)
   [![License](https://img.shields.io/github/license/jjuanrivvera/canvas-lms-kit?style=flat-square)](https://github.com/jjuanrivvera/canvas-lms-kit/blob/main/LICENSE)
 
-  **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 40+ APIs implemented.**
+  **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 37 APIs implemented.**
 </div>
 
 ---
@@ -33,7 +33,7 @@ Config::setApiKey('your-api-key');
 Config::setBaseUrl('https://canvas.instructure.com');
 
 // It's that simple!
-$courses = Course::fetchAll();
+$courses = Course::get();  // Get first page
 foreach ($courses as $course) {
     echo $course->name . "\n";
 }
@@ -66,6 +66,8 @@ composer require jjuanrivvera/canvas-lms-kit
 
 ## ⚙️ Configuration
 
+### API Key Authentication (Simple)
+
 ```php
 use CanvasLMS\Config;
 
@@ -83,6 +85,54 @@ Config::setMiddleware([
 ]);
 ```
 
+### OAuth 2.0 Authentication (User-Based) 🆕
+
+Canvas LMS Kit now supports OAuth 2.0 for user-specific authentication with automatic token refresh!
+
+```php
+use CanvasLMS\Config;
+use CanvasLMS\Auth\OAuth;
+
+// Configure OAuth credentials
+Config::setOAuthClientId('your-client-id');
+Config::setOAuthClientSecret('your-client-secret');
+Config::setOAuthRedirectUri('https://yourapp.com/oauth/callback');
+Config::setBaseUrl('https://canvas.instructure.com');
+
+// Step 1: Get authorization URL
+$authUrl = OAuth::getAuthorizationUrl(['state' => 'random-state']);
+// Redirect user to $authUrl
+
+// Step 2: Handle callback
+$tokenData = OAuth::exchangeCode($_GET['code']);
+
+// Step 3: Use OAuth mode
+Config::useOAuth();
+
+// Now all API calls use OAuth with automatic token refresh!
+$courses = Course::get(); // User's courses (first page)
+```
+
+### Environment Variable Configuration
+
+Perfect for containerized deployments and 12-factor apps:
+
+```bash
+# .env file
+CANVAS_BASE_URL=https://canvas.instructure.com
+CANVAS_API_KEY=your-api-key
+# OR for OAuth:
+CANVAS_OAUTH_CLIENT_ID=your-client-id
+CANVAS_OAUTH_CLIENT_SECRET=your-client-secret
+CANVAS_AUTH_MODE=oauth
+```
+
+```php
+// Auto-detect from environment
+Config::autoDetectFromEnvironment();
+// Ready to use!
+```
+
 ## 💡 Usage Examples
 
 ### Working with Courses
@@ -90,11 +140,16 @@ Config::setMiddleware([
 ```php
 use CanvasLMS\Api\Courses\Course;
 
-// List courses (first page with Canvas default limit)
-$courses = Course::fetchAll();
+// Get first page of courses (memory efficient)
+$courses = Course::get();
 
-// Get ALL courses across all pages
-$allCourses = Course::fetchAllPages();
+// Get ALL courses across all pages automatically
+// ⚠️ Warning: Be cautious with large datasets (1000+ items)
+$allCourses = Course::all();
+
+// Get paginated results with metadata (recommended for large datasets)
+$paginated = Course::paginate(['per_page' => 50]);
+echo "Total courses: " . $paginated->getTotalCount();
 
 // Find a specific course
 $course = Course::find(123);
@@ -111,7 +166,11 @@ $course->update([
     'name' => 'Advanced PHP Programming'
 ]);
 
-// Delete a course
+// Save changes with fluent interface support
+$course->name = 'Updated Course Name';
+$course->save()->enrollments(); // Save and immediately get enrollments
+
+// Delete a course (also returns self for chaining)
 $course->delete();
 ```
 
@@ -119,10 +178,15 @@ $course->delete();
 
 ```php
 use CanvasLMS\Api\Assignments\Assignment;
+use CanvasLMS\Api\Submissions\Submission;
+use CanvasLMS\Api\Courses\Course;
+
+// Set course context for Assignment
+$course = Course::find(123);
+Assignment::setCourse($course);
 
 // Create an assignment - simple array syntax
 $assignment = Assignment::create([
-    'course_id' => 123,
     'name' => 'Final Project',
     'description' => 'Build a web application',
     'points_possible' => 100,
@@ -130,12 +194,50 @@ $assignment = Assignment::create([
     'submission_types' => ['online_upload', 'online_url']
 ]);
 
-// Grade submissions
-$submission = $assignment->getSubmission($studentId);
-$submission->grade([
+// Grade submissions (requires both Course and Assignment context)
+Submission::setCourse($course);
+Submission::setAssignment($assignment);
+
+$submission = Submission::update($studentId, [
     'posted_grade' => 95,
     'comment' => 'Excellent work!'
 ]);
+```
+
+### Working with Modules and Module Items
+
+```php
+use CanvasLMS\Api\Modules\Module;
+use CanvasLMS\Api\Modules\ModuleItem;
+
+// Get course and set context
+$course = Course::find(123);
+Module::setCourse($course);
+
+// Create a module
+$module = Module::create([
+    'name' => 'Week 1: Introduction',
+    'position' => 1,
+    'published' => true
+]);
+
+// Add items to the module (requires both course and module context)
+ModuleItem::setCourse($course);
+ModuleItem::setModule($module);
+
+// Add an assignment to the module
+$item = ModuleItem::create([
+    'title' => 'Week 1 Assignment',
+    'type' => 'Assignment',
+    'content_id' => $assignment->id,
+    'position' => 1,
+    'completion_requirement' => [
+        'type' => 'must_submit'
+    ]
+]);
+
+// Or use the course instance method (recommended)
+$modules = $course->modules();
 ```
 
 ### Working with Current User
@@ -149,7 +251,7 @@ $currentUser = User::self();
 // Canvas supports 'self' for these endpoints:
 $profile = $currentUser->getProfile();
 $activityStream = $currentUser->getActivityStream();
-$todoItems = $currentUser->getTodo();
+$todos = $currentUser->getTodoItems();
 $groups = $currentUser->groups();
 
 // Other methods require explicit user ID
@@ -205,8 +307,9 @@ $file = File::upload([
 use CanvasLMS\Api\FeatureFlags\FeatureFlag;
 use CanvasLMS\Api\Courses\Course;
 
-// List all feature flags for the account
-$flags = FeatureFlag::fetchAll();
+// Get feature flags for the account
+$flags = FeatureFlag::get();     // First page
+$allFlags = FeatureFlag::all();  // All flags
 
 // Get a specific feature flag
 $flag = FeatureFlag::find('new_gradebook');
@@ -226,6 +329,42 @@ $courseFlag = $course->getFeatureFlag('anonymous_marking');
 $courseFlag->enable();
 ```
 
+### Conversations (Internal Messaging)
+
+```php
+use CanvasLMS\Api\Conversations\Conversation;
+
+// Get conversations for the current user
+$conversations = Conversation::get(['scope' => 'unread']); // First page
+$allConversations = Conversation::all(['scope' => 'unread']); // All pages
+
+// Create a new conversation
+$conversation = Conversation::create([
+    'recipients' => ['user_123', 'course_456_students'],
+    'subject' => 'Assignment Feedback',
+    'body' => 'Great work on your recent submission!',
+    'group_conversation' => true
+]);
+
+// Add a message to existing conversation
+$conversation->addMessage([
+    'body' => 'Following up on my previous message...',
+    'attachment_ids' => [789] // Attach files
+]);
+
+// Manage conversation state
+$conversation->markAsRead();
+$conversation->star();
+$conversation->archive();
+
+// Batch operations
+Conversation::batchUpdate([1, 2, 3], ['event' => 'mark_as_read']);
+Conversation::markAllAsRead();
+
+// Get unread count
+$unreadCount = Conversation::getUnreadCount();
+```
+
 ### Working with Multi-Context Resources
 
 Some Canvas resources exist in multiple contexts (Account, Course, User, Group). Canvas LMS Kit follows an **Account-as-Default** convention for consistency:
@@ -237,10 +376,10 @@ use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Api\Files\File;
 
 // Direct calls default to Account context
-$rubrics = Rubric::fetchAll();           // Account-level rubrics
-$tools = ExternalTool::fetchAll();       // Account-level external tools  
-$events = CalendarEvent::fetchAll();     // Account-level calendar events
-$files = File::fetchAll();               // Exception: User files (no account context)
+$rubrics = Rubric::get();           // Account-level rubrics (first page)
+$tools = ExternalTool::get();       // Account-level external tools (first page)
+$events = CalendarEvent::get();     // Account-level calendar events (first page)
+$files = File::get();               // Exception: User files (no account context)
 
 // Course-specific access through Course instance
 $course = Course::find(123);
@@ -262,11 +401,91 @@ $groupFiles = File::fetchByContext('groups', 789);
 - **Groups** (Account/Course/User)
 - **Content Migrations** (Account/Course/Group/User)
 
+### Performance Considerations & Memory Usage
+
+When working with large Canvas instances (universities, enterprise organizations), be mindful of memory usage:
+
+```php
+// ✅ GOOD: Memory-efficient for large datasets
+$result = User::paginate(['per_page' => 100]);
+while ($result) {
+    foreach ($result->getData() as $user) {
+        // Process batch of 100 users
+    }
+    $result = $result->hasNextPage() ? $result->getNextPage() : null;
+}
+
+// ✅ GOOD: Get only what you need
+$recentCourses = Course::get(['per_page' => 20]); // Just first 20
+
+// ⚠️ CAUTION: Loads entire dataset into memory
+$allUsers = User::all();  // Could be 50,000+ users!
+$allEnrollments = Enrollment::all(); // Could be millions!
+
+// ⚠️ BETTER: Process in batches for large datasets
+$page = 1;
+do {
+    $batch = Enrollment::paginate(['page' => $page++, 'per_page' => 500]);
+    // Process batch
+} while ($batch->hasNextPage());
+```
+
+**Memory Guidelines:**
+- Use `get()` for dashboards and quick views (1 API call)
+- Use `paginate()` for large datasets and UI tables (controlled memory)
+- Use `all()` only when you need complete data AND know it's reasonably sized
+- Consider your server's memory limit when using `all()` on production data
+
+### Working with Course-Scoped Resources
+
+Some Canvas resources are strictly course-scoped and require setting the course context before use:
+
+```php
+use CanvasLMS\Api\Pages\Page;
+use CanvasLMS\Api\Quizzes\Quiz;
+use CanvasLMS\Api\Modules\Module;
+use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
+use CanvasLMS\Api\Courses\Course;
+
+// Get your course
+$course = Course::find(123);
+
+// Option 1: Set context for each API (required for direct API calls)
+Page::setCourse($course);
+Quiz::setCourse($course);
+Module::setCourse($course);
+DiscussionTopic::setCourse($course);
+
+// Now you can use the APIs directly
+$pages = Page::get();         // Get first page
+$quizzes = Quiz::all();       // Get all quizzes
+$modules = Module::get();     // Get first page
+$discussions = DiscussionTopic::all(); // Get all discussions
+
+// Option 2: Use course instance methods (recommended - no context setup needed)
+$pages = $course->pages();          // Returns first page only
+$quizzes = $course->quizzes();      // Returns first page only
+$modules = $course->modules();      // Returns first page only
+$discussions = $course->discussionTopics(); // Returns first page only
+```
+
+**Important Notes:**
+1. These APIs will throw an exception if you try to use them without setting the course context first.
+2. **Relationship methods return FIRST PAGE ONLY** for performance. To get all items:
+   ```php
+   // Get ALL modules for a course
+   Module::setCourse($course);
+   $allModules = Module::all();  // Gets all pages
+   
+   // Or paginate for control
+   $paginated = Module::paginate(['per_page' => 50]);
+   ```
+
 ### Learning Outcomes
 
 ```php
-use CanvasLMS\Api\Outcomes\Outcome\Outcome;
-use CanvasLMS\Api\Outcomes\OutcomeGroup\OutcomeGroup;
+use CanvasLMS\Api\Outcomes\Outcome;
+use CanvasLMS\Api\OutcomeGroups\OutcomeGroup;
 
 // Create an outcome group
 $group = OutcomeGroup::create([
@@ -392,8 +611,9 @@ foreach ($issues as $issue) {
 - ✅ **Groups** - Student groups and collaboration
 - ✅ **Group Categories** - Organize and manage groups
 - ✅ **Group Memberships** - Group member management
+- ✅ **Conferences** - Web conferencing integration
+- ✅ **Conversations** - Internal messaging system
 - 🔄 **Announcements** - Course announcements (coming soon)
-- 🔄 **Conversations** - Private messaging (coming soon)
 </details>
 
 <details>
@@ -435,21 +655,54 @@ Config::setContext('test');
 $testCourse = Course::find(456);
 ```
 
-### Pagination Support
+### Pagination Support (Simplified API)
 
 ```php
-// Get first page with Canvas default limit
-$courses = Course::fetchAll(); 
+// Three simple methods for all your pagination needs:
 
-// Get ALL items across all pages automatically
-$allCourses = Course::fetchAllPages();
+// 1. get() - Fetch first page only (fast, memory efficient)
+$courses = Course::get(['per_page' => 100]); 
 
-// Manual pagination control
-$paginator = Course::fetchAllPaginated(['per_page' => 50]);
-foreach ($paginator as $page) {
-    foreach ($page as $course) {
-        // Process each course
-    }
+// 2. all() - Fetch ALL items across all pages automatically
+$allCourses = Course::all();
+
+// 3. paginate() - Get results with pagination metadata
+$result = Course::paginate(['per_page' => 50]);
+echo "Page {$result->getCurrentPage()} of {$result->getTotalPages()}";
+echo "Total courses: {$result->getTotalCount()}";
+
+// Access the data
+foreach ($result->getData() as $course) {
+    echo $course->name;
+}
+
+// Navigate pages
+if ($result->hasNextPage()) {
+    $nextPage = $result->getNextPage();
+}
+```
+
+### Fluent Interface & Method Chaining
+
+All `save()` and `delete()` methods return the instance, enabling method chaining:
+
+```php
+// Save and continue working with the object
+$course->name = 'New Name';
+$enrollments = $course->save()->enrollments();
+
+// Chain multiple operations
+$assignment = new Assignment();
+$assignment->name = 'Final Project';
+$assignment->points_possible = 100;
+$submissions = $assignment->save()->getSubmissions();
+
+// Error handling with fluent interface
+try {
+    $user->email = 'new@example.com';
+    $user->save()->enrollments(); // Save and get enrollments
+} catch (CanvasApiException $e) {
+    // Handle error - no more silent failures!
 }
 ```
 
@@ -459,8 +712,8 @@ foreach ($paginator as $page) {
 // Efficient relationship loading
 $course = Course::find(123);
 $students = $course->getStudents();
-$assignments = $course->getAssignments();
-$modules = $course->getModules();
+$assignments = $course->assignments();
+$modules = $course->modules();
 ```
 
 ### Context Management (Account-as-Default)
@@ -469,14 +722,15 @@ Canvas LMS Kit uses the **Account-as-Default** convention for multi-context reso
 
 ```php
 // Direct API calls use Account context (Config::getAccountId())
-$groups = Group::fetchAll();              // First page of groups in the account
-$rubrics = Rubric::fetchAll();            // First page of rubrics in the account
-$migrations = ContentMigration::fetchAll(); // First page of migrations in the account
+$groups = Group::get();              // First page of groups in the account
+$allGroups = Group::all();           // All groups in the account
+$rubrics = Rubric::get();            // First page of rubrics in the account
+$migrations = ContentMigration::all(); // All migrations in the account
 
 // Course-specific access via Course instance methods
 $course = Course::find(123);
-$courseGroups = $course->getGroups();              // Groups in this course
-$courseRubrics = $course->getRubrics();            // Rubrics in this course
+$courseGroups = $course->groups();              // Groups in this course
+$courseRubrics = $course->rubrics();            // Rubrics in this course
 $courseMigrations = $course->contentMigrations(); // Migrations in this course
 
 // User-specific access via User instance methods

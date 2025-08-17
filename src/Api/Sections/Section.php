@@ -262,50 +262,44 @@ class Section extends AbstractBaseApi
     /**
      * Save the section (create or update).
      *
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
-        try {
-            if ($this->id) {
-                // Update existing section
-                $dto = new UpdateSectionDTO($this->toDtoArray());
-                $updated = self::update($this->id, $dto);
-                $this->populate(get_object_vars($updated));
-            } else {
-                // Create new section
-                if (!self::checkCourse()) {
-                    throw new CanvasApiException('Course context is required for creating sections');
-                }
-
-                $dto = new CreateSectionDTO($this->toDtoArray());
-                $created = self::create($dto);
-                $this->populate(get_object_vars($created));
+        if ($this->id) {
+            // Update existing section
+            $dto = new UpdateSectionDTO($this->toDtoArray());
+            $updated = self::update($this->id, $dto);
+            $this->populate(get_object_vars($updated));
+        } else {
+            // Create new section
+            if (!self::checkCourse()) {
+                throw new CanvasApiException('Course context is required for creating sections');
             }
-            return true;
-        } catch (\Exception $e) {
-            return false;
+
+            $dto = new CreateSectionDTO($this->toDtoArray());
+            $created = self::create($dto);
+            $this->populate(get_object_vars($created));
         }
+        return $this;
     }
 
     /**
      * Delete the section.
      *
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
-            return false;
+            throw new CanvasApiException('Section ID is required for deletion');
         }
 
-        try {
-            $endpoint = sprintf('sections/%d', $this->id);
-            self::$apiClient->delete($endpoint);
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
+        $endpoint = sprintf('sections/%d', $this->id);
+        self::$apiClient->delete($endpoint);
+        return $this;
     }
 
     /**
@@ -367,5 +361,16 @@ class Section extends AbstractBaseApi
     {
         $params = array_merge($params, ['type[]' => ['StudentEnrollment']]);
         return $this->enrollments($params);
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/sections', self::$course->getId());
     }
 }

@@ -1592,10 +1592,10 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Save the current discussion topic (create or update)
      *
-     * @return bool True if save was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
         // Check for required fields before trying to save
         if (!$this->id && empty($this->title)) {
@@ -1627,53 +1627,45 @@ class DiscussionTopic extends AbstractBaseApi
             }
         }
 
-        try {
-            if ($this->id) {
-                // Update existing discussion topic
-                $updateData = $this->toDtoArray();
-                if (empty($updateData)) {
-                    return true; // Nothing to update
-                }
-
-                $updatedDiscussion = self::update($this->id, $updateData);
-                $this->populate($updatedDiscussion->toArray());
-            } else {
-                // Create new discussion topic
-                $createData = $this->toDtoArray();
-
-                $newDiscussion = self::create($createData);
-                $this->populate($newDiscussion->toArray());
+        if ($this->id) {
+            // Update existing discussion topic
+            $updateData = $this->toDtoArray();
+            if (empty($updateData)) {
+                return $this; // Nothing to update
             }
 
-            return true;
-        } catch (CanvasApiException) {
-            return false;
+            $updatedDiscussion = self::update($this->id, $updateData);
+            $this->populate($updatedDiscussion->toArray());
+        } else {
+            // Create new discussion topic
+            $createData = $this->toDtoArray();
+
+            $newDiscussion = self::create($createData);
+            $this->populate($newDiscussion->toArray());
         }
+
+        return $this;
     }
 
     /**
      * Delete the discussion topic
      *
-     * @return bool True if deletion was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Discussion topic ID is required for deletion');
         }
 
-        try {
-            self::checkCourse();
-            self::checkApiClient();
+        self::checkCourse();
+        self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/discussion_topics/%d', self::$course->id, $this->id);
-            self::$apiClient->delete($endpoint);
+        $endpoint = sprintf('courses/%d/discussion_topics/%d', self::$course->id, $this->id);
+        self::$apiClient->delete($endpoint);
 
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        return $this;
     }
 
     /**
@@ -1989,5 +1981,16 @@ class DiscussionTopic extends AbstractBaseApi
         } catch (\Exception $e) {
             throw new CanvasApiException("Could not load associated assignment: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/discussion_topics', self::$course->getId());
     }
 }

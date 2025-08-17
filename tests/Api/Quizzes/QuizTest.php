@@ -553,7 +553,7 @@ class QuizTest extends TestCase
 
         $result = $quiz->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Quiz::class, $result);
         $this->assertEquals(3, $quiz->getId());
     }
 
@@ -596,7 +596,7 @@ class QuizTest extends TestCase
 
         $result = $quiz->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Quiz::class, $result);
         $this->assertEquals('Updated Existing Quiz', $quiz->getTitle());
     }
 
@@ -610,7 +610,7 @@ class QuizTest extends TestCase
 
         $result = $quiz->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Quiz::class, $result);
     }
 
     public function testDeleteWithoutId(): void
@@ -656,7 +656,7 @@ class QuizTest extends TestCase
 
         $result = $quiz->publish();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Quiz::class, $result);
         $this->assertTrue($quiz->getPublished());
         $this->assertEquals('published', $quiz->getWorkflowState());
     }
@@ -695,7 +695,7 @@ class QuizTest extends TestCase
 
         $result = $quiz->unpublish();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Quiz::class, $result);
         $this->assertFalse($quiz->getPublished());
         $this->assertEquals('unpublished', $quiz->getWorkflowState());
     }

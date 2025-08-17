@@ -68,12 +68,12 @@ class ContentMigrationTest extends TestCase
             ['id' => 2, 'migration_type' => 'zip_file_importer']
         ];
 
-        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')->willReturn($migrationsData);
+        $this->mockStream->method('getContents')->willReturn(json_encode($migrationsData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
-        $this->mockClient->method('getPaginated')
+        $this->mockClient->method('get')
             ->with('accounts/1/content_migrations', ['query' => []])
-            ->willReturn($mockPaginatedResponse);
+            ->willReturn($this->mockResponse);
 
         $migrations = ContentMigration::fetchAll();
 

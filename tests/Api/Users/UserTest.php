@@ -275,7 +275,7 @@ class UserTest extends TestCase
 
         $result = $this->user->save();
 
-        $this->assertTrue($result, 'The save method should return true on successful save.');
+        $this->assertInstanceOf(User::class, $result, 'The save method should return User instance on successful save.');
         $this->assertEquals('Test User', $this->user->getName(), 'The user name should be updated after saving.');
     }
 
@@ -283,7 +283,7 @@ class UserTest extends TestCase
      * Test the save user method
      * @return void
      */
-    public function testSaveUserShouldReturnFalseWhenApiThrowsException(): void
+    public function testSaveUserShouldThrowExceptionWhenApiFails(): void
     {
         $this->user->setId(1);
         $this->user->setName('Test User');
@@ -291,9 +291,11 @@ class UserTest extends TestCase
         $this->httpClientMock
             ->expects($this->once())
             ->method('request')
-            ->will($this->throwException(new CanvasApiException()));
+            ->will($this->throwException(new CanvasApiException('API Error')));
 
-        $this->assertFalse($this->user->save());
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('API Error');
+        $this->user->save();
     }
 
     // Relationship Method Tests
@@ -550,6 +552,66 @@ class UserTest extends TestCase
         
         $currentUser = User::self();
         $currentUser->files();
+    }
+
+    /**
+     * Test getTodo() method delegates to getTodoItems()
+     */
+    public function testGetTodoMethodAlias(): void
+    {
+        $todoData = [
+            [
+                'type' => 'grading',
+                'assignment' => ['id' => 1, 'name' => 'Assignment 1'],
+                'needs_grading_count' => 5
+            ],
+            [
+                'type' => 'submitting',
+                'assignment' => ['id' => 2, 'name' => 'Assignment 2']
+            ]
+        ];
+        
+        $response = new Response(200, [], json_encode($todoData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('/users/self/todo', $this->anything())
+            ->willReturn($response);
+        
+        $currentUser = User::self();
+        $todos = $currentUser->getTodo();
+        
+        $this->assertCount(2, $todos);
+        $this->assertEquals('grading', $todos[0]->type);
+        $this->assertEquals('submitting', $todos[1]->type);
+    }
+
+    /**
+     * Test getTodo() with specific user ID
+     */
+    public function testGetTodoWithUserId(): void
+    {
+        $todoData = [
+            [
+                'type' => 'grading',
+                'assignment' => ['id' => 1, 'name' => 'Assignment 1']
+            ]
+        ];
+        
+        $response = new Response(200, [], json_encode($todoData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('/users/123/todo', $this->anything())
+            ->willReturn($response);
+        
+        $user = new User(['id' => 123]);
+        $todos = $user->getTodo();
+        
+        $this->assertCount(1, $todos);
+        $this->assertEquals('grading', $todos[0]->type);
     }
 
     protected function tearDown(): void

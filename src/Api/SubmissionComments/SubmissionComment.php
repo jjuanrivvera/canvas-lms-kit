@@ -243,29 +243,24 @@ class SubmissionComment extends AbstractBaseApi
 
     /**
      * Delete a submission comment
+     * @return self
      * @throws CanvasApiException
      * @throws Exception
      */
-    public static function delete(int $commentId): bool
+    public static function delete(int $commentId): self
     {
         self::checkApiClient();
         self::checkContexts();
 
-        try {
-            $endpoint = sprintf(
-                'courses/%d/assignments/%d/submissions/%d/comments/%d',
-                self::$course->id,
-                self::$assignment->id,
-                self::$userId,
-                $commentId
-            );
-            self::$apiClient->delete($endpoint);
-        } catch (CanvasApiException $exception) {
-            error_log('SubmissionComment delete failed: ' . $exception->getMessage());
-            return false;
-        }
-
-        return true;
+        $endpoint = sprintf(
+            'courses/%d/assignments/%d/submissions/%d/comments/%d',
+            self::$course->id,
+            self::$assignment->id,
+            self::$userId,
+            $commentId
+        );
+        self::$apiClient->delete($endpoint);
+        return new self([]);
     }
 
     /**
@@ -322,13 +317,13 @@ class SubmissionComment extends AbstractBaseApi
 
     /**
      * Save the comment (update only)
+     * @return self
      * @throws CanvasApiException
-     * @throws Exception
      */
-    public function save(): bool
+    public function save(): self
     {
         if (!isset($this->id)) {
-            throw new Exception('Cannot save comment without ID');
+            throw new CanvasApiException('Cannot save comment without ID');
         }
 
         self::checkApiClient();
@@ -345,26 +340,21 @@ class SubmissionComment extends AbstractBaseApi
             $this->id
         );
 
-        try {
-            $response = self::$apiClient->request('PUT', $endpoint, [
-                'multipart' => $dto->toApiArray()
-            ]);
+        $response = self::$apiClient->request('PUT', $endpoint, [
+            'multipart' => $dto->toApiArray()
+        ]);
 
-            $commentData = json_decode($response->getBody()->getContents(), true);
+        $commentData = json_decode($response->getBody()->getContents(), true);
 
-            // Update the current instance with the response data
-            foreach ($commentData as $key => $value) {
-                $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
-                if (property_exists($this, $camelKey) && !is_null($value)) {
-                    $this->{$camelKey} = $value;
-                }
+        // Update the current instance with the response data
+        foreach ($commentData as $key => $value) {
+            $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+            if (property_exists($this, $camelKey) && !is_null($value)) {
+                $this->{$camelKey} = $value;
             }
-        } catch (CanvasApiException $exception) {
-            error_log('SubmissionComment save failed: ' . $exception->getMessage());
-            return false;
         }
 
-        return true;
+        return $this;
     }
 
     // Getter and setter methods for all properties
@@ -453,5 +443,18 @@ class SubmissionComment extends AbstractBaseApi
     public function setMediaComment(?array $mediaComment): void
     {
         $this->mediaComment = $mediaComment;
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * Note: SubmissionComment is a nested resource under Submission
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        throw new CanvasApiException(
+            'SubmissionComment does not support direct endpoint access. Use context-specific methods.'
+        );
     }
 }

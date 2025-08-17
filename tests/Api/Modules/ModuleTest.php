@@ -439,7 +439,7 @@ class ModuleTest extends TestCase
 
         $result = $module->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Module::class, $result);
         $this->assertEquals(123, $module->getId());
     }
 
@@ -470,7 +470,7 @@ class ModuleTest extends TestCase
 
         $result = $module->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Module::class, $result);
     }
 
     public function testSaveReturnsFalseOnException(): void
@@ -481,9 +481,9 @@ class ModuleTest extends TestCase
             ->method('request')
             ->willThrowException(new CanvasApiException('API Error'));
 
-        $result = $module->save();
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('API Error');
+        $module->save();
     }
 
     public function testDelete(): void
@@ -499,7 +499,7 @@ class ModuleTest extends TestCase
 
         $result = $module->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Module::class, $result);
     }
 
     public function testDeleteReturnsFalseOnException(): void
@@ -510,9 +510,9 @@ class ModuleTest extends TestCase
             ->method('delete')
             ->willThrowException(new CanvasApiException('Delete failed'));
 
-        $result = $module->delete();
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Delete failed');
+        $module->delete();
     }
 
     public function testRelock(): void
@@ -538,7 +538,7 @@ class ModuleTest extends TestCase
 
         $result = $module->relock();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Module::class, $result);
         $this->assertEquals('locked', $module->getState());
     }
 
@@ -550,9 +550,9 @@ class ModuleTest extends TestCase
             ->method('put')
             ->willThrowException(new CanvasApiException('Relock failed'));
 
-        $result = $module->relock();
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Relock failed');
+        $module->relock();
     }
 
     public function testItems(): void
@@ -687,7 +687,7 @@ class ModuleTest extends TestCase
 
         $result = $module->bulkUpdateOverrides($dto);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Module::class, $result);
     }
 
     public function testBulkUpdateOverridesWithArray(): void
@@ -716,7 +716,7 @@ class ModuleTest extends TestCase
 
         $result = $module->bulkUpdateOverrides($overrides);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Module::class, $result);
     }
 
     public function testBulkUpdateOverridesReturnsFalseOnException(): void
@@ -727,9 +727,9 @@ class ModuleTest extends TestCase
             ->method('put')
             ->willThrowException(new CanvasApiException('Update failed'));
 
-        $result = $module->bulkUpdateOverrides([]);
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Update failed');
+        $module->bulkUpdateOverrides([]);
     }
 
     public function testToDtoArray(): void

@@ -9,7 +9,6 @@ use CanvasLMS\Dto\Rubrics\UpdateRubricDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Objects\RubricCriterion;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Rubric Class
@@ -327,10 +326,10 @@ class Rubric extends AbstractBaseApi
     /**
      * Delete a rubric
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot delete rubric without ID");
@@ -345,7 +344,7 @@ class Rubric extends AbstractBaseApi
         $endpoint = sprintf('%ss/%d/rubrics/%d', $this->contextType, $this->contextId, $this->id);
         self::$apiClient->delete($endpoint);
 
-        return true;
+        return $this;
     }
 
     /**
@@ -391,29 +390,13 @@ class Rubric extends AbstractBaseApi
     }
 
     /**
-     * Fetch all rubrics in the default account context
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<self>
-     * @throws CanvasApiException
-     * @deprecated Use fetchAllPaginated(), fetchPage(), or fetchAllPages() for better pagination support
+     * Get the API endpoint for this resource
+     * @return string
      */
-    public static function fetchAll(array $params = []): array
-    {
-        return self::fetchAllPages($params);
-    }
-
-    /**
-     * Get all pages of rubrics in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<self>
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
+    protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
-        return self::fetchAllPagesAsModels(sprintf('accounts/%d/rubrics', $accountId), $params);
+        return sprintf('accounts/%d/rubrics', $accountId);
     }
 
     /**
@@ -430,31 +413,6 @@ class Rubric extends AbstractBaseApi
         return self::fetchAllPagesAsModels(sprintf('%s/%d/rubrics', $contextType, $contextId), $params);
     }
 
-    /**
-     * Get paginated rubrics in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        $accountId = Config::getAccountId();
-        return self::getPaginatedResponse(sprintf('accounts/%d/rubrics', $accountId), $params);
-    }
-
-    /**
-     * Get a single page of rubrics in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
 
     /**
      * Get paginated rubrics for a specific context

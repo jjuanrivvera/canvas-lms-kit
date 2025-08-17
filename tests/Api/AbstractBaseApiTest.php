@@ -48,50 +48,53 @@ class AbstractBaseApiTest extends TestCase
      */
     private function createTestApiClass(): string
     {
-        $className = 'TestApi' . uniqid();
-
-        eval("
-            class {$className} extends \\CanvasLMS\\Api\\AbstractBaseApi
+        // Use anonymous class instead of eval()
+        // We need to pass empty array to constructor to avoid the error
+        $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
+        {
+            public $id;
+            public $name;
+            
+            protected static function getEndpoint(): string
             {
-                public \$id;
-                public \$name;
-                
-                public static function find(int \$id): self
-                {
-                    return new self(['id' => \$id, 'name' => 'Test Item']);
-                }
-                
-                public static function fetchAll(array \$params = []): array
-                {
-                    return [
-                        new self(['id' => 1, 'name' => 'Test Item 1']),
-                        new self(['id' => 2, 'name' => 'Test Item 2']),
-                    ];
-                }
-                
-                public static function testGetPaginatedResponse(string \$endpoint, array \$params = []): \\CanvasLMS\\Pagination\\PaginatedResponse
-                {
-                    return parent::getPaginatedResponse(\$endpoint, \$params);
-                }
-                
-                public static function testConvertPaginatedResponseToModels(\\CanvasLMS\\Pagination\\PaginatedResponse \$paginatedResponse): array
-                {
-                    return parent::convertPaginatedResponseToModels(\$paginatedResponse);
-                }
-                
-                public static function testFetchAllPagesAsModels(string \$endpoint, array \$params = []): array
-                {
-                    return parent::fetchAllPagesAsModels(\$endpoint, \$params);
-                }
-                
-                public static function testCreatePaginationResult(\\CanvasLMS\\Pagination\\PaginatedResponse \$paginatedResponse): \\CanvasLMS\\Pagination\\PaginationResult
-                {
-                    return parent::createPaginationResult(\$paginatedResponse);
-                }
+                return 'test_items';
             }
-        ");
+            
+            public static function find(int $id): self
+            {
+                return new self(['id' => $id, 'name' => 'Test Item']);
+            }
+            
+            public static function fetchAll(array $params = []): array
+            {
+                return [
+                    new self(['id' => 1, 'name' => 'Test Item 1']),
+                    new self(['id' => 2, 'name' => 'Test Item 2']),
+                ];
+            }
+            
+            public static function testGetPaginatedResponse(string $endpoint, array $params = []): \CanvasLMS\Pagination\PaginatedResponse
+            {
+                return parent::getPaginatedResponse($endpoint, $params);
+            }
+            
+            public static function testConvertPaginatedResponseToModels(\CanvasLMS\Pagination\PaginatedResponse $paginatedResponse): array
+            {
+                return parent::convertPaginatedResponseToModels($paginatedResponse);
+            }
+            
+            public static function testFetchAllPagesAsModels(string $endpoint, array $params = []): array
+            {
+                return parent::fetchAllPagesAsModels($endpoint, $params);
+            }
+            
+            public static function testCreatePaginationResult(\CanvasLMS\Pagination\PaginatedResponse $paginatedResponse): \CanvasLMS\Pagination\PaginationResult
+            {
+                return parent::createPaginationResult($paginatedResponse);
+            }
+        };
 
-        return $className;
+        return get_class($testClass);
     }
 
     /**
@@ -222,18 +225,16 @@ class AbstractBaseApiTest extends TestCase
         // Test that aliases are registered
         $aliases = $this->getMethodAliases();
 
-        $this->assertArrayHasKey('fetchAll', $aliases);
+        $this->assertArrayHasKey('get', $aliases);
+        $this->assertArrayHasKey('all', $aliases);
+        $this->assertArrayHasKey('paginate', $aliases);
         $this->assertArrayHasKey('find', $aliases);
-        $this->assertArrayHasKey('fetchAllPaginated', $aliases);
-        $this->assertArrayHasKey('fetchAllPages', $aliases);
-        $this->assertArrayHasKey('fetchPage', $aliases);
 
         // Test specific alias mappings
-        $this->assertEquals(['all', 'get', 'getAll'], $aliases['fetchAll']);
+        $this->assertEquals(['fetch', 'list', 'fetchAll'], $aliases['get']);
+        $this->assertEquals(['fetchAllPages', 'getAll'], $aliases['all']);
+        $this->assertEquals(['getPaginated', 'withPagination', 'fetchPage'], $aliases['paginate']);
         $this->assertEquals(['one', 'getOne'], $aliases['find']);
-        $this->assertEquals(['allPaginated', 'getPaginated'], $aliases['fetchAllPaginated']);
-        $this->assertEquals(['allPages', 'getPages'], $aliases['fetchAllPages']);
-        $this->assertEquals(['page', 'getPage'], $aliases['fetchPage']);
     }
 
     /**
@@ -283,34 +284,37 @@ class AbstractBaseApiTest extends TestCase
      */
     private function createTestApiClassWithFetchAll(): string
     {
-        $className = 'TestApiWithFetchAll' . uniqid();
-
-        eval("
-            class {$className} extends \\CanvasLMS\\Api\\AbstractBaseApi
+        // Use anonymous class instead of eval()
+        // We need to pass empty array to constructor to avoid the error
+        $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
+        {
+            public $id;
+            public $name;
+            
+            protected static function getEndpoint(): string
             {
-                public \$id;
-                public \$name;
-                
-                public static function find(int \$id): self
-                {
-                    return new self(['id' => \$id, 'name' => 'Test Item']);
-                }
-                
-                public static function fetchAll(array \$params = []): array
-                {
-                    self::checkApiClient();
-                    
-                    \$response = self::\$apiClient->get('/test', ['query' => \$params]);
-                    \$data = json_decode(\$response->getBody()->getContents(), true);
-                    
-                    return array_map(function (\$item) {
-                        return new self(\$item);
-                    }, \$data);
-                }
+                return 'test';
             }
-        ");
+            
+            public static function find(int $id): self
+            {
+                return new self(['id' => $id, 'name' => 'Test Item']);
+            }
+            
+            public static function fetchAll(array $params = []): array
+            {
+                self::checkApiClient();
+                
+                $response = self::$apiClient->get('/test', ['query' => $params]);
+                $data = json_decode($response->getBody()->getContents(), true);
+                
+                return array_map(function ($item) {
+                    return new self($item);
+                }, $data);
+            }
+        };
 
-        return $className;
+        return get_class($testClass);
     }
 
     /**
@@ -359,30 +363,33 @@ class AbstractBaseApiTest extends TestCase
      */
     public function testSnakeCaseToCarmelCaseConversion(): void
     {
-        // Create a test class with camelCase property
-        $className = 'TestApiCamelCase' . uniqid();
-
-        eval("
-            class {$className} extends \\CanvasLMS\\Api\\AbstractBaseApi
+        // Use anonymous class instead of eval()
+        // We need to pass empty array to constructor to avoid the error
+        $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
+        {
+            public $someProperty;
+            
+            protected static function getEndpoint(): string
             {
-                public \$someProperty;
-                
-                public static function find(int \$id): self
-                {
-                    return new self(['id' => \$id]);
-                }
-                
-                public static function fetchAll(array \$params = []): array
-                {
-                    return [];
-                }
+                return 'test';
             }
-        ");
+            
+            public static function find(int $id): self
+            {
+                return new self(['id' => $id]);
+            }
+            
+            public static function fetchAll(array $params = []): array
+            {
+                return [];
+            }
+        };
 
         $data = [
             'some_property' => 'test value'
         ];
 
+        $className = get_class($testClass);
         $instance = new $className($data);
 
         $this->assertEquals('test value', $instance->someProperty);

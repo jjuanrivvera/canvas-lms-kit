@@ -2,6 +2,7 @@
 
 namespace CanvasLMS\Http;
 
+use CanvasLMS\Auth\OAuth;
 use CanvasLMS\Config;
 use Psr\Log\LoggerInterface;
 use GuzzleHttp\ClientInterface;
@@ -14,6 +15,7 @@ use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Exceptions\MissingApiKeyException;
 use CanvasLMS\Exceptions\MissingBaseUrlException;
+use CanvasLMS\Exceptions\MissingOAuthTokenException;
 use CanvasLMS\Pagination\PaginatedResponse;
 
 /**
@@ -299,13 +301,27 @@ class HttpClient implements HttpClientInterface
      * @param mixed[] $options
      * @return mixed[]
      * @throws MissingApiKeyException
+     * @throws MissingOAuthTokenException
      * @throws MissingBaseUrlException
      */
     private function prepareDefaultOptions(string &$url, array $options): array
     {
-        $appKey = Config::getAppKey();
-        if (!$appKey) {
-            throw new MissingApiKeyException();
+        $authMode = Config::getAuthMode();
+
+        // Handle authentication based on mode
+        if ($authMode === 'oauth') {
+            $token = $this->getValidOAuthToken();
+            if (!$token) {
+                throw new MissingOAuthTokenException();
+            }
+            $options['headers']['Authorization'] = 'Bearer ' . $token;
+        } else {
+            // Default to API key authentication
+            $appKey = Config::getAppKey();
+            if (!$appKey) {
+                throw new MissingApiKeyException();
+            }
+            $options['headers']['Authorization'] = 'Bearer ' . $appKey;
         }
 
         $baseUrl = Config::getBaseUrl();
@@ -319,9 +335,28 @@ class HttpClient implements HttpClientInterface
             '/' .
             ltrim($url, '/');
 
-        $options['headers']['Authorization'] = 'Bearer ' . $appKey;
         $url = $fullUrl;
 
         return $options;
+    }
+
+    /**
+     * Get a valid OAuth token, refreshing if necessary.
+     *
+     * @return string|null The valid OAuth token or null if not available
+     */
+    private function getValidOAuthToken(): ?string
+    {
+        // Check if token is expired and refresh if needed
+        if (Config::isOAuthTokenExpired()) {
+            try {
+                OAuth::refreshToken();
+            } catch (\Exception $e) {
+                // If refresh fails, return null to trigger MissingOAuthTokenException
+                return null;
+            }
+        }
+
+        return Config::getOAuthToken();
     }
 }

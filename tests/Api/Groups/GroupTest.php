@@ -106,15 +106,13 @@ class GroupTest extends TestCase
             ['id' => 2, 'name' => 'Group 2']
         ];
 
-        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
-            ->willReturn($groupsData);
+        $this->mockStream->method('getContents')->willReturn(json_encode($groupsData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         
         $this->mockHttpClient->expects($this->once())
-            ->method('getPaginated')
+            ->method('get')
             ->with('accounts/1/groups', ['query' => []])
-            ->willReturn($mockPaginatedResponse);
+            ->willReturn($this->mockResponse);
 
         $groups = Group::fetchAll();
 
@@ -124,7 +122,7 @@ class GroupTest extends TestCase
         $this->assertEquals('Group 1', $groups[0]->name);
     }
 
-    public function testFetchAllPaginated(): void
+    public function testPaginate(): void
     {
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         
@@ -133,9 +131,9 @@ class GroupTest extends TestCase
             ->with('accounts/1/groups', ['query' => []])
             ->willReturn($mockPaginatedResponse);
 
-        $result = Group::fetchAllPaginated();
+        $result = Group::paginate();
 
-        $this->assertSame($mockPaginatedResponse, $result);
+        $this->assertInstanceOf(\CanvasLMS\Pagination\PaginationResult::class, $result);
     }
 
     public function testCreate(): void
@@ -208,7 +206,7 @@ class GroupTest extends TestCase
 
         $result = $group->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Group::class, $result);
     }
 
     public function testSave(): void
@@ -232,7 +230,7 @@ class GroupTest extends TestCase
 
         $result = $group->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Group::class, $result);
         $this->assertEquals(123, $group->id);
     }
 
@@ -407,7 +405,7 @@ class GroupTest extends TestCase
 
         $result = $group->invite(['test@example.com']);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Group::class, $result);
     }
 
     public function testInviteWithInvalidEmail(): void
@@ -451,7 +449,7 @@ class GroupTest extends TestCase
 
         $result = $group->removeUser(789);
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Group::class, $result);
     }
 
     public function testFetchByContext(): void

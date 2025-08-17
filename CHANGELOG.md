@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-01-17
+
+### Added
+- OAuth 2.0 authentication support (#44)
+  - Full OAuth 2.0 implementation with client credentials flow
+  - Automatic token management and refresh
+  - Secure token storage and handling
+  - Comprehensive middleware support for OAuth workflows
+  - Backward compatible with existing API key authentication
+- Conversations API for Canvas internal messaging system (#65)
+  - **Conversation** class for managing user conversations and messages
+  - User-scoped resource (all conversations belong to authenticated user)
+  - Support for individual and group conversations
+  - File attachment support via integration with File API
+  - Media comment support for audio/video messages
+  - Batch operations for bulk conversation management
+  - Message threading and forwarding capabilities
+  - **ConversationParticipant** object for participant data
+  - **CreateConversationDTO** for creating new conversations with recipients
+  - **UpdateConversationDTO** for updating conversation properties
+  - **AddMessageDTO** for adding messages to existing conversations
+  - **AddRecipientsDTO** for adding participants to group conversations
+  - Support for complex recipient types (users, courses, groups)
+  - Filtering by scope (unread, starred, archived, sent)
+  - Convenience methods: `markAsRead()`, `markAsUnread()`, `star()`, `unstar()`, `archive()`
+  - Static methods: `markAllAsRead()`, `getUnreadCount()`, `getRunningBatches()`
+  - Comprehensive test coverage for all conversation operations
+
+### Changed
+- **IMPROVED**: Simplified pagination API to three clear, intuitive methods
+  - `get()` - Fetch first page only (fast, memory efficient)
+  - `all()` - Fetch all pages automatically (handles pagination transparently)
+  - `paginate()` - Get results with pagination metadata (PaginationResult)
+  - Old method names (`fetchAll`, `fetchAllPages`, `fetchAllPaginated`, `fetchPage`) still work via aliases for backward compatibility
+  - Added `getEndpoint()` method to all API classes for consistency
+  - Context-aware behavior preserved for Files (user context) and ExternalTools (account context)
+  - Updated all tests and documentation to use new method names
+  - No breaking changes - existing code continues to work with aliases
+- **IMPROVED**: Standardized `save()` and `delete()` methods across all API classes to return `self` for fluent interface support (#99)
+  - Enables method chaining: `$course->save()->enrollments()` 
+  - Changed from returning `bool` to returning instance
+  - Exceptions now thrown on errors instead of returning false
+  - Affects 18 classes: Account, Assignment, Course, DiscussionTopic, Enrollment, ExternalTool, Group, GroupCategory, Module, ModuleItem, Page, Quiz, QuizSubmission, Section, Submission, SubmissionComment, Tab, User
+  - Consistent with existing pattern in AppointmentGroup, CalendarEvent, Outcome, Rubric, RubricAssociation
+  - No breaking changes as SDK is pre-release
+
 ## [1.1.0] - 2025-01-13
 
 ### Added
@@ -153,5 +199,8 @@ Canvas LMS Kit is now production-ready with 90% Canvas API coverage, rate limiti
 - Contributing guidelines
 - Wiki with implementation guides
 
-[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/jjuanrivvera/canvas-lms-kit/releases/tag/v1.0.0

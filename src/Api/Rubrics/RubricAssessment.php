@@ -312,10 +312,10 @@ class RubricAssessment extends AbstractBaseApi
     /**
      * Delete a rubric assessment
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot delete rubric assessment without ID");
@@ -332,7 +332,7 @@ class RubricAssessment extends AbstractBaseApi
 
         $response = self::$apiClient->delete($endpoint);
         json_decode($response->getBody(), true);
-        return true;
+        return $this;
     }
 
     /**
@@ -459,6 +459,19 @@ class RubricAssessment extends AbstractBaseApi
         throw new CanvasApiException(
             "Fetching all rubric assessments is not supported by the Canvas API. " .
             "Rubric assessments must be accessed through specific rubric associations."
+        );
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * Note: RubricAssessment is a nested resource under RubricAssociation
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        throw new CanvasApiException(
+            'RubricAssessment does not support direct endpoint access. Use context-specific methods.'
         );
     }
 }

@@ -296,7 +296,7 @@ class AdminTest extends TestCase
 
         $result = $this->admin->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Admin::class, $result);
     }
 
     /**

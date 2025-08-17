@@ -10,10 +10,10 @@ use CanvasLMS\Dto\Assignments\CreateAssignmentDTO;
 use CanvasLMS\Dto\Assignments\UpdateAssignmentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Api\Submissions\Submission;
 use CanvasLMS\Api\Rubrics\Rubric;
 use CanvasLMS\Api\Rubrics\RubricAssociation;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Assignments API
@@ -40,12 +40,16 @@ use CanvasLMS\Api\Rubrics\RubricAssociation;
  * // Find an assignment by ID
  * $assignment = Assignment::find(456);
  *
- * // List all assignments for the course
- * $assignments = Assignment::fetchAll();
+ * // Get first page of assignments (memory efficient)
+ * $assignments = Assignment::get();
+ * $assignments = Assignment::get(['order_by' => 'due_at']);
  *
- * // Get paginated assignments
- * $paginatedAssignments = Assignment::fetchAllPaginated();
- * $paginationResult = Assignment::fetchPage();
+ * // Get ALL assignments from all pages (be mindful of memory)
+ * $allAssignments = Assignment::all();
+ *
+ * // Get paginated results with metadata (recommended)
+ * $paginated = Assignment::paginate(['per_page' => 25]);
+ * echo "Page {$paginated->getCurrentPage()} of {$paginated->getTotalPages()}";
  *
  * // Update an assignment
  * $updatedAssignment = Assignment::update(456, ['points_possible' => 150]);
@@ -1403,10 +1407,10 @@ class Assignment extends AbstractBaseApi
     /**
      * Save the current assignment (create or update)
      *
-     * @return bool True if save was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
         // Check for required fields before trying to save
         if (!$this->id && empty($this->name)) {
@@ -1452,53 +1456,45 @@ class Assignment extends AbstractBaseApi
             }
         }
 
-        try {
-            if ($this->id) {
-                // Update existing assignment
-                $updateData = $this->toDtoArray();
-                if (empty($updateData)) {
-                    return true; // Nothing to update
-                }
-
-                $updatedAssignment = self::update($this->id, $updateData);
-                $this->populate($updatedAssignment->toArray());
-            } else {
-                // Create new assignment
-                $createData = $this->toDtoArray();
-
-                $newAssignment = self::create($createData);
-                $this->populate($newAssignment->toArray());
+        if ($this->id) {
+            // Update existing assignment
+            $updateData = $this->toDtoArray();
+            if (empty($updateData)) {
+                return $this; // Nothing to update
             }
 
-            return true;
-        } catch (CanvasApiException) {
-            return false;
+            $updatedAssignment = self::update($this->id, $updateData);
+            $this->populate($updatedAssignment->toArray());
+        } else {
+            // Create new assignment
+            $createData = $this->toDtoArray();
+
+            $newAssignment = self::create($createData);
+            $this->populate($newAssignment->toArray());
         }
+
+        return $this;
     }
 
     /**
      * Delete the assignment
      *
-     * @return bool True if deletion was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Assignment ID is required for deletion');
         }
 
-        try {
-            self::checkCourse();
-            self::checkApiClient();
+        self::checkCourse();
+        self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/assignments/%d', self::$course->id, $this->id);
-            self::$apiClient->delete($endpoint);
+        $endpoint = sprintf('courses/%d/assignments/%d', self::$course->id, $this->id);
+        self::$apiClient->delete($endpoint);
 
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        return $this;
     }
 
     /**
@@ -1679,5 +1675,16 @@ class Assignment extends AbstractBaseApi
             $msg = "Failed to get rubric association for assignment {$this->id}: ";
             throw new CanvasApiException($msg . $e->getMessage());
         }
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/assignments', self::$course->getId());
     }
 }

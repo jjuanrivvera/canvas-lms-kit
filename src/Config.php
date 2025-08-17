@@ -13,7 +13,17 @@ class Config
      *     app_key?: string,
      *     base_url?: string,
      *     account_id?: int,
-     *     middleware?: array<string, array<string, mixed>>
+     *     middleware?: array<string, array<string, mixed>>,
+     *     oauth_client_id?: string,
+     *     oauth_client_secret?: string,
+     *     oauth_redirect_uri?: string,
+     *     oauth_token?: string,
+     *     oauth_refresh_token?: string,
+     *     oauth_expires_at?: int,
+     *     oauth_user_id?: int,
+     *     oauth_user_name?: string,
+     *     oauth_scopes?: array<string>,
+     *     auth_mode?: string
      * }>
      */
     private static array $contexts = [];
@@ -47,6 +57,56 @@ class Config
      * @var int
      */
     private static int $accountId = 1;
+
+    /**
+     * @var string|null OAuth client ID
+     */
+    private static ?string $oauthClientId = null;
+
+    /**
+     * @var string|null OAuth client secret
+     */
+    private static ?string $oauthClientSecret = null;
+
+    /**
+     * @var string|null OAuth redirect URI
+     */
+    private static ?string $oauthRedirectUri = null;
+
+    /**
+     * @var string|null OAuth access token
+     */
+    private static ?string $oauthToken = null;
+
+    /**
+     * @var string|null OAuth refresh token
+     */
+    private static ?string $oauthRefreshToken = null;
+
+    /**
+     * @var int|null OAuth token expiration timestamp
+     */
+    private static ?int $oauthExpiresAt = null;
+
+    /**
+     * @var int|null OAuth user ID
+     */
+    private static ?int $oauthUserId = null;
+
+    /**
+     * @var string|null OAuth user name
+     */
+    private static ?string $oauthUserName = null;
+
+    /**
+     * @var array<string>|null OAuth scopes
+     */
+    private static ?array $oauthScopes = null;
+
+    /**
+     * @var string Authentication mode ('api_key' or 'oauth')
+     */
+    private static string $authMode = 'api_key';
 
     /**
      * Set the application key.
@@ -340,6 +400,16 @@ class Config
         self::$apiVersion = 'v1';
         self::$timeout = 30;
         self::$accountId = 1;
+        self::$oauthClientId = null;
+        self::$oauthClientSecret = null;
+        self::$oauthRedirectUri = null;
+        self::$oauthToken = null;
+        self::$oauthRefreshToken = null;
+        self::$oauthExpiresAt = null;
+        self::$oauthUserId = null;
+        self::$oauthUserName = null;
+        self::$oauthScopes = null;
+        self::$authMode = 'api_key';
 
         // Then apply context-specific values if they exist
         if (isset(self::$contexts[$context]['app_key'])) {
@@ -356,6 +426,36 @@ class Config
         }
         if (isset(self::$contexts[$context]['account_id'])) {
             self::$accountId = self::$contexts[$context]['account_id'];
+        }
+        if (isset(self::$contexts[$context]['oauth_client_id'])) {
+            self::$oauthClientId = self::$contexts[$context]['oauth_client_id'];
+        }
+        if (isset(self::$contexts[$context]['oauth_client_secret'])) {
+            self::$oauthClientSecret = self::$contexts[$context]['oauth_client_secret'];
+        }
+        if (isset(self::$contexts[$context]['oauth_redirect_uri'])) {
+            self::$oauthRedirectUri = self::$contexts[$context]['oauth_redirect_uri'];
+        }
+        if (isset(self::$contexts[$context]['oauth_token'])) {
+            self::$oauthToken = self::$contexts[$context]['oauth_token'];
+        }
+        if (isset(self::$contexts[$context]['oauth_refresh_token'])) {
+            self::$oauthRefreshToken = self::$contexts[$context]['oauth_refresh_token'];
+        }
+        if (isset(self::$contexts[$context]['oauth_expires_at'])) {
+            self::$oauthExpiresAt = self::$contexts[$context]['oauth_expires_at'];
+        }
+        if (isset(self::$contexts[$context]['oauth_user_id'])) {
+            self::$oauthUserId = self::$contexts[$context]['oauth_user_id'];
+        }
+        if (isset(self::$contexts[$context]['oauth_user_name'])) {
+            self::$oauthUserName = self::$contexts[$context]['oauth_user_name'];
+        }
+        if (isset(self::$contexts[$context]['oauth_scopes'])) {
+            self::$oauthScopes = self::$contexts[$context]['oauth_scopes'];
+        }
+        if (isset(self::$contexts[$context]['auth_mode'])) {
+            self::$authMode = self::$contexts[$context]['auth_mode'];
         }
     }
 
@@ -473,6 +573,53 @@ class Config
             }
             self::setTimeout((int) $timeout, $context);
         }
+
+        // OAuth-specific environment variables
+        if (isset($_ENV['CANVAS_OAUTH_CLIENT_ID'])) {
+            $clientId = trim($_ENV['CANVAS_OAUTH_CLIENT_ID']);
+            if (!empty($clientId)) {
+                self::setOAuthClientId($clientId, $context);
+            }
+        }
+
+        if (isset($_ENV['CANVAS_OAUTH_CLIENT_SECRET'])) {
+            $clientSecret = trim($_ENV['CANVAS_OAUTH_CLIENT_SECRET']);
+            if (!empty($clientSecret)) {
+                self::setOAuthClientSecret($clientSecret, $context);
+            }
+        }
+
+        if (isset($_ENV['CANVAS_OAUTH_REDIRECT_URI'])) {
+            $redirectUri = trim($_ENV['CANVAS_OAUTH_REDIRECT_URI']);
+            if (!empty($redirectUri)) {
+                self::setOAuthRedirectUri($redirectUri, $context);
+            }
+        }
+
+        if (isset($_ENV['CANVAS_OAUTH_TOKEN'])) {
+            $token = trim($_ENV['CANVAS_OAUTH_TOKEN']);
+            if (!empty($token)) {
+                self::setOAuthToken($token, $context);
+            }
+        }
+
+        if (isset($_ENV['CANVAS_OAUTH_REFRESH_TOKEN'])) {
+            $refreshToken = trim($_ENV['CANVAS_OAUTH_REFRESH_TOKEN']);
+            if (!empty($refreshToken)) {
+                self::setOAuthRefreshToken($refreshToken, $context);
+            }
+        }
+
+        if (isset($_ENV['CANVAS_AUTH_MODE'])) {
+            $authMode = trim(strtolower($_ENV['CANVAS_AUTH_MODE']));
+            if (in_array($authMode, ['oauth', 'api_key'], true)) {
+                if ($authMode === 'oauth') {
+                    self::useOAuth($context);
+                } else {
+                    self::useApiKey($context);
+                }
+            }
+        }
     }
 
     /**
@@ -543,5 +690,447 @@ class Config
     public static function getApiKey(?string $context = null): ?string
     {
         return self::getAppKey($context);
+    }
+
+    /**
+     * Set the OAuth client ID.
+     *
+     * @param string $clientId The OAuth client ID.
+     * @param string|null $context The context to set the client ID for. If null, uses active context.
+     */
+    public static function setOAuthClientId(string $clientId, ?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        if ($context === self::$activeContext) {
+            self::$oauthClientId = $clientId;
+        }
+
+        self::$contexts[$context]['oauth_client_id'] = $clientId;
+    }
+
+    /**
+     * Get the OAuth client ID.
+     *
+     * @param string|null $context The context to get the client ID from. If null, uses active context.
+     * @return string|null The OAuth client ID or null if not set.
+     */
+    public static function getOAuthClientId(?string $context = null): ?string
+    {
+        $context ??= self::$activeContext;
+
+        if (isset(self::$contexts[$context]['oauth_client_id'])) {
+            return self::$contexts[$context]['oauth_client_id'];
+        }
+
+        if ($context === self::$activeContext) {
+            return self::$oauthClientId;
+        }
+
+        return null;
+    }
+
+    /**
+     * Set the OAuth client secret.
+     *
+     * @param string $clientSecret The OAuth client secret.
+     * @param string|null $context The context to set the client secret for. If null, uses active context.
+     */
+    public static function setOAuthClientSecret(string $clientSecret, ?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        if ($context === self::$activeContext) {
+            self::$oauthClientSecret = $clientSecret;
+        }
+
+        self::$contexts[$context]['oauth_client_secret'] = $clientSecret;
+    }
+
+    /**
+     * Get the OAuth client secret.
+     *
+     * @param string|null $context The context to get the client secret from. If null, uses active context.
+     * @return string|null The OAuth client secret or null if not set.
+     */
+    public static function getOAuthClientSecret(?string $context = null): ?string
+    {
+        $context ??= self::$activeContext;
+
+        if (isset(self::$contexts[$context]['oauth_client_secret'])) {
+            return self::$contexts[$context]['oauth_client_secret'];
+        }
+
+        if ($context === self::$activeContext) {
+            return self::$oauthClientSecret;
+        }
+
+        return null;
+    }
+
+    /**
+     * Set the OAuth redirect URI.
+     *
+     * @param string $redirectUri The OAuth redirect URI.
+     * @param string|null $context The context to set the redirect URI for. If null, uses active context.
+     */
+    public static function setOAuthRedirectUri(string $redirectUri, ?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        if ($context === self::$activeContext) {
+            self::$oauthRedirectUri = $redirectUri;
+        }
+
+        self::$contexts[$context]['oauth_redirect_uri'] = $redirectUri;
+    }
+
+    /**
+     * Get the OAuth redirect URI.
+     *
+     * @param string|null $context The context to get the redirect URI from. If null, uses active context.
+     * @return string|null The OAuth redirect URI or null if not set.
+     */
+    public static function getOAuthRedirectUri(?string $context = null): ?string
+    {
+        $context ??= self::$activeContext;
+
+        if (isset(self::$contexts[$context]['oauth_redirect_uri'])) {
+            return self::$contexts[$context]['oauth_redirect_uri'];
+        }
+
+        if ($context === self::$activeContext) {
+            return self::$oauthRedirectUri;
+        }
+
+        return null;
+    }
+
+    /**
+     * Set the OAuth access token.
+     *
+     * @param string $token The OAuth access token.
+     * @param string|null $context The context to set the token for. If null, uses active context.
+     */
+    public static function setOAuthToken(string $token, ?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        if ($context === self::$activeContext) {
+            self::$oauthToken = $token;
+        }
+
+        self::$contexts[$context]['oauth_token'] = $token;
+    }
+
+    /**
+     * Get the OAuth access token.
+     *
+     * @param string|null $context The context to get the token from. If null, uses active context.
+     * @return string|null The OAuth access token or null if not set.
+     */
+    public static function getOAuthToken(?string $context = null): ?string
+    {
+        $context ??= self::$activeContext;
+
+        if (isset(self::$contexts[$context]['oauth_token'])) {
+            return self::$contexts[$context]['oauth_token'];
+        }
+
+        if ($context === self::$activeContext) {
+            return self::$oauthToken;
+        }
+
+        return null;
+    }
+
+    /**
+     * Set the OAuth refresh token.
+     *
+     * @param string $refreshToken The OAuth refresh token.
+     * @param string|null $context The context to set the refresh token for. If null, uses active context.
+     */
+    public static function setOAuthRefreshToken(string $refreshToken, ?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        if ($context === self::$activeContext) {
+            self::$oauthRefreshToken = $refreshToken;
+        }
+
+        self::$contexts[$context]['oauth_refresh_token'] = $refreshToken;
+    }
+
+    /**
+     * Get the OAuth refresh token.
+     *
+     * @param string|null $context The context to get the refresh token from. If null, uses active context.
+     * @return string|null The OAuth refresh token or null if not set.
+     */
+    public static function getOAuthRefreshToken(?string $context = null): ?string
+    {
+        $context ??= self::$activeContext;
+
+        if (isset(self::$contexts[$context]['oauth_refresh_token'])) {
+            return self::$contexts[$context]['oauth_refresh_token'];
+        }
+
+        if ($context === self::$activeContext) {
+            return self::$oauthRefreshToken;
+        }
+
+        return null;
+    }
+
+    /**
+     * Set the OAuth token expiration timestamp.
+     *
+     * @param int $expiresAt The Unix timestamp when the token expires.
+     * @param string|null $context The context to set the expiration for. If null, uses active context.
+     */
+    public static function setOAuthExpiresAt(int $expiresAt, ?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        if ($context === self::$activeContext) {
+            self::$oauthExpiresAt = $expiresAt;
+        }
+
+        self::$contexts[$context]['oauth_expires_at'] = $expiresAt;
+    }
+
+    /**
+     * Get the OAuth token expiration timestamp.
+     *
+     * @param string|null $context The context to get the expiration from. If null, uses active context.
+     * @return int|null The Unix timestamp when the token expires or null if not set.
+     */
+    public static function getOAuthExpiresAt(?string $context = null): ?int
+    {
+        $context ??= self::$activeContext;
+
+        if (isset(self::$contexts[$context]['oauth_expires_at'])) {
+            return self::$contexts[$context]['oauth_expires_at'];
+        }
+
+        if ($context === self::$activeContext) {
+            return self::$oauthExpiresAt;
+        }
+
+        return null;
+    }
+
+    /**
+     * Set the OAuth user ID.
+     *
+     * @param int $userId The OAuth user ID.
+     * @param string|null $context The context to set the user ID for. If null, uses active context.
+     */
+    public static function setOAuthUserId(int $userId, ?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        if ($context === self::$activeContext) {
+            self::$oauthUserId = $userId;
+        }
+
+        self::$contexts[$context]['oauth_user_id'] = $userId;
+    }
+
+    /**
+     * Get the OAuth user ID.
+     *
+     * @param string|null $context The context to get the user ID from. If null, uses active context.
+     * @return int|null The OAuth user ID or null if not set.
+     */
+    public static function getOAuthUserId(?string $context = null): ?int
+    {
+        $context ??= self::$activeContext;
+
+        if (isset(self::$contexts[$context]['oauth_user_id'])) {
+            return self::$contexts[$context]['oauth_user_id'];
+        }
+
+        if ($context === self::$activeContext) {
+            return self::$oauthUserId;
+        }
+
+        return null;
+    }
+
+    /**
+     * Set the OAuth user name.
+     *
+     * @param string $userName The OAuth user name.
+     * @param string|null $context The context to set the user name for. If null, uses active context.
+     */
+    public static function setOAuthUserName(string $userName, ?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        if ($context === self::$activeContext) {
+            self::$oauthUserName = $userName;
+        }
+
+        self::$contexts[$context]['oauth_user_name'] = $userName;
+    }
+
+    /**
+     * Get the OAuth user name.
+     *
+     * @param string|null $context The context to get the user name from. If null, uses active context.
+     * @return string|null The OAuth user name or null if not set.
+     */
+    public static function getOAuthUserName(?string $context = null): ?string
+    {
+        $context ??= self::$activeContext;
+
+        if (isset(self::$contexts[$context]['oauth_user_name'])) {
+            return self::$contexts[$context]['oauth_user_name'];
+        }
+
+        if ($context === self::$activeContext) {
+            return self::$oauthUserName;
+        }
+
+        return null;
+    }
+
+    /**
+     * Set the OAuth scopes.
+     *
+     * @param array<string> $scopes The OAuth scopes.
+     * @param string|null $context The context to set the scopes for. If null, uses active context.
+     */
+    public static function setOAuthScopes(array $scopes, ?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        if ($context === self::$activeContext) {
+            self::$oauthScopes = $scopes;
+        }
+
+        self::$contexts[$context]['oauth_scopes'] = $scopes;
+    }
+
+    /**
+     * Get the OAuth scopes.
+     *
+     * @param string|null $context The context to get the scopes from. If null, uses active context.
+     * @return array<string>|null The OAuth scopes or null if not set.
+     */
+    public static function getOAuthScopes(?string $context = null): ?array
+    {
+        $context ??= self::$activeContext;
+
+        if (isset(self::$contexts[$context]['oauth_scopes'])) {
+            return self::$contexts[$context]['oauth_scopes'];
+        }
+
+        if ($context === self::$activeContext) {
+            return self::$oauthScopes;
+        }
+
+        return null;
+    }
+
+    /**
+     * Switch to OAuth authentication mode.
+     *
+     * @param string|null $context The context to switch to OAuth for. If null, uses active context.
+     */
+    public static function useOAuth(?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        if ($context === self::$activeContext) {
+            self::$authMode = 'oauth';
+        }
+
+        self::$contexts[$context]['auth_mode'] = 'oauth';
+    }
+
+    /**
+     * Switch to API key authentication mode.
+     *
+     * @param string|null $context The context to switch to API key for. If null, uses active context.
+     */
+    public static function useApiKey(?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        if ($context === self::$activeContext) {
+            self::$authMode = 'api_key';
+        }
+
+        self::$contexts[$context]['auth_mode'] = 'api_key';
+    }
+
+    /**
+     * Get the current authentication mode.
+     *
+     * @param string|null $context The context to get the auth mode from. If null, uses active context.
+     * @return string The authentication mode ('api_key' or 'oauth').
+     */
+    public static function getAuthMode(?string $context = null): string
+    {
+        $context ??= self::$activeContext;
+
+        if (isset(self::$contexts[$context]['auth_mode'])) {
+            return self::$contexts[$context]['auth_mode'];
+        }
+
+        if ($context === self::$activeContext) {
+            return self::$authMode;
+        }
+
+        return 'api_key';
+    }
+
+    /**
+     * Check if the OAuth token is expired or about to expire.
+     *
+     * @param string|null $context The context to check. If null, uses active context.
+     * @return bool True if token is expired or will expire within 5 minutes.
+     */
+    public static function isOAuthTokenExpired(?string $context = null): bool
+    {
+        $context ??= self::$activeContext;
+        $expiresAt = self::getOAuthExpiresAt($context);
+
+        if ($expiresAt === null) {
+            return false; // No expiration set, assume valid
+        }
+
+        // Check if expired or will expire within 5 minutes (300 seconds)
+        return $expiresAt <= time() + 300;
+    }
+
+    /**
+     * Clear all OAuth tokens and related data.
+     *
+     * @param string|null $context The context to clear OAuth data for. If null, uses active context.
+     */
+    public static function clearOAuthTokens(?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        if ($context === self::$activeContext) {
+            self::$oauthToken = null;
+            self::$oauthRefreshToken = null;
+            self::$oauthExpiresAt = null;
+            self::$oauthUserId = null;
+            self::$oauthUserName = null;
+            self::$oauthScopes = null;
+        }
+
+        unset(
+            self::$contexts[$context]['oauth_token'],
+            self::$contexts[$context]['oauth_refresh_token'],
+            self::$contexts[$context]['oauth_expires_at'],
+            self::$contexts[$context]['oauth_user_id'],
+            self::$contexts[$context]['oauth_user_name'],
+            self::$contexts[$context]['oauth_scopes']
+        );
     }
 }

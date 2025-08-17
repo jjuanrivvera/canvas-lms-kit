@@ -138,16 +138,14 @@ class ExternalToolTest extends TestCase
             ['id' => 2, 'name' => 'Tool 2', 'privacy_level' => 'anonymous']
         ];
         
-        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
-            ->willReturn($toolsData);
+        $this->mockStream->method('getContents')->willReturn(json_encode($toolsData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('getPaginated')
+            ->method('get')
             ->with('accounts/1/external_tools', ['query' => []])
-            ->willReturn($mockPaginatedResponse);
+            ->willReturn($this->mockResponse);
         
         $tools = ExternalTool::fetchAll();
         
@@ -162,16 +160,14 @@ class ExternalToolTest extends TestCase
         $params = ['include_parents' => true, 'placement' => 'editor_button'];
         $toolsData = [['id' => 1, 'name' => 'Tool 1', 'privacy_level' => 'public']];
         
-        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
-            ->willReturn($toolsData);
+        $this->mockStream->method('getContents')->willReturn(json_encode($toolsData));
+        $this->mockResponse->method('getBody')->willReturn($this->mockStream);
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('getPaginated')
+            ->method('get')
             ->with('accounts/1/external_tools', ['query' => $params])
-            ->willReturn($mockPaginatedResponse);
+            ->willReturn($this->mockResponse);
         
         $tools = ExternalTool::fetchAll($params);
         
@@ -179,7 +175,7 @@ class ExternalToolTest extends TestCase
         $this->assertCount(1, $tools);
     }
 
-    public function testFetchAllPaginated(): void
+    public function testPaginate(): void
     {
         $paginatedResponse = $this->createMock(PaginatedResponse::class);
         
@@ -189,9 +185,10 @@ class ExternalToolTest extends TestCase
             ->with('accounts/1/external_tools', ['query' => []])
             ->willReturn($paginatedResponse);
         
-        $result = ExternalTool::fetchAllPaginated();
+        // Since paginate() method returns PaginationResult, we need to mock that
+        $result = ExternalTool::paginate();
         
-        $this->assertInstanceOf(PaginatedResponse::class, $result);
+        $this->assertInstanceOf(\CanvasLMS\Pagination\PaginationResult::class, $result);
     }
 
     public function testCreateWithArray(): void
@@ -359,7 +356,7 @@ class ExternalToolTest extends TestCase
         
         $result = $tool->save();
         
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ExternalTool::class, $result);
         $this->assertEquals(1, $tool->getId());
     }
 
@@ -391,7 +388,7 @@ class ExternalToolTest extends TestCase
         
         $result = $tool->save();
         
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ExternalTool::class, $result);
     }
 
     public function testSaveThrowsExceptionForMissingName(): void
@@ -445,7 +442,7 @@ class ExternalToolTest extends TestCase
         
         $result = $tool->delete();
         
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ExternalTool::class, $result);
     }
 
     public function testDeleteThrowsExceptionWithoutId(): void

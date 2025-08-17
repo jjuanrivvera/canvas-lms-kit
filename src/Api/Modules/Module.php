@@ -10,8 +10,8 @@ use CanvasLMS\Dto\Modules\UpdateModuleDTO;
 use CanvasLMS\Dto\Modules\CreateModuleItemDTO;
 use CanvasLMS\Dto\Modules\BulkUpdateModuleAssignmentOverridesDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Module Class
@@ -448,11 +448,10 @@ class Module extends AbstractBaseApi
 
     /**
      * Save the module
-     * @return bool
+     * @return self
      * @throws CanvasApiException
-     * @throws Exception
      */
-    public function save(): bool
+    public function save(): self
     {
         self::checkApiClient();
         self::checkCourse();
@@ -465,37 +464,29 @@ class Module extends AbstractBaseApi
             : sprintf('courses/%d/modules', self::$course->id);
         $method = isset($data['id']) ? 'PUT' : 'POST';
 
-        try {
-            $response = self::$apiClient->request($method, $path, [
-                'multipart' => $dto->toApiArray()
-            ]);
+        $response = self::$apiClient->request($method, $path, [
+            'multipart' => $dto->toApiArray()
+        ]);
 
-            $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
-            $this->populate($moduleData);
-        } catch (CanvasApiException) {
-            return false;
-        }
+        $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $this->populate($moduleData);
 
-        return true;
+        return $this;
     }
 
     /**
      * Delete a module
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         self::checkApiClient();
         self::checkCourse();
 
-        try {
-            self::$apiClient->delete(sprintf('courses/%d/modules/%d', self::$course->id, $this->id));
-        } catch (CanvasApiException) {
-            return false;
-        }
+        self::$apiClient->delete(sprintf('courses/%d/modules/%d', self::$course->id, $this->id));
 
-        return true;
+        return $this;
     }
 
     /**
@@ -741,22 +732,18 @@ class Module extends AbstractBaseApi
     /**
      * Re-lock module progressions
      * Resets module progressions to their default locked state and recalculates them based on the current requirements.
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function relock(): bool
+    public function relock(): self
     {
         self::checkApiClient();
         self::checkCourse();
 
-        try {
-            $response = self::$apiClient->put(sprintf('courses/%d/modules/%d/relock', self::$course->id, $this->id));
-            $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
-            $this->populate($moduleData);
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        $response = self::$apiClient->put(sprintf('courses/%d/modules/%d/relock', self::$course->id, $this->id));
+        $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $this->populate($moduleData);
+        return $this;
     }
 
     /**
@@ -866,10 +853,10 @@ class Module extends AbstractBaseApi
     /**
      * Bulk update module assignment overrides
      * @param mixed[]|BulkUpdateModuleAssignmentOverridesDTO $overrides
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function bulkUpdateOverrides(array | BulkUpdateModuleAssignmentOverridesDTO $overrides): bool
+    public function bulkUpdateOverrides(array | BulkUpdateModuleAssignmentOverridesDTO $overrides): self
     {
         self::checkApiClient();
         self::checkCourse();
@@ -880,17 +867,13 @@ class Module extends AbstractBaseApi
             $overrides = $dto;
         }
 
-        try {
-            self::$apiClient->put(
-                sprintf('courses/%d/modules/%d/assignment_overrides', self::$course->id, $this->id),
-                [
-                    'json' => $overrides->toApiArray()
-                ]
-            );
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        self::$apiClient->put(
+            sprintf('courses/%d/modules/%d/assignment_overrides', self::$course->id, $this->id),
+            [
+                'json' => $overrides->toApiArray()
+            ]
+        );
+        return $this;
     }
 
     // Relationship Methods
@@ -1014,5 +997,16 @@ class Module extends AbstractBaseApi
         }
 
         return $prerequisites;
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/modules', self::$course->getId());
     }
 }

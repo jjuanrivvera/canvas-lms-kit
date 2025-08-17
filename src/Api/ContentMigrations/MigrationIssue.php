@@ -8,8 +8,8 @@ use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Dto\ContentMigrations\UpdateMigrationIssueDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 use DateTime;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Migration Issues API
@@ -535,5 +535,20 @@ class MigrationIssue extends AbstractBaseApi
     public function setUpdatedAt(?DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * Note: MigrationIssue is a nested resource under ContentMigration
+     * and requires context, so this returns a placeholder that should not be used directly
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        throw new CanvasApiException(
+            'MigrationIssue does not support direct endpoint access. ' .
+            'Use context-specific methods like fetchAllInMigration()'
+        );
     }
 }

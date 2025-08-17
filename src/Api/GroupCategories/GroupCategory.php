@@ -116,55 +116,19 @@ class GroupCategory extends AbstractBaseApi
     }
 
     /**
-     * List group categories in current account
+     * Get the endpoint for this resource.
      *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<GroupCategory>
+     * @return string
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
-    {
-        return self::fetchAllPages($params);
-    }
-
-    /**
-     * Get paginated group categories in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
-        return self::getPaginatedResponse(sprintf('accounts/%d/group_categories', $accountId), $params);
+        return sprintf('accounts/%d/group_categories', $accountId);
     }
 
-    /**
-     * Get a single page of group categories in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
 
-    /**
-     * Get all pages of group categories in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<GroupCategory>
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        $accountId = Config::getAccountId();
-        return self::fetchAllPagesAsModels(sprintf('accounts/%d/group_categories', $accountId), $params);
-    }
+
 
 
     /**
@@ -216,45 +180,39 @@ class GroupCategory extends AbstractBaseApi
     /**
      * Save the group category (create or update)
      *
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
-        try {
-            if ($this->id) {
-                $dto = new UpdateGroupCategoryDTO($this->toDtoArray());
-                $updated = self::update($this->id, $dto);
-                $this->populate(get_object_vars($updated));
-            } else {
-                $dto = new CreateGroupCategoryDTO($this->toDtoArray());
-                $created = self::create($dto);
-                $this->populate(get_object_vars($created));
-            }
-            return true;
-        } catch (\Exception $e) {
-            return false;
+        if ($this->id) {
+            $dto = new UpdateGroupCategoryDTO($this->toDtoArray());
+            $updated = self::update($this->id, $dto);
+            $this->populate(get_object_vars($updated));
+        } else {
+            $dto = new CreateGroupCategoryDTO($this->toDtoArray());
+            $created = self::create($dto);
+            $this->populate(get_object_vars($created));
         }
+        return $this;
     }
 
     /**
      * Delete the group category
      *
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
-            return false;
+            throw new CanvasApiException('Group category ID is required for deletion');
         }
 
-        try {
-            self::checkApiClient();
-            $endpoint = sprintf('group_categories/%d', $this->id);
-            self::$apiClient->delete($endpoint);
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
+        self::checkApiClient();
+        $endpoint = sprintf('group_categories/%d', $this->id);
+        self::$apiClient->delete($endpoint);
+        return $this;
     }
 
     /**

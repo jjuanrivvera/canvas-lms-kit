@@ -477,7 +477,7 @@ class EnrollmentTest extends TestCase
 
         $result = $enrollment->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Enrollment::class, $result);
         $this->assertEquals(1, $enrollment->getId());
     }
 
@@ -507,7 +507,7 @@ class EnrollmentTest extends TestCase
 
         $result = $enrollment->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Enrollment::class, $result);
         $this->assertEquals('completed', $enrollment->getEnrollmentState());
     }
 
@@ -561,7 +561,7 @@ class EnrollmentTest extends TestCase
 
         $result = $enrollment->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Enrollment::class, $result);
     }
 
     public function testDeleteThrowsExceptionWithoutId(): void

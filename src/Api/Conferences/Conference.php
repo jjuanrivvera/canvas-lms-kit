@@ -234,9 +234,9 @@ class Conference extends AbstractBaseApi
      * Update the conference.
      *
      * @param array<string, mixed>|UpdateConferenceDTO $data Update data
-     * @return bool True if successful
+     * @return self
      */
-    public function update(array|UpdateConferenceDTO $data): bool
+    public function update(array|UpdateConferenceDTO $data): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Conference ID is required for updating');
@@ -270,18 +270,18 @@ class Conference extends AbstractBaseApi
             }
 
             $this->processRecordings($responseData);
-            return true;
+            return $this;
         }
 
-        return false;
+        throw new CanvasApiException('Failed to update conference');
     }
 
     /**
      * Delete the conference.
      *
-     * @return bool True if successful
+     * @return self
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Conference ID is required for deletion');
@@ -290,7 +290,12 @@ class Conference extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->delete(sprintf('conferences/%d', $this->id));
-        return $response->getStatusCode() === 200 || $response->getStatusCode() === 204;
+
+        if (!($response->getStatusCode() === 200 || $response->getStatusCode() === 204)) {
+            throw new CanvasApiException('Failed to delete conference');
+        }
+
+        return $this;
     }
 
     /**
@@ -347,5 +352,18 @@ class Conference extends AbstractBaseApi
                 $this->recordings[] = new ConferenceRecording($recordingData);
             }
         }
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * Note: Conference endpoints are context-specific and this should not be used directly
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        throw new CanvasApiException(
+            'Conference does not support direct endpoint access. Use context-specific methods like listForCourse()'
+        );
     }
 }

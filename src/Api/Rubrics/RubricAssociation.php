@@ -256,10 +256,10 @@ class RubricAssociation extends AbstractBaseApi
     /**
      * Delete a rubric association
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot delete rubric association without ID");
@@ -273,7 +273,7 @@ class RubricAssociation extends AbstractBaseApi
         $response = self::$apiClient->delete($endpoint);
 
         json_decode($response->getBody(), true);
-        return true;
+        return $this;
     }
 
     /**
@@ -369,6 +369,19 @@ class RubricAssociation extends AbstractBaseApi
         throw new CanvasApiException(
             "Fetching all rubric associations is not supported by the Canvas API. " .
             "Rubric associations must be accessed through rubrics."
+        );
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * Note: RubricAssociation is a nested resource under Rubric
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        throw new CanvasApiException(
+            'RubricAssociation does not support direct endpoint access. Use context-specific methods.'
         );
     }
 }

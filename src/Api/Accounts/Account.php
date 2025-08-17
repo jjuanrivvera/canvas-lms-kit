@@ -8,7 +8,6 @@ use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Dto\Accounts\CreateAccountDTO;
 use CanvasLMS\Dto\Accounts\UpdateAccountDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
@@ -41,8 +40,9 @@ use CanvasLMS\Dto\Rubrics\CreateRubricDTO;
  * $account->name = 'Mathematics and Statistics Department';
  * $account->save();
  *
- * // Getting sub-accounts
- * $subAccounts = $account->getSubAccounts();
+ * // Getting sub-accounts (two approaches)
+ * $subAccounts = $account->getSubAccounts();  // Instance method
+ * $subAccounts = Account::fetchSubAccounts(1); // Static method
  *
  * // Getting account settings
  * $settings = $account->getSettings();
@@ -208,65 +208,12 @@ class Account extends AbstractBaseApi
     }
 
     /**
-     * Get a list of accounts the current user can view or manage
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<int, self>
-     * @throws CanvasApiException
+     * Get the API endpoint for this resource
+     * @return string
      */
-    public static function fetchAll(array $params = []): array
+    protected static function getEndpoint(): string
     {
-        self::checkApiClient();
-
-        $endpoint = 'accounts';
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody(), true);
-
-        return array_map(function ($item) {
-            return new self($item);
-        }, $responseData);
-    }
-
-    /**
-     * Get accounts with pagination support
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkApiClient();
-
-        $endpoint = 'accounts';
-        return self::getPaginatedResponse($endpoint, $params);
-    }
-
-    /**
-     * Get a specific page of accounts
-     *
-     * @param array<string, mixed> $params Query parameters including page and per_page
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        $data = self::convertPaginatedResponseToModels($paginatedResponse);
-
-        return $paginatedResponse->toPaginationResult($data);
-    }
-
-    /**
-     * Get all accounts from all pages
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<int, self>
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        return self::fetchAllPagesAsModels('accounts', $params);
+        return 'accounts';
     }
 
     /**
@@ -301,6 +248,30 @@ class Account extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = 'course_creation_accounts';
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $responseData = json_decode($response->getBody(), true);
+
+        return array_map(function ($item) {
+            return new self($item);
+        }, $responseData);
+    }
+
+    /**
+     * Fetch sub-accounts for a given account
+     *
+     * Static method to fetch sub-accounts without requiring an Account instance.
+     * Provides direct access to the sub-accounts endpoint.
+     *
+     * @param int $accountId The ID of the parent account
+     * @param array<string, mixed> $params Query parameters (e.g., 'recursive' => true)
+     * @return array<int, self> Array of Account objects
+     * @throws CanvasApiException
+     */
+    public static function fetchSubAccounts(int $accountId, array $params = []): array
+    {
+        self::checkApiClient();
+
+        $endpoint = sprintf('accounts/%d/sub_accounts', $accountId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $responseData = json_decode($response->getBody(), true);
 
@@ -373,10 +344,10 @@ class Account extends AbstractBaseApi
     /**
      * Save the current account instance
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot save account without ID");
@@ -391,16 +362,16 @@ class Account extends AbstractBaseApi
                 $this->$key = $value;
             }
         }
-        return true;
+        return $this;
     }
 
     /**
      * Delete the account (only sub-accounts can be deleted)
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot delete account without ID");
@@ -414,7 +385,7 @@ class Account extends AbstractBaseApi
         $response = self::$apiClient->delete($endpoint);
 
         json_decode($response->getBody(), true);
-        return true;
+        return $this;
     }
 
     /**
@@ -486,10 +457,10 @@ class Account extends AbstractBaseApi
      * Update account settings
      *
      * @param array<string, mixed> $settings Settings to update
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function updateSettings(array $settings): bool
+    public function updateSettings(array $settings): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Account ID is required");
@@ -507,7 +478,7 @@ class Account extends AbstractBaseApi
         // Refresh settings
         $this->settings = $this->getSettings();
 
-        return true;
+        return $this;
     }
 
     /**

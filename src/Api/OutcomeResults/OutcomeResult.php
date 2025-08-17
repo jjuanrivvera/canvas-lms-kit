@@ -245,4 +245,13 @@ class OutcomeResult extends AbstractBaseApi
         }
         return null;
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     */
+    protected static function getEndpoint(): string
+    {
+        return 'outcome_results';
+    }
 }

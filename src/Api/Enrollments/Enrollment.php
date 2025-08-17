@@ -57,6 +57,26 @@ use CanvasLMS\Pagination\PaginationResult;
  * }
  * ```
  *
+ * @example Pagination for large datasets (IMPORTANT for large institutions)
+ * ```php
+ * // ⚠️ CAUTION: Universities can have MILLIONS of enrollments!
+ *
+ * // ✅ GOOD: Process in batches
+ * $page = 1;
+ * do {
+ *     $batch = Enrollment::paginate(['page' => $page++, 'per_page' => 500]);
+ *     foreach ($batch->getData() as $enrollment) {
+ *         // Process enrollment...
+ *     }
+ * } while ($batch->hasNextPage());
+ *
+ * // ❌ DANGEROUS: Could crash with memory exhaustion
+ * // $allEnrollments = Enrollment::all(); // DON'T DO THIS IN PRODUCTION!
+ *
+ * // ✅ GOOD: Get just what you need
+ * $activeEnrollments = Enrollment::get(['state' => ['active'], 'per_page' => 100]);
+ * ```
+ *
  * @package CanvasLMS\Api\Enrollments
  */
 class Enrollment extends AbstractBaseApi
@@ -404,8 +424,11 @@ class Enrollment extends AbstractBaseApi
 
     /**
      * Save the current enrollment (create or update)
+     *
+     * @return self
+     * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
         // Validation - user ID and type are required for new enrollments
         if (!$this->id && (empty($this->userId) || empty($this->type))) {
@@ -422,47 +445,42 @@ class Enrollment extends AbstractBaseApi
             throw new CanvasApiException('Invalid enrollment state: ' . $this->enrollmentState);
         }
 
-        try {
-            if ($this->id) {
-                // Update existing enrollment
-                $updateData = $this->toDtoArray();
-                if (empty($updateData)) {
-                    return true; // Nothing to update
-                }
-                $updated = self::update($this->id, $updateData);
-                $this->populate($updated->toArray());
-            } else {
-                // Create new enrollment
-                $createData = $this->toDtoArray();
-                $new = self::create($createData);
-                $this->populate($new->toArray());
+        if ($this->id) {
+            // Update existing enrollment
+            $updateData = $this->toDtoArray();
+            if (empty($updateData)) {
+                return $this; // Nothing to update
             }
-            return true;
-        } catch (CanvasApiException) {
-            return false;
+            $updated = self::update($this->id, $updateData);
+            $this->populate($updated->toArray());
+        } else {
+            // Create new enrollment
+            $createData = $this->toDtoArray();
+            $new = self::create($createData);
+            $this->populate($new->toArray());
         }
+        return $this;
     }
 
     /**
      * Delete the current enrollment
+     *
+     * @return self
+     * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Enrollment ID is required for deletion');
         }
 
-        try {
-            self::checkCourse();
-            self::checkApiClient();
+        self::checkCourse();
+        self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/enrollments/%d', self::$course->id, $this->id);
-            self::$apiClient->delete($endpoint);
+        $endpoint = sprintf('courses/%d/enrollments/%d', self::$course->id, $this->id);
+        self::$apiClient->delete($endpoint);
 
-            return true;
-        } catch (CanvasApiException) {
-            return false;
-        }
+        return $this;
     }
 
     /**
@@ -1048,5 +1066,16 @@ class Enrollment extends AbstractBaseApi
         } catch (\Exception $e) {
             throw new CanvasApiException("Could not load section with ID {$this->sectionId}: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/enrollments', self::$course->getId());
     }
 }

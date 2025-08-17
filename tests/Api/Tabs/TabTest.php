@@ -311,7 +311,7 @@ class TabTest extends TestCase
 
         $result = $tab->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Tab::class, $result);
         $this->assertEquals(5, $tab->getPosition());
         $this->assertTrue($tab->getHidden());
     }
@@ -330,7 +330,7 @@ class TabTest extends TestCase
         $tab = new Tab(['id' => 'home']);
         $result = $tab->save();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(Tab::class, $result);
     }
 
     public function testSaveReturnsFalseOnException(): void
@@ -344,9 +344,9 @@ class TabTest extends TestCase
             ->method('put')
             ->willThrowException(new CanvasApiException('API Error'));
 
-        $result = $tab->save();
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('API Error');
+        $tab->save();
     }
 
     public function testToArray(): void

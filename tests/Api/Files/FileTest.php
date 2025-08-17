@@ -342,7 +342,7 @@ class FileTest extends TestCase
 
         $result = $file->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(File::class, $result);
     }
 
     /**
@@ -370,9 +370,9 @@ class FileTest extends TestCase
             ->with('/files/789')
             ->willThrowException(new CanvasApiException('Delete failed'));
 
-        $result = $file->delete();
-
-        $this->assertFalse($result);
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Delete failed');
+        $file->delete();
     }
 
     /**

@@ -263,52 +263,45 @@ class GroupMembership extends AbstractBaseApi
      *
      * @param int $groupId Group ID
      * @param int $membershipId Membership ID
-     * @return bool
+     * @return void
      * @throws CanvasApiException
      */
-    public static function deleteMembership(int $groupId, int $membershipId): bool
+    public static function deleteMembership(int $groupId, int $membershipId): void
     {
-        try {
-            self::checkApiClient();
-            $endpoint = sprintf('groups/%d/memberships/%d', $groupId, $membershipId);
-            self::$apiClient->delete($endpoint);
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
+        self::checkApiClient();
+        $endpoint = sprintf('groups/%d/memberships/%d', $groupId, $membershipId);
+        self::$apiClient->delete($endpoint);
     }
 
     /**
      * Delete this membership instance
      *
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->groupId || !$this->id) {
-            return false;
+            throw new CanvasApiException("Cannot delete membership without group ID and membership ID");
         }
 
-        return self::deleteMembership($this->groupId, $this->id);
+        self::deleteMembership($this->groupId, $this->id);
+
+        return $this;
     }
 
     /**
      * Leave a group (for current user)
      *
      * @param int $groupId Group ID
-     * @return bool
+     * @return void
      * @throws CanvasApiException
      */
-    public static function leave(int $groupId): bool
+    public static function leave(int $groupId): void
     {
-        try {
-            self::checkApiClient();
-            $endpoint = sprintf('groups/%d/memberships/self', $groupId);
-            self::$apiClient->delete($endpoint);
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
+        self::checkApiClient();
+        $endpoint = sprintf('groups/%d/memberships/self', $groupId);
+        self::$apiClient->delete($endpoint);
     }
 
     /**
@@ -368,94 +361,84 @@ class GroupMembership extends AbstractBaseApi
     /**
      * Accept this membership invitation
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function accept(): bool
+    public function accept(): self
     {
         if (!$this->groupId || !$this->id) {
             throw new CanvasApiException('Group ID and Membership ID are required');
         }
 
-        try {
-            $updated = self::update($this->groupId, $this->id, ['workflow_state' => 'accepted']);
-            // Update properties from the returned object
-            foreach (get_object_vars($updated) as $key => $value) {
-                if (property_exists($this, $key)) {
-                    $this->$key = $value;
-                }
+        $updated = self::update($this->groupId, $this->id, ['workflow_state' => 'accepted']);
+        // Update properties from the returned object
+        foreach (get_object_vars($updated) as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
             }
-            return true;
-        } catch (\Exception $e) {
-            return false;
         }
+        return $this;
     }
 
     /**
      * Reject this membership invitation
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function reject(): bool
+    public function reject(): self
     {
         if (!$this->groupId || !$this->id) {
             throw new CanvasApiException('Group ID and Membership ID are required');
         }
 
-        return self::deleteMembership($this->groupId, $this->id);
+        self::deleteMembership($this->groupId, $this->id);
+
+        return $this;
     }
 
     /**
      * Make this member a moderator
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function makeModerator(): bool
+    public function makeModerator(): self
     {
         if (!$this->groupId || !$this->id) {
             throw new CanvasApiException('Group ID and Membership ID are required');
         }
 
-        try {
-            $updated = self::update($this->groupId, $this->id, ['moderator' => true]);
-            // Update properties from the returned object
-            foreach (get_object_vars($updated) as $key => $value) {
-                if (property_exists($this, $key)) {
-                    $this->$key = $value;
-                }
+        $updated = self::update($this->groupId, $this->id, ['moderator' => true]);
+        // Update properties from the returned object
+        foreach (get_object_vars($updated) as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
             }
-            return true;
-        } catch (\Exception $e) {
-            return false;
         }
+        return $this;
     }
 
     /**
      * Remove moderator status
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function removeModerator(): bool
+    public function removeModerator(): self
     {
         if (!$this->groupId || !$this->id) {
             throw new CanvasApiException('Group ID and Membership ID are required');
         }
 
-        try {
-            $updated = self::update($this->groupId, $this->id, ['moderator' => false]);
-            // Update properties from the returned object
-            foreach (get_object_vars($updated) as $key => $value) {
-                if (property_exists($this, $key)) {
-                    $this->$key = $value;
-                }
+        $updated = self::update($this->groupId, $this->id, ['moderator' => false]);
+        // Update properties from the returned object
+        foreach (get_object_vars($updated) as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
             }
-            return true;
-        } catch (\Exception $e) {
-            return false;
         }
+        return $this;
     }
 
     // Getter and setter methods
@@ -552,5 +535,19 @@ class GroupMembership extends AbstractBaseApi
     public function setJustCreated(?bool $justCreated): void
     {
         $this->justCreated = $justCreated;
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * Note: GroupMembership is a nested resource under Group
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        throw new CanvasApiException(
+            'GroupMembership does not support direct endpoint access. ' .
+            'Use context-specific methods like createForGroup()'
+        );
     }
 }

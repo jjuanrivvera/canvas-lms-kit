@@ -266,10 +266,10 @@ class Admin extends AbstractBaseApi
     /**
      * Remove admin privileges (delete admin)
      *
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot delete admin without user ID");
@@ -283,7 +283,7 @@ class Admin extends AbstractBaseApi
         $response = self::$apiClient->delete($endpoint);
 
         json_decode($response->getBody(), true);
-        return true;
+        return $this;
     }
 
     /**
@@ -454,5 +454,18 @@ class Admin extends AbstractBaseApi
     {
         $this->roleId = $roleId;
         return $this;
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     */
+    protected static function getEndpoint(): string
+    {
+        $accountId = Config::getAccountId();
+        if (empty($accountId)) {
+            throw new CanvasApiException("Account ID must be set in Config for Admin operations");
+        }
+        return "accounts/{$accountId}/admins";
     }
 }

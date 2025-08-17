@@ -402,41 +402,37 @@ class Tab extends AbstractBaseApi
     /**
      * Save the current tab (update only)
      *
-     * @return bool True if save was successful, false otherwise
+     * @return self
      * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Tab ID is required for save operation');
         }
 
-        try {
-            $updateData = [];
+        $updateData = [];
 
-            if ($this->position !== null) {
-                // Validate position (Canvas API typically supports positions 1-50)
-                if ($this->position < 1 || $this->position > 50) {
-                    throw new CanvasApiException('Position must be a positive integer between 1 and 50');
-                }
-                $updateData['position'] = $this->position;
+        if ($this->position !== null) {
+            // Validate position (Canvas API typically supports positions 1-50)
+            if ($this->position < 1 || $this->position > 50) {
+                throw new CanvasApiException('Position must be a positive integer between 1 and 50');
             }
-
-            if ($this->hidden !== null) {
-                $updateData['hidden'] = $this->hidden;
-            }
-
-            if (empty($updateData)) {
-                return true; // Nothing to update
-            }
-
-            $updatedTab = self::update($this->id, $updateData);
-            $this->populate($updatedTab->toArray());
-
-            return true;
-        } catch (CanvasApiException) {
-            return false;
+            $updateData['position'] = $this->position;
         }
+
+        if ($this->hidden !== null) {
+            $updateData['hidden'] = $this->hidden;
+        }
+
+        if (empty($updateData)) {
+            return $this; // Nothing to update
+        }
+
+        $updatedTab = self::update($this->id, $updateData);
+        $this->populate($updatedTab->toArray());
+
+        return $this;
     }
 
     /**
@@ -475,5 +471,16 @@ class Tab extends AbstractBaseApi
         }
 
         return $data;
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/tabs', self::$course->getId());
     }
 }

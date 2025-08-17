@@ -1,6 +1,6 @@
 {
     "name": "jjuanrivvera/canvas-lms-kit",
-    "description": "The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 90% API coverage, rate limiting, and full test coverage.",
+    "description": "The most comprehensive PHP SDK for Canvas LMS API. Production-ready with +35 APIs implemented, rate limiting, and full test coverage.",
     "keywords": [
         "canvas",
         "canvas-lms",

@@ -214,9 +214,9 @@ class GroupMembershipTest extends TestCase
             ->with('groups/456/memberships/123')
             ->willReturn($this->mockResponse);
 
-        $result = GroupMembership::deleteMembership(456, 123);
+        GroupMembership::deleteMembership(456, 123);
 
-        $this->assertTrue($result);
+        // No assertion needed as deleteMembership() returns void
     }
 
 
@@ -251,7 +251,8 @@ class GroupMembershipTest extends TestCase
 
         $result = $membership->accept();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(GroupMembership::class, $result);
+        $this->assertSame($membership, $result);
         $this->assertEquals('accepted', $membership->workflowState);
     }
 
@@ -270,7 +271,8 @@ class GroupMembershipTest extends TestCase
 
         $result = $membership->reject();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(GroupMembership::class, $result);
+        $this->assertSame($membership, $result);
     }
 
     public function testMakeModerator(): void
@@ -304,7 +306,8 @@ class GroupMembershipTest extends TestCase
 
         $result = $membership->makeModerator();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(GroupMembership::class, $result);
+        $this->assertSame($membership, $result);
         $this->assertTrue($membership->moderator);
     }
 
@@ -339,7 +342,8 @@ class GroupMembershipTest extends TestCase
 
         $result = $membership->removeModerator();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(GroupMembership::class, $result);
+        $this->assertSame($membership, $result);
         $this->assertFalse($membership->moderator);
     }
 
@@ -350,9 +354,9 @@ class GroupMembershipTest extends TestCase
             ->with('groups/456/memberships/self')
             ->willReturn($this->mockResponse);
 
-        $result = GroupMembership::leave(456);
+        GroupMembership::leave(456);
 
-        $this->assertTrue($result);
+        // No assertion needed as leave() returns void
     }
 
     public function testGetUser(): void

@@ -15,10 +15,18 @@ interface ApiInterface
     public static function find(int $id);
 
     /**
-     * Fetch all records
+     * Get first page of records
      * @param mixed[] $params
      * @return static[]
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []);
+    public static function get(array $params = []);
+
+    /**
+     * Get all records from all pages
+     * @param mixed[] $params
+     * @return static[]
+     * @throws CanvasApiException
+     */
+    public static function all(array $params = []);
 }

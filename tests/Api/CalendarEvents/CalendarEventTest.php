@@ -196,7 +196,7 @@ class CalendarEventTest extends TestCase
 
         $result = $this->calendarEvent->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(CalendarEvent::class, $result);
     }
 
     /**
@@ -280,7 +280,7 @@ class CalendarEventTest extends TestCase
 
         $result = $this->calendarEvent->deleteSeries('following');
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(CalendarEvent::class, $result);
     }
 
     /**

@@ -294,10 +294,10 @@ class AppointmentGroup extends AbstractBaseApi
      * Delete an appointment group
      *
      * @param string|null $cancelReason Optional reason for deletion
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function delete(?string $cancelReason = null): bool
+    public function delete(?string $cancelReason = null): self
     {
         if (!$this->id) {
             throw new CanvasApiException("Cannot delete appointment group without ID");
@@ -312,7 +312,7 @@ class AppointmentGroup extends AbstractBaseApi
         }
 
         self::$apiClient->delete($endpoint, $params);
-        return true;
+        return $this;
     }
 
     /**
@@ -593,5 +593,14 @@ class AppointmentGroup extends AbstractBaseApi
     public function __set($name, $value): void
     {
         $this->{$name} = $this->castValue($name, $value);
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     */
+    protected static function getEndpoint(): string
+    {
+        return 'appointment_groups';
     }
 }

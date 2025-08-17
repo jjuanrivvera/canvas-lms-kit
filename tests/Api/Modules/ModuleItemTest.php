@@ -305,7 +305,7 @@ class ModuleItemTest extends TestCase
 
         $result = $moduleItem->save();
         
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ModuleItem::class, $result);
     }
 
     public function testSaveNewModuleItem(): void
@@ -336,7 +336,7 @@ class ModuleItemTest extends TestCase
 
         $result = $moduleItem->save();
         
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ModuleItem::class, $result);
         $this->assertEquals(1, $moduleItem->getId());
     }
 
@@ -350,7 +350,7 @@ class ModuleItemTest extends TestCase
 
         $result = $moduleItem->delete();
         
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ModuleItem::class, $result);
     }
 
     public function testMarkAsRead(): void
@@ -363,7 +363,7 @@ class ModuleItemTest extends TestCase
 
         $result = $moduleItem->markAsRead();
         
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ModuleItem::class, $result);
     }
 
     public function testMarkAsDone(): void
@@ -376,7 +376,7 @@ class ModuleItemTest extends TestCase
 
         $result = $moduleItem->markAsDone();
         
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ModuleItem::class, $result);
     }
 
     public function testMarkAsNotDone(): void
@@ -389,7 +389,7 @@ class ModuleItemTest extends TestCase
 
         $result = $moduleItem->markAsNotDone();
         
-        $this->assertTrue($result);
+        $this->assertInstanceOf(ModuleItem::class, $result);
     }
 
     public function testFetchAllPaginated(): void

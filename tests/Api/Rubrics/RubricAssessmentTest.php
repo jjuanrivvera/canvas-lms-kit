@@ -391,7 +391,7 @@ class RubricAssessmentTest extends TestCase
 
         $result = $assessment->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(RubricAssessment::class, $result);
     }
 
     /**
@@ -417,7 +417,7 @@ class RubricAssessmentTest extends TestCase
 
         $result = $assessment->delete();
 
-        $this->assertTrue($result);
+        $this->assertInstanceOf(RubricAssessment::class, $result);
     }
 
     /**

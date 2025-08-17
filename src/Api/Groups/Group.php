@@ -12,7 +12,6 @@ use CanvasLMS\Dto\Groups\CreateGroupMembershipDTO;
 use CanvasLMS\Dto\Groups\UpdateGroupDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Api\ContentMigrations\ContentMigration;
 use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 
@@ -21,6 +20,35 @@ use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
  *
  * Provides functionality to manage groups in Canvas LMS.
  * Groups can be used for collaborative work, discussions, and assignments.
+ *
+ * Usage Examples:
+ *
+ * ```php
+ * // Create a group (defaults to account context)
+ * $group = Group::create([
+ *     'name' => 'Study Group Alpha',
+ *     'description' => 'Weekly study sessions'
+ * ]);
+ *
+ * // Get first page of groups (memory efficient)
+ * $groups = Group::get();
+ *
+ * // Get ALL groups (⚠️ Be cautious with large institutions)
+ * $allGroups = Group::all();
+ *
+ * // Get paginated groups (recommended for listings)
+ * $paginated = Group::paginate(['per_page' => 50]);
+ * foreach ($paginated->getData() as $group) {
+ *     echo $group->name . ' (' . $group->membersCount . ' members)';
+ * }
+ *
+ * // Get groups for a specific course
+ * $course = Course::find(123);
+ * $courseGroups = $course->groups(); // Returns first page only
+ *
+ * // To get ALL groups for a course:
+ * $groups = Group::fetchByContext('courses', 123, true); // true = all pages
+ * ```
  *
  * @see https://canvas.instructure.com/doc/api/groups.html
  *
@@ -170,55 +198,13 @@ class Group extends AbstractBaseApi
     }
 
     /**
-     * List groups in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<Group>
-     * @throws CanvasApiException
-     * @deprecated Use fetchAllPaginated(), fetchPage(), or fetchAllPages() for better pagination support
+     * Get the API endpoint for this resource
+     * @return string
      */
-    public static function fetchAll(array $params = []): array
-    {
-        return self::fetchAllPages($params);
-    }
-
-    /**
-     * Get paginated groups in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
-        return self::getPaginatedResponse(sprintf('accounts/%d/groups', $accountId), $params);
-    }
-
-    /**
-     * Get a single page of groups in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Get all pages of groups in current account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return array<Group>
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        $accountId = Config::getAccountId();
-        return self::fetchAllPagesAsModels(sprintf('accounts/%d/groups', $accountId), $params);
+        return sprintf('accounts/%d/groups', $accountId);
     }
 
     /**
@@ -327,45 +313,39 @@ class Group extends AbstractBaseApi
     /**
      * Save the group (create or update)
      *
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function save(): bool
+    public function save(): self
     {
-        try {
-            if ($this->id) {
-                $dto = new UpdateGroupDTO($this->toDtoArray());
-                $updated = self::update($this->id, $dto);
-                $this->populate(get_object_vars($updated));
-            } else {
-                $dto = new CreateGroupDTO($this->toDtoArray());
-                $created = self::create($dto);
-                $this->populate(get_object_vars($created));
-            }
-            return true;
-        } catch (\Exception $e) {
-            return false;
+        if ($this->id) {
+            $dto = new UpdateGroupDTO($this->toDtoArray());
+            $updated = self::update($this->id, $dto);
+            $this->populate(get_object_vars($updated));
+        } else {
+            $dto = new CreateGroupDTO($this->toDtoArray());
+            $created = self::create($dto);
+            $this->populate(get_object_vars($created));
         }
+        return $this;
     }
 
     /**
      * Delete the group
      *
-     * @return bool
+     * @return self
+     * @throws CanvasApiException
      */
-    public function delete(): bool
+    public function delete(): self
     {
         if (!$this->id) {
-            return false;
+            throw new CanvasApiException('Group ID is required for deletion');
         }
 
-        try {
-            self::checkApiClient();
-            $endpoint = sprintf('groups/%d', $this->id);
-            self::$apiClient->delete($endpoint);
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
+        self::checkApiClient();
+        $endpoint = sprintf('groups/%d', $this->id);
+        self::$apiClient->delete($endpoint);
+        return $this;
     }
 
     /**
@@ -476,10 +456,10 @@ class Group extends AbstractBaseApi
      * Invite users to this group
      *
      * @param array<string> $emails Email addresses to invite
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function invite(array $emails): bool
+    public function invite(array $emails): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Group ID is required to invite users');
@@ -494,17 +474,13 @@ class Group extends AbstractBaseApi
 
         self::checkApiClient();
 
-        try {
-            $endpoint = sprintf('groups/%d/invite', $this->id);
-            $data = [];
-            foreach ($emails as $email) {
-                $data[] = ['name' => 'invitees[]', 'contents' => $email];
-            }
-            self::$apiClient->post($endpoint, ['multipart' => $data]);
-            return true;
-        } catch (\Exception $e) {
-            return false;
+        $endpoint = sprintf('groups/%d/invite', $this->id);
+        $data = [];
+        foreach ($emails as $email) {
+            $data[] = ['name' => 'invitees[]', 'contents' => $email];
         }
+        self::$apiClient->post($endpoint, ['multipart' => $data]);
+        return $this;
     }
 
     /**
@@ -516,36 +492,33 @@ class Group extends AbstractBaseApi
      * memberships once and managing them locally.
      *
      * @param int $userId User ID to remove
-     * @return bool
+     * @return self
      * @throws CanvasApiException
      */
-    public function removeUser(int $userId): bool
+    public function removeUser(int $userId): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Group ID is required to remove user from group');
         }
 
-        try {
-            // Find the user's membership
-            $memberships = $this->memberships(['filter_states[]' => 'accepted']);
-            $membershipToDelete = null;
+        // Find the user's membership
+        $memberships = $this->memberships(['filter_states[]' => 'accepted']);
+        $membershipToDelete = null;
 
-            foreach ($memberships as $membership) {
-                if ($membership->userId == $userId) {
-                    $membershipToDelete = $membership;
-                    break;
-                }
+        foreach ($memberships as $membership) {
+            if ($membership->userId == $userId) {
+                $membershipToDelete = $membership;
+                break;
             }
-
-            if (!$membershipToDelete) {
-                return false;
-            }
-
-            // Delete the membership
-            return $membershipToDelete->delete();
-        } catch (\Exception $e) {
-            return false;
         }
+
+        if (!$membershipToDelete) {
+            throw new CanvasApiException('User not found in group');
+        }
+
+        // Delete the membership
+        $membershipToDelete->delete();
+        return $this;
     }
 
     /**
