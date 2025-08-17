@@ -21,6 +21,35 @@ use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
  * Provides functionality to manage groups in Canvas LMS.
  * Groups can be used for collaborative work, discussions, and assignments.
  *
+ * Usage Examples:
+ *
+ * ```php
+ * // Create a group (defaults to account context)
+ * $group = Group::create([
+ *     'name' => 'Study Group Alpha',
+ *     'description' => 'Weekly study sessions'
+ * ]);
+ *
+ * // Get first page of groups (memory efficient)
+ * $groups = Group::get();
+ *
+ * // Get ALL groups (⚠️ Be cautious with large institutions)
+ * $allGroups = Group::all();
+ *
+ * // Get paginated groups (recommended for listings)
+ * $paginated = Group::paginate(['per_page' => 50]);
+ * foreach ($paginated->getData() as $group) {
+ *     echo $group->name . ' (' . $group->membersCount . ' members)';
+ * }
+ *
+ * // Get groups for a specific course
+ * $course = Course::find(123);
+ * $courseGroups = $course->groups(); // Returns first page only
+ *
+ * // To get ALL groups for a course:
+ * $groups = Group::fetchByContext('courses', 123, true); // true = all pages
+ * ```
+ *
  * @see https://canvas.instructure.com/doc/api/groups.html
  *
  * @package CanvasLMS\Api\Groups

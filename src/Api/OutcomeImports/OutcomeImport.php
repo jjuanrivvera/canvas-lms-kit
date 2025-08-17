@@ -490,4 +490,17 @@ class OutcomeImport extends AbstractBaseApi
             'The fetchAll() method is not applicable for OutcomeImport. Use import() or importFromData() instead.'
         );
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     */
+    protected static function getEndpoint(): string
+    {
+        $accountId = Config::getAccountId();
+        if (empty($accountId)) {
+            throw new CanvasApiException("Account ID must be set in Config for OutcomeImport operations");
+        }
+        return "accounts/{$accountId}/outcome_imports";
+    }
 }

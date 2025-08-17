@@ -57,6 +57,26 @@ use CanvasLMS\Pagination\PaginationResult;
  * }
  * ```
  *
+ * @example Pagination for large datasets (IMPORTANT for large institutions)
+ * ```php
+ * // ⚠️ CAUTION: Universities can have MILLIONS of enrollments!
+ *
+ * // ✅ GOOD: Process in batches
+ * $page = 1;
+ * do {
+ *     $batch = Enrollment::paginate(['page' => $page++, 'per_page' => 500]);
+ *     foreach ($batch->getData() as $enrollment) {
+ *         // Process enrollment...
+ *     }
+ * } while ($batch->hasNextPage());
+ *
+ * // ❌ DANGEROUS: Could crash with memory exhaustion
+ * // $allEnrollments = Enrollment::all(); // DON'T DO THIS IN PRODUCTION!
+ *
+ * // ✅ GOOD: Get just what you need
+ * $activeEnrollments = Enrollment::get(['state' => ['active'], 'per_page' => 100]);
+ * ```
+ *
  * @package CanvasLMS\Api\Enrollments
  */
 class Enrollment extends AbstractBaseApi

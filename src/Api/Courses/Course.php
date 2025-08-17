@@ -63,21 +63,22 @@ use CanvasLMS\Objects\OutcomeLink;
  * // Finding a course by ID
  * $course = Course::find(123);
  *
- * // Fetching all courses (first page only)
- * $courses = Course::fetchAll();
+ * // Get first page of courses (memory efficient)
+ * $courses = Course::get();
+ * $courses = Course::get(['per_page' => 50]); // Custom page size
  *
- * // Fetching courses with pagination support
- * $paginatedResponse = Course::fetchAllPaginated(['per_page' => 10]);
- * $courses = $paginatedResponse->getJsonData();
- * $pagination = $paginatedResponse->toPaginationResult($courses);
+ * // Get ALL courses from all pages (⚠️ Be cautious with large datasets)
+ * $allCourses = Course::all();
  *
- * // Fetching a specific page of courses
- * $paginationResult = Course::fetchPage(['page' => 2, 'per_page' => 10]);
- * $courses = $paginationResult->getData();
- * $hasNext = $paginationResult->hasNext();
+ * // Get paginated results with metadata (recommended for large datasets)
+ * $paginated = Course::paginate(['per_page' => 50]);
+ * echo "Page {$paginated->getCurrentPage()} of {$paginated->getTotalPages()}";
+ * echo "Total courses: {$paginated->getTotalCount()}";
  *
- * // Fetching all courses from all pages
- * $allCourses = Course::fetchAllPages(['per_page' => 50]);
+ * // Process next page
+ * if ($paginated->hasNextPage()) {
+ *     $nextPage = $paginated->getNextPage();
+ * }
  *```
  * @package CanvasLMS\Api\Courses
  */
@@ -1439,6 +1440,9 @@ class Course extends AbstractBaseApi
     }
 
     // Enrollment Relationship Methods
+    // NOTE: All relationship methods return FIRST PAGE ONLY for performance.
+    // To get all items, use the static methods with context:
+    // Assignment::setCourse($course); $all = Assignment::all();
 
 
     /**
@@ -2713,10 +2717,17 @@ class Course extends AbstractBaseApi
     // Assignment Relationship Methods
 
     /**
-     * Get assignments for this course
+     * Get assignments for this course (first page only)
+     *
+     * NOTE: Returns FIRST PAGE of assignments only for performance.
+     * To get ALL assignments:
+     * ```php
+     * Assignment::setCourse($course);
+     * $allAssignments = Assignment::all();
+     * ```
      *
      * @param array<string, mixed> $params Query parameters
-     * @return Assignment[]
+     * @return Assignment[] First page of assignments
      * @throws CanvasApiException
      */
     public function assignments(array $params = []): array
@@ -2726,7 +2737,7 @@ class Course extends AbstractBaseApi
         }
 
         Assignment::setCourse($this);
-        return Assignment::fetchAll($params);
+        return Assignment::fetchAll($params); // fetchAll() is aliased to get() - first page only
     }
 
 
@@ -3398,5 +3409,14 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to create conference');
         }
         return \CanvasLMS\Api\Conferences\Conference::createForCourse($this->id, $data);
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     */
+    protected static function getEndpoint(): string
+    {
+        return 'courses';
     }
 }

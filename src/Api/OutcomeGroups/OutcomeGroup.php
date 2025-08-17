@@ -635,4 +635,17 @@ class OutcomeGroup extends AbstractBaseApi
 
         return $path;
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     */
+    protected static function getEndpoint(): string
+    {
+        $accountId = Config::getAccountId();
+        if (empty($accountId)) {
+            throw new CanvasApiException("Account ID must be set in Config for OutcomeGroup operations");
+        }
+        return "accounts/{$accountId}/outcome_groups";
+    }
 }

@@ -140,13 +140,14 @@ Config::autoDetectFromEnvironment();
 ```php
 use CanvasLMS\Api\Courses\Course;
 
-// Get first page of courses
+// Get first page of courses (memory efficient)
 $courses = Course::get();
 
 // Get ALL courses across all pages automatically
+// ⚠️ Warning: Be cautious with large datasets (1000+ items)
 $allCourses = Course::all();
 
-// Get paginated results with metadata
+// Get paginated results with metadata (recommended for large datasets)
 $paginated = Course::paginate(['per_page' => 50]);
 echo "Total courses: " . $paginated->getTotalCount();
 
@@ -400,6 +401,41 @@ $groupFiles = File::fetchByContext('groups', 789);
 - **Groups** (Account/Course/User)
 - **Content Migrations** (Account/Course/Group/User)
 
+### Performance Considerations & Memory Usage
+
+When working with large Canvas instances (universities, enterprise organizations), be mindful of memory usage:
+
+```php
+// ✅ GOOD: Memory-efficient for large datasets
+$result = User::paginate(['per_page' => 100]);
+while ($result) {
+    foreach ($result->getData() as $user) {
+        // Process batch of 100 users
+    }
+    $result = $result->hasNextPage() ? $result->getNextPage() : null;
+}
+
+// ✅ GOOD: Get only what you need
+$recentCourses = Course::get(['per_page' => 20]); // Just first 20
+
+// ⚠️ CAUTION: Loads entire dataset into memory
+$allUsers = User::all();  // Could be 50,000+ users!
+$allEnrollments = Enrollment::all(); // Could be millions!
+
+// ⚠️ BETTER: Process in batches for large datasets
+$page = 1;
+do {
+    $batch = Enrollment::paginate(['page' => $page++, 'per_page' => 500]);
+    // Process batch
+} while ($batch->hasNextPage());
+```
+
+**Memory Guidelines:**
+- Use `get()` for dashboards and quick views (1 API call)
+- Use `paginate()` for large datasets and UI tables (controlled memory)
+- Use `all()` only when you need complete data AND know it's reasonably sized
+- Consider your server's memory limit when using `all()` on production data
+
 ### Working with Course-Scoped Resources
 
 Some Canvas resources are strictly course-scoped and require setting the course context before use:
@@ -427,13 +463,23 @@ $modules = Module::get();     // Get first page
 $discussions = DiscussionTopic::all(); // Get all discussions
 
 // Option 2: Use course instance methods (recommended - no context setup needed)
-$pages = $course->pages();
-$quizzes = $course->quizzes();
-$modules = $course->modules();
-$discussions = $course->discussionTopics();
+$pages = $course->pages();          // Returns first page only
+$quizzes = $course->quizzes();      // Returns first page only
+$modules = $course->modules();      // Returns first page only
+$discussions = $course->discussionTopics(); // Returns first page only
 ```
 
-**Important:** These APIs will throw an exception if you try to use them without setting the course context first.
+**Important Notes:**
+1. These APIs will throw an exception if you try to use them without setting the course context first.
+2. **Relationship methods return FIRST PAGE ONLY** for performance. To get all items:
+   ```php
+   // Get ALL modules for a course
+   Module::setCourse($course);
+   $allModules = Module::all();  // Gets all pages
+   
+   // Or paginate for control
+   $paginated = Module::paginate(['per_page' => 50]);
+   ```
 
 ### Learning Outcomes
 

@@ -371,4 +371,17 @@ class RubricAssociation extends AbstractBaseApi
             "Rubric associations must be accessed through rubrics."
         );
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * Note: RubricAssociation is a nested resource under Rubric
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        throw new CanvasApiException(
+            'RubricAssociation does not support direct endpoint access. Use context-specific methods.'
+        );
+    }
 }

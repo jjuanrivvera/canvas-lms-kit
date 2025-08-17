@@ -823,4 +823,13 @@ class CalendarEvent extends AbstractBaseApi
     {
         $this->{$name} = $this->castValue($name, $value);
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     */
+    protected static function getEndpoint(): string
+    {
+        return 'calendar_events';
+    }
 }

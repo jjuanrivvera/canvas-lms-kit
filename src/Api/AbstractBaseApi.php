@@ -278,14 +278,10 @@ abstract class AbstractBaseApi implements ApiInterface
 
     /**
      * Get the API endpoint for this resource
-     * Subclasses should override this to provide their specific endpoint
+     * Subclasses must implement this to provide their specific endpoint
      * @return string
      */
-    protected static function getEndpoint(): string
-    {
-        // This should be overridden by subclasses
-        throw new \RuntimeException('Subclasses must implement getEndpoint()');
-    }
+    abstract protected static function getEndpoint(): string;
 
     /**
      * Magic method to handle function aliases

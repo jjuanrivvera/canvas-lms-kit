@@ -68,21 +68,23 @@ use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
  * // Finding a user by ID (admin operation)
  * $user = User::find(123);
  *
- * // Fetching all users (admin operation - first page only)
- * $users = User::fetchAll();
+ * // Get first page of users (memory efficient)
+ * $users = User::get();
+ * $users = User::get(['per_page' => 100]); // Custom page size
  *
- * // Fetching users with pagination support
- * $paginatedResponse = User::fetchAllPaginated(['per_page' => 10]);
- * $users = $paginatedResponse->getJsonData();
- * $pagination = $paginatedResponse->toPaginationResult($users);
+ * // Get ALL users from all pages (⚠️ CAUTION: Could be thousands!)
+ * $allUsers = User::all(); // Be very careful with large institutions
  *
- * // Fetching a specific page of users
- * $paginationResult = User::fetchPage(['page' => 2, 'per_page' => 10]);
- * $users = $paginationResult->getData();
- * $hasNext = $paginationResult->hasNext();
+ * // Get paginated results with metadata (recommended for user lists)
+ * $paginated = User::paginate(['per_page' => 100]);
+ * echo "Showing {$paginated->getPerPage()} of {$paginated->getTotalCount()} users";
  *
- * // Fetching all users from all pages
- * $allUsers = User::fetchAllPages(['per_page' => 50]);
+ * // Process in batches for large datasets
+ * $page = 1;
+ * do {
+ *     $batch = User::paginate(['page' => $page++, 'per_page' => 500]);
+ *     // Process batch...
+ * } while ($batch->hasNextPage());
  * ```
  *
  * @package CanvasLMS\Api\Users

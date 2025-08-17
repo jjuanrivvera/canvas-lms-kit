@@ -55,6 +55,11 @@ class AbstractBaseApiTest extends TestCase
             public $id;
             public $name;
             
+            protected static function getEndpoint(): string
+            {
+                return 'test_items';
+            }
+            
             public static function find(int $id): self
             {
                 return new self(['id' => $id, 'name' => 'Test Item']);
@@ -286,6 +291,11 @@ class AbstractBaseApiTest extends TestCase
             public $id;
             public $name;
             
+            protected static function getEndpoint(): string
+            {
+                return 'test';
+            }
+            
             public static function find(int $id): self
             {
                 return new self(['id' => $id, 'name' => 'Test Item']);
@@ -358,6 +368,11 @@ class AbstractBaseApiTest extends TestCase
         $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
         {
             public $someProperty;
+            
+            protected static function getEndpoint(): string
+            {
+                return 'test';
+            }
             
             public static function find(int $id): self
             {

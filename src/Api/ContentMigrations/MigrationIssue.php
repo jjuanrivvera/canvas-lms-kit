@@ -536,4 +536,19 @@ class MigrationIssue extends AbstractBaseApi
     {
         $this->updatedAt = $updatedAt;
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * Note: MigrationIssue is a nested resource under ContentMigration
+     * and requires context, so this returns a placeholder that should not be used directly
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        throw new CanvasApiException(
+            'MigrationIssue does not support direct endpoint access. ' .
+            'Use context-specific methods like fetchAllInMigration()'
+        );
+    }
 }

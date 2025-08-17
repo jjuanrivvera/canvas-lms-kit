@@ -444,4 +444,17 @@ class SubmissionComment extends AbstractBaseApi
     {
         $this->mediaComment = $mediaComment;
     }
+
+    /**
+     * Get the API endpoint for this resource
+     * Note: SubmissionComment is a nested resource under Submission
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        throw new CanvasApiException(
+            'SubmissionComment does not support direct endpoint access. Use context-specific methods.'
+        );
+    }
 }
