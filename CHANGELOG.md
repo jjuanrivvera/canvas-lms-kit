@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Comprehensive logging system activation and improvements (#107)
+  - PSR-3 compatible logger configuration via `Config::setLogger()`
+  - Context-aware logging support for multi-tenant applications
+  - Activity logging trait for standardized API operation logging
+  - OAuth token operation logging with sensitive data sanitization
+  - Pagination metrics and performance tracking
+  - File upload progress logging (3-step process)
+  - Automatic sensitive data sanitization in logs
+  - Integration examples with Monolog, Symfony, and other PSR-3 loggers
+
+### Changed
+- Replaced `trigger_error()` and `error_log()` calls with proper PSR-3 logger usage
+- AbstractBaseApi now uses configured logger instead of hardcoded NullLogger
+- Enhanced error handling with contextual logging throughout the SDK
+
+### Security
+- Automatic sanitization of sensitive fields (passwords, tokens, API keys) in log output
+- OAuth token masking in log entries to prevent credential exposure
+
 ## [1.2.0] - 2025-01-17
 
 ### Added

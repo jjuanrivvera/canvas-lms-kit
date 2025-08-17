@@ -4,6 +4,7 @@ namespace CanvasLMS\Api\Files;
 
 use Exception;
 use CanvasLMS\Api\AbstractBaseApi;
+use CanvasLMS\Config;
 use CanvasLMS\Dto\Files\UploadFileDto;
 use CanvasLMS\Exceptions\CanvasApiException;
 
@@ -317,12 +318,22 @@ class File extends AbstractBaseApi
     {
         self::checkApiClient();
 
+        $logger = Config::getLogger();
+        $logger->info('File Upload: Starting 3-step upload process', [
+            'endpoint' => $endpoint,
+            'file_name' => $dto->name ?? 'unknown',
+            'file_size' => $dto->size ?? null,
+            'content_type' => $dto->contentType ?? null
+        ]);
+
         // Step 1: Initialize upload
+        $logger->debug('File Upload: Step 1 - Initializing upload with Canvas API');
         $response = self::$apiClient->post($endpoint, [
             'multipart' => $dto->toApiArray()
         ]);
 
         $uploadData = json_decode($response->getBody(), true);
+        $logger->debug('File Upload: Step 1 complete - Received upload URL and parameters');
 
         // Step 2: Upload file data
         $uploadParams = $uploadData['upload_params'] ?? [];
@@ -346,6 +357,7 @@ class File extends AbstractBaseApi
 
         // Ensure we have a valid filename
         if (empty($dto->name)) {
+            $logger->error('File Upload: File name is required for upload');
             throw new CanvasApiException('File name is required for upload');
         }
 
@@ -356,18 +368,33 @@ class File extends AbstractBaseApi
         ];
 
         try {
+            $logger->debug('File Upload: Step 2 - Uploading file to external storage', [
+                'upload_url_host' => parse_url($uploadUrl, PHP_URL_HOST)
+            ]);
+
+            $startTime = microtime(true);
             $uploadResponse = self::$apiClient->post($uploadUrl, [
                 'multipart' => $multipartData
             ]);
+            $uploadDuration = microtime(true) - $startTime;
 
             // Check for HTTP errors in external storage upload
             $statusCode = $uploadResponse->getStatusCode();
             if ($statusCode >= 400) {
+                $logger->error('File Upload: External storage upload failed', [
+                    'status_code' => $statusCode,
+                    'reason' => $uploadResponse->getReasonPhrase()
+                ]);
                 throw new CanvasApiException(
                     "External storage upload failed with status {$statusCode}: " .
                     $uploadResponse->getReasonPhrase()
                 );
             }
+
+            $logger->debug('File Upload: Step 2 complete - File uploaded to external storage', [
+                'duration_ms' => round($uploadDuration * 1000, 2),
+                'status_code' => $statusCode
+            ]);
         } finally {
             // Close file resource if it was opened by getFileResource()
             if (is_resource($fileResource)) {
@@ -378,11 +405,20 @@ class File extends AbstractBaseApi
         // Step 3: Confirm upload (follow redirect if present)
         $location = $uploadResponse->getHeader('Location')[0] ?? '';
         if (!empty($location)) {
+            $logger->debug('File Upload: Step 3 - Following redirect to confirm upload');
             $confirmResponse = self::$apiClient->get($location);
             $fileData = json_decode($confirmResponse->getBody(), true);
         } else {
+            $logger->debug('File Upload: Step 3 - Processing upload response directly');
             $fileData = json_decode($uploadResponse->getBody(), true);
         }
+
+        $logger->info('File Upload: Successfully completed 3-step upload process', [
+            'file_id' => $fileData['id'] ?? null,
+            'file_name' => $fileData['display_name'] ?? $fileData['filename'] ?? null,
+            'file_size' => $fileData['size'] ?? null,
+            'content_type' => $fileData['content-type'] ?? null
+        ]);
 
         return new self($fileData);
     }
