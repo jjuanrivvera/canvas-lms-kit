@@ -10,6 +10,7 @@ use CanvasLMS\Exceptions\MissingOAuthTokenException;
 use CanvasLMS\Exceptions\OAuthRefreshFailedException;
 use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use CanvasLMS\Traits\ActivityLoggingTrait;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
@@ -25,6 +26,8 @@ use GuzzleHttp\Exception\RequestException;
  */
 class OAuth
 {
+    use ActivityLoggingTrait;
+
     private static ?HttpClientInterface $httpClient = null;
 
     /**
@@ -48,6 +51,15 @@ class OAuth
         ];
 
         $params = array_merge($defaults, $params);
+
+        // Log OAuth operation
+        $logger = Config::getLogger();
+        $logger->info('OAuth: Generating authorization URL', [
+            'has_state' => isset($params['state']),
+            'has_scope' => isset($params['scope']),
+            'has_purpose' => isset($params['purpose']),
+            'force_login' => $params['force_login'] ?? false
+        ]);
 
         if (empty($params['client_id']) || empty($params['redirect_uri'])) {
             throw new CanvasApiException('OAuth client_id and redirect_uri must be configured');
@@ -75,6 +87,12 @@ class OAuth
      */
     public static function exchangeCode(string $code, array $options = []): array
     {
+        $logger = Config::getLogger();
+        $logger->info('OAuth: Starting authorization code exchange', [
+            'has_code' => !empty($code),
+            'replace_tokens' => $options['replace_tokens'] ?? false
+        ]);
+
         $params = array_merge([
             'grant_type' => 'authorization_code',
             'client_id' => Config::getOAuthClientId(),
@@ -128,8 +146,19 @@ class OAuth
                 }
             }
 
+            $logger->info('OAuth: Successfully exchanged authorization code for tokens', [
+                'has_refresh_token' => isset($data['refresh_token']),
+                'expires_in' => $data['expires_in'] ?? null,
+                'user_id' => $data['user']['id'] ?? null,
+                'scopes' => $data['scope'] ?? null
+            ]);
+
             return $data;
         } catch (RequestException $e) {
+            $logger->error('OAuth: Failed to exchange authorization code', [
+                'error' => $e->getMessage(),
+                'code' => $e->getCode()
+            ]);
             $response = $e->getResponse();
             if ($response) {
                 $error = $response->getBody()->getContents();
@@ -151,8 +180,12 @@ class OAuth
      */
     public static function refreshToken(): array
     {
+        $logger = Config::getLogger();
+        $logger->info('OAuth: Starting token refresh');
+
         $refreshToken = Config::getOAuthRefreshToken();
         if (!$refreshToken) {
+            $logger->error('OAuth: No refresh token available for refresh');
             throw new MissingOAuthTokenException('No refresh token available');
         }
 
@@ -200,6 +233,11 @@ class OAuth
                 Config::setOAuthExpiresAt(time() + $data['expires_in']);
             }
 
+            $logger->info('OAuth: Successfully refreshed access token', [
+                'expires_in' => $data['expires_in'] ?? null,
+                'scopes' => $data['scope'] ?? null
+            ]);
+
             return $data;
         } catch (RequestException $e) {
             $response = $e->getResponse();
@@ -208,6 +246,12 @@ class OAuth
             } else {
                 $error = $e->getMessage();
             }
+
+            $logger->error('OAuth: Failed to refresh token', [
+                'error' => $error,
+                'code' => $e->getCode()
+            ]);
+
             throw new OAuthRefreshFailedException('Token refresh failed: ' . $error);
         }
     }
@@ -222,8 +266,14 @@ class OAuth
      */
     public static function revokeToken(bool $expireSessions = false): array
     {
+        $logger = Config::getLogger();
+        $logger->info('OAuth: Starting token revocation', [
+            'expire_sessions' => $expireSessions
+        ]);
+
         $token = Config::getOAuthToken();
         if (!$token) {
+            $logger->error('OAuth: No token available to revoke');
             throw new MissingOAuthTokenException('No OAuth token to revoke');
         }
 
@@ -253,9 +303,17 @@ class OAuth
             // Clear stored tokens
             Config::clearOAuthTokens();
 
+            $logger->info('OAuth: Successfully revoked token', [
+                'expire_sessions' => $expireSessions
+            ]);
+
             $body = $response->getBody()->getContents();
             return $body ? json_decode($body, true) ?? [] : [];
         } catch (RequestException $e) {
+            $logger->error('OAuth: Failed to revoke token', [
+                'error' => $e->getMessage(),
+                'code' => $e->getCode()
+            ]);
             $response = $e->getResponse();
             if ($response) {
                 $error = $response->getBody()->getContents();

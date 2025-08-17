@@ -3,6 +3,8 @@
 namespace CanvasLMS;
 
 use CanvasLMS\Exceptions\ConfigurationException;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class Config
 {
@@ -23,7 +25,8 @@ class Config
      *     oauth_user_id?: int,
      *     oauth_user_name?: string,
      *     oauth_scopes?: array<string>,
-     *     auth_mode?: string
+     *     auth_mode?: string,
+     *     logger?: LoggerInterface
      * }>
      */
     private static array $contexts = [];
@@ -107,6 +110,11 @@ class Config
      * @var string Authentication mode ('api_key' or 'oauth')
      */
     private static string $authMode = 'api_key';
+
+    /**
+     * @var LoggerInterface|null PSR-3 logger instance
+     */
+    private static ?LoggerInterface $logger = null;
 
     /**
      * Set the application key.
@@ -339,10 +347,11 @@ class Config
 
         // Warn about using default value if no configuration was explicitly set
         if (!self::hasAccountIdConfigured($context)) {
-            trigger_error(
+            $logger = self::getLogger($context);
+            $logger->notice(
                 "No account ID configured for context '{$context}', using default value 1. " .
                 "Consider setting explicitly with Config::setAccountId().",
-                E_USER_NOTICE
+                ['context' => $context, 'default_value' => 1]
             );
         }
 
@@ -410,6 +419,7 @@ class Config
         self::$oauthUserName = null;
         self::$oauthScopes = null;
         self::$authMode = 'api_key';
+        self::$logger = null;
 
         // Then apply context-specific values if they exist
         if (isset(self::$contexts[$context]['app_key'])) {
@@ -457,6 +467,9 @@ class Config
         if (isset(self::$contexts[$context]['auth_mode'])) {
             self::$authMode = self::$contexts[$context]['auth_mode'];
         }
+        if (isset(self::$contexts[$context]['logger'])) {
+            self::$logger = self::$contexts[$context]['logger'];
+        }
     }
 
     /**
@@ -495,6 +508,71 @@ class Config
     }
 
     /**
+     * Set a PSR-3 logger instance for the SDK.
+     *
+     * @param LoggerInterface $logger The PSR-3 logger instance
+     * @param string|null $context The context to set the logger for. If null, uses active context.
+     */
+    public static function setLogger(LoggerInterface $logger, ?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        // Maintain backward compatibility - set both legacy and context
+        if ($context === self::$activeContext) {
+            self::$logger = $logger;
+        }
+
+        self::$contexts[$context]['logger'] = $logger;
+    }
+
+    /**
+     * Get the configured logger instance.
+     *
+     * @param string|null $context The context to get the logger from. If null, uses active context.
+     * @return LoggerInterface The logger instance (returns NullLogger if not configured)
+     */
+    public static function getLogger(?string $context = null): LoggerInterface
+    {
+        $context ??= self::$activeContext;
+
+        // Check context first, then fall back to legacy for backward compatibility
+        if (isset(self::$contexts[$context]['logger'])) {
+            return self::$contexts[$context]['logger'];
+        }
+
+        // For backward compatibility with existing code
+        if ($context === self::$activeContext && self::$logger !== null) {
+            return self::$logger;
+        }
+
+        // Return NullLogger by default to maintain backward compatibility
+        return new NullLogger();
+    }
+
+    /**
+     * Check if a logger has been configured.
+     *
+     * @param string|null $context The context to check. If null, uses active context.
+     * @return bool True if a logger is configured, false otherwise
+     */
+    public static function hasLogger(?string $context = null): bool
+    {
+        $context ??= self::$activeContext;
+
+        // Check if explicitly set in context
+        if (isset(self::$contexts[$context]['logger'])) {
+            return true;
+        }
+
+        // Check if explicitly set in legacy (for active context only)
+        if ($context === self::$activeContext && self::$logger !== null) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Reset a specific context, removing all its configuration.
      *
      * @param string $context The context to reset.
@@ -510,6 +588,7 @@ class Config
             self::$apiVersion = 'v1';
             self::$timeout = 30;
             self::$accountId = 1;
+            self::$logger = null;
         }
     }
 
