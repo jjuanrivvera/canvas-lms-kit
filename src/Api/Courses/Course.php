@@ -29,6 +29,9 @@ use CanvasLMS\Api\Rubrics\Rubric;
 use CanvasLMS\Api\ExternalTools\ExternalTool;
 use CanvasLMS\Api\Tabs\Tab;
 use CanvasLMS\Objects\OutcomeLink;
+use CanvasLMS\Api\GradebookHistory\GradebookHistory;
+use CanvasLMS\Objects\GradebookHistoryDay;
+use CanvasLMS\Objects\GradebookHistoryGrader;
 
 /**
  * Course Class
@@ -3378,6 +3381,59 @@ class Course extends AbstractBaseApi
         ]);
 
         return $response->getBody()->getContents();
+    }
+
+    // Gradebook History Relationship Methods
+
+    /**
+     * Get a GradebookHistory instance configured for this course.
+     *
+     * @return GradebookHistory
+     * @throws CanvasApiException
+     */
+    public function gradebookHistory(): GradebookHistory
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to access gradebook history');
+        }
+
+        GradebookHistory::setCourse($this->id);
+        return new GradebookHistory([]);
+    }
+
+    /**
+     * Get days with grading activity in this course.
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<GradebookHistoryDay>
+     * @throws CanvasApiException
+     */
+    public function getGradebookHistoryDays(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch gradebook history days');
+        }
+
+        GradebookHistory::setCourse($this->id);
+        return GradebookHistory::fetchDays($params);
+    }
+
+    /**
+     * Get graders who had activity on a specific day.
+     *
+     * @param string $date The date in YYYY-MM-DD format
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<GradebookHistoryGrader>
+     * @throws CanvasApiException
+     */
+    public function getGradebookHistoryForDay(string $date, array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch gradebook history');
+        }
+
+        GradebookHistory::setCourse($this->id);
+        return GradebookHistory::fetchDay($date, $params);
     }
 
     /**
