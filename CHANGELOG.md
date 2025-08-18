@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Gradebook History API for grade change audit trail (#66)
+  - **GradebookHistory** class for tracking all grade changes with timestamps
+  - Course-scoped resource requiring course context
+  - Four main endpoints for comprehensive grade history access:
+    - `fetchDays()` - List days with grading activity
+    - `fetchDay()` - Get graders and assignments for a specific day
+    - `fetchSubmissions()` - Get detailed submission versions
+    - `fetchFeed()` - Paginated feed of all submission versions
+  - Full pagination support via `fetchFeedPaginated()` method
+  - Data objects for structured responses:
+    - **GradebookHistoryGrader** - Grader information with assignments
+    - **GradebookHistoryDay** - Days with grading activity
+    - **SubmissionVersion** - Individual submission version with grade changes
+    - **SubmissionHistory** - Complete history of submission versions
+  - Integration with Course class via `gradebookHistory()` method
+  - Support for filtering by assignment, user, and date range
+  - Grade change tracking with previous/current/new values
+  - Essential for academic integrity and compliance requirements
 - Comprehensive logging system activation and improvements (#107)
   - PSR-3 compatible logger configuration via `Config::setLogger()`
   - Context-aware logging support for multi-tenant applications
