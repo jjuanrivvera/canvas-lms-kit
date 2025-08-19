@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-01-19
+
 ### Fixed
 - OAuth token exchange authentication bypass issue (#110)
   - Fixed OAuth::exchangeCode() and OAuth::refreshToken() methods failing due to authentication chicken-and-egg problem
@@ -245,7 +247,8 @@ Canvas LMS Kit is now production-ready with 90% Canvas API coverage, rate limiti
 - Contributing guidelines
 - Wiki with implementation guides
 
-[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.0.0...v1.0.1
