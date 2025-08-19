@@ -133,6 +133,61 @@ Config::autoDetectFromEnvironment();
 // Ready to use!
 ```
 
+### Logging Configuration
+
+The SDK supports any PSR-3 compatible logger for comprehensive debugging and monitoring:
+
+```php
+use CanvasLMS\Config;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
+// Configure with Monolog
+$logger = new Logger('canvas-lms');
+$logger->pushHandler(new StreamHandler('logs/canvas.log', Logger::INFO));
+Config::setLogger($logger);
+
+// All API calls, OAuth operations, pagination, and file uploads are now logged!
+```
+
+#### Symfony Integration
+
+```php
+use Psr\Log\LoggerInterface;
+
+public function __construct(LoggerInterface $logger) {
+    Config::setLogger($logger);
+}
+```
+
+#### Advanced Logging Configuration
+
+```php
+// Enable detailed request/response logging
+Config::setMiddleware([
+    'logging' => [
+        'enabled' => true,
+        'log_requests' => true,
+        'log_responses' => true,
+        'log_errors' => true,
+        'log_timing' => true,
+        'log_level' => \Psr\Log\LogLevel::DEBUG,
+        'sanitize_fields' => ['password', 'token', 'api_key', 'secret'],
+        'max_body_length' => 1000
+    ]
+]);
+```
+
+**What Gets Logged:**
+- ✅ All API requests and responses (with sensitive data sanitization)
+- ✅ OAuth token operations (refresh, revoke, exchange)
+- ✅ Pagination operations with performance metrics
+- ✅ File upload progress (3-step process)
+- ✅ Rate limit headers and API costs
+- ✅ Error conditions with context
+
+**Security:** The logging middleware automatically sanitizes sensitive fields like passwords, tokens, and API keys to prevent accidental exposure in logs.
+
 ## 💡 Usage Examples
 
 ### Working with Courses

@@ -569,12 +569,16 @@ class AppointmentGroup extends AbstractBaseApi
                 return new DateTime($value);
             } catch (\Exception $e) {
                 // Log the parsing error for debugging
-                error_log(sprintf(
-                    'AppointmentGroup: Failed to parse DateTime for field "%s" with value "%s": %s',
-                    $key,
-                    $value,
-                    $e->getMessage()
-                ));
+                $logger = \CanvasLMS\Config::getLogger();
+                $logger->warning(
+                    'AppointmentGroup: Failed to parse DateTime for field "{field}" with value "{value}": {error}',
+                    [
+                        'field' => $key,
+                        'value' => $value,
+                        'error' => $e->getMessage(),
+                        'class' => self::class
+                    ]
+                );
 
                 // Return null for invalid dates to maintain consistency
                 return null;

@@ -425,4 +425,76 @@ class ConfigTest extends TestCase
         // Different context should not be configured
         $this->assertFalse(Config::hasAccountIdConfigured('other-context'));
     }
+
+    public function testLoggerConfiguration(): void
+    {
+        // Test default logger is NullLogger
+        $logger = Config::getLogger();
+        $this->assertInstanceOf(\Psr\Log\LoggerInterface::class, $logger);
+        $this->assertInstanceOf(\Psr\Log\NullLogger::class, $logger);
+
+        // Test hasLogger returns false by default
+        $this->assertFalse(Config::hasLogger());
+
+        // Test setting a custom logger
+        $mockLogger = $this->createMock(\Psr\Log\LoggerInterface::class);
+        Config::setLogger($mockLogger);
+        
+        $retrievedLogger = Config::getLogger();
+        $this->assertSame($mockLogger, $retrievedLogger);
+        $this->assertTrue(Config::hasLogger());
+    }
+
+    public function testLoggerConfigurationPerContext(): void
+    {
+        // Set logger for default context
+        $defaultLogger = $this->createMock(\Psr\Log\LoggerInterface::class);
+        Config::setLogger($defaultLogger);
+        
+        // Set logger for test context
+        Config::setContext('test');
+        $testLogger = $this->createMock(\Psr\Log\LoggerInterface::class);
+        Config::setLogger($testLogger);
+        
+        // Verify loggers are isolated per context
+        $this->assertSame($testLogger, Config::getLogger('test'));
+        $this->assertSame($defaultLogger, Config::getLogger('default'));
+        
+        // Context without logger returns NullLogger
+        $this->assertInstanceOf(\Psr\Log\NullLogger::class, Config::getLogger('new-context'));
+        $this->assertFalse(Config::hasLogger('new-context'));
+    }
+
+    public function testLoggerResetWithContext(): void
+    {
+        // Set logger for a context
+        $logger = $this->createMock(\Psr\Log\LoggerInterface::class);
+        Config::setLogger($logger, 'test');
+        $this->assertTrue(Config::hasLogger('test'));
+        
+        // Reset context should clear logger
+        Config::resetContext('test');
+        $this->assertFalse(Config::hasLogger('test'));
+        $this->assertInstanceOf(\Psr\Log\NullLogger::class, Config::getLogger('test'));
+    }
+
+    public function testLoggerSyncWithActiveContext(): void
+    {
+        // Set logger for default context
+        $defaultLogger = $this->createMock(\Psr\Log\LoggerInterface::class);
+        Config::setLogger($defaultLogger);
+        
+        // Create and switch to new context with different logger
+        Config::setContext('production');
+        $productionLogger = $this->createMock(\Psr\Log\LoggerInterface::class);
+        Config::setLogger($productionLogger);
+        
+        // Switch back to default - logger should be restored
+        Config::setContext('default');
+        $this->assertSame($defaultLogger, Config::getLogger());
+        
+        // Switch to production - logger should be production logger
+        Config::setContext('production');
+        $this->assertSame($productionLogger, Config::getLogger());
+    }
 }

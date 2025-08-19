@@ -106,7 +106,8 @@ class OAuthTest extends TestCase
                         'client_secret' => 'test_client_secret',
                         'redirect_uri' => 'https://app.test.com/oauth/callback',
                         'code' => 'test_code'
-                    ]
+                    ],
+                    'skipAuth' => true
                 ])
             )
             ->willReturn(new Response(200, [], json_encode($tokenData)));
@@ -145,7 +146,9 @@ class OAuthTest extends TestCase
                 $this->equalTo('https://canvas.test.com/login/oauth2/token'),
                 $this->callback(function ($options) {
                     return isset($options['form_params']['replace_tokens']) &&
-                           $options['form_params']['replace_tokens'] === '1';
+                           $options['form_params']['replace_tokens'] === '1' &&
+                           isset($options['skipAuth']) &&
+                           $options['skipAuth'] === true;
                 })
             )
             ->willReturn(new Response(200, [], json_encode($tokenData)));
@@ -181,7 +184,8 @@ class OAuthTest extends TestCase
                         'client_id' => 'test_client_id',
                         'client_secret' => 'test_client_secret',
                         'refresh_token' => 'existing_refresh_token'
-                    ]
+                    ],
+                    'skipAuth' => true
                 ])
             )
             ->willReturn(new Response(200, [], json_encode($refreshData)));
@@ -208,7 +212,10 @@ class OAuthTest extends TestCase
             ->method('request')
             ->with(
                 $this->equalTo('POST'),
-                $this->equalTo('https://canvas.test.com/login/oauth2/token')
+                $this->equalTo('https://canvas.test.com/login/oauth2/token'),
+                $this->callback(function ($options) {
+                    return isset($options['skipAuth']) && $options['skipAuth'] === true;
+                })
             )
             ->willReturn(new Response(401, [], json_encode([
                 'error' => 'invalid_grant',
@@ -460,5 +467,158 @@ class OAuthTest extends TestCase
         unset($_ENV['CANVAS_OAUTH_CLIENT_SECRET']);
         unset($_ENV['CANVAS_OAUTH_REDIRECT_URI']);
         unset($_ENV['CANVAS_AUTH_MODE']);
+    }
+    
+    /**
+     * Test authentication bypass functionality for OAuth token exchange
+     */
+    public function testAuthenticationBypassForTokenExchange(): void
+    {
+        // Reset to a real HttpClient to test authentication bypass
+        OAuth::setHttpClient(null);
+        
+        // Set auth mode to OAuth but don't set any tokens (should not cause exception)
+        Config::useOAuth();
+        Config::clearOAuthTokens();
+        
+        $tokenData = [
+            'access_token' => 'test_access_token',
+            'refresh_token' => 'test_refresh_token',
+            'expires_in' => 3600,
+            'token_type' => 'Bearer',
+            'user' => ['id' => 123, 'name' => 'Test User']
+        ];
+        
+        // Create a mock HTTP client that will be used internally by OAuth
+        $mockHttpClient = $this->createMock(HttpClientInterface::class);
+        $mockHttpClient->expects($this->once())
+            ->method('request')
+            ->with(
+                $this->equalTo('POST'),
+                $this->stringContains('/login/oauth2/token'),
+                $this->callback(function ($options) {
+                    // Verify that skipAuth is present and true
+                    return isset($options['skipAuth']) && $options['skipAuth'] === true;
+                })
+            )
+            ->willReturn(new Response(200, [], json_encode($tokenData)));
+        
+        OAuth::setHttpClient($mockHttpClient);
+        
+        // This should not throw MissingOAuthTokenException or MissingApiKeyException
+        $result = OAuth::exchangeCode('test_code');
+        
+        $this->assertEquals('test_access_token', $result['access_token']);
+    }
+    
+    /**
+     * Test authentication bypass functionality for OAuth token refresh
+     */
+    public function testAuthenticationBypassForTokenRefresh(): void
+    {
+        // Reset to a real HttpClient to test authentication bypass
+        OAuth::setHttpClient(null);
+        
+        // Set auth mode to API key but don't set API key (should not cause exception)
+        Config::useApiKey();
+        Config::setAppKey(''); // Clear API key
+        Config::setOAuthRefreshToken('test_refresh_token');
+        
+        $refreshData = [
+            'access_token' => 'refreshed_access_token',
+            'expires_in' => 3600,
+            'token_type' => 'Bearer'
+        ];
+        
+        // Create a mock HTTP client that will be used internally by OAuth
+        $mockHttpClient = $this->createMock(HttpClientInterface::class);
+        $mockHttpClient->expects($this->once())
+            ->method('request')
+            ->with(
+                $this->equalTo('POST'),
+                $this->stringContains('/login/oauth2/token'),
+                $this->callback(function ($options) {
+                    // Verify that skipAuth is present and true
+                    return isset($options['skipAuth']) && $options['skipAuth'] === true;
+                })
+            )
+            ->willReturn(new Response(200, [], json_encode($refreshData)));
+        
+        OAuth::setHttpClient($mockHttpClient);
+        
+        // This should not throw MissingApiKeyException
+        $result = OAuth::refreshToken();
+        
+        $this->assertEquals('refreshed_access_token', $result['access_token']);
+    }
+    
+    /**
+     * Test that OAuth token revocation still requires authentication
+     */
+    public function testTokenRevocationStillRequiresAuthentication(): void
+    {
+        // Reset to a real HttpClient
+        OAuth::setHttpClient(null);
+        
+        // Set OAuth token for revocation
+        Config::setOAuthToken('token_to_revoke');
+        
+        // Create a mock HTTP client 
+        $mockHttpClient = $this->createMock(HttpClientInterface::class);
+        $mockHttpClient->expects($this->once())
+            ->method('request')
+            ->with(
+                $this->equalTo('DELETE'),
+                $this->stringContains('/login/oauth2/token'),
+                $this->callback(function ($options) {
+                    // Verify that skipAuth is NOT present (authentication should be applied)
+                    return !isset($options['skipAuth']) &&
+                           isset($options['headers']['Authorization']) &&
+                           $options['headers']['Authorization'] === 'Bearer token_to_revoke';
+                })
+            )
+            ->willReturn(new Response(200, [], json_encode(['success' => true])));
+        
+        OAuth::setHttpClient($mockHttpClient);
+        
+        $result = OAuth::revokeToken();
+        
+        $this->assertTrue($result['success']);
+    }
+    
+    /**
+     * Test that OAuth session token creation still requires authentication
+     */
+    public function testSessionTokenCreationStillRequiresAuthentication(): void
+    {
+        // Reset to a real HttpClient
+        OAuth::setHttpClient(null);
+        
+        // Set OAuth token for session creation
+        Config::setOAuthToken('test_token');
+        
+        $sessionUrl = 'https://canvas.test.com/sessions/123abc';
+        
+        // Create a mock HTTP client
+        $mockHttpClient = $this->createMock(HttpClientInterface::class);
+        $mockHttpClient->expects($this->once())
+            ->method('request')
+            ->with(
+                $this->equalTo('POST'),
+                $this->stringContains('/login/session_token'),
+                $this->callback(function ($options) {
+                    // Verify that skipAuth is NOT present (authentication should be applied)
+                    return !isset($options['skipAuth']) &&
+                           isset($options['headers']['Authorization']) &&
+                           $options['headers']['Authorization'] === 'Bearer test_token';
+                })
+            )
+            ->willReturn(new Response(200, [], json_encode(['session_url' => $sessionUrl])));
+        
+        OAuth::setHttpClient($mockHttpClient);
+        
+        $result = OAuth::getSessionToken();
+        
+        $this->assertEquals($sessionUrl, $result);
     }
 }

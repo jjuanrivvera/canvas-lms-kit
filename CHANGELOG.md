@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-01-19
+
+### Fixed
+- OAuth token exchange authentication bypass issue (#110)
+  - Fixed OAuth::exchangeCode() and OAuth::refreshToken() methods failing due to authentication chicken-and-egg problem
+  - Added `skipAuth` option to HttpClient for OAuth endpoints that should be unauthenticated
+  - OAuth token exchange and refresh now work without requiring existing API key or OAuth token
+  - OAuth token revocation and session creation continue to require authentication as expected
+  - Added integration tests to verify authentication bypass behavior
+
+### Added
+- Gradebook History API for grade change audit trail (#66)
+  - **GradebookHistory** class for tracking all grade changes with timestamps
+  - Course-scoped resource requiring course context
+  - Four main endpoints for comprehensive grade history access:
+    - `fetchDays()` - List days with grading activity
+    - `fetchDay()` - Get graders and assignments for a specific day
+    - `fetchSubmissions()` - Get detailed submission versions
+    - `fetchFeed()` - Paginated feed of all submission versions
+  - Full pagination support via `fetchFeedPaginated()` method
+  - Data objects for structured responses:
+    - **GradebookHistoryGrader** - Grader information with assignments
+    - **GradebookHistoryDay** - Days with grading activity
+    - **SubmissionVersion** - Individual submission version with grade changes
+    - **SubmissionHistory** - Complete history of submission versions
+  - Integration with Course class via `gradebookHistory()` method
+  - Support for filtering by assignment, user, and date range
+  - Grade change tracking with previous/current/new values
+  - Essential for academic integrity and compliance requirements
+- Comprehensive logging system activation and improvements (#107)
+  - PSR-3 compatible logger configuration via `Config::setLogger()`
+  - Context-aware logging support for multi-tenant applications
+  - Activity logging trait for standardized API operation logging
+  - OAuth token operation logging with sensitive data sanitization
+  - Pagination metrics and performance tracking
+  - File upload progress logging (3-step process)
+  - Automatic sensitive data sanitization in logs
+  - Integration examples with Monolog, Symfony, and other PSR-3 loggers
+
+### Changed
+- Replaced `trigger_error()` and `error_log()` calls with proper PSR-3 logger usage
+- AbstractBaseApi now uses configured logger instead of hardcoded NullLogger
+- Enhanced error handling with contextual logging throughout the SDK
+
+### Security
+- Automatic sanitization of sensitive fields (passwords, tokens, API keys) in log output
+- OAuth token masking in log entries to prevent credential exposure
+
 ## [1.2.0] - 2025-01-17
 
 ### Added
@@ -199,7 +247,8 @@ Canvas LMS Kit is now production-ready with 90% Canvas API coverage, rate limiti
 - Contributing guidelines
 - Wiki with implementation guides
 
-[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.0.0...v1.0.1

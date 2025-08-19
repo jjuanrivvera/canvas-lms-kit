@@ -87,9 +87,8 @@ abstract class AbstractBaseApi implements ApiInterface
 
         // Check if logging is configured
         if (isset($middlewareConfig['logging']) && $middlewareConfig['logging']['enabled'] !== false) {
-            // For now, use NullLogger unless a logger is provided via setApiClient
-            // In a future enhancement, we could support PSR-3 logger configuration
-            $logger = new \Psr\Log\NullLogger();
+            // Use the configured logger from Config, defaults to NullLogger if not configured
+            $logger = Config::getLogger();
         }
 
         // If middleware config is empty, HttpClient will use defaults

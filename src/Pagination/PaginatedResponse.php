@@ -2,8 +2,10 @@
 
 namespace CanvasLMS\Pagination;
 
+use CanvasLMS\Config;
 use Psr\Http\Message\ResponseInterface;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * PaginatedResponse Class
@@ -59,6 +61,12 @@ class PaginatedResponse
     private ?string $linkHeader = null;
 
     /**
+     * Logger instance
+     * @var LoggerInterface
+     */
+    private LoggerInterface $logger;
+
+    /**
      * PaginatedResponse constructor
      *
      * @param ResponseInterface $response The HTTP response
@@ -70,6 +78,17 @@ class PaginatedResponse
         $this->httpClient = $httpClient;
         $this->linkParser = new LinkHeaderParser();
         $this->navigationUrls = $this->parseLinkHeader();
+        $this->logger = Config::getLogger();
+
+        // Log pagination information if Link header exists
+        if ($this->linkHeader) {
+            $this->logger->debug('Pagination: Response contains Link header', [
+                'has_next' => $this->hasNext(),
+                'has_prev' => $this->hasPrev(),
+                'current_page' => $this->getCurrentPage(),
+                'per_page' => $this->getPerPage()
+            ]);
+        }
     }
 
     /**
@@ -364,9 +383,26 @@ class PaginatedResponse
                 $options['query'] = $queryParams;
             }
 
+            $this->logger->debug('Pagination: Fetching page', [
+                'path' => $path,
+                'has_query' => isset($parsedUrl['query'])
+            ]);
+
+            $startTime = microtime(true);
             $response = $this->httpClient->get($path, $options);
+            $duration = microtime(true) - $startTime;
+
+            $this->logger->info('Pagination: Page fetched successfully', [
+                'path' => $path,
+                'duration_ms' => round($duration * 1000, 2)
+            ]);
+
             return new self($response, $this->httpClient);
-        } catch (\Exception) {
+        } catch (\Exception $e) {
+            $this->logger->error('Pagination: Failed to fetch page', [
+                'url' => $url,
+                'error' => $e->getMessage()
+            ]);
             return null;
         }
     }
@@ -389,15 +425,37 @@ class PaginatedResponse
      */
     public function fetchAllPages(): array
     {
+        $this->logger->info('Pagination: Starting to fetch all pages');
+
         $allData = [];
         $currentResponse = $this;
+        $pageCount = 0;
+        $startTime = microtime(true);
 
         do {
+            $pageCount++;
             $data = $currentResponse->getJsonData();
+            $itemCount = count((array) $data);
+
+            $this->logger->debug('Pagination: Processing page', [
+                'page_number' => $pageCount,
+                'items_on_page' => $itemCount,
+                'total_items_so_far' => count($allData) + $itemCount
+            ]);
+
             $allData = array_merge($allData, $data);
 
             $currentResponse = $currentResponse->getNext();
         } while ($currentResponse !== null);
+
+        $duration = microtime(true) - $startTime;
+
+        $this->logger->info('Pagination: Completed fetching all pages', [
+            'total_pages' => $pageCount,
+            'total_items' => count($allData),
+            'duration_s' => round($duration, 2),
+            'avg_time_per_page_ms' => round(($duration / $pageCount) * 1000, 2)
+        ]);
 
         return $allData;
     }
