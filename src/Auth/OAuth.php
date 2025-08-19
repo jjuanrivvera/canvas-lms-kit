@@ -116,7 +116,8 @@ class OAuth
         try {
             $client = self::getClient();
             $response = $client->request('POST', $baseUrl . '/login/oauth2/token', [
-                'form_params' => $params
+                'form_params' => $params,
+                'skipAuth' => true
             ]);
 
             $body = $response->getBody()->getContents();
@@ -212,7 +213,8 @@ class OAuth
                     'client_id' => $clientId,
                     'client_secret' => $clientSecret,
                     'refresh_token' => $refreshToken
-                ]
+                ],
+                'skipAuth' => true
             ]);
 
             $body = $response->getBody()->getContents();
