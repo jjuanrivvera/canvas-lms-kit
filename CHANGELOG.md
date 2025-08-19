@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- OAuth token exchange authentication bypass issue (#110)
+  - Fixed OAuth::exchangeCode() and OAuth::refreshToken() methods failing due to authentication chicken-and-egg problem
+  - Added `skipAuth` option to HttpClient for OAuth endpoints that should be unauthenticated
+  - OAuth token exchange and refresh now work without requiring existing API key or OAuth token
+  - OAuth token revocation and session creation continue to require authentication as expected
+  - Added integration tests to verify authentication bypass behavior
+
 ### Added
 - Gradebook History API for grade change audit trail (#66)
   - **GradebookHistory** class for tracking all grade changes with timestamps

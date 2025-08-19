@@ -306,23 +306,29 @@ class HttpClient implements HttpClientInterface
      */
     private function prepareDefaultOptions(string &$url, array $options): array
     {
-        $authMode = Config::getAuthMode();
+        // Skip authentication if explicitly requested (e.g., for OAuth token exchange)
+        if (!isset($options['skipAuth']) || $options['skipAuth'] !== true) {
+            $authMode = Config::getAuthMode();
 
-        // Handle authentication based on mode
-        if ($authMode === 'oauth') {
-            $token = $this->getValidOAuthToken();
-            if (!$token) {
-                throw new MissingOAuthTokenException();
+            // Handle authentication based on mode
+            if ($authMode === 'oauth') {
+                $token = $this->getValidOAuthToken();
+                if (!$token) {
+                    throw new MissingOAuthTokenException();
+                }
+                $options['headers']['Authorization'] = 'Bearer ' . $token;
+            } else {
+                // Default to API key authentication
+                $appKey = Config::getAppKey();
+                if (!$appKey) {
+                    throw new MissingApiKeyException();
+                }
+                $options['headers']['Authorization'] = 'Bearer ' . $appKey;
             }
-            $options['headers']['Authorization'] = 'Bearer ' . $token;
-        } else {
-            // Default to API key authentication
-            $appKey = Config::getAppKey();
-            if (!$appKey) {
-                throw new MissingApiKeyException();
-            }
-            $options['headers']['Authorization'] = 'Bearer ' . $appKey;
         }
+
+        // Remove skipAuth from options as it's not a valid HTTP client option
+        unset($options['skipAuth']);
 
         $baseUrl = Config::getBaseUrl();
         if (!$baseUrl) {
