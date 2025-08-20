@@ -425,6 +425,114 @@ class UserTest extends TestCase
     }
 
     /**
+     * Test fetchSelf() retrieves complete user data for authenticated user
+     */
+    public function testFetchSelfRetrievesFullUserData(): void
+    {
+        $userData = [
+            'id' => 54699,
+            'name' => 'Juan Rivera',
+            'sortable_name' => 'Rivera, Juan',
+            'short_name' => 'Juan',
+            'sis_user_id' => 'juan123',
+            'integration_id' => null,
+            'login_id' => 'jrivera@example.com',
+            'email' => 'jrivera@example.com',
+            'avatar_url' => 'https://canvas.example.com/images/messages/avatar-50.png',
+            'locale' => 'en',
+            'effective_locale' => 'en',
+            'last_login' => '2025-01-20T10:30:00Z',
+            'time_zone' => 'America/New_York',
+            'bio' => null
+        ];
+        
+        $response = new Response(200, [], json_encode($userData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('/users/self')
+            ->willReturn($response);
+        
+        $currentUser = User::fetchSelf();
+        
+        // Assert user instance is properly populated
+        $this->assertInstanceOf(User::class, $currentUser);
+        $this->assertEquals(54699, $currentUser->id);
+        $this->assertEquals('Juan Rivera', $currentUser->name);
+        $this->assertEquals('jrivera@example.com', $currentUser->email);
+        $this->assertEquals('https://canvas.example.com/images/messages/avatar-50.png', $currentUser->avatarUrl);
+        $this->assertEquals('America/New_York', $currentUser->timeZone);
+    }
+
+    /**
+     * Test fetchSelf() works with OAuth authentication
+     */
+    public function testFetchSelfWorksWithOAuth(): void
+    {
+        // Set up OAuth authentication
+        Config::setOAuthToken('test-oauth-token');
+        Config::useOAuth();
+        
+        $userData = [
+            'id' => 12345,
+            'name' => 'OAuth User',
+            'email' => 'oauth@example.com'
+        ];
+        
+        $response = new Response(200, [], json_encode($userData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('/users/self')
+            ->willReturn($response);
+        
+        $currentUser = User::fetchSelf();
+        
+        $this->assertEquals(12345, $currentUser->id);
+        $this->assertEquals('OAuth User', $currentUser->name);
+        $this->assertEquals('oauth@example.com', $currentUser->email);
+        
+        // Reset to API key auth
+        Config::useApiKey();
+    }
+
+    /**
+     * Test that fetchSelf() populated user can use all User methods
+     */
+    public function testFetchSelfUserCanUseAllMethods(): void
+    {
+        $userData = [
+            'id' => 789,
+            'name' => 'Test User',
+            'email' => 'test@example.com'
+        ];
+        
+        $profileData = [
+            'id' => 789,
+            'name' => 'Test User',
+            'bio' => 'Test bio'
+        ];
+        
+        $userResponse = new Response(200, [], json_encode($userData));
+        $profileResponse = new Response(200, [], json_encode($profileData));
+        
+        $this->httpClientMock
+            ->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnOnConsecutiveCalls($userResponse, $profileResponse);
+        
+        // First fetch the user
+        $currentUser = User::fetchSelf();
+        
+        // Now use a method that requires ID
+        $profile = $currentUser->getProfile();
+        
+        $this->assertEquals('Test bio', $profile->bio);
+    }
+
+    /**
      * Test setCustomData throws exception when ID is not set
      */
     public function testSetCustomDataThrowsExceptionWhenNoId(): void

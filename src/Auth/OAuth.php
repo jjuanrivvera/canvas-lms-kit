@@ -105,17 +105,15 @@ class OAuth
             throw new CanvasApiException('OAuth client credentials must be configured');
         }
 
-        $baseUrl = rtrim(Config::getBaseUrl() ?? '', '/');
+        $baseUrl = Config::getBaseUrl();
         if (empty($baseUrl)) {
             throw new CanvasApiException('Base URL must be configured');
         }
 
-        // Remove /api/v1 if present
-        $baseUrl = preg_replace('#/api/v\d+/?$#', '', $baseUrl);
-
         try {
             $client = self::getClient();
-            $response = $client->request('POST', $baseUrl . '/login/oauth2/token', [
+            // HttpClient now handles OAuth URLs properly - no need to manipulate URL
+            $response = $client->request('POST', '/login/oauth2/token', [
                 'form_params' => $params,
                 'skipAuth' => true
             ]);
@@ -197,17 +195,15 @@ class OAuth
             throw new CanvasApiException('OAuth client credentials must be configured');
         }
 
-        $baseUrl = rtrim(Config::getBaseUrl() ?? '', '/');
+        $baseUrl = Config::getBaseUrl();
         if (empty($baseUrl)) {
             throw new CanvasApiException('Base URL must be configured');
         }
 
-        // Remove /api/v1 if present
-        $baseUrl = preg_replace('#/api/v\d+/?$#', '', $baseUrl);
-
         try {
             $client = self::getClient();
-            $response = $client->request('POST', $baseUrl . '/login/oauth2/token', [
+            // HttpClient now handles OAuth URLs properly - no need to manipulate URL
+            $response = $client->request('POST', '/login/oauth2/token', [
                 'form_params' => [
                     'grant_type' => 'refresh_token',
                     'client_id' => $clientId,
@@ -279,17 +275,15 @@ class OAuth
             throw new MissingOAuthTokenException('No OAuth token to revoke');
         }
 
-        $baseUrl = rtrim(Config::getBaseUrl() ?? '', '/');
+        $baseUrl = Config::getBaseUrl();
         if (empty($baseUrl)) {
             throw new CanvasApiException('Base URL must be configured');
         }
 
-        // Remove /api/v1 if present
-        $baseUrl = preg_replace('#/api/v\d+/?$#', '', $baseUrl);
-
         try {
             $client = self::getClient();
 
+            // Note: This endpoint requires authentication, so no skipAuth
             $options = [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $token
@@ -300,7 +294,8 @@ class OAuth
                 $options['query'] = ['expire_sessions' => 1];
             }
 
-            $response = $client->request('DELETE', $baseUrl . '/login/oauth2/token', $options);
+            // HttpClient now handles OAuth URLs properly
+            $response = $client->request('DELETE', '/login/oauth2/token', $options);
 
             // Clear stored tokens
             Config::clearOAuthTokens();
@@ -341,17 +336,15 @@ class OAuth
             throw new MissingOAuthTokenException('OAuth token required for session creation');
         }
 
-        $baseUrl = rtrim(Config::getBaseUrl() ?? '', '/');
+        $baseUrl = Config::getBaseUrl();
         if (empty($baseUrl)) {
             throw new CanvasApiException('Base URL must be configured');
         }
 
-        // Remove /api/v1 if present
-        $baseUrl = preg_replace('#/api/v\d+/?$#', '', $baseUrl);
-
         try {
             $client = self::getClient();
 
+            // Note: This endpoint requires authentication, so no skipAuth
             $options = [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $token
@@ -363,7 +356,8 @@ class OAuth
                 $options['json']['return_to'] = $returnTo;
             }
 
-            $response = $client->request('POST', $baseUrl . '/login/session_token', $options);
+            // Note: session_token is a regular API endpoint (gets /api/v1/ prefix)
+            $response = $client->request('POST', '/login/session_token', $options);
 
             $body = $response->getBody()->getContents();
 
