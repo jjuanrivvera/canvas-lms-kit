@@ -235,4 +235,153 @@ class HttpClientTest extends TestCase
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('body content', $response->getBody()->getContents());
     }
+
+    /**
+     * Test that OAuth endpoints don't get /api/v1/ prefix added
+     */
+    public function testOAuthEndpointsDoNotGetApiPrefix()
+    {
+        Config::setBaseUrl('https://canvas.instructure.com');
+        
+        // Track the actual request URI that would be sent
+        $actualUri = null;
+        
+        // Create a mock handler that captures the request
+        $mock = new MockHandler([
+            new Response(200, [], json_encode(['access_token' => 'test-token'])),
+        ]);
+        
+        $handlerStack = HandlerStack::create($mock);
+        
+        // Add middleware to capture the actual request URL
+        $handlerStack->push(function ($handler) use (&$actualUri) {
+            return function ($request, $options) use ($handler, &$actualUri) {
+                $actualUri = (string) $request->getUri();
+                return $handler($request, $options);
+            };
+        });
+        
+        $guzzleClient = new Client(['handler' => $handlerStack]);
+        $this->httpClient = new HttpClient($guzzleClient, $this->loggerMock);
+        
+        // Make request to OAuth endpoint with skipAuth
+        $this->httpClient->request('POST', '/login/oauth2/token', ['skipAuth' => true]);
+        
+        // Assert the URL doesn't have /api/v1/ prefix
+        $this->assertEquals('https://canvas.instructure.com/login/oauth2/token', $actualUri);
+    }
+
+    /**
+     * Test that regular API endpoints still get /api/v1/ prefix
+     */
+    public function testRegularEndpointsGetApiPrefix()
+    {
+        Config::setBaseUrl('https://canvas.instructure.com');
+        Config::setApiVersion('v1');
+        Config::setAppKey('test-key');
+        
+        // Track the actual request URI that would be sent
+        $actualUri = null;
+        
+        // Create a mock handler that captures the request
+        $mock = new MockHandler([
+            new Response(200, [], json_encode(['id' => 123, 'name' => 'Test User'])),
+        ]);
+        
+        $handlerStack = HandlerStack::create($mock);
+        
+        // Add middleware to capture the actual request URL
+        $handlerStack->push(function ($handler) use (&$actualUri) {
+            return function ($request, $options) use ($handler, &$actualUri) {
+                $actualUri = (string) $request->getUri();
+                return $handler($request, $options);
+            };
+        });
+        
+        $guzzleClient = new Client(['handler' => $handlerStack]);
+        $this->httpClient = new HttpClient($guzzleClient, $this->loggerMock);
+        
+        // Make request to regular API endpoint
+        $this->httpClient->get('/users/self');
+        
+        // Assert the URL has /api/v1/ prefix
+        $this->assertEquals('https://canvas.instructure.com/api/v1/users/self', $actualUri);
+    }
+
+    /**
+     * Test OAuth token refresh endpoint handling
+     */
+    public function testOAuthRefreshTokenEndpoint()
+    {
+        Config::setBaseUrl('https://canvas.instructure.com');
+        
+        // Track the actual request URI that would be sent
+        $actualUri = null;
+        
+        // Create a mock handler that captures the request
+        $mock = new MockHandler([
+            new Response(200, [], json_encode(['access_token' => 'new-token'])),
+        ]);
+        
+        $handlerStack = HandlerStack::create($mock);
+        
+        // Add middleware to capture the actual request URL
+        $handlerStack->push(function ($handler) use (&$actualUri) {
+            return function ($request, $options) use ($handler, &$actualUri) {
+                $actualUri = (string) $request->getUri();
+                return $handler($request, $options);
+            };
+        });
+        
+        $guzzleClient = new Client(['handler' => $handlerStack]);
+        $this->httpClient = new HttpClient($guzzleClient, $this->loggerMock);
+        
+        // Make request to OAuth refresh endpoint with skipAuth
+        $this->httpClient->request('POST', '/login/oauth2/token', [
+            'skipAuth' => true,
+            'form_params' => ['grant_type' => 'refresh_token']
+        ]);
+        
+        // Assert the URL doesn't have /api/v1/ prefix
+        $this->assertEquals('https://canvas.instructure.com/login/oauth2/token', $actualUri);
+    }
+
+    /**
+     * Test that login/session_token endpoint gets API prefix (it's not an OAuth2 endpoint)
+     */
+    public function testSessionTokenEndpointGetsApiPrefix()
+    {
+        Config::setBaseUrl('https://canvas.instructure.com');
+        Config::setOAuthToken('test-oauth-token');
+        Config::useOAuth();
+        
+        // Track the actual request URI that would be sent
+        $actualUri = null;
+        
+        // Create a mock handler that captures the request
+        $mock = new MockHandler([
+            new Response(200, [], json_encode(['session_token' => 'session-token'])),
+        ]);
+        
+        $handlerStack = HandlerStack::create($mock);
+        
+        // Add middleware to capture the actual request URL and headers
+        $handlerStack->push(function ($handler) use (&$actualUri) {
+            return function ($request, $options) use ($handler, &$actualUri) {
+                $actualUri = (string) $request->getUri();
+                // Also verify auth header is present
+                $this->assertTrue($request->hasHeader('Authorization'));
+                return $handler($request, $options);
+            };
+        });
+        
+        $guzzleClient = new Client(['handler' => $handlerStack]);
+        $this->httpClient = new HttpClient($guzzleClient, $this->loggerMock);
+        
+        // Make request to session token endpoint (requires auth)
+        $this->httpClient->request('POST', '/login/session_token');
+        
+        // Assert the URL DOES have /api/v1/ prefix (it's not an OAuth2 endpoint)
+        $this->assertEquals('https://canvas.instructure.com/api/v1/login/session_token', $actualUri);
+    }
 }
