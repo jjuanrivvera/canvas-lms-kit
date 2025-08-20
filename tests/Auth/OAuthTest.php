@@ -98,7 +98,7 @@ class OAuthTest extends TestCase
             ->method('request')
             ->with(
                 $this->equalTo('POST'),
-                $this->equalTo('https://canvas.test.com/login/oauth2/token'),
+                $this->equalTo('/login/oauth2/token'),
                 $this->equalTo([
                     'form_params' => [
                         'grant_type' => 'authorization_code',
@@ -143,7 +143,7 @@ class OAuthTest extends TestCase
             ->method('request')
             ->with(
                 $this->equalTo('POST'),
-                $this->equalTo('https://canvas.test.com/login/oauth2/token'),
+                $this->equalTo('/login/oauth2/token'),
                 $this->callback(function ($options) {
                     return isset($options['form_params']['replace_tokens']) &&
                            $options['form_params']['replace_tokens'] === '1' &&
@@ -177,7 +177,7 @@ class OAuthTest extends TestCase
             ->method('request')
             ->with(
                 $this->equalTo('POST'),
-                $this->equalTo('https://canvas.test.com/login/oauth2/token'),
+                $this->equalTo('/login/oauth2/token'),
                 $this->equalTo([
                     'form_params' => [
                         'grant_type' => 'refresh_token',
@@ -212,7 +212,7 @@ class OAuthTest extends TestCase
             ->method('request')
             ->with(
                 $this->equalTo('POST'),
-                $this->equalTo('https://canvas.test.com/login/oauth2/token'),
+                $this->equalTo('/login/oauth2/token'),
                 $this->callback(function ($options) {
                     return isset($options['skipAuth']) && $options['skipAuth'] === true;
                 })
@@ -239,7 +239,7 @@ class OAuthTest extends TestCase
             ->method('request')
             ->with(
                 $this->equalTo('DELETE'),
-                $this->equalTo('https://canvas.test.com/login/oauth2/token'),
+                $this->equalTo('/login/oauth2/token'),
                 $this->equalTo([
                     'headers' => [
                         'Authorization' => 'Bearer token_to_revoke'
@@ -268,7 +268,7 @@ class OAuthTest extends TestCase
             ->method('request')
             ->with(
                 $this->equalTo('DELETE'),
-                $this->equalTo('https://canvas.test.com/login/oauth2/token'),
+                $this->equalTo('/login/oauth2/token'),
                 $this->equalTo([
                     'headers' => [
                         'Authorization' => 'Bearer token_to_revoke'
@@ -300,7 +300,7 @@ class OAuthTest extends TestCase
             ->method('request')
             ->with(
                 $this->equalTo('POST'),
-                $this->equalTo('https://canvas.test.com/login/session_token'),
+                $this->equalTo('/login/session_token'),
                 $this->equalTo([
                     'headers' => [
                         'Authorization' => 'Bearer test_token'
@@ -330,7 +330,7 @@ class OAuthTest extends TestCase
             ->method('request')
             ->with(
                 $this->equalTo('POST'),
-                $this->equalTo('https://canvas.test.com/login/session_token'),
+                $this->equalTo('/login/session_token'),
                 $this->equalTo([
                     'headers' => [
                         'Authorization' => 'Bearer test_token'

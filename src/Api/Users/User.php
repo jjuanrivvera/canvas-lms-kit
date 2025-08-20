@@ -270,6 +270,40 @@ class User extends AbstractBaseApi
     }
 
     /**
+     * Fetch the current authenticated user's full data from Canvas.
+     *
+     * This method retrieves complete user information for the authenticated user,
+     * including all properties like id, name, email, avatar_url, etc.
+     *
+     * Unlike self() which returns an empty User instance for use with methods that
+     * support the "self" pattern, this method actually fetches the user data from
+     * the Canvas API.
+     *
+     * Example usage:
+     * ```php
+     * // Get complete user data for the authenticated user
+     * $currentUser = User::fetchSelf();
+     * echo $currentUser->id;       // 12345
+     * echo $currentUser->name;     // "John Doe"
+     * echo $currentUser->email;    // "john@example.com"
+     *
+     * // You can then use all User methods with the fetched data
+     * $courses = $currentUser->courses();
+     * $profile = $currentUser->getProfile();
+     * ```
+     *
+     * @return self A fully populated User instance with all user data
+     * @throws CanvasApiException If the API request fails
+     */
+    public static function fetchSelf(): self
+    {
+        self::checkApiClient();
+
+        $response = self::$apiClient->get('/users/self');
+        return new self(json_decode($response->getBody()->getContents(), true));
+    }
+
+    /**
      * Create a new User instance.
      * @param mixed[]|CreateUserDTO $userData
      * @return self

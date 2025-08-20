@@ -306,6 +306,10 @@ class HttpClient implements HttpClientInterface
      */
     private function prepareDefaultOptions(string &$url, array $options): array
     {
+        // Check if this is an OAuth2-specific endpoint that shouldn't have /api/v1/ added
+        // Only OAuth2 token endpoints should bypass the API prefix
+        $isOAuthEndpoint = preg_match('#^/?login/oauth2/#', $url);
+
         // Skip authentication if explicitly requested (e.g., for OAuth token exchange)
         if (!isset($options['skipAuth']) || $options['skipAuth'] !== true) {
             $authMode = Config::getAuthMode();
@@ -335,13 +339,18 @@ class HttpClient implements HttpClientInterface
             throw new MissingBaseUrlException();
         }
 
-        $fullUrl = $baseUrl .
-            'api/' .
-            rtrim(Config::getApiVersion(), '/') .
-            '/' .
-            ltrim($url, '/');
-
-        $url = $fullUrl;
+        // Only add /api/v1/ prefix for non-OAuth endpoints
+        if (!$isOAuthEndpoint) {
+            $fullUrl = $baseUrl .
+                'api/' .
+                rtrim(Config::getApiVersion(), '/') .
+                '/' .
+                ltrim($url, '/');
+            $url = $fullUrl;
+        } else {
+            // For OAuth endpoints, just combine base URL with path
+            $url = rtrim($baseUrl, '/') . '/' . ltrim($url, '/');
+        }
 
         return $options;
     }

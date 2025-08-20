@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Critical OAuth authentication issues (#112)
+  - Fixed OAuth2 token endpoints incorrectly getting /api/v1/ prefix added to URLs
+  - Added proper URL handling in HttpClient to detect OAuth2 endpoints and bypass API prefix
+  - Only OAuth2 token endpoints (/login/oauth2/*) now bypass the API prefix
+  - Regular API endpoints including /login/session_token continue to use /api/v1/ prefix
+
+### Added
+- User::fetchSelf() method for retrieving complete current user data (#112)
+  - New method that actually fetches full user data from Canvas API
+  - Returns fully populated User instance with all properties (id, name, email, etc.)
+  - Complements existing User::self() which returns empty instance for "self" pattern methods
+  - Works with both API key and OAuth authentication modes
+
+### Changed
+- Simplified OAuth class URL handling (#112)
+  - Removed unnecessary URL manipulation in OAuth::exchangeCode() and OAuth::refreshToken()
+  - OAuth methods now rely on HttpClient's improved URL handling
+  - Cleaner code with consistent URL patterns across all OAuth endpoints
+
 ## [1.3.0] - 2025-01-19
 
 ### Fixed
