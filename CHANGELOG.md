@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Raw URL support for direct Canvas API calls (#92)
+  - New `Canvas` facade class for making raw API calls to arbitrary Canvas URLs
+  - Added `rawRequest()` method to HttpClientInterface and HttpClient
+  - Support for both absolute Canvas URLs and relative paths
+  - Automatic authentication header inclusion
+  - Response parsing based on Content-Type (JSON/non-JSON)
+  - Security validation to prevent SSRF attacks
+  - Domain allowlisting with subdomain support
+  - Useful for:
+    - Following pagination URLs returned by Canvas
+    - Calling custom or undocumented endpoints
+    - Processing webhook callbacks with embedded URLs
+    - Following URLs in API responses (e.g., file downloads)
+    - Accessing beta or experimental Canvas features
+
 ## [1.3.1] - 2025-01-20
 
 ### Fixed

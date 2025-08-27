@@ -771,6 +771,51 @@ $assignments = $course->assignments();
 $modules = $course->modules();
 ```
 
+### Raw URL Support (Direct API Calls) 🆕
+
+Make direct API calls to arbitrary Canvas URLs using the `Canvas` facade class:
+
+```php
+use CanvasLMS\Canvas;
+
+// Follow pagination URLs returned by Canvas
+$courses = Course::paginate();
+while ($nextUrl = $courses->getNextUrl()) {
+    $nextPage = Canvas::get($nextUrl);
+    // Process next page data
+}
+
+// Call custom or undocumented endpoints
+$analytics = Canvas::get('/api/v1/courses/123/analytics');
+$customData = Canvas::post('/api/v1/custom/endpoint', [
+    'key' => 'value'
+]);
+
+// Download files directly
+$file = File::find(456);
+$content = Canvas::get($file->url);
+file_put_contents('download.pdf', $content);
+
+// Process webhook callbacks
+$webhookData = json_decode($request->getContent(), true);
+$resource = Canvas::get($webhookData['resource_url']);
+
+// All HTTP methods supported
+$response = Canvas::get($url);        // GET request
+$response = Canvas::post($url, $data); // POST request
+$response = Canvas::put($url, $data);  // PUT request
+$response = Canvas::delete($url);      // DELETE request
+$response = Canvas::patch($url, $data); // PATCH request
+$response = Canvas::request($url, 'HEAD'); // Any HTTP method
+```
+
+**Features:**
+- ✅ Automatic authentication (API key or OAuth)
+- ✅ Response parsing (JSON/non-JSON)
+- ✅ Security validation (domain allowlisting, HTTPS enforcement)
+- ✅ Supports absolute URLs and relative paths
+- ✅ All middleware applied (rate limiting, retries, logging)
+
 ### Context Management (Account-as-Default)
 
 Canvas LMS Kit uses the **Account-as-Default** convention for multi-context resources:
