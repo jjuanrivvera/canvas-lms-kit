@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Canvas Masquerading (Act As User) Support (#91)
+  - New Config methods: `asUser()`, `stopMasquerading()`, `getMasqueradeUserId()`, `isMasquerading()`
+  - Automatic `as_user_id` parameter injection in all API requests when masquerading is active
+  - Multi-context support: Different masquerade users per context/tenant
+  - Support for both regular and raw API requests
+  - Comprehensive test coverage for masquerading scenarios
+  - Security features: Permission validation by Canvas, logging support for audit trails
+  - Use cases: Admin operations, support workflows, permission testing, batch user operations
 - Raw URL support for direct Canvas API calls (#92)
   - New `Canvas` facade class for making raw API calls to arbitrary Canvas URLs
   - Added `rawRequest()` method to HttpClientInterface and HttpClient

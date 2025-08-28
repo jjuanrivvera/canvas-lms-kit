@@ -292,6 +292,110 @@ class ConfigTest extends TestCase
         $this->assertEquals('test-key', Config::getApiKey('test'));
     }
 
+    /**
+     * Test masquerading functionality
+     */
+    public function testBasicMasquerading(): void
+    {
+        // Initially, no masquerading should be active
+        $this->assertNull(Config::getMasqueradeUserId());
+        $this->assertFalse(Config::isMasquerading());
+
+        // Enable masquerading
+        Config::asUser(12345);
+        
+        // Check that masquerading is active
+        $this->assertEquals(12345, Config::getMasqueradeUserId());
+        $this->assertTrue(Config::isMasquerading());
+
+        // Stop masquerading
+        Config::stopMasquerading();
+        
+        // Check that masquerading is disabled
+        $this->assertNull(Config::getMasqueradeUserId());
+        $this->assertFalse(Config::isMasquerading());
+    }
+
+    public function testMasqueradingWithContexts(): void
+    {
+        // Set up multiple contexts
+        Config::setContext('production');
+        Config::asUser(11111, 'production');
+        
+        Config::setContext('staging');
+        Config::asUser(22222, 'staging');
+        
+        // Check production context
+        $this->assertEquals(11111, Config::getMasqueradeUserId('production'));
+        $this->assertTrue(Config::isMasquerading('production'));
+        
+        // Check staging context (current)
+        $this->assertEquals(22222, Config::getMasqueradeUserId('staging'));
+        $this->assertTrue(Config::isMasquerading('staging'));
+        
+        // Switch contexts and verify isolation
+        Config::setContext('production');
+        $this->assertEquals(11111, Config::getMasqueradeUserId());
+        
+        Config::setContext('staging');
+        $this->assertEquals(22222, Config::getMasqueradeUserId());
+        
+        // Stop masquerading in staging
+        Config::stopMasquerading('staging');
+        $this->assertNull(Config::getMasqueradeUserId('staging'));
+        $this->assertFalse(Config::isMasquerading('staging'));
+        
+        // Production should still have masquerading
+        $this->assertEquals(11111, Config::getMasqueradeUserId('production'));
+        $this->assertTrue(Config::isMasquerading('production'));
+        
+        // Clean up
+        Config::stopMasquerading('production');
+        Config::resetContext('production');
+        Config::resetContext('staging');
+    }
+
+    public function testMasqueradingSyncWithContextSwitch(): void
+    {
+        // Set masquerading in default context
+        Config::setContext('default');
+        Config::asUser(33333);
+        
+        // Create new context
+        Config::setContext('new_context');
+        
+        // New context should not have masquerading
+        $this->assertNull(Config::getMasqueradeUserId());
+        $this->assertFalse(Config::isMasquerading());
+        
+        // Switch back to default
+        Config::setContext('default');
+        
+        // Masquerading should still be active in default
+        $this->assertEquals(33333, Config::getMasqueradeUserId());
+        $this->assertTrue(Config::isMasquerading());
+        
+        // Clean up
+        Config::stopMasquerading();
+        Config::resetContext('new_context');
+    }
+
+    public function testMasqueradingClearedOnContextReset(): void
+    {
+        // Set up masquerading
+        Config::setContext('test');
+        Config::asUser(44444, 'test');
+        $this->assertTrue(Config::isMasquerading('test'));
+        
+        // Reset the context
+        Config::resetContext('test');
+        
+        // Masquerading should be cleared
+        Config::setContext('test');
+        $this->assertNull(Config::getMasqueradeUserId('test'));
+        $this->assertFalse(Config::isMasquerading('test'));
+    }
+
     public function testEnvironmentValidationEmptyApiKey(): void
     {
         $this->expectException(ConfigurationException::class);
