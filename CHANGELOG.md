@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2025-01-28
+
 ### Added
 - Canvas Masquerading (Act As User) Support (#91)
   - New Config methods: `asUser()`, `stopMasquerading()`, `getMasqueradeUserId()`, `isMasquerading()`
@@ -30,7 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Processing webhook callbacks with embedded URLs
     - Following URLs in API responses (e.g., file downloads)
     - Accessing beta or experimental Canvas features
-
 ## [1.3.1] - 2025-01-20
 
 ### Fixed
@@ -293,7 +294,8 @@ Canvas LMS Kit is now production-ready with 90% Canvas API coverage, rate limiti
 - Contributing guidelines
 - Wiki with implementation guides
 
-[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.1.0...v1.2.0
