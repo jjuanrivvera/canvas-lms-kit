@@ -26,7 +26,8 @@ class Config
      *     oauth_user_name?: string,
      *     oauth_scopes?: array<string>,
      *     auth_mode?: string,
-     *     logger?: LoggerInterface
+     *     logger?: LoggerInterface,
+     *     masquerade_user_id?: int
      * }>
      */
     private static array $contexts = [];
@@ -115,6 +116,11 @@ class Config
      * @var LoggerInterface|null PSR-3 logger instance
      */
     private static ?LoggerInterface $logger = null;
+
+    /**
+     * @var int|null User ID to masquerade as
+     */
+    private static ?int $masqueradeUserId = null;
 
     /**
      * Set the application key.
@@ -420,6 +426,7 @@ class Config
         self::$oauthScopes = null;
         self::$authMode = 'api_key';
         self::$logger = null;
+        self::$masqueradeUserId = null;
 
         // Then apply context-specific values if they exist
         if (isset(self::$contexts[$context]['app_key'])) {
@@ -469,6 +476,9 @@ class Config
         }
         if (isset(self::$contexts[$context]['logger'])) {
             self::$logger = self::$contexts[$context]['logger'];
+        }
+        if (isset(self::$contexts[$context]['masquerade_user_id'])) {
+            self::$masqueradeUserId = self::$contexts[$context]['masquerade_user_id'];
         }
     }
 
@@ -589,6 +599,7 @@ class Config
             self::$timeout = 30;
             self::$accountId = 1;
             self::$logger = null;
+            self::$masqueradeUserId = null;
         }
     }
 
@@ -1211,5 +1222,92 @@ class Config
             self::$contexts[$context]['oauth_user_name'],
             self::$contexts[$context]['oauth_scopes']
         );
+    }
+
+    /**
+     * Set the user ID to masquerade as for API calls.
+     *
+     * This enables Canvas's "Act As User" functionality, allowing administrators
+     * to perform API operations on behalf of another user. The authenticated user
+     * must have appropriate Canvas permissions to masquerade.
+     *
+     * @param int $userId The Canvas user ID to masquerade as.
+     * @param string|null $context The context to set masquerading for. If null, uses active context.
+     */
+    public static function asUser(int $userId, ?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        // Maintain backward compatibility - set both legacy and context
+        if ($context === self::$activeContext) {
+            self::$masqueradeUserId = $userId;
+        }
+
+        self::$contexts[$context]['masquerade_user_id'] = $userId;
+
+        // Log masquerading activation
+        $logger = self::getLogger($context);
+        $logger->info(
+            "Masquerading enabled for user ID {$userId} in context '{$context}'",
+            ['user_id' => $userId, 'context' => $context]
+        );
+    }
+
+    /**
+     * Stop masquerading and return to normal authenticated user operations.
+     *
+     * @param string|null $context The context to stop masquerading for. If null, uses active context.
+     */
+    public static function stopMasquerading(?string $context = null): void
+    {
+        $context ??= self::$activeContext;
+
+        // Clear both legacy and context values
+        if ($context === self::$activeContext) {
+            self::$masqueradeUserId = null;
+        }
+
+        unset(self::$contexts[$context]['masquerade_user_id']);
+
+        // Log masquerading deactivation
+        $logger = self::getLogger($context);
+        $logger->info(
+            "Masquerading disabled for context '{$context}'",
+            ['context' => $context]
+        );
+    }
+
+    /**
+     * Get the current masquerade user ID.
+     *
+     * @param string|null $context The context to get the masquerade user ID from. If null, uses active context.
+     * @return int|null The user ID being masqueraded as, or null if not masquerading.
+     */
+    public static function getMasqueradeUserId(?string $context = null): ?int
+    {
+        $context ??= self::$activeContext;
+
+        // Check context first, then fall back to legacy for backward compatibility
+        if (isset(self::$contexts[$context]['masquerade_user_id'])) {
+            return self::$contexts[$context]['masquerade_user_id'];
+        }
+
+        // For backward compatibility with existing code
+        if ($context === self::$activeContext) {
+            return self::$masqueradeUserId;
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if masquerading is currently active.
+     *
+     * @param string|null $context The context to check. If null, uses active context.
+     * @return bool True if masquerading is active, false otherwise.
+     */
+    public static function isMasquerading(?string $context = null): bool
+    {
+        return self::getMasqueradeUserId($context) !== null;
     }
 }

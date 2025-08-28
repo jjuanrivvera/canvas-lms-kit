@@ -188,6 +188,102 @@ Config::setMiddleware([
 
 **Security:** The logging middleware automatically sanitizes sensitive fields like passwords, tokens, and API keys to prevent accidental exposure in logs.
 
+### Masquerading (Act As User) 🆕
+
+The SDK supports Canvas's masquerading functionality, allowing administrators to perform API operations on behalf of other users. This is essential for administrative operations, support workflows, and testing.
+
+#### Global Masquerading
+
+Enable masquerading globally for all subsequent API calls:
+
+```php
+use CanvasLMS\Config;
+use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Users\User;
+
+// Enable masquerading as user 12345
+Config::asUser(12345);
+
+// All API calls will now include as_user_id=12345
+$course = Course::find(123);              // Performed as user 12345
+$assignments = $course->assignments();    // Also performed as user 12345
+$enrollments = User::find(456)->enrollments(); // Also as user 12345
+
+// Stop masquerading
+Config::stopMasquerading();
+
+// Subsequent calls are performed as the authenticated user
+$normalCourse = Course::find(789);        // No masquerading
+```
+
+#### Context-Specific Masquerading
+
+In multi-tenant environments, masquerading can be set per context:
+
+```php
+// Set masquerading for production context only
+Config::setContext('production');
+Config::asUser(12345, 'production');
+
+// Only affects production context operations
+Config::setContext('staging');
+$stagingUser = User::find(1);  // Not masqueraded
+
+Config::setContext('production');
+$prodUser = User::find(1);      // Masqueraded as user 12345
+```
+
+#### Security Considerations
+
+- **Permissions Required**: The authenticated user must have appropriate Canvas permissions to masquerade
+- **Error Handling**: Canvas will return 401/403 errors if permissions are insufficient
+- **Audit Trail**: Consider logging when masquerading is active for compliance
+
+```php
+// Check if masquerading is active
+if (Config::isMasquerading()) {
+    $masqueradeUserId = Config::getMasqueradeUserId();
+    $logger->info("Performing operation as user {$masqueradeUserId}");
+}
+```
+
+#### Common Use Cases
+
+**Support Operations:**
+```php
+// Support agent helping a student
+Config::asUser($studentId);
+$submissions = Assignment::find($assignmentId)->getSubmission($studentId);
+Config::stopMasquerading();
+```
+
+**Testing Permission-Based Features:**
+```php
+// Test different user roles
+foreach ($testUsers as $userId => $role) {
+    Config::asUser($userId);
+    $canEdit = Course::find($courseId)->canEdit(); // Check permissions as this user
+    echo "User {$userId} ({$role}): " . ($canEdit ? 'Can edit' : 'Cannot edit') . "\n";
+}
+Config::stopMasquerading();
+```
+
+**Batch Operations for Multiple Users:**
+```php
+// Process enrollments for multiple users
+$userIds = [123, 456, 789];
+foreach ($userIds as $userId) {
+    Config::asUser($userId);
+    $enrollment = Enrollment::create([
+        'user_id' => $userId,
+        'course_id' => $courseId,
+        'enrollment_state' => 'active'
+    ]);
+    echo "Enrolled user {$userId} successfully\n";
+}
+Config::stopMasquerading();
+```
+
 ## 💡 Usage Examples
 
 ### Working with Courses

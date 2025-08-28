@@ -352,6 +352,15 @@ class HttpClient implements HttpClientInterface
             $url = rtrim($baseUrl, '/') . '/' . ltrim($url, '/');
         }
 
+        // Add masquerading parameter if active
+        $masqueradeUserId = Config::getMasqueradeUserId();
+        if ($masqueradeUserId !== null) {
+            if (!isset($options['query'])) {
+                $options['query'] = [];
+            }
+            $options['query']['as_user_id'] = $masqueradeUserId;
+        }
+
         return $options;
     }
 
@@ -471,6 +480,15 @@ class HttpClient implements HttpClientInterface
 
         // Remove skipAuth from options as it's not a valid HTTP client option
         unset($options['skipAuth']);
+
+        // Add masquerading parameter if active
+        $masqueradeUserId = Config::getMasqueradeUserId();
+        if ($masqueradeUserId !== null) {
+            if (!isset($options['query'])) {
+                $options['query'] = [];
+            }
+            $options['query']['as_user_id'] = $masqueradeUserId;
+        }
 
         return $options;
     }
