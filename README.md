@@ -188,6 +188,102 @@ Config::setMiddleware([
 
 **Security:** The logging middleware automatically sanitizes sensitive fields like passwords, tokens, and API keys to prevent accidental exposure in logs.
 
+### Masquerading (Act As User) 🆕
+
+The SDK supports Canvas's masquerading functionality, allowing administrators to perform API operations on behalf of other users. This is essential for administrative operations, support workflows, and testing.
+
+#### Global Masquerading
+
+Enable masquerading globally for all subsequent API calls:
+
+```php
+use CanvasLMS\Config;
+use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Users\User;
+
+// Enable masquerading as user 12345
+Config::asUser(12345);
+
+// All API calls will now include as_user_id=12345
+$course = Course::find(123);              // Performed as user 12345
+$assignments = $course->assignments();    // Also performed as user 12345
+$enrollments = User::find(456)->enrollments(); // Also as user 12345
+
+// Stop masquerading
+Config::stopMasquerading();
+
+// Subsequent calls are performed as the authenticated user
+$normalCourse = Course::find(789);        // No masquerading
+```
+
+#### Context-Specific Masquerading
+
+In multi-tenant environments, masquerading can be set per context:
+
+```php
+// Set masquerading for production context only
+Config::setContext('production');
+Config::asUser(12345, 'production');
+
+// Only affects production context operations
+Config::setContext('staging');
+$stagingUser = User::find(1);  // Not masqueraded
+
+Config::setContext('production');
+$prodUser = User::find(1);      // Masqueraded as user 12345
+```
+
+#### Security Considerations
+
+- **Permissions Required**: The authenticated user must have appropriate Canvas permissions to masquerade
+- **Error Handling**: Canvas will return 401/403 errors if permissions are insufficient
+- **Audit Trail**: Consider logging when masquerading is active for compliance
+
+```php
+// Check if masquerading is active
+if (Config::isMasquerading()) {
+    $masqueradeUserId = Config::getMasqueradeUserId();
+    $logger->info("Performing operation as user {$masqueradeUserId}");
+}
+```
+
+#### Common Use Cases
+
+**Support Operations:**
+```php
+// Support agent helping a student
+Config::asUser($studentId);
+$submissions = Assignment::find($assignmentId)->getSubmission($studentId);
+Config::stopMasquerading();
+```
+
+**Testing Permission-Based Features:**
+```php
+// Test different user roles
+foreach ($testUsers as $userId => $role) {
+    Config::asUser($userId);
+    $canEdit = Course::find($courseId)->canEdit(); // Check permissions as this user
+    echo "User {$userId} ({$role}): " . ($canEdit ? 'Can edit' : 'Cannot edit') . "\n";
+}
+Config::stopMasquerading();
+```
+
+**Batch Operations for Multiple Users:**
+```php
+// Process enrollments for multiple users
+$userIds = [123, 456, 789];
+foreach ($userIds as $userId) {
+    Config::asUser($userId);
+    $enrollment = Enrollment::create([
+        'user_id' => $userId,
+        'course_id' => $courseId,
+        'enrollment_state' => 'active'
+    ]);
+    echo "Enrolled user {$userId} successfully\n";
+}
+Config::stopMasquerading();
+```
+
 ## 💡 Usage Examples
 
 ### Working with Courses
@@ -770,6 +866,51 @@ $students = $course->getStudents();
 $assignments = $course->assignments();
 $modules = $course->modules();
 ```
+
+### Raw URL Support (Direct API Calls) 🆕
+
+Make direct API calls to arbitrary Canvas URLs using the `Canvas` facade class:
+
+```php
+use CanvasLMS\Canvas;
+
+// Follow pagination URLs returned by Canvas
+$courses = Course::paginate();
+while ($nextUrl = $courses->getNextUrl()) {
+    $nextPage = Canvas::get($nextUrl);
+    // Process next page data
+}
+
+// Call custom or undocumented endpoints
+$analytics = Canvas::get('/api/v1/courses/123/analytics');
+$customData = Canvas::post('/api/v1/custom/endpoint', [
+    'key' => 'value'
+]);
+
+// Download files directly
+$file = File::find(456);
+$content = Canvas::get($file->url);
+file_put_contents('download.pdf', $content);
+
+// Process webhook callbacks
+$webhookData = json_decode($request->getContent(), true);
+$resource = Canvas::get($webhookData['resource_url']);
+
+// All HTTP methods supported
+$response = Canvas::get($url);        // GET request
+$response = Canvas::post($url, $data); // POST request
+$response = Canvas::put($url, $data);  // PUT request
+$response = Canvas::delete($url);      // DELETE request
+$response = Canvas::patch($url, $data); // PATCH request
+$response = Canvas::request($url, 'HEAD'); // Any HTTP method
+```
+
+**Features:**
+- ✅ Automatic authentication (API key or OAuth)
+- ✅ Response parsing (JSON/non-JSON)
+- ✅ Security validation (domain allowlisting, HTTPS enforcement)
+- ✅ Supports absolute URLs and relative paths
+- ✅ All middleware applied (rate limiting, retries, logging)
 
 ### Context Management (Account-as-Default)
 

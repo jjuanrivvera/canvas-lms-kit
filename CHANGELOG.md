@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2025-01-28
+
+### Added
+- Canvas Masquerading (Act As User) Support (#91)
+  - New Config methods: `asUser()`, `stopMasquerading()`, `getMasqueradeUserId()`, `isMasquerading()`
+  - Automatic `as_user_id` parameter injection in all API requests when masquerading is active
+  - Multi-context support: Different masquerade users per context/tenant
+  - Support for both regular and raw API requests
+  - Comprehensive test coverage for masquerading scenarios
+  - Security features: Permission validation by Canvas, logging support for audit trails
+  - Use cases: Admin operations, support workflows, permission testing, batch user operations
+- Raw URL support for direct Canvas API calls (#92)
+  - New `Canvas` facade class for making raw API calls to arbitrary Canvas URLs
+  - Added `rawRequest()` method to HttpClientInterface and HttpClient
+  - Support for both absolute Canvas URLs and relative paths
+  - Automatic authentication header inclusion
+  - Response parsing based on Content-Type (JSON/non-JSON)
+  - Security validation to prevent SSRF attacks
+  - Domain allowlisting with subdomain support
+  - Useful for:
+    - Following pagination URLs returned by Canvas
+    - Calling custom or undocumented endpoints
+    - Processing webhook callbacks with embedded URLs
+    - Following URLs in API responses (e.g., file downloads)
+    - Accessing beta or experimental Canvas features
 ## [1.3.1] - 2025-01-20
 
 ### Fixed
@@ -269,7 +294,8 @@ Canvas LMS Kit is now production-ready with 90% Canvas API coverage, rate limiti
 - Contributing guidelines
 - Wiki with implementation guides
 
-[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.1.0...v1.2.0

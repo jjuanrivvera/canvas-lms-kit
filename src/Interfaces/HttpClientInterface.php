@@ -81,4 +81,22 @@ interface HttpClientInterface
      * @return PaginatedResponse
      */
     public function requestPaginated(string $method, string $url, array $options = []): PaginatedResponse;
+
+    /**
+     * Make a raw request to any Canvas URL
+     *
+     * This method allows direct API calls to arbitrary Canvas URLs, useful for:
+     * - Following pagination URLs returned by Canvas
+     * - Calling custom or undocumented endpoints
+     * - Handling webhook callbacks with URLs
+     * - Following URLs provided in Canvas API responses
+     * - Accessing beta/experimental endpoints
+     *
+     * @param string $url Full URL or relative path
+     * @param string $method HTTP method (GET, POST, PUT, DELETE, PATCH, etc.)
+     * @param mixed[] $options Guzzle request options
+     * @throws CanvasApiException
+     * @return ResponseInterface
+     */
+    public function rawRequest(string $url, string $method = 'GET', array $options = []): ResponseInterface;
 }

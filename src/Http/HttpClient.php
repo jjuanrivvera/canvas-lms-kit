@@ -352,6 +352,15 @@ class HttpClient implements HttpClientInterface
             $url = rtrim($baseUrl, '/') . '/' . ltrim($url, '/');
         }
 
+        // Add masquerading parameter if active
+        $masqueradeUserId = Config::getMasqueradeUserId();
+        if ($masqueradeUserId !== null) {
+            if (!isset($options['query'])) {
+                $options['query'] = [];
+            }
+            $options['query']['as_user_id'] = $masqueradeUserId;
+        }
+
         return $options;
     }
 
@@ -373,5 +382,167 @@ class HttpClient implements HttpClientInterface
         }
 
         return Config::getOAuthToken();
+    }
+
+    /**
+     * Make a raw request to any Canvas URL
+     *
+     * This method allows direct API calls to arbitrary Canvas URLs, useful for:
+     * - Following pagination URLs returned by Canvas
+     * - Calling custom or undocumented endpoints
+     * - Handling webhook callbacks with URLs
+     * - Following URLs provided in Canvas API responses
+     * - Accessing beta/experimental endpoints
+     *
+     * @param string $url Full URL or relative path
+     * @param string $method HTTP method (GET, POST, PUT, DELETE, PATCH, etc.)
+     * @param mixed[] $options Guzzle request options
+     * @return ResponseInterface
+     * @throws CanvasApiException
+     * @throws MissingApiKeyException
+     * @throws MissingBaseUrlException
+     * @throws MissingOAuthTokenException
+     */
+    public function rawRequest(string $url, string $method = 'GET', array $options = []): ResponseInterface
+    {
+        try {
+            $requestUrl = $url;
+            $requestOptions = $this->prepareRawRequestOptions($requestUrl, $options);
+
+            return $this->client->request($method, $requestUrl, $requestOptions);
+        } catch (RequestException $e) {
+            $this->logger->error($e->getMessage());
+            $errors = [];
+            if ($e->getResponse()) {
+                $body = $e->getResponse()->getBody()->getContents();
+                if ($body) {
+                    $decoded = json_decode($body, true);
+                    if (is_array($decoded) && isset($decoded['errors'])) {
+                        $errors = $decoded['errors'];
+                    }
+                }
+            }
+            throw new CanvasApiException($e->getMessage(), $e->getCode(), $errors);
+        } catch (GuzzleException $e) {
+            throw new CanvasApiException($e->getMessage(), $e->getCode(), []);
+        }
+    }
+
+    /**
+     * Prepare options for raw requests
+     *
+     * @param string $url The URL to process (passed by reference, may be modified)
+     * @param mixed[] $options The request options
+     * @return mixed[]
+     * @throws MissingApiKeyException
+     * @throws MissingOAuthTokenException
+     * @throws MissingBaseUrlException
+     * @throws CanvasApiException
+     */
+    private function prepareRawRequestOptions(string &$url, array $options): array
+    {
+        // Detect if URL is absolute (contains scheme) or relative
+        $isAbsoluteUrl = filter_var($url, FILTER_VALIDATE_URL) !== false;
+
+        if ($isAbsoluteUrl) {
+            // Validate that the URL points to the configured Canvas domain
+            $this->validateCanvasUrl($url);
+        } else {
+            // For relative URLs, prepend base URL (without API version)
+            $baseUrl = Config::getBaseUrl();
+            if (!$baseUrl) {
+                throw new MissingBaseUrlException();
+            }
+
+            // If the relative URL already starts with /api/v1, use it as is
+            // Otherwise, just append to base URL
+            $url = rtrim($baseUrl, '/') . '/' . ltrim($url, '/');
+        }
+
+        // Add authentication headers unless explicitly skipped
+        if (!isset($options['skipAuth']) || $options['skipAuth'] !== true) {
+            $authMode = Config::getAuthMode();
+
+            if ($authMode === 'oauth') {
+                $token = $this->getValidOAuthToken();
+                if (!$token) {
+                    throw new MissingOAuthTokenException();
+                }
+                $options['headers']['Authorization'] = 'Bearer ' . $token;
+            } else {
+                $appKey = Config::getAppKey();
+                if (!$appKey) {
+                    throw new MissingApiKeyException();
+                }
+                $options['headers']['Authorization'] = 'Bearer ' . $appKey;
+            }
+        }
+
+        // Remove skipAuth from options as it's not a valid HTTP client option
+        unset($options['skipAuth']);
+
+        // Add masquerading parameter if active
+        $masqueradeUserId = Config::getMasqueradeUserId();
+        if ($masqueradeUserId !== null) {
+            if (!isset($options['query'])) {
+                $options['query'] = [];
+            }
+            $options['query']['as_user_id'] = $masqueradeUserId;
+        }
+
+        return $options;
+    }
+
+    /**
+     * Validate that a URL points to the configured Canvas domain
+     *
+     * @param string $url The URL to validate
+     * @return void
+     * @throws CanvasApiException
+     */
+    private function validateCanvasUrl(string $url): void
+    {
+        $baseUrl = Config::getBaseUrl();
+        if (!$baseUrl) {
+            throw new MissingBaseUrlException();
+        }
+
+        $parsedUrl = parse_url($url);
+        $parsedBaseUrl = parse_url($baseUrl);
+
+        if (!isset($parsedUrl['host']) || !isset($parsedBaseUrl['host'])) {
+            throw new CanvasApiException('Invalid URL format', 0, ['error' => 'Could not parse URL']);
+        }
+
+        // Allow the same host or subdomains of the configured host
+        if ($parsedUrl['host'] !== $parsedBaseUrl['host']) {
+            // Check if it's a subdomain of the configured host
+            $baseHost = $parsedBaseUrl['host'];
+            $requestHost = $parsedUrl['host'];
+
+            // Remove potential port numbers for comparison
+            $baseHost = explode(':', $baseHost)[0];
+            $requestHost = explode(':', $requestHost)[0];
+
+            if (!str_ends_with($requestHost, '.' . $baseHost) && $requestHost !== $baseHost) {
+                throw new CanvasApiException(
+                    'URL domain does not match configured Canvas instance',
+                    0,
+                    ['error' => 'Invalid domain: ' . $parsedUrl['host']]
+                );
+            }
+        }
+
+        // Validate scheme (only allow HTTP for localhost, HTTPS otherwise)
+        $scheme = $parsedUrl['scheme'] ?? '';
+        $isLocalhost = in_array($parsedUrl['host'], ['localhost', '127.0.0.1', '::1']);
+
+        if (!$isLocalhost && $scheme !== 'https') {
+            throw new CanvasApiException(
+                'Only HTTPS URLs are allowed for production Canvas instances',
+                0,
+                ['error' => 'Invalid scheme: ' . $scheme]
+            );
+        }
     }
 }
