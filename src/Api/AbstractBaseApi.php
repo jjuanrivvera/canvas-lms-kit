@@ -28,15 +28,6 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     protected static HttpClientInterface $apiClient;
 
-    /**
-     * @var int|null Instance-level masquerade user ID
-     */
-    protected ?int $instanceMasqueradeUserId = null;
-
-    /**
-     * @var int|null Temporary masquerade user ID for static method chaining
-     */
-    protected static ?int $tempMasqueradeUserId = null;
 
     /**
      * Define method aliases
@@ -62,12 +53,6 @@ abstract class AbstractBaseApi implements ApiInterface
                 $this->{$key} = $value;
             }
         }
-
-        // Transfer temporary masquerade user ID to instance if present
-        if (static::$tempMasqueradeUserId !== null) {
-            $this->instanceMasqueradeUserId = static::$tempMasqueradeUserId;
-            static::$tempMasqueradeUserId = null; // Clear temporary value
-        }
     }
 
     /**
@@ -78,37 +63,6 @@ abstract class AbstractBaseApi implements ApiInterface
     public static function setApiClient(HttpClientInterface $apiClient): void
     {
         self::$apiClient = $apiClient;
-    }
-
-    /**
-     * Enable masquerading for fluent interface operations.
-     *
-     * This method temporarily sets a masquerade user ID that will be used
-     * for the next static method call. The masquerading is automatically
-     * cleared after the operation completes.
-     *
-     * Note: For this to work properly, static methods that make API calls
-     * should use withTemporaryMasquerading() wrapper.
-     *
-     * @param int $userId The Canvas user ID to masquerade as
-     * @return string Returns the class name for static method chaining
-     *
-     * @example
-     * // Due to PHP limitations, use this pattern:
-     * // Set masquerading
-     * User::asUser(456);
-     * $user = User::find(123); // This call will be masqueraded
-     *
-     * // Or for a more fluent approach in derived classes:
-     * // Implement a custom find method that handles masquerading
-     */
-    public static function asUser(int $userId): string
-    {
-        // Store the masquerade user ID temporarily for the next static operation
-        static::$tempMasqueradeUserId = $userId;
-
-        // Return the class name to allow pseudo-chaining
-        return static::class;
     }
 
     /**
@@ -206,80 +160,6 @@ abstract class AbstractBaseApi implements ApiInterface
             return new DateTime($value);
         }
         return $value;
-    }
-
-    /**
-     * Apply instance-level masquerading temporarily.
-     *
-     * This method temporarily overrides the global masquerading configuration
-     * for a single operation, then restores the original state.
-     *
-     * @param callable $operation The operation to perform with masquerading
-     * @return mixed The result of the operation
-     */
-    protected function withInstanceMasquerading(callable $operation): mixed
-    {
-        if ($this->instanceMasqueradeUserId === null) {
-            // No instance masquerading, just execute the operation
-            return $operation();
-        }
-
-        // Store the current global masquerade user ID
-        $originalMasqueradeUserId = Config::getMasqueradeUserId();
-
-        try {
-            // Set the instance masquerade user ID globally
-            Config::asUser($this->instanceMasqueradeUserId);
-
-            // Execute the operation
-            return $operation();
-        } finally {
-            // Restore the original masquerade user ID
-            if ($originalMasqueradeUserId !== null) {
-                Config::asUser($originalMasqueradeUserId);
-            } else {
-                Config::stopMasquerading();
-            }
-        }
-    }
-
-    /**
-     * Apply temporary masquerading for static methods.
-     *
-     * This method checks for a temporary masquerade user ID set by asUser()
-     * and applies it for the duration of the operation, then clears it.
-     *
-     * @param callable $operation The operation to perform with masquerading
-     * @return mixed The result of the operation
-     */
-    protected static function withTemporaryMasquerading(callable $operation): mixed
-    {
-        if (static::$tempMasqueradeUserId === null) {
-            // No temporary masquerading, just execute the operation
-            return $operation();
-        }
-
-        // Store the current global masquerade user ID
-        $originalMasqueradeUserId = Config::getMasqueradeUserId();
-        $tempUserId = static::$tempMasqueradeUserId;
-
-        try {
-            // Clear the temporary value immediately to prevent reuse
-            static::$tempMasqueradeUserId = null;
-
-            // Set the temporary masquerade user ID globally
-            Config::asUser($tempUserId);
-
-            // Execute the operation
-            return $operation();
-        } finally {
-            // Restore the original masquerade user ID
-            if ($originalMasqueradeUserId !== null) {
-                Config::asUser($originalMasqueradeUserId);
-            } else {
-                Config::stopMasquerading();
-            }
-        }
     }
 
     /**
