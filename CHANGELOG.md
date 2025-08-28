@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2025-01-28
+
+### Changed
+- Removed unused instance masquerading code from AbstractBaseApi
+  - Cleaned up 120 lines of partially implemented code that was never integrated
+  - Global masquerading via Config::asUser() remains fully functional
+  - Simplified codebase by removing unnecessary complexity
+
 ## [1.4.0] - 2025-01-28
 
 ### Added
