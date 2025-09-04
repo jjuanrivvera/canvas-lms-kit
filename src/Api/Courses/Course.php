@@ -3500,6 +3500,36 @@ class Course extends AbstractBaseApi
     }
 
     /**
+     * Get media objects for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<\CanvasLMS\Api\MediaObjects\MediaObject> Array of MediaObject instances
+     * @throws CanvasApiException
+     */
+    public function mediaObjects(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch media objects');
+        }
+        return \CanvasLMS\Api\MediaObjects\MediaObject::fetchByCourse($this->id, $params);
+    }
+
+    /**
+     * Get media attachments for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<\CanvasLMS\Api\MediaObjects\MediaObject> Array of MediaObject instances
+     * @throws CanvasApiException
+     */
+    public function mediaAttachments(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch media attachments');
+        }
+        return \CanvasLMS\Api\MediaObjects\MediaObject::fetchAttachmentsByCourse($this->id, $params);
+    }
+
+    /**
      * Get the API endpoint for this resource
      * @return string
      */

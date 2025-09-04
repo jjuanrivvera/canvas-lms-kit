@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- MediaObjects API implementation (#47)
+  - New `MediaObject` class for managing media objects and tracks in Canvas
+  - Support for media objects in global, course, and group contexts
+  - Media attachments endpoints for parallel attachment-based operations
+  - Media tracks management (captions/subtitles) with SRT and WEBVTT format support
+  - `UpdateMediaObjectDTO` for updating media object titles
+  - `UpdateMediaTracksDTO` for managing media tracks with validation
+  - `MediaTrack` and `MediaSource` data objects for structured data handling
+  - Course and Group integration via `mediaObjects()` and `mediaAttachments()` methods
+  - Support for 12 Canvas API endpoints covering all media operations
+  - Comprehensive test coverage for API operations and DTOs
+
 - Announcements API implementation (#41)
   - New `Announcement` class extending `DiscussionTopic` with announcement-specific features
   - Automatic filtering for announcements only (adds `only_announcements=true`)
