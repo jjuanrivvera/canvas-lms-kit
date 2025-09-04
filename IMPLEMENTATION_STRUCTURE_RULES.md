@@ -72,6 +72,137 @@ When implementing a new resource:
 
 ## API Design Principles
 
+### Property Naming Convention (camelCase)
+
+**Rule**: All API class properties MUST be declared using camelCase naming convention, regardless of how they appear in Canvas API responses.
+
+**Implementation Pattern**:
+```php
+// Property declarations in API classes - ALWAYS camelCase
+class Course extends AbstractBaseApi 
+{
+    public ?int $id = null;
+    public ?string $name = null;
+    public ?string $courseCode = null;        // NOT course_code
+    public ?string $workflowState = null;     // NOT workflow_state
+    public ?string $createdAt = null;         // NOT created_at
+    public ?string $sisCourseid = null;       // NOT sis_course_id
+    public ?bool $isPublic = null;            // NOT is_public
+}
+```
+
+**Automatic Conversion**:
+The `AbstractBaseApi` constructor automatically converts snake_case keys from Canvas API responses to camelCase properties:
+
+```php
+// AbstractBaseApi constructor handles conversion
+public function __construct(array $data)
+{
+    foreach ($data as $key => $value) {
+        // Converts snake_case to camelCase
+        // 'course_code' becomes 'courseCode'
+        // 'workflow_state' becomes 'workflowState'
+        $key = lcfirst(str_replace('_', '', ucwords($key, '_')));
+        
+        if (property_exists($this, $key) && !is_null($value)) {
+            $this->{$key} = $value;
+        }
+    }
+}
+```
+
+**Benefits**:
+- Provides a PHP-idiomatic interface (camelCase is PHP convention)
+- Maintains consistency across the entire SDK
+- Automatically handles Canvas API's snake_case format
+- No manual conversion needed in individual classes
+
+**Important Notes**:
+1. **NEVER** declare properties in snake_case (e.g., `$course_code`, `$html_url`)
+2. **ALWAYS** call parent constructor when implementing custom constructors
+3. **Canvas API responses** use snake_case, but SDK properties use camelCase
+4. **The conversion is automatic** - developers don't need to handle it manually
+
+**Example Usage**:
+```php
+// Canvas API returns snake_case
+$apiResponse = [
+    'id' => 123,
+    'name' => 'Introduction to PHP',
+    'course_code' => 'PHP101',           // snake_case from API
+    'workflow_state' => 'available',     // snake_case from API
+    'created_at' => '2024-01-15T10:00:00Z'
+];
+
+// SDK automatically converts to camelCase
+$course = new Course($apiResponse);
+echo $course->courseCode;      // 'PHP101' - camelCase property
+echo $course->workflowState;   // 'available' - camelCase property
+echo $course->createdAt;        // '2024-01-15T10:00:00Z' - camelCase property
+```
+
+**Custom Constructor Pattern**:
+If a class needs a custom constructor, it MUST call the parent constructor:
+
+```php
+public function __construct(array $data = [])
+{
+    // ALWAYS call parent constructor first for property conversion
+    parent::__construct($data);
+    
+    // Then handle any special cases (e.g., DateTime conversion)
+    if (isset($this->createdAt) && is_string($this->createdAt)) {
+        $this->createdAt = new DateTime($this->createdAt);
+    }
+}
+```
+
+**Getter/Setter Convention**:
+Getters and setters should follow the camelCase property naming:
+
+```php
+class Course extends AbstractBaseApi
+{
+    public ?string $courseCode = null;     // Property in camelCase
+    
+    // Getter uses camelCase
+    public function getCourseCode(): ?string
+    {
+        return $this->courseCode;
+    }
+    
+    // Setter uses camelCase
+    public function setCourseCode(?string $courseCode): void
+    {
+        $this->courseCode = $courseCode;
+    }
+}
+```
+
+**toArray() Method**:
+When converting back to array format (e.g., for API requests), convert camelCase back to snake_case:
+
+```php
+public function toArray(): array
+{
+    return [
+        'id' => $this->id,
+        'name' => $this->name,
+        'course_code' => $this->courseCode,        // Convert back to snake_case
+        'workflow_state' => $this->workflowState,  // Convert back to snake_case
+        'created_at' => $this->createdAt,          // Convert back to snake_case
+    ];
+}
+```
+
+**Current Issues** (To Be Fixed):
+- Conference.php: Uses mixed snake_case and camelCase (10 snake_case properties)
+- FeatureFlag.php: Uses mixed snake_case and camelCase (6 snake_case properties)
+- Section.php: Has 1 snake_case property (`$passback_status`)
+- Tab.php: Has snake_case properties including `$html_url`
+
+These classes violate the convention and need to be refactored to use camelCase consistently.
+
 ### Account-as-Default Convention for Multi-Context Resources
 
 **Rule**: Resources that can exist in multiple contexts (Account, Course, User) should default to Account context when accessed directly through the API class. Course-specific and other context-specific access should be provided through instance methods on the respective context classes.

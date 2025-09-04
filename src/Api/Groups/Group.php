@@ -924,4 +924,34 @@ class Group extends AbstractBaseApi
 
         return $migration;
     }
+
+    /**
+     * Get media objects for this group
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<\CanvasLMS\Api\MediaObjects\MediaObject> Array of MediaObject instances
+     * @throws CanvasApiException
+     */
+    public function mediaObjects(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Group ID is required to fetch media objects');
+        }
+        return \CanvasLMS\Api\MediaObjects\MediaObject::fetchByGroup($this->id, $params);
+    }
+
+    /**
+     * Get media attachments for this group
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<\CanvasLMS\Api\MediaObjects\MediaObject> Array of MediaObject instances
+     * @throws CanvasApiException
+     */
+    public function mediaAttachments(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Group ID is required to fetch media attachments');
+        }
+        return \CanvasLMS\Api\MediaObjects\MediaObject::fetchAttachmentsByGroup($this->id, $params);
+    }
 }
