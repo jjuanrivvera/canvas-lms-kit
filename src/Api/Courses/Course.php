@@ -23,6 +23,7 @@ use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 use CanvasLMS\Api\Pages\Page;
 use CanvasLMS\Api\Sections\Section;
 use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
+use CanvasLMS\Api\Announcements\Announcement;
 use CanvasLMS\Api\Quizzes\Quiz;
 use CanvasLMS\Api\Files\File;
 use CanvasLMS\Api\Rubrics\Rubric;
@@ -2822,6 +2823,37 @@ class Course extends AbstractBaseApi
 
         DiscussionTopic::setCourse($this);
         return DiscussionTopic::fetchAll($params);
+    }
+
+    /**
+     * Get announcements for this course
+     *
+     * Returns the first page of announcements for performance. To fetch more announcements, use:
+     * - Announcement::fetchAllPaginated() for pagination metadata
+     * - Announcement::fetchAllPages() for all announcements (memory intensive)
+     * - Announcement::fetchPage() for single page with navigation
+     *
+     * @example
+     * ```php
+     * $course = Course::find(123);
+     * $announcements = $course->announcements();
+     *
+     * // With parameters
+     * $activeAnnouncements = $course->announcements(['active_only' => true]);
+     * ```
+     *
+     * @param array<string, mixed> $params Query parameters (active_only, etc.)
+     * @return Announcement[] First page of announcements
+     * @throws CanvasApiException
+     */
+    public function announcements(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch announcements');
+        }
+
+        Announcement::setCourse($this);
+        return Announcement::fetchAll($params);
     }
 
 

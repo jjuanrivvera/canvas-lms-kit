@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Announcements API implementation (#41)
+  - New `Announcement` class extending `DiscussionTopic` with announcement-specific features
+  - Automatic filtering for announcements only (adds `only_announcements=true`)
+  - Global announcements endpoint support for cross-course announcements
+  - Scheduled announcements with `scheduleFor()` and `postImmediately()` methods
+  - Section-targeted announcements support
+  - Comment locking functionality for one-way broadcasts
+  - `CreateAnnouncementDTO` and `UpdateAnnouncementDTO` with announcement defaults
+  - Course integration via `$course->announcements()` relationship method
+  - Comprehensive test coverage for all announcement operations
+
 ## [1.4.1] - 2025-01-28
 
 ### Changed
