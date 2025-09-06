@@ -20,6 +20,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Returns raw arrays matching Canvas API JSON responses for flexibility
   - Comprehensive test coverage for all 20+ analytics endpoints
 
+- Bookmarks API implementation (#120)
+  - New `Bookmark` class for managing user bookmarks in Canvas
+  - Support for bookmarking various Canvas resources (courses, groups, users, etc.)
+  - Full CRUD operations: create, read, update, delete
+  - `CreateBookmarkDTO` and `UpdateBookmarkDTO` for data validation
+  - Position management for custom bookmark ordering
+  - Metadata support via JSON data field
+  - User-specific context - always operates on current user (`/users/self/bookmarks`)
+  - Comprehensive test coverage for all operations
+
 - Brand Configs API implementation (#122)
   - New `BrandConfig` class for retrieving brand variables (colors, fonts, logos)
   - New `SharedBrandConfig` class for managing shared theme configurations
