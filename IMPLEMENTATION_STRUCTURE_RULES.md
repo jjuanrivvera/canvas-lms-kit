@@ -31,7 +31,13 @@ tests/Dto/{ResourceName}/
 
 ### 2. Data Objects (No Endpoints)
 
-**Rule**: Objects that are referenced in the official Canvas LMS documentation but do not have ANY endpoints at all should be stored in the `src/Objects/` folder. These are pure data structures returned as part of other API responses.
+**Rule**: Objects that are **explicitly documented as separate data structures** in the official Canvas LMS documentation but do not have ANY endpoints at all should be stored in the `src/Objects/` folder. These are pure data structures returned as part of other API responses.
+
+**IMPORTANT**: Do NOT create data objects for simple JSON responses. Only create data objects when:
+1. The Canvas API documentation explicitly defines it as a named object/structure
+2. The object is reused across multiple API endpoints
+3. The object has complex nested properties that benefit from type safety
+4. The object appears in the Canvas API documentation with its own definition section
 
 **Structure**:
 ```
@@ -45,7 +51,27 @@ tests/Objects/
 - No endpoints at all (not even GET)
 - Only exist as data structures returned by other API calls
 - Cannot be fetched directly from the API
-- Examples: OutcomeLink, OutcomeRating, RubricCriteria, Grade objects
+- Must be explicitly named in Canvas documentation
+- Examples: OutcomeLink, OutcomeRating, RubricCriterion, Grade objects
+
+**When NOT to Create Data Objects**:
+- Simple JSON responses (even if complex) that are only used by one endpoint
+- Response structures that are not explicitly named in Canvas documentation
+- Analytics data that returns simple arrays or hashes
+- One-off response formats specific to a single endpoint
+
+**Example of What NOT to Do**:
+```php
+// ❌ WRONG - Don't create objects for unnamed JSON responses
+class ActivityData {  // Not a real Canvas object
+    public ?array $byDate = null;
+    public ?array $byCategory = null;
+}
+
+// ✅ CORRECT - Return as array or stdClass
+$analytics = Analytics::fetchAccountActivity();
+// Returns: ['by_date' => [...], 'by_category' => [...]]
+```
 
 ## Implementation Checklist
 
@@ -277,7 +303,37 @@ $course = Course::create($dto);
 - Should be placed in `/src/Api/{ResourceName}/`
 - May not extend `AbstractBaseApi` since they don't need full CRUD operations
 - Should implement their own static methods for fetching data
-- Examples: OutcomeResult (context-specific fetching only)
+- Examples: OutcomeResult (context-specific fetching only), Analytics API
+
+### Analytics and Statistical APIs
+
+**Rule**: APIs that return statistical data, analytics, or aggregated information should:
+- Return simple arrays or stdClass objects matching the JSON structure
+- NOT create custom data objects unless explicitly defined in Canvas documentation
+- Use array return types or mixed for flexibility
+- Let consumers work with the raw data structures
+
+**Implementation Pattern**:
+```php
+// Analytics API returns raw data structures
+class Analytics {
+    // Returns array matching JSON response
+    public static function fetchAccountActivity(?int $accountId = null): array {
+        // Returns: ['by_date' => [...], 'by_category' => [...]]
+    }
+    
+    // Returns array of arrays for list responses
+    public static function fetchCourseAssignments(int $courseId): array {
+        // Returns: [['assignment_id' => 1, 'title' => '...'], ...]
+    }
+}
+```
+
+**Benefits**:
+- Simpler implementation
+- Matches Canvas API documentation exactly
+- No unnecessary abstraction layers
+- Easier to maintain and update
 
 ## Examples
 

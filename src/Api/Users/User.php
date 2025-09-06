@@ -1886,4 +1886,37 @@ class User extends AbstractBaseApi
 
         return $migration;
     }
+
+    /**
+     * Get analytics data for this user in a specific course
+     *
+     * @param int $courseId The course ID
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<string, array<string, mixed>> Analytics data for the user in the course
+     * @throws CanvasApiException
+     */
+    public function courseAnalytics(int $courseId, array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('User ID is required to fetch analytics');
+        }
+
+        return [
+            'activity' => \CanvasLMS\Api\Analytics\Analytics::fetchUserCourseActivity(
+                $courseId,
+                $this->id,
+                $params
+            ),
+            'assignments' => \CanvasLMS\Api\Analytics\Analytics::fetchUserCourseAssignments(
+                $courseId,
+                $this->id,
+                $params
+            ),
+            'communication' => \CanvasLMS\Api\Analytics\Analytics::fetchUserCourseCommunication(
+                $courseId,
+                $this->id,
+                $params
+            )
+        ];
+    }
 }

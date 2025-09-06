@@ -3530,6 +3530,87 @@ class Course extends AbstractBaseApi
     }
 
     /**
+     * Get analytics data for this course
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, array<string, mixed>> Activity data array
+     * @throws CanvasApiException
+     */
+    public function analytics(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch analytics');
+        }
+
+        return \CanvasLMS\Api\Analytics\Analytics::fetchCourseActivity($this->id, $params);
+    }
+
+    /**
+     * Get assignment analytics for this course
+     *
+     * @param array<string, mixed> $params Optional query parameters (e.g., ['async' => true])
+     * @return array<int, array<string, mixed>> Array of assignment analytics
+     * @throws CanvasApiException
+     */
+    public function assignmentAnalytics(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch assignment analytics');
+        }
+
+        return \CanvasLMS\Api\Analytics\Analytics::fetchCourseAssignments($this->id, $params);
+    }
+
+    /**
+     * Get student summaries for this course
+     *
+     * @param array<string, mixed> $params Optional query parameters (e.g., ['sort_column' => 'name'])
+     * @return array<int, array<string, mixed>> Array of student summaries
+     * @throws CanvasApiException
+     */
+    public function studentSummaries(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch student summaries');
+        }
+
+        return \CanvasLMS\Api\Analytics\Analytics::fetchCourseStudentSummaries($this->id, $params);
+    }
+
+    /**
+     * Get analytics for a specific student in this course
+     *
+     * @param int $studentId The student/user ID
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<string, array<string, mixed>> Analytics data for the student
+     * @throws CanvasApiException
+     */
+    public function studentAnalytics(int $studentId, array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch student analytics');
+        }
+
+        return [
+            'activity' => \CanvasLMS\Api\Analytics\Analytics::fetchUserCourseActivity(
+                $this->id,
+                $studentId,
+                $params
+            ),
+            'assignments' => \CanvasLMS\Api\Analytics\Analytics::fetchUserCourseAssignments(
+                $this->id,
+                $studentId,
+                $params
+            ),
+            'communication' => \CanvasLMS\Api\Analytics\Analytics::fetchUserCourseCommunication(
+                $this->id,
+                $studentId,
+                $params
+            )
+        ];
+    }
+
+    /**
      * Get the API endpoint for this resource
      * @return string
      */
