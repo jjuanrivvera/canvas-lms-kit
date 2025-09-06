@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Analytics API implementation (#123)
+  - New `Analytics` class for accessing Canvas learning analytics data
+  - Support for Account/Department level analytics (activity, grades, statistics)
+  - Support for Course level analytics (activity, assignments, student summaries)
+  - Support for User-in-Course level analytics (activity, assignments, communication)
+  - Support for current and completed term filtering
+  - Support for subaccount statistics breakdown
+  - Integration with Course class via `analytics()`, `assignmentAnalytics()`, `studentSummaries()`, and `studentAnalytics()` methods
+  - Integration with User class via `courseAnalytics()` method
+  - Returns raw arrays matching Canvas API JSON responses for flexibility
+  - Comprehensive test coverage for all 20+ analytics endpoints
+
 - Bookmarks API implementation (#120)
   - New `Bookmark` class for managing user bookmarks in Canvas
   - Support for bookmarking various Canvas resources (courses, groups, users, etc.)
