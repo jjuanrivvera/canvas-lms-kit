@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Brand Configs API implementation (#122)
+  - New `BrandConfig` class for retrieving brand variables (colors, fonts, logos)
+  - New `SharedBrandConfig` class for managing shared theme configurations
+  - Support for creating, updating, and deleting shared brand configs
+  - `CreateSharedBrandConfigDto` and `UpdateSharedBrandConfigDto` for data validation
+  - Account integration via `getBrandVariables()` and shared config methods
+  - Note: Canvas API has limitations - no list/fetch endpoints for shared configs
+  - Comprehensive test coverage for all operations
+
 - MediaObjects API implementation (#47)
   - New `MediaObject` class for managing media objects and tracks in Canvas
   - Support for media objects in global, course, and group contexts
