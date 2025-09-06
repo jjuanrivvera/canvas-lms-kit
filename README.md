@@ -129,7 +129,7 @@ CANVAS_AUTH_MODE=oauth
 
 ```php
 // Auto-detect from environment
-Config::autoDetectFromEnvironment();
+Config::autoDetect();
 // Ready to use!
 ```
 
@@ -716,7 +716,7 @@ foreach ($issues as $issue) {
 
 ## 📊 Supported APIs
 
-### ✅ Currently Implemented (37 APIs)
+### ✅ Currently Implemented (38 APIs)
 
 <details>
 <summary><b>📚 Core Course Management</b></summary>
@@ -779,6 +779,7 @@ foreach ($issues as $issue) {
 - ✅ **Content Migrations** - Import/export course content
 - ✅ **Migration Issues** - Handle import problems
 - ✅ **Feature Flags** - Manage Canvas feature toggles
+- ✅ **Brand Configs** - Theme variables and shared brand configurations
 </details>
 
 ## 🚀 Advanced Features
