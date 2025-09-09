@@ -7,6 +7,7 @@ use CanvasLMS\Config;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Enrollments\Enrollment;
 use CanvasLMS\Api\Groups\Group;
+use CanvasLMS\Api\Logins\Login;
 use CanvasLMS\Dto\Users\UpdateUserDTO;
 use CanvasLMS\Dto\Users\CreateUserDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -1669,6 +1670,33 @@ class User extends AbstractBaseApi
         return Group::fetchUserGroups($this->id, $params);
     }
 
+    /**
+     * Get logins (pseudonyms) for this user
+     *
+     * Note: This method supports the 'self' identifier for the current user
+     * when called on an instance returned by User::self().
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return Login[]
+     * @throws CanvasApiException
+     */
+    public function logins(array $params = []): array
+    {
+        self::checkApiClient();
+
+        if (!isset($this->id)) {
+            // Special case: Canvas supports /users/self/logins endpoint
+            $response = self::$apiClient->get('users/self/logins', ['query' => $params]);
+            $loginsData = json_decode($response->getBody()->getContents(), true);
+
+            return array_map(function ($loginData) {
+                return new Login($loginData);
+            }, $loginsData);
+        }
+
+        // For regular users with IDs, use the Login fetchByContext method
+        return Login::fetchByContext('users', $this->id, $params);
+    }
 
     /**
      * Get courses for this user
