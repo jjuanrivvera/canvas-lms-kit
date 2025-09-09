@@ -8,6 +8,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Developer Keys API implementation (#128)
+  - New `DeveloperKey` class for managing Canvas API keys used for OAuth access
+  - Full CRUD operations: create, read, update, delete with mixed endpoint routing
+  - Support for both Canvas API keys and LTI 1.3 registrations
+  - OAuth parameter handling: scopes, redirect URIs, security settings
+  - Account-as-default context pattern with Config::getAccountId() integration
+  - Mixed endpoint routing: account-scoped CREATE/LIST, direct ID UPDATE/DELETE
+  - `CreateDeveloperKeyDTO` and `UpdateDeveloperKeyDTO` with fluent interfaces
+  - Advanced array manipulation methods for URIs and scopes management
+  - Status checking methods: isActive(), isLti(), isTestClusterOnly(), etc.
+  - Helper methods: getRedirectUrisString(), getScopesString()
+  - Instance methods: save() and remove() for existing objects
+  - Support for inherited keys from Site Admin
+  - Comprehensive test coverage with 60 tests for API and DTO functionality
+
+- Login API implementation (#121)
+  - New `Login` class for managing user login credentials and authentication methods
+  - Multi-context support: Account, Course, and User-scoped login management
+  - Full CRUD operations with support for trusted accounts and existing users
+  - `CreateLoginDTO` and `UpdateLoginDTO` with comprehensive validation
+  - Support for multiple authentication providers (Canvas, LDAP, CAS, SAML, etc.)
+  - User identification via SIS ID, integration ID, or username
+  - Unique ID management for external authentication systems
+  - Integration with User class via `logins()` and login management methods
+  - Account and Course integration for administrative login operations
+  - Declared user type support for user creation workflows
+  - Comprehensive test coverage for all contexts and operations
+
 - Analytics API implementation (#123)
   - New `Analytics` class for accessing Canvas learning analytics data
   - Support for Account/Department level analytics (activity, grades, statistics)
