@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Course Reports API implementation (#124)
+  - New `CourseReports` class for managing asynchronous course report generation
+  - Support for all Canvas report types (grade export, student assignment data, etc.)
+  - Three main operations: create reports, check status, get last report status
+  - Course-context pattern with `setCourse()` and `checkCourse()` methods
+  - Status checking helper methods: `isCompleted()`, `isRunning()`, `isFailed()`, `isReady()`
+  - Progress tracking with `getProgress()` and human-readable status descriptions
+  - Canvas API endpoints: POST/GET for report generation and status checking
+  - Course class integration with convenience methods: `createReport()`, `getReport()`, `getLastReport()`
+  - Full test coverage with 34 unit tests covering all functionality and edge cases
+  - PSR-12 compliant code with PHPStan level 6 static analysis passing
 - Developer Keys API implementation (#128)
   - New `DeveloperKey` class for managing Canvas API keys used for OAuth access
   - Full CRUD operations: create, read, update, delete with mixed endpoint routing
