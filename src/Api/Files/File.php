@@ -5,7 +5,7 @@ namespace CanvasLMS\Api\Files;
 use Exception;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Config;
-use CanvasLMS\Dto\Files\UploadFileDto;
+use CanvasLMS\Dto\Files\UploadFileDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 
 /**
@@ -229,16 +229,16 @@ class File extends AbstractBaseApi
      *
      * @param string $contextType Context type ('courses', 'groups', 'users')
      * @param int $contextId Context ID
-     * @param array<string, mixed>|UploadFileDto $fileData File data to upload
+     * @param array<string, mixed>|UploadFileDTO $fileData File data to upload
      * @return self
      * @throws CanvasApiException
      */
     public static function uploadToContext(
         string $contextType,
         int $contextId,
-        array|UploadFileDto $fileData
+        array|UploadFileDTO $fileData
     ): self {
-        $fileData = is_array($fileData) ? new UploadFileDto($fileData) : $fileData;
+        $fileData = is_array($fileData) ? new UploadFileDTO($fileData) : $fileData;
         $endpoint = sprintf('/%s/%d/files', $contextType, $contextId);
 
         $file = self::performUpload($endpoint, $fileData);
@@ -253,11 +253,11 @@ class File extends AbstractBaseApi
     /**
      * Upload a file to a course
      * @param int $courseId
-     * @param UploadFileDto|mixed[] $fileData
+     * @param UploadFileDTO|mixed[] $fileData
      * @return self
      * @throws Exception
      */
-    public static function uploadToCourse(int $courseId, array | UploadFileDto $fileData): self
+    public static function uploadToCourse(int $courseId, array | UploadFileDTO $fileData): self
     {
         return self::uploadToContext('courses', $courseId, $fileData);
     }
@@ -265,11 +265,11 @@ class File extends AbstractBaseApi
     /**
      * Upload a file to a user
      * @param int $userId
-     * @param UploadFileDto|mixed[] $fileData
+     * @param UploadFileDTO|mixed[] $fileData
      * @return self
      * @throws Exception
      */
-    public static function uploadToUser(int $userId, array | UploadFileDto $fileData): self
+    public static function uploadToUser(int $userId, array | UploadFileDTO $fileData): self
     {
         return self::uploadToContext('users', $userId, $fileData);
     }
@@ -277,11 +277,11 @@ class File extends AbstractBaseApi
     /**
      * Upload a file to a group
      * @param int $groupId
-     * @param UploadFileDto|mixed[] $fileData
+     * @param UploadFileDTO|mixed[] $fileData
      * @return self
      * @throws Exception
      */
-    public static function uploadToGroup(int $groupId, array | UploadFileDto $fileData): self
+    public static function uploadToGroup(int $groupId, array | UploadFileDTO $fileData): self
     {
         return self::uploadToContext('groups', $groupId, $fileData);
     }
@@ -290,16 +290,16 @@ class File extends AbstractBaseApi
      * Upload a file for an assignment submission
      * @param int $courseId
      * @param int $assignmentId
-     * @param UploadFileDto|mixed[] $fileData
+     * @param UploadFileDTO|mixed[] $fileData
      * @return self
      * @throws Exception
      */
     public static function uploadToAssignmentSubmission(
         int $courseId,
         int $assignmentId,
-        array | UploadFileDto $fileData
+        array | UploadFileDTO $fileData
     ): self {
-        $fileData = is_array($fileData) ? new UploadFileDto($fileData) : $fileData;
+        $fileData = is_array($fileData) ? new UploadFileDTO($fileData) : $fileData;
 
         return self::performUpload(
             "/courses/{$courseId}/assignments/{$assignmentId}/submissions/self/files",
@@ -310,11 +310,11 @@ class File extends AbstractBaseApi
     /**
      * Perform the 3-step Canvas file upload process
      * @param string $endpoint
-     * @param UploadFileDto $dto
+     * @param UploadFileDTO $dto
      * @return self
      * @throws CanvasApiException
      */
-    private static function performUpload(string $endpoint, UploadFileDto $dto): self
+    private static function performUpload(string $endpoint, UploadFileDTO $dto): self
     {
         self::checkApiClient();
 

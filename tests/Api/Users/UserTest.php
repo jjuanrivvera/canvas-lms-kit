@@ -722,6 +722,66 @@ class UserTest extends TestCase
         $this->assertEquals('grading', $todos[0]->type);
     }
 
+    /**
+     * Test that User logins method works with self ID
+     */
+    public function testLoginsWithSelfId(): void
+    {
+        $loginData = [
+            [
+                'id' => 1,
+                'unique_id' => 'test@example.com',
+                'user_id' => 123,
+                'workflow_state' => 'active'
+            ]
+        ];
+        
+        $response = new Response(200, [], json_encode($loginData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('users/self/logins', $this->anything())
+            ->willReturn($response);
+        
+        $user = User::self();
+        $logins = $user->logins();
+        
+        $this->assertIsArray($logins);
+        $this->assertCount(1, $logins);
+        $this->assertInstanceOf('CanvasLMS\Api\Logins\Login', $logins[0]);
+    }
+
+    /**
+     * Test that User logins method works with regular user ID
+     */
+    public function testLoginsWithUserId(): void
+    {
+        $loginData = [
+            [
+                'id' => 1,
+                'unique_id' => 'test@example.com',
+                'user_id' => 123,
+                'workflow_state' => 'active'
+            ]
+        ];
+        
+        $response = new Response(200, [], json_encode($loginData));
+        
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('get')
+            ->with('users/123/logins', $this->anything())
+            ->willReturn($response);
+        
+        $user = new User(['id' => 123]);
+        $logins = $user->logins();
+        
+        $this->assertIsArray($logins);
+        $this->assertCount(1, $logins);
+        $this->assertInstanceOf('CanvasLMS\Api\Logins\Login', $logins[0]);
+    }
+
     protected function tearDown(): void
     {
         $this->user = null;

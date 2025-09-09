@@ -40,35 +40,35 @@ class FeatureFlag
      *
      * @var string|null
      */
-    public ?string $display_name = null;
+    public ?string $displayName = null;
 
     /**
      * The type of object the feature applies to (RootAccount, Account, Course, or User)
      *
      * @var string|null
      */
-    public ?string $applies_to = null;
+    public ?string $appliesTo = null;
 
     /**
      * The name of the feature that this feature depends on, if any
      *
      * @var string|null
      */
-    public ?string $enable_at = null;
+    public ?string $enableAt = null;
 
     /**
      * The FeatureFlag that applies to the caller
      *
      * @var array<string, mixed>|null
      */
-    public ?array $feature_flag = null;
+    public ?array $featureFlag = null;
 
     /**
      * If true, a feature flag associated with this feature may only be set on the Root Account
      *
      * @var bool|null
      */
-    public ?bool $root_opt_in = null;
+    public ?bool $rootOptIn = null;
 
     /**
      * If true, the feature is a beta feature that may change or be removed
@@ -89,7 +89,7 @@ class FeatureFlag
      *
      * @var string|null
      */
-    public ?string $release_notes_url = null;
+    public ?string $releaseNotesUrl = null;
 
     /**
      * The type of context (for tracking purposes, not from Canvas API)
@@ -460,8 +460,8 @@ class FeatureFlag
      */
     public function isEnabled(): bool
     {
-        if (isset($this->feature_flag['state']) && is_string($this->feature_flag['state'])) {
-            return $this->feature_flag['state'] === 'on';
+        if (isset($this->featureFlag['state']) && is_string($this->featureFlag['state'])) {
+            return $this->featureFlag['state'] === 'on';
         }
         return $this->state === 'on';
     }
@@ -473,8 +473,8 @@ class FeatureFlag
      */
     public function isDisabled(): bool
     {
-        if (isset($this->feature_flag['state']) && is_string($this->feature_flag['state'])) {
-            return $this->feature_flag['state'] === 'off';
+        if (isset($this->featureFlag['state']) && is_string($this->featureFlag['state'])) {
+            return $this->featureFlag['state'] === 'off';
         }
         return $this->state === 'off';
     }
@@ -486,8 +486,8 @@ class FeatureFlag
      */
     public function isAllowed(): bool
     {
-        if (isset($this->feature_flag['state']) && is_string($this->feature_flag['state'])) {
-            return $this->feature_flag['state'] === 'allowed';
+        if (isset($this->featureFlag['state']) && is_string($this->featureFlag['state'])) {
+            return $this->featureFlag['state'] === 'allowed';
         }
         return $this->state === 'allowed';
     }
@@ -499,8 +499,8 @@ class FeatureFlag
      */
     public function isLocked(): bool
     {
-        if (isset($this->feature_flag['locked']) && is_bool($this->feature_flag['locked'])) {
-            return $this->feature_flag['locked'] === true;
+        if (isset($this->featureFlag['locked']) && is_bool($this->featureFlag['locked'])) {
+            return $this->featureFlag['locked'] === true;
         }
         return $this->locked === true;
     }
@@ -512,8 +512,8 @@ class FeatureFlag
      */
     public function isHidden(): bool
     {
-        if (isset($this->feature_flag['hidden']) && is_bool($this->feature_flag['hidden'])) {
-            return $this->feature_flag['hidden'] === true;
+        if (isset($this->featureFlag['hidden']) && is_bool($this->featureFlag['hidden'])) {
+            return $this->featureFlag['hidden'] === true;
         }
         return $this->hidden === true;
     }
@@ -547,14 +547,17 @@ class FeatureFlag
     protected static function hydrateProperties(self $object, array $data): void
     {
         foreach ($data as $key => $value) {
-            if (property_exists($object, $key)) {
-                $object->$key = $value;
+            // Convert snake_case to camelCase
+            $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+
+            if (property_exists($object, $camelKey)) {
+                $object->$camelKey = $value;
             }
         }
 
         // Handle nested feature_flag data with proper type checking
         if (isset($data['feature_flag']) && is_array($data['feature_flag'])) {
-            $object->feature_flag = $data['feature_flag'];
+            $object->featureFlag = $data['feature_flag'];
 
             // Extract state, locked, and hidden from nested feature_flag if present
             // Only override if not already set at top level

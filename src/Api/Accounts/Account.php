@@ -794,4 +794,123 @@ class Account extends AbstractBaseApi
 
         return new Rubric($data);
     }
+
+    /**
+     * Get brand variables for this account's domain
+     *
+     * Retrieves the brand configuration variables used by this account.
+     * This includes colors, fonts, logos, and other branding elements.
+     *
+     * @return array<string, mixed> The brand configuration variables
+     * @throws CanvasApiException If the API request fails
+     *
+     * @example
+     * ```php
+     * $account = Account::find(1);
+     * $brandVars = $account->getBrandVariables();
+     * echo $brandVars['primary_color'];
+     * ```
+     */
+    public function getBrandVariables(): array
+    {
+        return \CanvasLMS\Api\BrandConfigs\BrandConfig::getBrandVariables();
+    }
+
+    /**
+     * Create a shared brand config for this account
+     *
+     * Creates a new shared brand configuration that can be reused across
+     * multiple accounts. The config is associated with this account.
+     *
+     * @param array<string, mixed>|\CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDTO $data Config data
+     * @return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig The created shared brand config
+     * @throws CanvasApiException If the API request fails
+     *
+     * @example
+     * ```php
+     * $account = Account::find(1);
+     * $sharedConfig = $account->createSharedBrandConfig([
+     *     'name' => 'Spring 2024 Theme',
+     *     'brand_config_md5' => 'a1f113321fa024e7a14cb0948597a2a4'
+     * ]);
+     * ```
+     */
+    public function createSharedBrandConfig(
+        array|\CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDTO $data
+    ): \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig {
+        if (!$this->id) {
+            throw new CanvasApiException('Account ID is required to create shared brand config');
+        }
+
+        // Save current account ID and temporarily set this account's ID
+        $originalAccountId = Config::getAccountId();
+        Config::setAccountId($this->id);
+
+        try {
+            return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig::create($data);
+        } finally {
+            // Restore original account ID
+            Config::setAccountId($originalAccountId);
+        }
+    }
+
+    /**
+     * Update a shared brand config for this account
+     *
+     * Updates an existing shared brand configuration associated with this account.
+     *
+     * @param int $id The ID of the shared brand config to update
+     * @param array<string, mixed>|\CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDTO $data The update data
+     * @return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig The updated shared brand config
+     * @throws CanvasApiException If the API request fails
+     *
+     * @example
+     * ```php
+     * $account = Account::find(1);
+     * $updated = $account->updateSharedBrandConfig(987, [
+     *     'name' => 'Updated Theme Name'
+     * ]);
+     * ```
+     */
+    public function updateSharedBrandConfig(
+        int $id,
+        array|\CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDTO $data
+    ): \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig {
+        if (!$this->id) {
+            throw new CanvasApiException('Account ID is required to update shared brand config');
+        }
+
+        // Save current account ID and temporarily set this account's ID
+        $originalAccountId = Config::getAccountId();
+        Config::setAccountId($this->id);
+
+        try {
+            return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig::update($id, $data);
+        } finally {
+            // Restore original account ID
+            Config::setAccountId($originalAccountId);
+        }
+    }
+
+    /**
+     * Delete a shared brand config
+     *
+     * Deletes a shared brand configuration. Note that the Canvas API uses
+     * a different endpoint pattern for deletion (no account_id in path).
+     *
+     * @param int $id The ID of the shared brand config to delete
+     * @return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig The deleted shared brand config
+     * @throws CanvasApiException If the API request fails
+     *
+     * @example
+     * ```php
+     * $account = Account::find(1);
+     * $deleted = $account->deleteSharedBrandConfig(987);
+     * ```
+     */
+    public function deleteSharedBrandConfig(int $id): \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig
+    {
+        // Note: DELETE endpoint doesn't use account ID in path
+        return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig::delete($id);
+    }
 }

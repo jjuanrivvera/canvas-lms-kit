@@ -65,7 +65,7 @@ class FeatureFlagTest extends TestCase
         $this->assertCount(1, $features);
         $this->assertInstanceOf(FeatureFlag::class, $features[0]);
         $this->assertEquals('new_gradebook', $features[0]->feature);
-        $this->assertEquals('New Gradebook', $features[0]->display_name);
+        $this->assertEquals('New Gradebook', $features[0]->displayName);
         $this->assertEquals('account', $features[0]->contextType);
         $this->assertEquals(1, $features[0]->contextId);
     }
@@ -429,7 +429,7 @@ class FeatureFlagTest extends TestCase
     public function testIsEnabledWithFeatureFlagState(): void
     {
         $feature = new FeatureFlag();
-        $feature->feature_flag = ['state' => 'on'];
+        $feature->featureFlag = ['state' => 'on'];
 
         $this->assertTrue($feature->isEnabled());
     }
@@ -445,7 +445,7 @@ class FeatureFlagTest extends TestCase
     public function testIsDisabled(): void
     {
         $feature = new FeatureFlag();
-        $feature->feature_flag = ['state' => 'off'];
+        $feature->featureFlag = ['state' => 'off'];
 
         $this->assertTrue($feature->isDisabled());
     }
@@ -461,7 +461,7 @@ class FeatureFlagTest extends TestCase
     public function testIsLocked(): void
     {
         $feature = new FeatureFlag();
-        $feature->feature_flag = ['locked' => true];
+        $feature->featureFlag = ['locked' => true];
 
         $this->assertTrue($feature->isLocked());
     }
@@ -585,14 +585,14 @@ class FeatureFlagTest extends TestCase
         $feature = new FeatureFlag();
         
         // Test with non-string state in feature_flag
-        $feature->feature_flag = ['state' => 123]; // Invalid type
+        $feature->featureFlag = ['state' => 123]; // Invalid type
         $feature->state = 'on';
         
         // Should fall back to direct state since nested is not a string
         $this->assertTrue($feature->isEnabled());
         
         // Test with missing state in feature_flag
-        $feature->feature_flag = ['other' => 'value'];
+        $feature->featureFlag = ['other' => 'value'];
         $feature->state = 'off';
         
         // Should use direct state

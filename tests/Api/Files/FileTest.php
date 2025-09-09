@@ -6,7 +6,7 @@ use GuzzleHttp\Psr7\Response;
 use CanvasLMS\Http\HttpClient;
 use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Files\File;
-use CanvasLMS\Dto\Files\UploadFileDto;
+use CanvasLMS\Dto\Files\UploadFileDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 
 class FileTest extends TestCase
@@ -96,7 +96,7 @@ class FileTest extends TestCase
         $tempFile = tempnam(sys_get_temp_dir(), 'upload_test');
         file_put_contents($tempFile, 'user content');
 
-        $fileDto = new UploadFileDto([
+        $fileDto = new UploadFileDTO([
             'name' => 'user-file.txt',
             'size' => 512,
             'file' => $tempFile

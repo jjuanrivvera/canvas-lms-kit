@@ -7,6 +7,115 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2025-09-09
+
+### Added
+- Course Reports API implementation (#124)
+  - New `CourseReports` class for managing asynchronous course report generation
+  - Support for all Canvas report types (grade export, student assignment data, etc.)
+  - Three main operations: create reports, check status, get last report status
+  - Course-context pattern with `setCourse()` and `checkCourse()` methods
+  - Status checking helper methods: `isCompleted()`, `isRunning()`, `isFailed()`, `isReady()`
+  - Progress tracking with `getProgress()` and human-readable status descriptions
+  - Canvas API endpoints: POST/GET for report generation and status checking
+  - Course class integration with convenience methods: `createReport()`, `getReport()`, `getLastReport()`
+  - Full test coverage with 34 unit tests covering all functionality and edge cases
+  - PSR-12 compliant code with PHPStan level 6 static analysis passing
+- Developer Keys API implementation (#128)
+  - New `DeveloperKey` class for managing Canvas API keys used for OAuth access
+  - Full CRUD operations: create, read, update, delete with mixed endpoint routing
+  - Support for both Canvas API keys and LTI 1.3 registrations
+  - OAuth parameter handling: scopes, redirect URIs, security settings
+  - Account-as-default context pattern with Config::getAccountId() integration
+  - Mixed endpoint routing: account-scoped CREATE/LIST, direct ID UPDATE/DELETE
+  - `CreateDeveloperKeyDTO` and `UpdateDeveloperKeyDTO` with fluent interfaces
+  - Advanced array manipulation methods for URIs and scopes management
+  - Status checking methods: isActive(), isLti(), isTestClusterOnly(), etc.
+  - Helper methods: getRedirectUrisString(), getScopesString()
+  - Instance methods: save() and remove() for existing objects
+  - Support for inherited keys from Site Admin
+  - Comprehensive test coverage with 60 tests for API and DTO functionality
+
+- Login API implementation (#121)
+  - New `Login` class for managing user login credentials and authentication methods
+  - Multi-context support: Account, Course, and User-scoped login management
+  - Full CRUD operations with support for trusted accounts and existing users
+  - `CreateLoginDTO` and `UpdateLoginDTO` with comprehensive validation
+  - Support for multiple authentication providers (Canvas, LDAP, CAS, SAML, etc.)
+  - User identification via SIS ID, integration ID, or username
+  - Unique ID management for external authentication systems
+  - Integration with User class via `logins()` and login management methods
+  - Account and Course integration for administrative login operations
+  - Declared user type support for user creation workflows
+  - Comprehensive test coverage for all contexts and operations
+
+- Analytics API implementation (#123)
+  - New `Analytics` class for accessing Canvas learning analytics data
+  - Support for Account/Department level analytics (activity, grades, statistics)
+  - Support for Course level analytics (activity, assignments, student summaries)
+  - Support for User-in-Course level analytics (activity, assignments, communication)
+  - Support for current and completed term filtering
+  - Support for subaccount statistics breakdown
+  - Integration with Course class via `analytics()`, `assignmentAnalytics()`, `studentSummaries()`, and `studentAnalytics()` methods
+  - Integration with User class via `courseAnalytics()` method
+  - Returns raw arrays matching Canvas API JSON responses for flexibility
+  - Comprehensive test coverage for all 20+ analytics endpoints
+
+- Bookmarks API implementation (#120)
+  - New `Bookmark` class for managing user bookmarks in Canvas
+  - Support for bookmarking various Canvas resources (courses, groups, users, etc.)
+  - Full CRUD operations: create, read, update, delete
+  - `CreateBookmarkDTO` and `UpdateBookmarkDTO` for data validation
+  - Position management for custom bookmark ordering
+  - Metadata support via JSON data field
+  - User-specific context - always operates on current user (`/users/self/bookmarks`)
+  - Comprehensive test coverage for all operations
+
+- Brand Configs API implementation (#122)
+  - New `BrandConfig` class for retrieving brand variables (colors, fonts, logos)
+  - New `SharedBrandConfig` class for managing shared theme configurations
+  - Support for creating, updating, and deleting shared brand configs
+  - `CreateSharedBrandConfigDTO` and `UpdateSharedBrandConfigDTO` for data validation
+  - Account integration via `getBrandVariables()` and shared config methods
+  - Note: Canvas API has limitations - no list/fetch endpoints for shared configs
+  - Comprehensive test coverage for all operations
+
+- MediaObjects API implementation (#47)
+  - New `MediaObject` class for managing media objects and tracks in Canvas
+  - Support for media objects in global, course, and group contexts
+  - Media attachments endpoints for parallel attachment-based operations
+  - Media tracks management (captions/subtitles) with SRT and WEBVTT format support
+  - `UpdateMediaObjectDTO` for updating media object titles
+  - `UpdateMediaTracksDTO` for managing media tracks with validation
+  - `MediaTrack` and `MediaSource` data objects for structured data handling
+  - Course and Group integration via `mediaObjects()` and `mediaAttachments()` methods
+  - Support for 12 Canvas API endpoints covering all media operations
+  - Comprehensive test coverage for API operations and DTOs
+
+- Announcements API implementation (#41)
+  - New `Announcement` class extending `DiscussionTopic` with announcement-specific features
+  - Automatic filtering for announcements only (adds `only_announcements=true`)
+  - Global announcements endpoint support for cross-course announcements
+  - Scheduled announcements with `scheduleFor()` and `postImmediately()` methods
+  - Section-targeted announcements support
+  - Comment locking functionality for one-way broadcasts
+  - `CreateAnnouncementDTO` and `UpdateAnnouncementDTO` with announcement defaults
+  - Course integration via `$course->announcements()` relationship method
+  - Comprehensive test coverage for all announcement operations
+
+### Changed
+- Property naming convention standardization (#117)
+  - Converted all snake_case properties to camelCase across 4 API classes (23 properties total)
+  - Section.php: `$passback_status` → `$passbackStatus`
+  - Tab.php: `$html_url` → `$htmlUrl` with constructor fix for proper inheritance
+  - FeatureFlag.php: 6 properties converted (displayName, appliesTo, enableAt, featureFlag, rootOptIn, releaseNotesUrl)
+  - Conference.php: 10 properties converted with enhanced DateTime handling in constructor
+  - ConferenceRecording.php: 5 properties converted with snake_case to camelCase conversion
+  - Fixed DTO class naming: UploadFileDto → UploadFileDTO, CreateSharedBrandConfigDto → CreateSharedBrandConfigDTO, UpdateSharedBrandConfigDto → UpdateSharedBrandConfigDTO
+  - Updated corresponding test files to use new camelCase property names
+  - Maintains full backward compatibility through AbstractBaseApi automatic conversion
+  - Achieves 100% camelCase property naming compliance across entire SDK
+
 ## [1.4.1] - 2025-01-28
 
 ### Changed
@@ -302,7 +411,9 @@ Canvas LMS Kit is now production-ready with 90% Canvas API coverage, rate limiti
 - Contributing guidelines
 - Wiki with implementation guides
 
-[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.4.1...v1.5.0
+[1.4.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.2.0...v1.3.0

@@ -17,11 +17,11 @@ class ConferenceRecordingTest extends TestCase
         $this->assertNull($recording->id);
         $this->assertNull($recording->title);
         $this->assertNull($recording->duration);
-        $this->assertNull($recording->created_at);
-        $this->assertNull($recording->playback_url);
-        $this->assertNull($recording->playback_formats);
-        $this->assertNull($recording->recording_id);
-        $this->assertNull($recording->updated_at);
+        $this->assertNull($recording->createdAt);
+        $this->assertNull($recording->playbackUrl);
+        $this->assertNull($recording->playbackFormats);
+        $this->assertNull($recording->recordingId);
+        $this->assertNull($recording->updatedAt);
     }
 
     public function testConstructorWithBasicData(): void
@@ -39,8 +39,8 @@ class ConferenceRecordingTest extends TestCase
         $this->assertEquals(123, $recording->id);
         $this->assertEquals('Test Recording', $recording->title);
         $this->assertEquals(3600, $recording->duration);
-        $this->assertEquals('https://example.com/recording/123', $recording->playback_url);
-        $this->assertEquals('REC-123-ABC', $recording->recording_id);
+        $this->assertEquals('https://example.com/recording/123', $recording->playbackUrl);
+        $this->assertEquals('REC-123-ABC', $recording->recordingId);
     }
 
     public function testConstructorWithDateTimeFields(): void
@@ -54,13 +54,13 @@ class ConferenceRecordingTest extends TestCase
 
         $recording = new ConferenceRecording($data);
 
-        $this->assertInstanceOf(DateTime::class, $recording->created_at);
-        $this->assertEquals('2024-01-15', $recording->created_at->format('Y-m-d'));
-        $this->assertEquals('10:30:00', $recording->created_at->format('H:i:s'));
+        $this->assertInstanceOf(DateTime::class, $recording->createdAt);
+        $this->assertEquals('2024-01-15', $recording->createdAt->format('Y-m-d'));
+        $this->assertEquals('10:30:00', $recording->createdAt->format('H:i:s'));
 
-        $this->assertInstanceOf(DateTime::class, $recording->updated_at);
-        $this->assertEquals('2024-01-16', $recording->updated_at->format('Y-m-d'));
-        $this->assertEquals('14:45:00', $recording->updated_at->format('H:i:s'));
+        $this->assertInstanceOf(DateTime::class, $recording->updatedAt);
+        $this->assertEquals('2024-01-16', $recording->updatedAt->format('Y-m-d'));
+        $this->assertEquals('14:45:00', $recording->updatedAt->format('H:i:s'));
     }
 
     public function testConstructorWithPlaybackFormats(): void
@@ -88,11 +88,11 @@ class ConferenceRecordingTest extends TestCase
 
         $recording = new ConferenceRecording($data);
 
-        $this->assertIsArray($recording->playback_formats);
-        $this->assertCount(3, $recording->playback_formats);
-        $this->assertEquals('video', $recording->playback_formats[0]['format']);
-        $this->assertEquals('audio', $recording->playback_formats[1]['format']);
-        $this->assertEquals('transcript', $recording->playback_formats[2]['format']);
+        $this->assertIsArray($recording->playbackFormats);
+        $this->assertCount(3, $recording->playbackFormats);
+        $this->assertEquals('video', $recording->playbackFormats[0]['format']);
+        $this->assertEquals('audio', $recording->playbackFormats[1]['format']);
+        $this->assertEquals('transcript', $recording->playbackFormats[2]['format']);
     }
 
     public function testConstructorIgnoresUnknownProperties(): void
@@ -125,8 +125,8 @@ class ConferenceRecordingTest extends TestCase
 
         $recording = new ConferenceRecording($data);
 
-        $this->assertNull($recording->created_at);
-        $this->assertNull($recording->updated_at);
+        $this->assertNull($recording->createdAt);
+        $this->assertNull($recording->updatedAt);
     }
 
     public function testConstructorWithCompleteData(): void
@@ -149,11 +149,11 @@ class ConferenceRecordingTest extends TestCase
         $this->assertEquals(222, $recording->id);
         $this->assertEquals('Complete Recording', $recording->title);
         $this->assertEquals(7200, $recording->duration);
-        $this->assertInstanceOf(DateTime::class, $recording->created_at);
-        $this->assertInstanceOf(DateTime::class, $recording->updated_at);
-        $this->assertEquals('https://example.com/play/222', $recording->playback_url);
-        $this->assertEquals('REC-222-XYZ', $recording->recording_id);
-        $this->assertCount(1, $recording->playback_formats);
+        $this->assertInstanceOf(DateTime::class, $recording->createdAt);
+        $this->assertInstanceOf(DateTime::class, $recording->updatedAt);
+        $this->assertEquals('https://example.com/play/222', $recording->playbackUrl);
+        $this->assertEquals('REC-222-XYZ', $recording->recordingId);
+        $this->assertCount(1, $recording->playbackFormats);
     }
 
     public function testDateTimeParsingWithDifferentFormats(): void
@@ -167,11 +167,11 @@ class ConferenceRecordingTest extends TestCase
 
         $recording = new ConferenceRecording($data);
 
-        $this->assertInstanceOf(DateTime::class, $recording->created_at);
-        $this->assertEquals('2024-03-15', $recording->created_at->format('Y-m-d'));
+        $this->assertInstanceOf(DateTime::class, $recording->createdAt);
+        $this->assertEquals('2024-03-15', $recording->createdAt->format('Y-m-d'));
 
-        $this->assertInstanceOf(DateTime::class, $recording->updated_at);
-        $this->assertEquals('2024-03-16', $recording->updated_at->format('Y-m-d'));
+        $this->assertInstanceOf(DateTime::class, $recording->updatedAt);
+        $this->assertEquals('2024-03-16', $recording->updatedAt->format('Y-m-d'));
     }
 
     public function testPropertyTypes(): void
@@ -190,8 +190,8 @@ class ConferenceRecordingTest extends TestCase
         $this->assertSame(444, $recording->id);
         $this->assertSame('Type Test Recording', $recording->title);
         $this->assertSame(5400, $recording->duration);
-        $this->assertSame('https://example.com/444', $recording->playback_url);
-        $this->assertSame(['format1', 'format2'], $recording->playback_formats);
-        $this->assertSame('12345', $recording->recording_id);
+        $this->assertSame('https://example.com/444', $recording->playbackUrl);
+        $this->assertSame(['format1', 'format2'], $recording->playbackFormats);
+        $this->assertSame('12345', $recording->recordingId);
     }
 }

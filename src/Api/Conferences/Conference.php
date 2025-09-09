@@ -27,28 +27,28 @@ class Conference extends AbstractBaseApi
 {
     public ?int $id = null;
     public ?string $title = null;
-    public ?string $conference_type = null;
+    public ?string $conferenceType = null;
     public ?string $description = null;
     public ?int $duration = null;
     /** @var array<string, mixed>|null */
     public ?array $settings = null;
-    public ?bool $long_running = null;
+    public ?bool $longRunning = null;
     /** @var array<int>|null */
     public ?array $users = null;
-    public ?bool $has_advanced_settings = null;
+    public ?bool $hasAdvancedSettings = null;
     public ?string $url = null;
-    public ?string $join_url = null;
+    public ?string $joinUrl = null;
     public ?string $status = null;
-    public ?DateTime $started_at = null;
-    public ?DateTime $ended_at = null;
+    public ?DateTime $startedAt = null;
+    public ?DateTime $endedAt = null;
     /** @var array<ConferenceRecording>|null */
     public ?array $recordings = null;
     /** @var array<mixed>|null */
     public ?array $attendees = null;
-    public ?int $context_id = null;
-    public ?string $context_type = null;
-    public ?DateTime $created_at = null;
-    public ?DateTime $updated_at = null;
+    public ?int $contextId = null;
+    public ?string $contextType = null;
+    public ?DateTime $createdAt = null;
+    public ?DateTime $updatedAt = null;
 
     /**
      * Constructor to initialize conference from array data.
@@ -57,13 +57,25 @@ class Conference extends AbstractBaseApi
      */
     public function __construct(array $data = [])
     {
-        foreach ($data as $key => $value) {
-            if (property_exists($this, $key)) {
-                if (in_array($key, ['started_at', 'ended_at', 'created_at', 'updated_at']) && !empty($value)) {
-                    $this->{$key} = new DateTime($value);
-                } else {
-                    $this->{$key} = $value;
-                }
+        // Handle DateTime fields specially - remove them from data before parent constructor
+        $dateFields = ['started_at', 'ended_at', 'created_at', 'updated_at'];
+        $dateData = [];
+
+        foreach ($dateFields as $dateField) {
+            if (isset($data[$dateField])) {
+                $dateData[$dateField] = $data[$dateField];
+                unset($data[$dateField]);
+            }
+        }
+
+        // Call parent constructor with remaining data for property conversion
+        parent::__construct($data);
+
+        // Handle DateTime conversion for specific fields
+        foreach ($dateData as $key => $value) {
+            if (!empty($value)) {
+                $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+                $this->{$camelKey} = new DateTime($value);
             }
         }
     }
@@ -258,15 +270,27 @@ class Conference extends AbstractBaseApi
         if ($response->getStatusCode() === 200) {
             $responseData = json_decode($response->getBody()->getContents(), true);
 
-            // Update current instance with response data
+            // Update current instance with response data - use same logic as constructor
+            $dateFields = ['started_at', 'ended_at', 'created_at', 'updated_at'];
+            $dateData = [];
+
             foreach ($responseData as $key => $value) {
-                if (property_exists($this, $key)) {
-                    if (in_array($key, ['started_at', 'ended_at', 'created_at', 'updated_at']) && !empty($value)) {
-                        $this->{$key} = new DateTime($value);
-                    } else {
-                        $this->{$key} = $value;
+                if (in_array($key, $dateFields) && !empty($value)) {
+                    $dateData[$key] = $value;
+                } else {
+                    // Convert snake_case to camelCase for non-date fields
+                    $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+
+                    if (property_exists($this, $camelKey) && !is_null($value)) {
+                        $this->{$camelKey} = $value;
                     }
                 }
+            }
+
+            // Handle DateTime conversion for specific fields
+            foreach ($dateData as $key => $value) {
+                $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+                $this->{$camelKey} = new DateTime($value);
             }
 
             $this->processRecordings($responseData);

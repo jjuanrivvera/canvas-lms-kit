@@ -23,6 +23,7 @@ use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 use CanvasLMS\Api\Pages\Page;
 use CanvasLMS\Api\Sections\Section;
 use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
+use CanvasLMS\Api\Announcements\Announcement;
 use CanvasLMS\Api\Quizzes\Quiz;
 use CanvasLMS\Api\Files\File;
 use CanvasLMS\Api\Rubrics\Rubric;
@@ -2824,6 +2825,37 @@ class Course extends AbstractBaseApi
         return DiscussionTopic::fetchAll($params);
     }
 
+    /**
+     * Get announcements for this course
+     *
+     * Returns the first page of announcements for performance. To fetch more announcements, use:
+     * - Announcement::fetchAllPaginated() for pagination metadata
+     * - Announcement::fetchAllPages() for all announcements (memory intensive)
+     * - Announcement::fetchPage() for single page with navigation
+     *
+     * @example
+     * ```php
+     * $course = Course::find(123);
+     * $announcements = $course->announcements();
+     *
+     * // With parameters
+     * $activeAnnouncements = $course->announcements(['active_only' => true]);
+     * ```
+     *
+     * @param array<string, mixed> $params Query parameters (active_only, etc.)
+     * @return Announcement[] First page of announcements
+     * @throws CanvasApiException
+     */
+    public function announcements(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch announcements');
+        }
+
+        Announcement::setCourse($this);
+        return Announcement::fetchAll($params);
+    }
+
 
     // Quiz Relationship Methods
 
@@ -3465,6 +3497,170 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to create conference');
         }
         return \CanvasLMS\Api\Conferences\Conference::createForCourse($this->id, $data);
+    }
+
+    /**
+     * Get media objects for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<\CanvasLMS\Api\MediaObjects\MediaObject> Array of MediaObject instances
+     * @throws CanvasApiException
+     */
+    public function mediaObjects(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch media objects');
+        }
+        return \CanvasLMS\Api\MediaObjects\MediaObject::fetchByCourse($this->id, $params);
+    }
+
+    /**
+     * Get media attachments for this course
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<\CanvasLMS\Api\MediaObjects\MediaObject> Array of MediaObject instances
+     * @throws CanvasApiException
+     */
+    public function mediaAttachments(array $params = []): array
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch media attachments');
+        }
+        return \CanvasLMS\Api\MediaObjects\MediaObject::fetchAttachmentsByCourse($this->id, $params);
+    }
+
+    /**
+     * Get analytics data for this course
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, array<string, mixed>> Activity data array
+     * @throws CanvasApiException
+     */
+    public function analytics(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch analytics');
+        }
+
+        return \CanvasLMS\Api\Analytics\Analytics::fetchCourseActivity($this->id, $params);
+    }
+
+    /**
+     * Get assignment analytics for this course
+     *
+     * @param array<string, mixed> $params Optional query parameters (e.g., ['async' => true])
+     * @return array<int, array<string, mixed>> Array of assignment analytics
+     * @throws CanvasApiException
+     */
+    public function assignmentAnalytics(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch assignment analytics');
+        }
+
+        return \CanvasLMS\Api\Analytics\Analytics::fetchCourseAssignments($this->id, $params);
+    }
+
+    /**
+     * Get student summaries for this course
+     *
+     * @param array<string, mixed> $params Optional query parameters (e.g., ['sort_column' => 'name'])
+     * @return array<int, array<string, mixed>> Array of student summaries
+     * @throws CanvasApiException
+     */
+    public function studentSummaries(array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch student summaries');
+        }
+
+        return \CanvasLMS\Api\Analytics\Analytics::fetchCourseStudentSummaries($this->id, $params);
+    }
+
+    /**
+     * Get analytics for a specific student in this course
+     *
+     * @param int $studentId The student/user ID
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<string, array<string, mixed>> Analytics data for the student
+     * @throws CanvasApiException
+     */
+    public function studentAnalytics(int $studentId, array $params = []): array
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch student analytics');
+        }
+
+        return [
+            'activity' => \CanvasLMS\Api\Analytics\Analytics::fetchUserCourseActivity(
+                $this->id,
+                $studentId,
+                $params
+            ),
+            'assignments' => \CanvasLMS\Api\Analytics\Analytics::fetchUserCourseAssignments(
+                $this->id,
+                $studentId,
+                $params
+            ),
+            'communication' => \CanvasLMS\Api\Analytics\Analytics::fetchUserCourseCommunication(
+                $this->id,
+                $studentId,
+                $params
+            )
+        ];
+    }
+
+    /**
+     * Start generating a new report for this course
+     *
+     * @param string $reportType Type of report to generate (e.g., 'grade_export', 'student_assignment_data')
+     * @param array<string, mixed> $parameters Additional parameters for report generation
+     * @return \CanvasLMS\Api\CourseReports\CourseReports New report instance with status
+     * @throws CanvasApiException
+     */
+    public function createReport(string $reportType, array $parameters = []): \CanvasLMS\Api\CourseReports\CourseReports
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to create reports');
+        }
+
+        \CanvasLMS\Api\CourseReports\CourseReports::setCourse($this);
+        return \CanvasLMS\Api\CourseReports\CourseReports::create($reportType, $parameters);
+    }
+
+    /**
+     * Get the status of a specific report for this course
+     *
+     * @param string $reportType Type of report to check
+     * @param int $reportId ID of the specific report
+     * @return \CanvasLMS\Api\CourseReports\CourseReports Report instance with current status
+     * @throws CanvasApiException
+     */
+    public function getReport(string $reportType, int $reportId): \CanvasLMS\Api\CourseReports\CourseReports
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to get report status');
+        }
+
+        \CanvasLMS\Api\CourseReports\CourseReports::setCourse($this);
+        return \CanvasLMS\Api\CourseReports\CourseReports::getReport($reportType, $reportId);
+    }
+
+    /**
+     * Get the status of the last report of the specified type for this course
+     *
+     * @param string $reportType Type of report to check
+     * @return \CanvasLMS\Api\CourseReports\CourseReports Last report instance with status
+     * @throws CanvasApiException
+     */
+    public function getLastReport(string $reportType): \CanvasLMS\Api\CourseReports\CourseReports
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to get last report status');
+        }
+
+        \CanvasLMS\Api\CourseReports\CourseReports::setCourse($this);
+        return \CanvasLMS\Api\CourseReports\CourseReports::last($reportType);
     }
 
     /**

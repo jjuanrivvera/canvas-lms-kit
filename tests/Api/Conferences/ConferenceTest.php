@@ -89,7 +89,7 @@ class ConferenceTest extends TestCase
         $this->assertInstanceOf(Conference::class, $conferences[0]);
         $this->assertEquals(1, $conferences[0]->id);
         $this->assertEquals('Test Conference', $conferences[0]->title);
-        $this->assertEquals('BigBlueButton', $conferences[0]->conference_type);
+        $this->assertEquals('BigBlueButton', $conferences[0]->conferenceType);
         $this->assertIsArray($conferences[0]->recordings);
         $this->assertEmpty($conferences[0]->recordings);
 
@@ -165,7 +165,7 @@ class ConferenceTest extends TestCase
         $this->assertInstanceOf(Conference::class, $conference);
         $this->assertEquals($conferenceId, $conference->id);
         $this->assertEquals('Single Conference', $conference->title);
-        $this->assertEquals('Zoom', $conference->conference_type);
+        $this->assertEquals('Zoom', $conference->conferenceType);
         $this->assertEquals(120, $conference->duration);
         $this->assertIsArray($conference->settings);
         $this->assertTrue($conference->settings['enable_waiting_room']);
@@ -215,7 +215,7 @@ class ConferenceTest extends TestCase
         $this->assertEquals('New Conference', $conference->title);
         $this->assertEquals('active', $conference->status);
         $this->assertNotNull($conference->url);
-        $this->assertNotNull($conference->join_url);
+        $this->assertNotNull($conference->joinUrl);
     }
 
     public function testCreateForGroup(): void
@@ -252,8 +252,8 @@ class ConferenceTest extends TestCase
 
         $this->assertInstanceOf(Conference::class, $conference);
         $this->assertEquals(888, $conference->id);
-        $this->assertEquals('Group', $conference->context_type);
-        $this->assertEquals($groupId, $conference->context_id);
+        $this->assertEquals('Group', $conference->contextType);
+        $this->assertEquals($groupId, $conference->contextId);
     }
 
     public function testUpdate(): void
@@ -408,7 +408,7 @@ class ConferenceTest extends TestCase
         $this->assertEquals(201, $recordings[0]->id);
         $this->assertEquals('Recording 1', $recordings[0]->title);
         $this->assertEquals(3600, $recordings[0]->duration);
-        $this->assertInstanceOf(\DateTime::class, $recordings[0]->created_at);
+        $this->assertInstanceOf(\DateTime::class, $recordings[0]->createdAt);
     }
 
     public function testGetRecordingsWithoutIdThrowsException(): void
@@ -445,9 +445,9 @@ class ConferenceTest extends TestCase
 
         $conference = Conference::find(333);
 
-        $this->assertInstanceOf(\DateTime::class, $conference->started_at);
-        $this->assertInstanceOf(\DateTime::class, $conference->ended_at);
-        $this->assertInstanceOf(\DateTime::class, $conference->created_at);
-        $this->assertInstanceOf(\DateTime::class, $conference->updated_at);
+        $this->assertInstanceOf(\DateTime::class, $conference->startedAt);
+        $this->assertInstanceOf(\DateTime::class, $conference->endedAt);
+        $this->assertInstanceOf(\DateTime::class, $conference->createdAt);
+        $this->assertInstanceOf(\DateTime::class, $conference->updatedAt);
     }
 }
