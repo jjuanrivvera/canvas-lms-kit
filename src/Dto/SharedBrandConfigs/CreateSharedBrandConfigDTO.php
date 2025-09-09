@@ -7,14 +7,14 @@ namespace CanvasLMS\Dto\SharedBrandConfigs;
 use CanvasLMS\Dto\AbstractBaseDto;
 
 /**
- * CreateSharedBrandConfigDto
+ * CreateSharedBrandConfigDTO
  *
  * Data Transfer Object for creating a shared brand configuration.
  * Handles the data transformation for the POST endpoint.
  *
  * Canvas API Documentation: https://canvas.instructure.com/doc/api/shared_brand_configs.html
  */
-class CreateSharedBrandConfigDto extends AbstractBaseDto
+class CreateSharedBrandConfigDTO extends AbstractBaseDto
 {
     /**
      * @var string $apiPropertyName The API property name for multipart form data

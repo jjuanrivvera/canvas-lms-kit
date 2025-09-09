@@ -54,7 +54,7 @@ class Tab extends AbstractBaseApi
     /**
      * HTML URL of the tab
      */
-    public ?string $html_url = null;
+    public ?string $htmlUrl = null;
 
     /**
      * Unique identifier for the tab
@@ -93,9 +93,8 @@ class Tab extends AbstractBaseApi
      */
     public function __construct(array $data = [])
     {
-        if (!empty($data)) {
-            $this->populate($data);
-        }
+        // Call parent constructor for snake_case to camelCase conversion
+        parent::__construct($data);
     }
 
     /**
@@ -130,18 +129,18 @@ class Tab extends AbstractBaseApi
      */
     public function getHtmlUrl(): ?string
     {
-        return $this->html_url;
+        return $this->htmlUrl;
     }
 
     /**
      * Set HTML URL
      *
-     * @param string|null $html_url
+     * @param string|null $htmlUrl
      * @return void
      */
-    public function setHtmlUrl(?string $html_url): void
+    public function setHtmlUrl(?string $htmlUrl): void
     {
-        $this->html_url = $html_url;
+        $this->htmlUrl = $htmlUrl;
     }
 
     /**
@@ -443,7 +442,7 @@ class Tab extends AbstractBaseApi
     public function toArray(): array
     {
         return [
-            'html_url' => $this->html_url,
+            'html_url' => $this->htmlUrl,
             'id' => $this->id,
             'label' => $this->label,
             'type' => $this->type,

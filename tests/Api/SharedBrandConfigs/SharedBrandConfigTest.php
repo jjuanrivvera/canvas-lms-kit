@@ -6,8 +6,8 @@ namespace CanvasLMS\Tests\Api\SharedBrandConfigs;
 
 use CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig;
 use CanvasLMS\Config;
-use CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDto;
-use CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDto;
+use CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDTO;
+use CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use PHPUnit\Framework\TestCase;
@@ -69,7 +69,7 @@ class SharedBrandConfigTest extends TestCase
             'brand_config_md5' => 'abc123def456',
         ];
 
-        $dto = new CreateSharedBrandConfigDto($data);
+        $dto = new CreateSharedBrandConfigDTO($data);
         
         $this->assertEquals('Test Theme', $dto->name);
         $this->assertEquals('abc123def456', $dto->brandConfigMd5);
@@ -78,12 +78,12 @@ class SharedBrandConfigTest extends TestCase
     public function testCreateWithDto(): void
     {
         // Test DTO creation
-        $dto = new CreateSharedBrandConfigDto([
+        $dto = new CreateSharedBrandConfigDTO([
             'name' => 'Test Theme',
             'brand_config_md5' => 'xyz789',
         ]);
 
-        $this->assertInstanceOf(CreateSharedBrandConfigDto::class, $dto);
+        $this->assertInstanceOf(CreateSharedBrandConfigDTO::class, $dto);
         $this->assertEquals('Test Theme', $dto->name);
         $this->assertEquals('xyz789', $dto->brandConfigMd5);
     }
@@ -95,7 +95,7 @@ class SharedBrandConfigTest extends TestCase
             'name' => 'Updated Theme',
         ];
 
-        $dto = new UpdateSharedBrandConfigDto($data);
+        $dto = new UpdateSharedBrandConfigDTO($data);
         
         $this->assertEquals('Updated Theme', $dto->name);
         $this->assertNull($dto->brandConfigMd5);
@@ -104,12 +104,12 @@ class SharedBrandConfigTest extends TestCase
     public function testUpdateWithDto(): void
     {
         // Test update DTO
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'name' => 'New Name',
             'brand_config_md5' => 'new_hash',
         ]);
 
-        $this->assertInstanceOf(UpdateSharedBrandConfigDto::class, $dto);
+        $this->assertInstanceOf(UpdateSharedBrandConfigDTO::class, $dto);
         $this->assertEquals('New Name', $dto->name);
         $this->assertEquals('new_hash', $dto->brandConfigMd5);
     }

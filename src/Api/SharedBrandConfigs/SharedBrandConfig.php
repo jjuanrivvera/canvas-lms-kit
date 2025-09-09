@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace CanvasLMS\Api\SharedBrandConfigs;
 
 use CanvasLMS\Config;
-use CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDto;
-use CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDto;
+use CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDTO;
+use CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Http\HttpClient;
 
@@ -84,7 +84,7 @@ class SharedBrandConfig
      *
      * API Endpoint: POST /api/v1/accounts/:account_id/shared_brand_configs
      *
-     * @param array<string, mixed>|CreateSharedBrandConfigDto $data The shared brand config data
+     * @param array<string, mixed>|CreateSharedBrandConfigDTO $data The shared brand config data
      * @return self The created SharedBrandConfig object
      * @throws CanvasApiException If the API request fails
      *
@@ -96,10 +96,10 @@ class SharedBrandConfig
      * ]);
      * ```
      */
-    public static function create(array|CreateSharedBrandConfigDto $data): self
+    public static function create(array|CreateSharedBrandConfigDTO $data): self
     {
         if (is_array($data)) {
-            $data = new CreateSharedBrandConfigDto($data);
+            $data = new CreateSharedBrandConfigDTO($data);
         }
 
         $httpClient = new HttpClient();
@@ -144,7 +144,7 @@ class SharedBrandConfig
      * API Endpoint: PUT /api/v1/accounts/:account_id/shared_brand_configs/:id
      *
      * @param int $id The ID of the shared brand config to update
-     * @param array<string, mixed>|UpdateSharedBrandConfigDto $data The update data
+     * @param array<string, mixed>|UpdateSharedBrandConfigDTO $data The update data
      * @return self The updated SharedBrandConfig object
      * @throws CanvasApiException If the API request fails
      *
@@ -155,10 +155,10 @@ class SharedBrandConfig
      * ]);
      * ```
      */
-    public static function update(int $id, array|UpdateSharedBrandConfigDto $data): self
+    public static function update(int $id, array|UpdateSharedBrandConfigDTO $data): self
     {
         if (is_array($data)) {
-            $data = new UpdateSharedBrandConfigDto($data);
+            $data = new UpdateSharedBrandConfigDTO($data);
         }
 
         $httpClient = new HttpClient();

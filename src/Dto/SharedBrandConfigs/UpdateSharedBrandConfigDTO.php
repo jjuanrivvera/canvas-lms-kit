@@ -7,14 +7,14 @@ namespace CanvasLMS\Dto\SharedBrandConfigs;
 use CanvasLMS\Dto\AbstractBaseDto;
 
 /**
- * UpdateSharedBrandConfigDto
+ * UpdateSharedBrandConfigDTO
  *
  * Data Transfer Object for updating a shared brand configuration.
  * Handles the data transformation for the PUT endpoint.
  *
  * Canvas API Documentation: https://canvas.instructure.com/doc/api/shared_brand_configs.html
  */
-class UpdateSharedBrandConfigDto extends AbstractBaseDto
+class UpdateSharedBrandConfigDTO extends AbstractBaseDto
 {
     /**
      * @var string $apiPropertyName The API property name for multipart form data
