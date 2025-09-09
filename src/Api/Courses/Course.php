@@ -3611,6 +3611,59 @@ class Course extends AbstractBaseApi
     }
 
     /**
+     * Start generating a new report for this course
+     *
+     * @param string $reportType Type of report to generate (e.g., 'grade_export', 'student_assignment_data')
+     * @param array<string, mixed> $parameters Additional parameters for report generation
+     * @return \CanvasLMS\Api\CourseReports\CourseReports New report instance with status
+     * @throws CanvasApiException
+     */
+    public function createReport(string $reportType, array $parameters = []): \CanvasLMS\Api\CourseReports\CourseReports
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to create reports');
+        }
+
+        \CanvasLMS\Api\CourseReports\CourseReports::setCourse($this);
+        return \CanvasLMS\Api\CourseReports\CourseReports::create($reportType, $parameters);
+    }
+
+    /**
+     * Get the status of a specific report for this course
+     *
+     * @param string $reportType Type of report to check
+     * @param int $reportId ID of the specific report
+     * @return \CanvasLMS\Api\CourseReports\CourseReports Report instance with current status
+     * @throws CanvasApiException
+     */
+    public function getReport(string $reportType, int $reportId): \CanvasLMS\Api\CourseReports\CourseReports
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to get report status');
+        }
+
+        \CanvasLMS\Api\CourseReports\CourseReports::setCourse($this);
+        return \CanvasLMS\Api\CourseReports\CourseReports::getReport($reportType, $reportId);
+    }
+
+    /**
+     * Get the status of the last report of the specified type for this course
+     *
+     * @param string $reportType Type of report to check
+     * @return \CanvasLMS\Api\CourseReports\CourseReports Last report instance with status
+     * @throws CanvasApiException
+     */
+    public function getLastReport(string $reportType): \CanvasLMS\Api\CourseReports\CourseReports
+    {
+        if (!$this->id) {
+            throw new CanvasApiException('Course ID is required to get last report status');
+        }
+
+        \CanvasLMS\Api\CourseReports\CourseReports::setCourse($this);
+        return \CanvasLMS\Api\CourseReports\CourseReports::last($reportType);
+    }
+
+    /**
      * Get the API endpoint for this resource
      * @return string
      */
