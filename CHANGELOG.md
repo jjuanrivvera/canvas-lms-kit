@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2025-09-09
+
 ### Added
 - Course Reports API implementation (#124)
   - New `CourseReports` class for managing asynchronous course report generation
@@ -409,7 +411,9 @@ Canvas LMS Kit is now production-ready with 90% Canvas API coverage, rate limiti
 - Contributing guidelines
 - Wiki with implementation guides
 
-[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.4.1...v1.5.0
+[1.4.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.2.0...v1.3.0
