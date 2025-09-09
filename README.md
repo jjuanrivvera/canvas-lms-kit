@@ -9,7 +9,7 @@
   [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-8892BF.svg?style=flat-square)](https://php.net)
   [![License](https://img.shields.io/github/license/jjuanrivvera/canvas-lms-kit?style=flat-square)](https://github.com/jjuanrivvera/canvas-lms-kit/blob/main/LICENSE)
 
-  **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 37 APIs implemented.**
+  **The most comprehensive PHP SDK for Canvas LMS API. Production-ready with 45 APIs implemented.**
 </div>
 
 ---
@@ -17,7 +17,7 @@
 ## ✨ Why Canvas LMS Kit?
 
 - 🚀 **Production Ready**: Rate limiting, middleware support, battle-tested
-- 📚 **Comprehensive**: 37 Canvas APIs fully implemented
+- 📚 **Comprehensive**: 45 Canvas APIs fully implemented
 - 🛡️ **Type Safe**: Full PHP 8.1+ type declarations and PHPStan level 6
 - 🔧 **Developer Friendly**: Intuitive Active Record pattern - just pass arrays!
 - 📖 **Well Documented**: Extensive examples, guides, and API reference
@@ -716,7 +716,7 @@ foreach ($issues as $issue) {
 
 ## 📊 Supported APIs
 
-### ✅ Currently Implemented (38 APIs)
+### ✅ Currently Implemented (45 APIs)
 
 <details>
 <summary><b>📚 Core Course Management</b></summary>
@@ -764,7 +764,7 @@ foreach ($issues as $issue) {
 - ✅ **Group Memberships** - Group member management
 - ✅ **Conferences** - Web conferencing integration
 - ✅ **Conversations** - Internal messaging system
-- 🔄 **Announcements** - Course announcements (coming soon)
+- ✅ **Announcements** - Course announcements extending DiscussionTopics
 </details>
 
 <details>
@@ -780,6 +780,13 @@ foreach ($issues as $issue) {
 - ✅ **Migration Issues** - Handle import problems
 - ✅ **Feature Flags** - Manage Canvas feature toggles
 - ✅ **Brand Configs** - Theme variables and shared brand configurations
+- ✅ **Gradebook History** - Grade change audit trail and submission version tracking
+- ✅ **Course Reports** - Asynchronous report generation (grade exports, student data)
+- ✅ **Developer Keys** - OAuth API key management for Canvas integrations
+- ✅ **Login API** - User authentication credentials and login methods
+- ✅ **Analytics** - Learning analytics data (account, course, user level)
+- ✅ **Bookmarks** - User bookmark management for Canvas resources
+- ✅ **MediaObjects** - Media files and captions/subtitles management
 </details>
 
 ## 🚀 Advanced Features
