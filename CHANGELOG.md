@@ -62,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New `BrandConfig` class for retrieving brand variables (colors, fonts, logos)
   - New `SharedBrandConfig` class for managing shared theme configurations
   - Support for creating, updating, and deleting shared brand configs
-  - `CreateSharedBrandConfigDto` and `UpdateSharedBrandConfigDto` for data validation
+  - `CreateSharedBrandConfigDTO` and `UpdateSharedBrandConfigDTO` for data validation
   - Account integration via `getBrandVariables()` and shared config methods
   - Note: Canvas API has limitations - no list/fetch endpoints for shared configs
   - Comprehensive test coverage for all operations
@@ -89,6 +89,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `CreateAnnouncementDTO` and `UpdateAnnouncementDTO` with announcement defaults
   - Course integration via `$course->announcements()` relationship method
   - Comprehensive test coverage for all announcement operations
+
+### Changed
+- Property naming convention standardization (#117)
+  - Converted all snake_case properties to camelCase across 4 API classes (23 properties total)
+  - Section.php: `$passback_status` → `$passbackStatus`
+  - Tab.php: `$html_url` → `$htmlUrl` with constructor fix for proper inheritance
+  - FeatureFlag.php: 6 properties converted (displayName, appliesTo, enableAt, featureFlag, rootOptIn, releaseNotesUrl)
+  - Conference.php: 10 properties converted with enhanced DateTime handling in constructor
+  - ConferenceRecording.php: 5 properties converted with snake_case to camelCase conversion
+  - Fixed DTO class naming: UploadFileDto → UploadFileDTO, CreateSharedBrandConfigDto → CreateSharedBrandConfigDTO, UpdateSharedBrandConfigDto → UpdateSharedBrandConfigDTO
+  - Updated corresponding test files to use new camelCase property names
+  - Maintains full backward compatibility through AbstractBaseApi automatic conversion
+  - Achieves 100% camelCase property naming compliance across entire SDK
 
 ## [1.4.1] - 2025-01-28
 

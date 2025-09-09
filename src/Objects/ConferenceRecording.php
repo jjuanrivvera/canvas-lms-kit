@@ -18,12 +18,12 @@ class ConferenceRecording
     public ?int $id = null;
     public ?string $title = null;
     public ?int $duration = null;
-    public ?DateTime $created_at = null;
-    public ?string $playback_url = null;
+    public ?DateTime $createdAt = null;
+    public ?string $playbackUrl = null;
     /** @var array<mixed>|null */
-    public ?array $playback_formats = null;
-    public ?string $recording_id = null;
-    public ?DateTime $updated_at = null;
+    public ?array $playbackFormats = null;
+    public ?string $recordingId = null;
+    public ?DateTime $updatedAt = null;
 
     /**
      * Constructor to populate object from array data.
@@ -33,11 +33,14 @@ class ConferenceRecording
     public function __construct(array $data = [])
     {
         foreach ($data as $key => $value) {
-            if (property_exists($this, $key)) {
+            // Convert snake_case to camelCase
+            $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+
+            if (property_exists($this, $camelKey)) {
                 if (in_array($key, ['created_at', 'updated_at']) && !empty($value)) {
-                    $this->$key = new DateTime($value);
+                    $this->$camelKey = new DateTime($value);
                 } else {
-                    $this->$key = $value;
+                    $this->$camelKey = $value;
                 }
             }
         }

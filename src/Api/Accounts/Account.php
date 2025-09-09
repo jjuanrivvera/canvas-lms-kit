@@ -822,7 +822,7 @@ class Account extends AbstractBaseApi
      * Creates a new shared brand configuration that can be reused across
      * multiple accounts. The config is associated with this account.
      *
-     * @param array<string, mixed>|\CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDto $data Config data
+     * @param array<string, mixed>|\CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDTO $data Config data
      * @return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig The created shared brand config
      * @throws CanvasApiException If the API request fails
      *
@@ -836,7 +836,7 @@ class Account extends AbstractBaseApi
      * ```
      */
     public function createSharedBrandConfig(
-        array|\CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDto $data
+        array|\CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDTO $data
     ): \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig {
         if (!$this->id) {
             throw new CanvasApiException('Account ID is required to create shared brand config');
@@ -860,7 +860,7 @@ class Account extends AbstractBaseApi
      * Updates an existing shared brand configuration associated with this account.
      *
      * @param int $id The ID of the shared brand config to update
-     * @param array<string, mixed>|\CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDto $data The update data
+     * @param array<string, mixed>|\CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDTO $data The update data
      * @return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig The updated shared brand config
      * @throws CanvasApiException If the API request fails
      *
@@ -874,7 +874,7 @@ class Account extends AbstractBaseApi
      */
     public function updateSharedBrandConfig(
         int $id,
-        array|\CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDto $data
+        array|\CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDTO $data
     ): \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig {
         if (!$this->id) {
             throw new CanvasApiException('Account ID is required to update shared brand config');

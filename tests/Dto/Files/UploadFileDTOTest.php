@@ -4,9 +4,9 @@ namespace Tests\Dto\Files;
 
 use Exception;
 use PHPUnit\Framework\TestCase;
-use CanvasLMS\Dto\Files\UploadFileDto;
+use CanvasLMS\Dto\Files\UploadFileDTO;
 
-class UploadFileDtoTest extends TestCase
+class UploadFileDTOTest extends TestCase
 {
     /**
      * Test basic DTO construction and properties
@@ -22,7 +22,7 @@ class UploadFileDtoTest extends TestCase
             'file' => 'test content'
         ];
 
-        $dto = new UploadFileDto($data);
+        $dto = new UploadFileDTO($data);
 
         $this->assertEquals('test-file.pdf', $dto->getName());
         $this->assertEquals(1024, $dto->getSize());
@@ -45,7 +45,7 @@ class UploadFileDtoTest extends TestCase
             'on_duplicate' => 'overwrite'
         ];
 
-        $dto = new UploadFileDto($data);
+        $dto = new UploadFileDTO($data);
         $apiArray = $dto->toApiArray();
 
         $expected = [
@@ -69,7 +69,7 @@ class UploadFileDtoTest extends TestCase
             'size' => 256
         ];
 
-        $dto = new UploadFileDto($data);
+        $dto = new UploadFileDTO($data);
         $apiArray = $dto->toApiArray();
 
         $expected = [
@@ -88,7 +88,7 @@ class UploadFileDtoTest extends TestCase
         $tempFile = tempnam(sys_get_temp_dir(), 'upload_test');
         file_put_contents($tempFile, 'test file content');
 
-        $dto = new UploadFileDto(['file' => $tempFile]);
+        $dto = new UploadFileDTO(['file' => $tempFile]);
         $resource = $dto->getFileResource();
 
         $this->assertIsResource($resource);
@@ -107,7 +107,7 @@ class UploadFileDtoTest extends TestCase
         file_put_contents($tempFile, 'resource test content');
         $resource = fopen($tempFile, 'r');
 
-        $dto = new UploadFileDto(['file' => $resource]);
+        $dto = new UploadFileDTO(['file' => $resource]);
         $returnedResource = $dto->getFileResource();
 
         $this->assertSame($resource, $returnedResource);
@@ -127,7 +127,7 @@ class UploadFileDtoTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Unable to open file: {$nonExistentFile}");
 
-        $dto = new UploadFileDto(['file' => $nonExistentFile]);
+        $dto = new UploadFileDTO(['file' => $nonExistentFile]);
         $dto->getFileResource();
     }
 
@@ -139,7 +139,7 @@ class UploadFileDtoTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Invalid file path: directory traversal not allowed');
 
-        $dto = new UploadFileDto(['file' => '../../../etc/passwd']);
+        $dto = new UploadFileDTO(['file' => '../../../etc/passwd']);
         $dto->getFileResource();
     }
 
@@ -151,7 +151,7 @@ class UploadFileDtoTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Invalid file path: directory traversal not allowed');
 
-        $dto = new UploadFileDto(['file' => './test/../../../sensitive/file.txt']);
+        $dto = new UploadFileDTO(['file' => './test/../../../sensitive/file.txt']);
         $dto->getFileResource();
     }
 
@@ -163,7 +163,7 @@ class UploadFileDtoTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('File is required for upload');
 
-        $dto = new UploadFileDto([]);
+        $dto = new UploadFileDTO([]);
         $dto->getFileResource();
     }
 
@@ -175,7 +175,7 @@ class UploadFileDtoTest extends TestCase
         $tempFile = tempnam(sys_get_temp_dir(), 'upload_test') . '.txt';
         file_put_contents($tempFile, 'text content');
 
-        $dto = new UploadFileDto(['file' => $tempFile]);
+        $dto = new UploadFileDTO(['file' => $tempFile]);
         $dto->autoDetectContentType();
 
         // Content type detection may vary by system, so we check if it's set
@@ -193,7 +193,7 @@ class UploadFileDtoTest extends TestCase
         $tempFile = tempnam(sys_get_temp_dir(), 'upload_test');
         file_put_contents($tempFile, $content);
 
-        $dto = new UploadFileDto(['file' => $tempFile]);
+        $dto = new UploadFileDTO(['file' => $tempFile]);
         $dto->autoDetectSize();
 
         $this->assertEquals(strlen($content), $dto->getSize());
@@ -209,7 +209,7 @@ class UploadFileDtoTest extends TestCase
         $tempFile = tempnam(sys_get_temp_dir(), 'upload_test') . '.pdf';
         file_put_contents($tempFile, 'pdf content');
 
-        $dto = new UploadFileDto(['file' => $tempFile]);
+        $dto = new UploadFileDTO(['file' => $tempFile]);
         $dto->autoDetectName();
 
         $this->assertEquals(basename($tempFile), $dto->getName());
@@ -226,7 +226,7 @@ class UploadFileDtoTest extends TestCase
         $tempFile = tempnam(sys_get_temp_dir(), 'upload_test') . '.txt';
         file_put_contents($tempFile, $content);
 
-        $dto = new UploadFileDto(['file' => $tempFile]);
+        $dto = new UploadFileDTO(['file' => $tempFile]);
         $dto->autoDetectFileProperties();
 
         $this->assertEquals(basename($tempFile), $dto->getName());
@@ -241,7 +241,7 @@ class UploadFileDtoTest extends TestCase
      */
     public function testValidationSuccess(): void
     {
-        $dto = new UploadFileDto([
+        $dto = new UploadFileDTO([
             'name' => 'valid-file.txt',
             'file' => 'content',
             'parent_folder_id' => 123
@@ -255,7 +255,7 @@ class UploadFileDtoTest extends TestCase
      */
     public function testValidationWithUrl(): void
     {
-        $dto = new UploadFileDto([
+        $dto = new UploadFileDTO([
             'name' => 'url-file.txt',
             'url' => 'https://example.com/file.txt'
         ]);
@@ -271,7 +271,7 @@ class UploadFileDtoTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('File name is required');
 
-        $dto = new UploadFileDto([
+        $dto = new UploadFileDTO([
             'file' => 'content'
         ]);
 
@@ -286,7 +286,7 @@ class UploadFileDtoTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Either file or URL is required');
 
-        $dto = new UploadFileDto([
+        $dto = new UploadFileDTO([
             'name' => 'no-file.txt'
         ]);
 
@@ -301,7 +301,7 @@ class UploadFileDtoTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Cannot specify both parent_folder_id and parent_folder_path');
 
-        $dto = new UploadFileDto([
+        $dto = new UploadFileDTO([
             'name' => 'conflict.txt',
             'file' => 'content',
             'parent_folder_id' => 123,
@@ -319,7 +319,7 @@ class UploadFileDtoTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('on_duplicate must be either "overwrite" or "rename"');
 
-        $dto = new UploadFileDto([
+        $dto = new UploadFileDTO([
             'name' => 'invalid-duplicate.txt',
             'file' => 'content',
             'on_duplicate' => 'invalid_option'
@@ -333,7 +333,7 @@ class UploadFileDtoTest extends TestCase
      */
     public function testGettersAndSetters(): void
     {
-        $dto = new UploadFileDto([]);
+        $dto = new UploadFileDTO([]);
 
         // Test name
         $dto->setName('setter-test.txt');
@@ -384,7 +384,7 @@ class UploadFileDtoTest extends TestCase
             'submitAssignment' => true
         ];
 
-        $dto = new UploadFileDto($data);
+        $dto = new UploadFileDTO($data);
 
         $this->assertEquals(456, $dto->getParentFolderId());
         $this->assertEquals('text/plain', $dto->getContentType());

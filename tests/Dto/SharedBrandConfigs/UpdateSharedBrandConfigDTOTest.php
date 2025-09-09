@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Dto\SharedBrandConfigs;
 
-use CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDto;
+use CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDTO;
 use PHPUnit\Framework\TestCase;
 
-class UpdateSharedBrandConfigDtoTest extends TestCase
+class UpdateSharedBrandConfigDTOTest extends TestCase
 {
     public function testConstructorSetsName(): void
     {
         // Arrange & Act
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'name' => 'Updated Theme Name',
         ]);
 
@@ -24,7 +24,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testConstructorSetsMd5(): void
     {
         // Arrange & Act
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'brand_config_md5' => 'new_hash_456',
         ]);
 
@@ -36,7 +36,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testConstructorSetsBothFields(): void
     {
         // Arrange & Act
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'name' => 'New Name',
             'brand_config_md5' => 'new_hash',
         ]);
@@ -49,7 +49,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testConstructorHandlesCamelCaseMd5(): void
     {
         // Arrange & Act
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'brandConfigMd5' => 'camel_case_hash',
         ]);
 
@@ -60,7 +60,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testValidateThrowsExceptionWhenNoFieldsProvided(): void
     {
         // Arrange
-        $dto = new UpdateSharedBrandConfigDto([]);
+        $dto = new UpdateSharedBrandConfigDTO([]);
 
         // Assert
         $this->expectException(\InvalidArgumentException::class);
@@ -73,7 +73,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testValidatePassesWithOnlyName(): void
     {
         // Arrange
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'name' => 'Valid Name',
         ]);
 
@@ -85,7 +85,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testValidatePassesWithOnlyMd5(): void
     {
         // Arrange
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'brand_config_md5' => 'valid_hash',
         ]);
 
@@ -97,7 +97,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testValidatePassesWithBothFields(): void
     {
         // Arrange
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'name' => 'Valid Name',
             'brand_config_md5' => 'valid_hash',
         ]);
@@ -110,7 +110,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testToApiArrayWithOnlyName(): void
     {
         // Arrange
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'name' => 'Updated Name Only',
         ]);
 
@@ -130,7 +130,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testToApiArrayWithOnlyMd5(): void
     {
         // Arrange
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'brand_config_md5' => 'updated_hash_only',
         ]);
 
@@ -150,7 +150,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testToApiArrayWithBothFields(): void
     {
         // Arrange
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'name' => 'Both Fields',
             'brand_config_md5' => 'both_hash',
         ]);
@@ -178,7 +178,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testToApiArrayValidatesBeforeConversion(): void
     {
         // Arrange
-        $dto = new UpdateSharedBrandConfigDto([]);
+        $dto = new UpdateSharedBrandConfigDTO([]);
 
         // Assert
         $this->expectException(\InvalidArgumentException::class);
@@ -190,7 +190,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testEmptyConstructor(): void
     {
         // Arrange & Act
-        $dto = new UpdateSharedBrandConfigDto();
+        $dto = new UpdateSharedBrandConfigDTO();
 
         // Assert
         $this->assertNull($dto->name);
@@ -200,7 +200,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testConstructorIgnoresExtraFields(): void
     {
         // Arrange & Act
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'name' => 'Test Theme',
             'extra_field' => 'should be ignored',
             'id' => 123, // Should be ignored
@@ -215,7 +215,7 @@ class UpdateSharedBrandConfigDtoTest extends TestCase
     public function testEmptyStringConsideredEmpty(): void
     {
         // Arrange
-        $dto = new UpdateSharedBrandConfigDto([
+        $dto = new UpdateSharedBrandConfigDTO([
             'name' => '',
             'brand_config_md5' => '',
         ]);

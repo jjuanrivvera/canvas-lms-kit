@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Dto\SharedBrandConfigs;
 
-use CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDto;
+use CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDTO;
 use PHPUnit\Framework\TestCase;
 
-class CreateSharedBrandConfigDtoTest extends TestCase
+class CreateSharedBrandConfigDTOTest extends TestCase
 {
     public function testConstructorSetsProperties(): void
     {
         // Arrange & Act
-        $dto = new CreateSharedBrandConfigDto([
+        $dto = new CreateSharedBrandConfigDTO([
             'name' => 'Spring 2024 Theme',
             'brand_config_md5' => 'abc123def456',
         ]);
@@ -25,7 +25,7 @@ class CreateSharedBrandConfigDtoTest extends TestCase
     public function testConstructorHandlesSnakeCaseMd5(): void
     {
         // Arrange & Act
-        $dto = new CreateSharedBrandConfigDto([
+        $dto = new CreateSharedBrandConfigDTO([
             'name' => 'Test Theme',
             'brand_config_md5' => 'hash_with_snake_case',
         ]);
@@ -38,7 +38,7 @@ class CreateSharedBrandConfigDtoTest extends TestCase
     public function testConstructorHandlesCamelCaseMd5(): void
     {
         // Arrange & Act
-        $dto = new CreateSharedBrandConfigDto([
+        $dto = new CreateSharedBrandConfigDTO([
             'name' => 'Test Theme',
             'brandConfigMd5' => 'hash_with_camel_case',
         ]);
@@ -51,7 +51,7 @@ class CreateSharedBrandConfigDtoTest extends TestCase
     public function testValidateThrowsExceptionWhenNameMissing(): void
     {
         // Arrange
-        $dto = new CreateSharedBrandConfigDto([
+        $dto = new CreateSharedBrandConfigDTO([
             'brand_config_md5' => 'abc123',
         ]);
 
@@ -66,7 +66,7 @@ class CreateSharedBrandConfigDtoTest extends TestCase
     public function testValidateThrowsExceptionWhenMd5Missing(): void
     {
         // Arrange
-        $dto = new CreateSharedBrandConfigDto([
+        $dto = new CreateSharedBrandConfigDTO([
             'name' => 'Test Theme',
         ]);
 
@@ -81,7 +81,7 @@ class CreateSharedBrandConfigDtoTest extends TestCase
     public function testValidateThrowsExceptionWhenBothFieldsMissing(): void
     {
         // Arrange
-        $dto = new CreateSharedBrandConfigDto([]);
+        $dto = new CreateSharedBrandConfigDTO([]);
 
         // Assert
         $this->expectException(\InvalidArgumentException::class);
@@ -95,7 +95,7 @@ class CreateSharedBrandConfigDtoTest extends TestCase
     public function testValidatePassesWithAllRequiredFields(): void
     {
         // Arrange
-        $dto = new CreateSharedBrandConfigDto([
+        $dto = new CreateSharedBrandConfigDTO([
             'name' => 'Valid Theme',
             'brand_config_md5' => 'valid_hash',
         ]);
@@ -108,7 +108,7 @@ class CreateSharedBrandConfigDtoTest extends TestCase
     public function testToApiArrayReturnsCorrectFormat(): void
     {
         // Arrange
-        $dto = new CreateSharedBrandConfigDto([
+        $dto = new CreateSharedBrandConfigDTO([
             'name' => 'Test Theme',
             'brand_config_md5' => 'test_hash_123',
         ]);
@@ -136,7 +136,7 @@ class CreateSharedBrandConfigDtoTest extends TestCase
     public function testToApiArrayValidatesBeforeConversion(): void
     {
         // Arrange
-        $dto = new CreateSharedBrandConfigDto([]);
+        $dto = new CreateSharedBrandConfigDTO([]);
 
         // Assert
         $this->expectException(\InvalidArgumentException::class);
@@ -148,7 +148,7 @@ class CreateSharedBrandConfigDtoTest extends TestCase
     public function testEmptyConstructor(): void
     {
         // Arrange & Act
-        $dto = new CreateSharedBrandConfigDto();
+        $dto = new CreateSharedBrandConfigDTO();
 
         // Assert
         $this->assertNull($dto->name);
@@ -158,7 +158,7 @@ class CreateSharedBrandConfigDtoTest extends TestCase
     public function testConstructorIgnoresExtraFields(): void
     {
         // Arrange & Act
-        $dto = new CreateSharedBrandConfigDto([
+        $dto = new CreateSharedBrandConfigDTO([
             'name' => 'Test Theme',
             'brand_config_md5' => 'test_hash',
             'extra_field' => 'should be ignored',

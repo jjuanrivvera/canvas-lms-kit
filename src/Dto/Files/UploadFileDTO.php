@@ -6,7 +6,7 @@ use Exception;
 use CanvasLMS\Dto\AbstractBaseDto;
 
 /**
- * UploadFileDto Class
+ * UploadFileDTO Class
  *
  * Data Transfer Object for Canvas LMS file upload initiation.
  * This DTO is used for Step 1 of the Canvas 3-step file upload process.
@@ -15,7 +15,7 @@ use CanvasLMS\Dto\AbstractBaseDto;
  *
  * ```php
  * // Direct file upload
- * $uploadDto = new UploadFileDto([
+ * $uploadDto = new UploadFileDTO([
  *     'name' => 'document.pdf',
  *     'size' => 1024000,
  *     'content_type' => 'application/pdf',
@@ -25,7 +25,7 @@ use CanvasLMS\Dto\AbstractBaseDto;
  *
  * // File resource upload
  * $fileResource = fopen('/path/to/file.txt', 'r');
- * $uploadDto = new UploadFileDto([
+ * $uploadDto = new UploadFileDTO([
  *     'name' => 'file.txt',
  *     'size' => filesize('/path/to/file.txt'),
  *     'file' => $fileResource
@@ -34,7 +34,7 @@ use CanvasLMS\Dto\AbstractBaseDto;
  *
  * @package CanvasLMS\Dto\Files
  */
-class UploadFileDto extends AbstractBaseDto
+class UploadFileDTO extends AbstractBaseDto
 {
     /**
      * The name of the property in the API

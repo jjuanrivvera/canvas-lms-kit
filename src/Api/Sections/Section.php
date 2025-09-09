@@ -42,7 +42,7 @@ class Section extends AbstractBaseApi
     public ?array $students = null;
     /** @var array<int, array<string, mixed>>|null */
     public ?array $enrollments = null;
-    public ?string $passback_status = null;
+    public ?string $passbackStatus = null;
     /** @var array<string, bool>|null */
     public ?array $permissions = null;
 
