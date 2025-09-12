@@ -74,19 +74,6 @@ class Login extends AbstractBaseApi
         return array_map(fn(array $item) => new self($item), $data);
     }
 
-    /**
-     * Get all logins from all pages (implements ApiInterface)
-     * Uses account context by default
-     *
-     * @param array<string, mixed> $params Optional query parameters
-     * @return array<Login> Array of Login objects
-     */
-    public static function all(array $params = []): array
-    {
-        self::checkApiClient();
-        $endpoint = self::getEndpoint();
-        return self::fetchAllPagesAsModels($endpoint, $params);
-    }
 
     /**
      * Find a specific login by ID (implements ApiInterface)
@@ -95,7 +82,7 @@ class Login extends AbstractBaseApi
      * @param int $id The login ID
      * @return self The Login instance
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         // Canvas doesn't have direct login endpoint by ID
         // We need to fetch all and filter

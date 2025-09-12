@@ -191,7 +191,7 @@ class ModuleTest extends TestCase
         $this->assertEquals([['id' => 1], ['id' => 2]], $module->getItems());
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $modulesData = [
             ['id' => 1, 'name' => 'Module 1'],
@@ -209,7 +209,7 @@ class ModuleTest extends TestCase
             ->with('courses/1/modules', ['query' => []])
             ->willReturn($response);
 
-        $modules = Module::fetchAll();
+        $modules = Module::get();
 
         $this->assertCount(2, $modules);
         $this->assertInstanceOf(Module::class, $modules[0]);
@@ -217,7 +217,7 @@ class ModuleTest extends TestCase
         $this->assertEquals('Module 2', $modules[1]->getName());
     }
 
-    public function testFetchAllWithParams(): void
+    public function testGetWithParams(): void
     {
         $modulesData = [
             ['id' => 1, 'name' => 'Introduction Module']
@@ -240,13 +240,13 @@ class ModuleTest extends TestCase
             ->with('courses/1/modules', ['query' => $params])
             ->willReturn($response);
 
-        $modules = Module::fetchAll($params);
+        $modules = Module::get($params);
 
         $this->assertCount(1, $modules);
         $this->assertEquals('Introduction Module', $modules[0]->getName());
     }
 
-    public function testFetchAllPaginated(): void
+    public function testGetPaginated(): void
     {
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
@@ -264,10 +264,10 @@ class ModuleTest extends TestCase
             ->with('courses/1/modules', ['query' => ['per_page' => 10]])
             ->willReturn($paginatedResponse);
 
-        $result = Module::fetchAllPaginated(['per_page' => 10]);
+        $result = Module::paginate(['per_page' => 10]);
 
-        $this->assertInstanceOf(PaginatedResponse::class, $result);
-        $data = $result->getJsonData();
+        $this->assertInstanceOf(\CanvasLMS\Pagination\PaginationResult::class, $result);
+        $data = $result->getData();
         $this->assertCount(1, $data);
     }
 

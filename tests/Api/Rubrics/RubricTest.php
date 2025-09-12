@@ -506,7 +506,7 @@ class RubricTest extends TestCase
     /**
      * Test fetchAll rubrics (test method existence and context handling)
      */
-    public function testFetchAllRubrics(): void
+    public function testGetRubrics(): void
     {
         // Testing that fetchAll method works with context parameters
         // Due to pagination complexity, we'll just test that the method exists and handles context
@@ -519,7 +519,7 @@ class RubricTest extends TestCase
         Rubric::setCourse(null);
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage("Course context is required for course-scoped rubric operations");
-        Rubric::fetchAll([]);
+        Rubric::get([]);
     }
 
     /**

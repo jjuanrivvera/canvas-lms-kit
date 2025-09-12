@@ -95,7 +95,7 @@ class GroupCategoryTest extends TestCase
         $this->assertEquals('Test Category', $category->name);
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $categoriesData = [
             ['id' => 1, 'name' => 'Category 1'],
@@ -113,7 +113,7 @@ class GroupCategoryTest extends TestCase
             ->with('accounts/1/group_categories', ['query' => []])
             ->willReturn($this->mockResponse);
 
-        $categories = GroupCategory::fetchAll();
+        $categories = GroupCategory::get();
 
         $this->assertIsArray($categories);
         $this->assertCount(2, $categories);
@@ -121,7 +121,7 @@ class GroupCategoryTest extends TestCase
         $this->assertEquals('Category 1', $categories[0]->name);
     }
 
-    public function testFetchAllFromAccount(): void
+    public function testGetFromAccount(): void
     {
         $categoriesData = [
             ['id' => 1, 'name' => 'Account Category 1'],
@@ -136,7 +136,7 @@ class GroupCategoryTest extends TestCase
             ->with('accounts/1/group_categories', ['query' => []])
             ->willReturn($this->mockResponse);
 
-        $categories = GroupCategory::fetchAll();
+        $categories = GroupCategory::get();
 
         $this->assertIsArray($categories);
         $this->assertCount(2, $categories);
@@ -282,7 +282,7 @@ class GroupCategoryTest extends TestCase
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('all')
             ->willReturn($groupsData);
         
         $this->mockHttpClient->expects($this->once())

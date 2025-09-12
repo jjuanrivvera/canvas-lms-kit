@@ -32,7 +32,7 @@ class OutcomeTest extends TestCase
         Config::setAccountId(1);
     }
 
-    public function testFetchAllUsesAccountContext(): void
+    public function testGetUsesAccountContext(): void
     {
         $expectedData = [
             [
@@ -53,7 +53,7 @@ class OutcomeTest extends TestCase
             ->with('accounts/1/outcome_groups/global/outcomes', ['query' => []])
             ->willReturn($this->mockResponse);
         
-        $outcomes = Outcome::fetchAll();
+        $outcomes = Outcome::get();
         
         $this->assertCount(1, $outcomes);
         $this->assertInstanceOf(Outcome::class, $outcomes[0]);
@@ -72,7 +72,7 @@ class OutcomeTest extends TestCase
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')
+        $mockPaginatedResponse->method('all')
             ->willReturn($expectedData);
         
         $this->mockClient->expects($this->once())

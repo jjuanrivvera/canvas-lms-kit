@@ -12,6 +12,7 @@ use CanvasLMS\Dto\Groups\CreateGroupMembershipDTO;
 use CanvasLMS\Dto\Groups\UpdateGroupDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Api\ContentMigrations\ContentMigration;
 use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 
@@ -186,7 +187,7 @@ class Group extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkApiClient();
 
@@ -218,7 +219,11 @@ class Group extends AbstractBaseApi
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
-        return self::fetchAllPagesAsModels(sprintf('%s/%d/groups', $contextType, $contextId), $params);
+        $endpoint = sprintf('%s/%d/groups', $contextType, $contextId);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+
+        return array_map(fn($data) => new self($data), $allData);
     }
 
     /**
@@ -248,7 +253,11 @@ class Group extends AbstractBaseApi
      */
     public static function fetchUserGroups(int $userId, array $params = []): array
     {
-        return self::fetchAllPagesAsModels(sprintf('users/%d/groups', $userId), $params);
+        $endpoint = sprintf('users/%d/groups', $userId);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+
+        return array_map(fn($data) => new self($data), $allData);
     }
 
     /**
@@ -365,7 +374,7 @@ class Group extends AbstractBaseApi
 
         $endpoint = sprintf('groups/%d/users', $this->id);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-        $allData = $paginatedResponse->fetchAllPages();
+        $allData = $paginatedResponse->all();
 
         return array_map(fn($data) => new User($data), $allData);
     }
@@ -440,16 +449,16 @@ class Group extends AbstractBaseApi
      * Get paginated memberships for this group
      *
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     * @return PaginationResult
      * @throws CanvasApiException
      */
-    public function membershipsPaginated(array $params = []): PaginatedResponse
+    public function membershipsPaginated(array $params = []): PaginationResult
     {
         if (!$this->id) {
             throw new CanvasApiException('Group ID is required to fetch memberships');
         }
 
-        return GroupMembership::fetchAllPaginated($this->id, $params);
+        return GroupMembership::paginate(['group_id' => $this->id] + $params);
     }
 
     /**

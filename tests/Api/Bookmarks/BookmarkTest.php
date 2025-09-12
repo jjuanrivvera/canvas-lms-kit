@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\Bookmarks;
 
+use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Bookmarks\Bookmark;
 use CanvasLMS\Dto\Bookmarks\CreateBookmarkDTO;
 use CanvasLMS\Dto\Bookmarks\UpdateBookmarkDTO;
@@ -13,6 +14,7 @@ use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 class BookmarkTest extends TestCase
 {
@@ -23,6 +25,15 @@ class BookmarkTest extends TestCase
         parent::setUp();
         $this->httpClientMock = $this->createMock(HttpClientInterface::class);
         Bookmark::setApiClient($this->httpClientMock);
+    }
+
+    protected function tearDown(): void
+    {
+        $reflection = new ReflectionClass(AbstractBaseApi::class);
+        $property = $reflection->getProperty('apiClient');
+        $property->setAccessible(true);
+        $property->setValue(null, null);
+        parent::tearDown();
     }
 
     public function testCreateBookmarkWithArray(): void
@@ -135,7 +146,7 @@ class BookmarkTest extends TestCase
         $this->assertEquals('{"type": "course"}', $bookmark->data);
     }
 
-    public function testFetchAllBookmarks(): void
+    public function testGetBookmarks(): void
     {
         $expectedResponse = [
             [

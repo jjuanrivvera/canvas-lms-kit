@@ -36,7 +36,7 @@ class AnnouncementTest extends TestCase
         $reflection = new \ReflectionClass(Announcement::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, new Course(['id' => 0]));
+        $property->setValue(null, null);
     }
 
     public function testSetCourse(): void
@@ -55,7 +55,7 @@ class AnnouncementTest extends TestCase
         $reflection = new \ReflectionClass(Announcement::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, new Course([]));
+        $property->setValue(null, null);
 
         Announcement::checkCourse();
     }
@@ -93,7 +93,7 @@ class AnnouncementTest extends TestCase
         $this->assertTrue($announcement->getIsAnnouncement());
     }
 
-    public function testFetchAllAddsAnnouncementFilter(): void
+    public function testGetAddsAnnouncementFilter(): void
     {
         $responseData = [
             [
@@ -127,7 +127,7 @@ class AnnouncementTest extends TestCase
             )
             ->willReturn($responseMock);
 
-        $announcements = Announcement::fetchAll();
+        $announcements = Announcement::get();
 
         $this->assertCount(2, $announcements);
         $this->assertInstanceOf(Announcement::class, $announcements[0]);
@@ -136,7 +136,7 @@ class AnnouncementTest extends TestCase
         $this->assertTrue($announcements[0]->getIsAnnouncement());
     }
 
-    public function testFetchAllWithCustomParams(): void
+    public function testGetWithCustomParams(): void
     {
         $responseData = [
             [
@@ -166,7 +166,7 @@ class AnnouncementTest extends TestCase
             )
             ->willReturn($responseMock);
 
-        $announcements = Announcement::fetchAll(['active_only' => true]);
+        $announcements = Announcement::get(['active_only' => true]);
 
         $this->assertCount(1, $announcements);
         $this->assertEquals('Active Announcement', $announcements[0]->getTitle());

@@ -9,6 +9,7 @@ use CanvasLMS\Dto\Accounts\CreateAccountDTO;
 use CanvasLMS\Dto\Accounts\UpdateAccountDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
 use CanvasLMS\Api\Rubrics\Rubric;
@@ -659,24 +660,24 @@ class Account extends AbstractBaseApi
         }
 
         $params['context_codes'] = [sprintf('account_%d', $this->id)];
-        return CalendarEvent::fetchAll($params);
+        return CalendarEvent::get($params);
     }
 
     /**
      * Get paginated calendar events for this account
      *
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     * @return PaginationResult
      * @throws CanvasApiException
      */
-    public function getCalendarEventsPaginated(array $params = []): PaginatedResponse
+    public function getCalendarEventsPaginated(array $params = []): PaginationResult
     {
         if (!$this->id) {
             throw new CanvasApiException('Account ID is required to get calendar events');
         }
 
         $params['context_codes'] = [sprintf('account_%d', $this->id)];
-        return CalendarEvent::fetchAllPaginated($params);
+        return CalendarEvent::paginate($params);
     }
 
     /**

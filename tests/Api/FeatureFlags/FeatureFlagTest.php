@@ -37,7 +37,7 @@ class FeatureFlagTest extends TestCase
         return $mockResponse;
     }
 
-    public function testFetchAllUsesAccountContext(): void
+    public function testGetUsesAccountContext(): void
     {
         $expectedData = [
             [
@@ -60,7 +60,7 @@ class FeatureFlagTest extends TestCase
             ->with('accounts/1/features', ['query' => []])
             ->willReturn($mockResponse);
 
-        $features = FeatureFlag::fetchAll();
+        $features = FeatureFlag::get();
 
         $this->assertCount(1, $features);
         $this->assertInstanceOf(FeatureFlag::class, $features[0]);

@@ -313,7 +313,7 @@ class QuizSubmissionTest extends TestCase
         QuizSubmission::getCurrentUserSubmission();
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $expectedData = [
             'quiz_submissions' => [
@@ -338,7 +338,7 @@ class QuizSubmissionTest extends TestCase
             ->with('courses/123/quizzes/456/submissions', ['query' => []])
             ->willReturn($response);
 
-        $submissions = QuizSubmission::fetchAll();
+        $submissions = QuizSubmission::get();
 
         $this->assertIsArray($submissions);
         $this->assertCount(2, $submissions);
@@ -348,7 +348,7 @@ class QuizSubmissionTest extends TestCase
         $this->assertEquals(790, $submissions[1]->getId());
     }
 
-    public function testFetchAllWithParams(): void
+    public function testGetWithParams(): void
     {
         $params = ['include' => ['user', 'quiz']];
         $responseData = ['quiz_submissions' => []];
@@ -359,21 +359,32 @@ class QuizSubmissionTest extends TestCase
             ->with('courses/123/quizzes/456/submissions', ['query' => $params])
             ->willReturn($response);
 
-        QuizSubmission::fetchAll($params);
+        QuizSubmission::get($params);
     }
 
-    public function testFetchAllPaginated(): void
+    public function testGetPaginated(): void
     {
         $paginatedResponse = $this->createMock(PaginatedResponse::class);
+        $paginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn([
+                ['id' => 1, 'quiz_id' => 456, 'user_id' => 789],
+                ['id' => 2, 'quiz_id' => 456, 'user_id' => 790]
+            ]);
+        
+        $paginatedResponse->expects($this->once())
+            ->method('toPaginationResult')
+            ->with($this->isType('array'))
+            ->willReturn($this->createMock(PaginationResult::class));
 
         $this->httpClient->expects($this->once())
             ->method('getPaginated')
             ->with('courses/123/quizzes/456/submissions', ['query' => []])
             ->willReturn($paginatedResponse);
 
-        $result = QuizSubmission::fetchAllPaginated();
+        $result = QuizSubmission::paginate();
 
-        $this->assertSame($paginatedResponse, $result);
+        $this->assertInstanceOf(PaginationResult::class, $result);
     }
 
     public function testCreate(): void

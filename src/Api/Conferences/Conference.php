@@ -102,7 +102,7 @@ class Conference extends AbstractBaseApi
      * @param array<string, mixed> $params Optional query parameters
      * @return array<Conference> Empty array
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         // Conferences require either course or group context
         // Use fetchByCourse() or fetchByGroup() instead
@@ -171,7 +171,7 @@ class Conference extends AbstractBaseApi
      * @param int $id The conference ID
      * @return self The Conference object
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkApiClient();
 

@@ -437,7 +437,7 @@ class RubricAssessment extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         throw new CanvasApiException(
             "Finding individual rubric assessments is not supported by the Canvas API. " .
@@ -454,7 +454,7 @@ class RubricAssessment extends AbstractBaseApi
      * @return array<int, self>
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         throw new CanvasApiException(
             "Fetching all rubric assessments is not supported by the Canvas API. " .

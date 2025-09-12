@@ -4,13 +4,16 @@ namespace CanvasLMS\Api;
 
 use DateTime;
 use Exception;
-use InvalidArgumentException;
 use CanvasLMS\Config;
+use InvalidArgumentException;
 use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Interfaces\ApiInterface;
-use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
+use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Interfaces\HttpClientInterface;
+use CanvasLMS\Http\Middleware\RetryMiddleware;
+use CanvasLMS\Http\Middleware\LoggingMiddleware;
+use CanvasLMS\Http\Middleware\RateLimitMiddleware;
 
 /**
  * Abstract base class for Canvas LMS API resources.
@@ -26,7 +29,7 @@ abstract class AbstractBaseApi implements ApiInterface
     /**
      * @var HttpClientInterface
      */
-    protected static HttpClientInterface $apiClient;
+    protected static ?HttpClientInterface $apiClient = null;
 
 
     /**
@@ -96,17 +99,17 @@ abstract class AbstractBaseApi implements ApiInterface
         if (!empty($middlewareConfig)) {
             // Build middleware instances from configuration
             if (isset($middlewareConfig['retry'])) {
-                $middleware[] = new \CanvasLMS\Http\Middleware\RetryMiddleware($middlewareConfig['retry']);
+                $middleware[] = new RetryMiddleware($middlewareConfig['retry']);
             }
 
             if (isset($middlewareConfig['rate_limit'])) {
-                $middleware[] = new \CanvasLMS\Http\Middleware\RateLimitMiddleware($middlewareConfig['rate_limit']);
+                $middleware[] = new RateLimitMiddleware($middlewareConfig['rate_limit']);
             }
 
             if (isset($middlewareConfig['logging']) && $logger !== null) {
                 $loggingConfig = $middlewareConfig['logging'];
                 unset($loggingConfig['enabled']); // Remove the enabled flag
-                $middleware[] = new \CanvasLMS\Http\Middleware\LoggingMiddleware($logger, $loggingConfig);
+                $middleware[] = new LoggingMiddleware($logger, $loggingConfig);
             }
         }
 
@@ -140,8 +143,9 @@ abstract class AbstractBaseApi implements ApiInterface
     protected function populate(array $data): void
     {
         foreach ($data as $key => $value) {
-            $key = str_to_snake_case($key);
-            if (property_exists($this, $key)) {
+            // Convert snake_case keys to camelCase to match property names
+            $key = lcfirst(str_replace('_', '', ucwords($key, '_')));
+            if (property_exists($this, $key) && !is_null($value)) {
                 $this->{$key} = $this->castValue($key, $value);
             }
         }
@@ -156,7 +160,24 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     protected function castValue(string $key, mixed $value): mixed
     {
-        if (in_array($key, ['startAt', 'endAt']) && is_string($value)) {
+        // List of common date fields in Canvas API
+        $dateFields = [
+            'startAt',
+            'endAt',
+            'createdAt',
+            'updatedAt',
+            'deletedAt',
+            'publishedAt',
+            'postedAt',
+            'dueAt',
+            'lockAt',
+            'unlockAt',
+            'submittedAt',
+            'gradedAt',
+            'gradeMatchesCurrentSubmission'
+        ];
+
+        if (in_array($key, $dateFields) && is_string($value) && !empty($value)) {
             return new DateTime($value);
         }
         return $value;
@@ -191,21 +212,6 @@ abstract class AbstractBaseApi implements ApiInterface
         }, $data);
     }
 
-    /**
-     * Helper method to fetch all pages and convert to model instances
-     * @param string $endpoint The API endpoint path
-     * @param mixed[] $params Query parameters for the request
-     * @return static[]
-     */
-    protected static function fetchAllPagesAsModels(string $endpoint, array $params = []): array
-    {
-        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-        $allData = $paginatedResponse->fetchAllPages();
-
-        return array_map(function ($item) {
-            return new static($item);
-        }, $allData);
-    }
 
     /**
      * Helper method to create PaginationResult from paginated response

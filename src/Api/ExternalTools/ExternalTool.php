@@ -23,7 +23,7 @@ use CanvasLMS\Pagination\PaginatedResponse;
  *
  * ```php
  * // Account context (default)
- * $tools = ExternalTool::fetchAll();
+ * $tools = ExternalTool::get();
  * $tool = ExternalTool::create([
  *     'name' => 'My LTI Tool',
  *     'consumer_key' => 'key123',
@@ -1043,7 +1043,7 @@ class ExternalTool extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         $accountId = Config::getAccountId();
         return self::findByContext('accounts', $accountId, $id);
@@ -1137,7 +1137,10 @@ class ExternalTool extends AbstractBaseApi
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
-        $tools = self::fetchAllPagesAsModels(sprintf('%s/%d/external_tools', $contextType, $contextId), $params);
+        $endpoint = sprintf('%s/%d/external_tools', $contextType, $contextId);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+        $tools = array_map(fn($data) => new self($data), $allData);
 
         // Set context information on each tool
         $singularContext = rtrim($contextType, 's');

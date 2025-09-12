@@ -178,7 +178,7 @@ class CourseRelationshipTest extends TestCase
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('all')
             ->willReturn($responseData);
 
         $this->httpClient
@@ -203,7 +203,7 @@ class CourseRelationshipTest extends TestCase
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('all')
             ->willReturn($responseData);
 
         $this->httpClient
@@ -228,7 +228,7 @@ class CourseRelationshipTest extends TestCase
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('all')
             ->willReturn($responseData);
 
         $this->httpClient

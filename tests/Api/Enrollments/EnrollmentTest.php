@@ -149,7 +149,7 @@ class EnrollmentTest extends TestCase
         $this->assertEquals('StudentEnrollment', $enrollment->getType());
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $responseBody = json_encode([
             [
@@ -175,7 +175,7 @@ class EnrollmentTest extends TestCase
             ->with('courses/123/enrollments', ['query' => []])
             ->willReturn($response);
 
-        $enrollments = Enrollment::fetchAll();
+        $enrollments = Enrollment::get();
 
         $this->assertIsArray($enrollments);
         $this->assertCount(2, $enrollments);
@@ -185,7 +185,7 @@ class EnrollmentTest extends TestCase
         $this->assertEquals('TeacherEnrollment', $enrollments[1]->getType());
     }
 
-    public function testFetchAllWithParameters(): void
+    public function testGetWithParameters(): void
     {
         $params = [
             'type[]' => ['StudentEnrollment'],
@@ -210,7 +210,7 @@ class EnrollmentTest extends TestCase
             ->with('courses/123/enrollments', ['query' => $params])
             ->willReturn($response);
 
-        $enrollments = Enrollment::fetchAll($params);
+        $enrollments = Enrollment::get($params);
 
         $this->assertIsArray($enrollments);
         $this->assertCount(1, $enrollments);
@@ -399,7 +399,7 @@ class EnrollmentTest extends TestCase
         $this->assertEquals('active', $enrollment->getEnrollmentState());
     }
 
-    public function testFetchAllBySection(): void
+    public function testGetBySection(): void
     {
         $responseBody = json_encode([
             [
@@ -426,7 +426,7 @@ class EnrollmentTest extends TestCase
         $this->assertEquals(456, $enrollments[0]->getSectionId());
     }
 
-    public function testFetchAllByUser(): void
+    public function testGetByUser(): void
     {
         $responseBody = json_encode([
             [

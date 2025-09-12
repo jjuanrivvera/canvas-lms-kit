@@ -260,7 +260,7 @@ class AccountTest extends TestCase
      * Test the fetchAll method
      * @return void
      */
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $expectedResult = [
             ['id' => 1, 'name' => 'Account 1'],
@@ -276,7 +276,7 @@ class AccountTest extends TestCase
             ->with($this->equalTo('accounts'))
             ->willReturn($response);
 
-        $accounts = Account::fetchAll();
+        $accounts = Account::get();
 
         $this->assertIsArray($accounts);
         $this->assertCount(3, $accounts);

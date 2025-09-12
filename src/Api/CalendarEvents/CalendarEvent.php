@@ -9,7 +9,6 @@ use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
 use CanvasLMS\Dto\CalendarEvents\UpdateCalendarEventDTO;
 use CanvasLMS\Dto\CalendarEvents\CreateReservationDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
 
 /**
  * CalendarEvent Class
@@ -41,7 +40,7 @@ use CanvasLMS\Pagination\PaginatedResponse;
  * $event = CalendarEvent::find(456);
  *
  * // Listing all calendar events with filters
- * $events = CalendarEvent::fetchAll([
+ * $events = CalendarEvent::get([
  *     'start_date' => '2025-03-01',
  *     'end_date' => '2025-03-31',
  *     'context_codes' => ['course_123', 'user_456']
@@ -440,7 +439,7 @@ class CalendarEvent extends AbstractBaseApi
             }
         }
 
-        $response = self::$apiClient->put($endpoint, $data);
+        $response = self::$apiClient->put($endpoint, ['multipart' => $data]);
         $responseData = json_decode($response->getBody(), true);
         return new self($responseData);
     }
@@ -477,7 +476,7 @@ class CalendarEvent extends AbstractBaseApi
      * @return array<int, self>
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         self::checkApiClient();
 
@@ -498,28 +497,6 @@ class CalendarEvent extends AbstractBaseApi
         }, $data);
     }
 
-    /**
-     * Get paginated calendar events
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkApiClient();
-
-        // Default to account context if no context_codes provided
-        if (!isset($params['context_codes'])) {
-            $accountId = Config::getAccountId();
-            if (!$accountId || $accountId <= 0) {
-                throw new CanvasApiException('Account ID must be configured to fetch calendar events');
-            }
-            $params['context_codes'] = [sprintf('account_%d', $accountId)];
-        }
-
-        return self::getPaginatedResponse('calendar_events', $params);
-    }
 
     /**
      * Fetch calendar events by context
@@ -688,7 +665,7 @@ class CalendarEvent extends AbstractBaseApi
             ];
         }
 
-        $response = self::$apiClient->post('calendar_events/save_enabled_account_calendars', $data);
+        $response = self::$apiClient->post('calendar_events/save_enabled_account_calendars', ['multipart' => $data]);
         return json_decode($response->getBody(), true);
     }
 
@@ -826,6 +803,65 @@ class CalendarEvent extends AbstractBaseApi
     public function __set($name, $value): void
     {
         $this->{$name} = $this->castValue($name, $value);
+    }
+
+    /**
+     * Get paginated calendar events
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return \CanvasLMS\Pagination\PaginationResult
+     * @throws CanvasApiException
+     */
+    public static function paginate(array $params = []): \CanvasLMS\Pagination\PaginationResult
+    {
+        self::checkApiClient();
+
+        // Default to account context if no context_codes provided
+        if (!isset($params['context_codes'])) {
+            $accountId = Config::getAccountId();
+            if (!$accountId || $accountId <= 0) {
+                throw new CanvasApiException('Account ID must be configured to fetch calendar events');
+            }
+            $params['context_codes'] = [sprintf('account_%d', $accountId)];
+        }
+
+        $paginatedResponse = self::getPaginatedResponse('calendar_events', $params);
+
+        // Convert data to models
+        $data = [];
+        foreach ($paginatedResponse->getJsonData() as $item) {
+            $data[] = new self($item);
+        }
+
+        return $paginatedResponse->toPaginationResult($data);
+    }
+
+    /**
+     * Get all calendar events from all pages
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<int, self>
+     * @throws CanvasApiException
+     */
+    public static function all(array $params = []): array
+    {
+        self::checkApiClient();
+
+        // Default to account context if no context_codes provided
+        if (!isset($params['context_codes'])) {
+            $accountId = Config::getAccountId();
+            if (!$accountId || $accountId <= 0) {
+                throw new CanvasApiException('Account ID must be configured to fetch calendar events');
+            }
+            $params['context_codes'] = [sprintf('account_%d', $accountId)];
+        }
+
+        $paginatedResponse = self::getPaginatedResponse('calendar_events', $params);
+        $allData = $paginatedResponse->all();
+
+        return array_map(function ($item) {
+            return new self($item);
+        }, $allData);
     }
 
     /**

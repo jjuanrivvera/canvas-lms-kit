@@ -11,8 +11,6 @@ use CanvasLMS\Api\Sections\Section;
 use CanvasLMS\Dto\Enrollments\CreateEnrollmentDTO;
 use CanvasLMS\Dto\Enrollments\UpdateEnrollmentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Enrollment API Class
@@ -82,7 +80,7 @@ use CanvasLMS\Pagination\PaginationResult;
 class Enrollment extends AbstractBaseApi
 {
     // Course context (required pattern)
-    protected static Course $course;
+    protected static ?Course $course = null;
 
     // Core enrollment properties
     public ?int $id = null;
@@ -179,13 +177,13 @@ class Enrollment extends AbstractBaseApi
     /**
      * @return self
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkCourse();
         self::checkApiClient();
 
         $endpoint = sprintf('courses/%d/enrollments/%d', self::$course->id, $id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $data = json_decode((string) $response->getBody(), true);
 
         return new self($data);
@@ -202,7 +200,7 @@ class Enrollment extends AbstractBaseApi
      * @param array<string, mixed> $params
      * @return array<self>
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         self::checkCourse();
         self::checkApiClient();
@@ -219,48 +217,6 @@ class Enrollment extends AbstractBaseApi
         return $enrollments;
     }
 
-    /**
-     * Fetch all enrollments with pagination support
-     */
-    /**
-     * @param mixed[] $params
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/enrollments', self::$course->id);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
-
-    /**
-     * Fetch a single page of enrollments
-     */
-    /**
-     * @param mixed[] $params
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Fetch all pages of enrollments
-     */
-    /**
-     * @param mixed[] $params
-     * @return self[]
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/enrollments', self::$course->id);
-        return self::fetchAllPagesAsModels($endpoint, $params);
-    }
 
     /**
      * Create a new enrollment

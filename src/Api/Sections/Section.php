@@ -56,10 +56,91 @@ class Section extends AbstractBaseApi
 
     /**
      * Check if course context is set.
+     * @throws CanvasApiException If course is not set
      */
     public static function checkCourse(): bool
     {
-        return isset(self::$course);
+        if (!isset(self::$course) || !isset(self::$course->id)) {
+            throw new CanvasApiException('Course context is required');
+        }
+        return true;
+    }
+
+    /**
+     * Get first page of sections
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<int, self>
+     * @throws CanvasApiException
+     */
+    public static function get(array $params = []): array
+    {
+        self::checkApiClient();
+
+        self::checkCourse();
+
+        // Validate search_term if provided
+        if (isset($params['search_term']) && strlen($params['search_term']) < 2) {
+            throw new CanvasApiException('search_term must be at least 2 characters');
+        }
+
+        $endpoint = sprintf('courses/%d/sections', self::$course->getId());
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $responseData = json_decode($response->getBody()->getContents(), true);
+
+        return array_map(function ($item) {
+            return new self($item);
+        }, $responseData);
+    }
+
+    /**
+     * Get all sections from all pages
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<int, self>
+     * @throws CanvasApiException
+     */
+    public static function all(array $params = []): array
+    {
+        self::checkApiClient();
+
+        self::checkCourse();
+
+        $endpoint = sprintf('courses/%d/sections', self::$course->getId());
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+
+        $sections = [];
+        foreach ($allData as $item) {
+            $sections[] = new self($item);
+        }
+
+        return $sections;
+    }
+
+    /**
+     * Get paginated sections
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return PaginationResult
+     * @throws CanvasApiException
+     */
+    public static function paginate(array $params = []): PaginationResult
+    {
+        self::checkApiClient();
+
+        self::checkCourse();
+
+        $endpoint = sprintf('courses/%d/sections', self::$course->getId());
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+
+        // Convert data to models
+        $data = [];
+        foreach ($paginatedResponse->getJsonData() as $item) {
+            $data[] = new self($item);
+        }
+
+        return $paginatedResponse->toPaginationResult($data);
     }
 
     /**
@@ -74,9 +155,10 @@ class Section extends AbstractBaseApi
     public static function find(int $id, array $params = []): self
     {
         // Use direct endpoint if no course context, otherwise use course-scoped endpoint
-        if (self::checkCourse()) {
+        try {
+            self::checkCourse();
             $endpoint = sprintf('courses/%d/sections/%d', self::$course->id, $id);
-        } else {
+        } catch (CanvasApiException $e) {
             $endpoint = sprintf('sections/%d', $id);
         }
 
@@ -84,89 +166,19 @@ class Section extends AbstractBaseApi
         $data = json_decode($response->getBody()->getContents(), true);
 
         $section = new self($data);
-        if (self::checkCourse()) {
+        try {
+            self::checkCourse();
             $section->courseId = self::$course->id;
+        } catch (CanvasApiException $e) {
+            // No course context, skip setting courseId
         }
 
         return $section;
     }
 
-    /**
-     * Get all sections for the current course.
-     *
-     * @param array<string, mixed> $params Optional parameters (include[], search_term)
-     * @return array<int, self> Array of Section objects
-     * @throws CanvasApiException
-     */
-    public static function fetchAll(array $params = []): array
-    {
-        if (!self::checkCourse()) {
-            throw new CanvasApiException('Course context is required for listing sections');
-        }
 
-        // Validate search_term if provided
-        if (isset($params['search_term']) && strlen($params['search_term']) < 2) {
-            throw new CanvasApiException('search_term must be at least 2 characters');
-        }
 
-        $endpoint = sprintf('courses/%d/sections', self::$course->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
 
-        return array_map(function ($sectionData) {
-            $section = new self($sectionData);
-            $section->courseId = self::$course->id;
-            return $section;
-        }, $data);
-    }
-
-    /**
-     * Get paginated sections for the current course.
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        if (!self::checkCourse()) {
-            throw new CanvasApiException('Course context is required for listing sections');
-        }
-
-        $endpoint = sprintf('courses/%d/sections', self::$course->id);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
-
-    /**
-     * Get a single page of sections.
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        self::checkCourse();
-        self::checkApiClient();
-        $endpoint = sprintf('courses/%d/sections', self::$course->id);
-        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Get all pages of sections.
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return array<int, self> All sections across all pages
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        self::checkCourse();
-        self::checkApiClient();
-        $endpoint = sprintf('courses/%d/sections', self::$course->id);
-        return self::fetchAllPagesAsModels($endpoint, $params);
-    }
 
     /**
      * Create a new section.
@@ -177,9 +189,7 @@ class Section extends AbstractBaseApi
      */
     public static function create(array|CreateSectionDTO $data): self
     {
-        if (!self::checkCourse()) {
-            throw new CanvasApiException('Course context is required for creating sections');
-        }
+        self::checkCourse(); // Throws exception if course not set
 
         $dto = $data instanceof CreateSectionDTO ? $data : new CreateSectionDTO($data);
         $apiData = $dto->toApiArray();

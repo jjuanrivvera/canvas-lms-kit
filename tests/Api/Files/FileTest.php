@@ -61,17 +61,41 @@ class FileTest extends TestCase
             'hidden' => false
         ];
 
-        $this->httpClientMock->expects($this->exactly(2))
-            ->method('post')
-            ->willReturnOnConsecutiveCalls(
-                new Response(200, [], json_encode($uploadResponse)),
-                new Response(200, ['Location' => 'https://confirm.example.com'], '')
-            );
-
+        // First post is for Canvas API (step 1)
         $this->httpClientMock->expects($this->once())
-            ->method('get')
-            ->with('https://confirm.example.com')
-            ->willReturn(new Response(200, [], json_encode($fileResponse)));
+            ->method('post')
+            ->willReturn(new Response(200, [], json_encode($uploadResponse)));
+
+        // Second call is rawRequest for external upload URL (step 2)
+        $callCount = 0;
+        $this->httpClientMock->expects($this->exactly(2))
+            ->method('rawRequest')
+            ->willReturnCallback(function ($url, $method, $options) use (&$callCount, $fileResponse) {
+                $callCount++;
+                
+                if ($callCount === 1) {
+                    // First call: POST to upload URL
+                    $this->assertEquals('https://upload.example.com', $url);
+                    $this->assertEquals('POST', $method);
+                    $this->assertArrayHasKey('multipart', $options);
+                    $this->assertArrayHasKey('skipAuth', $options);
+                    $this->assertTrue($options['skipAuth']);
+                    $this->assertArrayHasKey('skipDomainValidation', $options);
+                    $this->assertTrue($options['skipDomainValidation']);
+                    
+                    return new Response(200, ['Location' => 'https://confirm.example.com'], '');
+                } else {
+                    // Second call: GET to confirm URL
+                    $this->assertEquals('https://confirm.example.com', $url);
+                    $this->assertEquals('GET', $method);
+                    $this->assertArrayHasKey('skipAuth', $options);
+                    $this->assertTrue($options['skipAuth']);
+                    $this->assertArrayHasKey('skipDomainValidation', $options);
+                    $this->assertTrue($options['skipDomainValidation']);
+                    
+                    return new Response(200, [], json_encode($fileResponse));
+                }
+            });
 
         $file = File::uploadToCourse($courseId, $fileData);
 
@@ -122,12 +146,26 @@ class FileTest extends TestCase
             'hidden' => false
         ];
 
-        $this->httpClientMock->expects($this->exactly(2))
+        // First post is for Canvas API (step 1)
+        $this->httpClientMock->expects($this->once())
             ->method('post')
-            ->willReturnOnConsecutiveCalls(
-                new Response(200, [], json_encode($uploadResponse)),
-                new Response(200, [], json_encode($fileResponse))
-            );
+            ->willReturn(new Response(200, [], json_encode($uploadResponse)));
+
+        // Second call is rawRequest for external upload URL (step 2) - no Location redirect
+        $this->httpClientMock->expects($this->once())
+            ->method('rawRequest')
+            ->with(
+                'https://upload.example.com', 
+                'POST', 
+                $this->callback(function ($options) {
+                    return isset($options['multipart']) && 
+                           isset($options['skipAuth']) && 
+                           $options['skipAuth'] === true &&
+                           isset($options['skipDomainValidation']) && 
+                           $options['skipDomainValidation'] === true;
+                })
+            )
+            ->willReturn(new Response(200, [], json_encode($fileResponse)));
 
         $file = File::uploadToUser($userId, $fileDto);
 
@@ -176,12 +214,38 @@ class FileTest extends TestCase
             'hidden' => false
         ];
 
-        $this->httpClientMock->expects($this->exactly(2))
+        // First call: POST to Canvas API to get upload URL
+        $this->httpClientMock->expects($this->once())
             ->method('post')
-            ->willReturnOnConsecutiveCalls(
-                new Response(200, [], json_encode($uploadResponse)),
-                new Response(200, [], json_encode($fileResponse))
-            );
+            ->with(
+                '/groups/456/files',
+                $this->callback(function ($options) {
+                    return isset($options['multipart']);
+                })
+            )
+            ->willReturn(new Response(200, [], json_encode($uploadResponse)));
+
+        // Second call: rawRequest for external upload and confirmation
+        $callCount = 0;
+        $this->httpClientMock->expects($this->exactly(2))
+            ->method('rawRequest')
+            ->willReturnCallback(function ($url, $method, $options) use (&$callCount, $fileResponse) {
+                $callCount++;
+                
+                if ($callCount === 1) {
+                    // First call: POST to upload URL
+                    $this->assertEquals('https://upload.example.com', $url);
+                    $this->assertEquals('POST', $method);
+                    
+                    return new Response(200, ['Location' => 'https://confirm.example.com'], '');
+                } else {
+                    // Second call: GET to confirm URL
+                    $this->assertEquals('https://confirm.example.com', $url);
+                    $this->assertEquals('GET', $method);
+                    
+                    return new Response(200, [], json_encode($fileResponse));
+                }
+            });
 
         $file = File::uploadToGroup($groupId, $fileData);
 
@@ -230,12 +294,38 @@ class FileTest extends TestCase
             'hidden' => false
         ];
 
-        $this->httpClientMock->expects($this->exactly(2))
+        // First call: POST to Canvas API to get upload URL
+        $this->httpClientMock->expects($this->once())
             ->method('post')
-            ->willReturnOnConsecutiveCalls(
-                new Response(200, [], json_encode($uploadResponse)),
-                new Response(200, [], json_encode($fileResponse))
-            );
+            ->with(
+                '/courses/123/assignments/456/submissions/self/files',
+                $this->callback(function ($options) {
+                    return isset($options['multipart']);
+                })
+            )
+            ->willReturn(new Response(200, [], json_encode($uploadResponse)));
+
+        // Second call: rawRequest for external upload and confirmation
+        $callCount = 0;
+        $this->httpClientMock->expects($this->exactly(2))
+            ->method('rawRequest')
+            ->willReturnCallback(function ($url, $method, $options) use (&$callCount, $fileResponse) {
+                $callCount++;
+                
+                if ($callCount === 1) {
+                    // First call: POST to upload URL
+                    $this->assertEquals('https://upload.example.com', $url);
+                    $this->assertEquals('POST', $method);
+                    
+                    return new Response(200, ['Location' => 'https://confirm.example.com'], '');
+                } else {
+                    // Second call: GET to confirm URL
+                    $this->assertEquals('https://confirm.example.com', $url);
+                    $this->assertEquals('GET', $method);
+                    
+                    return new Response(200, [], json_encode($fileResponse));
+                }
+            });
 
         $file = File::uploadToAssignmentSubmission($courseId, $assignmentId, $fileData);
 
@@ -413,7 +503,7 @@ class FileTest extends TestCase
     /**
      * Test fetchAll method (fetches current user's files)
      */
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $filesResponse = [
             [
@@ -447,7 +537,7 @@ class FileTest extends TestCase
             ->with('/users/self/files', ['query' => []])
             ->willReturn(new Response(200, [], json_encode($filesResponse)));
 
-        $files = File::fetchAll();
+        $files = File::get();
 
         $this->assertCount(2, $files);
         $this->assertInstanceOf(File::class, $files[0]);
@@ -520,5 +610,110 @@ class FileTest extends TestCase
         $this->assertEquals('2024-01-01T00:00:00Z', $file->getUpdatedAt());
         $this->assertFalse($file->isLocked());
         $this->assertFalse($file->isHidden());
+    }
+
+    /**
+     * Test file upload to S3 with external URLs
+     */
+    public function testFileUploadToS3WithExternalUrls(): void
+    {
+        $courseId = 123;
+
+        // Create a temporary file for testing
+        $tempFile = tempnam(sys_get_temp_dir(), 'upload_test');
+        file_put_contents($tempFile, 'test content for S3');
+
+        $fileData = [
+            'name' => 's3-file.pdf',
+            'size' => 4096,
+            'content_type' => 'application/pdf',
+            'file' => $tempFile
+        ];
+
+        // Step 1: Canvas returns S3 upload URL and parameters
+        $uploadResponse = [
+            'upload_url' => 'https://canvas-files.s3.amazonaws.com/upload',
+            'upload_params' => [
+                'key' => 'uploads/files/123/s3-file.pdf',
+                'acl' => 'private',
+                'policy' => 'eyJleHBpcmF0aW9uIjoiMjAyNC0wMS0wMlQwMDowMDowMFoiLCJjb25kaXRpb25zIjpbWyJjb250ZW50LWxlbmd0aC1yYW5nZSIsMCwxMDQ4NTc2MF1dfQ==',
+                'signature' => 'abc123signature',
+                'AWSAccessKeyId' => 'AKIAIOSFODNN7EXAMPLE',
+                'Content-Type' => 'application/pdf',
+                'success_action_redirect' => 'https://canvas.example.com/api/v1/files/789/create_success'
+            ]
+        ];
+
+        // Step 3: S3 redirects to Canvas API after upload
+        $fileResponse = [
+            'id' => 789,
+            'display_name' => 's3-file.pdf',
+            'filename' => 's3-file.pdf',
+            'content_type' => 'application/pdf',
+            'size' => 4096,
+            'folder_id' => 456,
+            'uuid' => 's3-uuid-123',
+            'created_at' => '2024-01-01T00:00:00Z',
+            'updated_at' => '2024-01-01T00:00:00Z',
+            'url' => 'https://canvas-files.s3.amazonaws.com/files/789/s3-file.pdf',
+            'locked' => false,
+            'hidden' => false
+        ];
+
+        // Expect Canvas API call (Step 1)
+        $this->httpClientMock->expects($this->once())
+            ->method('post')
+            ->with(
+                $this->equalTo("/courses/{$courseId}/files"),
+                $this->callback(function ($options) {
+                    return isset($options['multipart']);
+                })
+            )
+            ->willReturn(new Response(200, [], json_encode($uploadResponse)));
+
+        // Expect rawRequest for S3 upload (Step 2) and Canvas redirect (Step 3)
+        $callCount = 0;
+        $this->httpClientMock->expects($this->exactly(2))
+            ->method('rawRequest')
+            ->willReturnCallback(function ($url, $method, $options) use (&$callCount, $fileResponse) {
+                $callCount++;
+                
+                if ($callCount === 1) {
+                    // First call: POST to S3
+                    $this->assertEquals('https://canvas-files.s3.amazonaws.com/upload', $url);
+                    $this->assertEquals('POST', $method);
+                    // Verify skipAuth and skipDomainValidation are set for external S3 URL
+                    $this->assertArrayHasKey('multipart', $options);
+                    $this->assertArrayHasKey('skipAuth', $options);
+                    $this->assertTrue($options['skipAuth']);
+                    $this->assertArrayHasKey('skipDomainValidation', $options);
+                    $this->assertTrue($options['skipDomainValidation']);
+                    
+                    return new Response(303, ['Location' => 'https://canvas.example.com/api/v1/files/789/create_success'], '');
+                } else {
+                    // Second call: GET to Canvas redirect URL
+                    $this->assertEquals('https://canvas.example.com/api/v1/files/789/create_success', $url);
+                    $this->assertEquals('GET', $method);
+                    // Verify skipAuth is true but skipDomainValidation might be false for Canvas redirect
+                    $this->assertArrayHasKey('skipAuth', $options);
+                    $this->assertTrue($options['skipAuth']);
+                    $this->assertArrayHasKey('skipDomainValidation', $options);
+                    $this->assertTrue($options['skipDomainValidation']);
+                    
+                    return new Response(200, [], json_encode($fileResponse));
+                }
+            });
+
+        $file = File::uploadToCourse($courseId, $fileData);
+
+        $this->assertInstanceOf(File::class, $file);
+        $this->assertEquals(789, $file->getId());
+        $this->assertEquals('s3-file.pdf', $file->getDisplayName());
+        $this->assertEquals('application/pdf', $file->getContentType());
+        $this->assertEquals(4096, $file->getSize());
+        $this->assertStringContainsString('s3.amazonaws.com', $file->getUrl());
+
+        // Clean up
+        unlink($tempFile);
     }
 }

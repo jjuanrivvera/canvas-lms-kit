@@ -166,7 +166,7 @@ class Progress extends AbstractBaseApi
      * @return Progress
      * @throws CanvasApiException
      */
-    public static function find(int $id): Progress
+    public static function find(int $id, array $params = []): Progress
     {
         self::checkApiClient();
 
@@ -594,7 +594,7 @@ class Progress extends AbstractBaseApi
      * @return Progress[]
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         throw new CanvasApiException(
             'Progress API does not support listing all progress objects. Use find() with specific ID.'

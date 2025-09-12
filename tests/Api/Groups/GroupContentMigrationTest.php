@@ -41,7 +41,7 @@ class GroupContentMigrationTest extends TestCase
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')->willReturn($migrationsData);
+        $mockPaginatedResponse->method('all')->willReturn($migrationsData);
         
         $this->mockClient->method('getPaginated')
             ->with('groups/123/content_migrations', ['query' => []])

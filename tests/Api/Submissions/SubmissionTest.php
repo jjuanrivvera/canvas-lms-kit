@@ -42,11 +42,11 @@ class SubmissionTest extends TestCase
         
         $courseProperty = $reflection->getProperty('course');
         $courseProperty->setAccessible(true);
-        $courseProperty->setValue(null, new Course(['id' => 0]));
+        $courseProperty->setValue(null, null);
         
         $assignmentProperty = $reflection->getProperty('assignment');
         $assignmentProperty->setAccessible(true);
-        $assignmentProperty->setValue(null, new Assignment(['id' => 0]));
+        $assignmentProperty->setValue(null, null);
     }
 
     public function testSetCourse(): void
@@ -592,7 +592,7 @@ class SubmissionTest extends TestCase
         $submission->save();
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $responseData = [
             [
@@ -627,7 +627,7 @@ class SubmissionTest extends TestCase
             ->with('courses/123/assignments/456/submissions')
             ->willReturn($responseMock);
 
-        $submissions = Submission::fetchAll();
+        $submissions = Submission::get();
 
         $this->assertCount(2, $submissions);
         $this->assertInstanceOf(Submission::class, $submissions[0]);
@@ -636,7 +636,7 @@ class SubmissionTest extends TestCase
         $this->assertEquals(222, $submissions[1]->getUserId());
     }
 
-    public function testFetchAllWithParameters(): void
+    public function testGetWithParameters(): void
     {
         $params = [
             'student_ids' => [111, 222],
@@ -660,7 +660,7 @@ class SubmissionTest extends TestCase
             ->with('courses/123/assignments/456/submissions', ['query' => $params])
             ->willReturn($response);
 
-        $submissions = Submission::fetchAll($params);
+        $submissions = Submission::get($params);
         
         $this->assertCount(2, $submissions);
         $this->assertEquals(111, $submissions[0]->getUserId());
