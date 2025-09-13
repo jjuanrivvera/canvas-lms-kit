@@ -186,7 +186,7 @@ class Group extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkApiClient();
 
@@ -218,7 +218,11 @@ class Group extends AbstractBaseApi
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
-        return self::fetchAllPagesAsModels(sprintf('%s/%d/groups', $contextType, $contextId), $params);
+        $endpoint = sprintf('%s/%d/groups', $contextType, $contextId);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+
+        return array_map(fn($data) => new self($data), $allData);
     }
 
     /**
@@ -248,7 +252,11 @@ class Group extends AbstractBaseApi
      */
     public static function fetchUserGroups(int $userId, array $params = []): array
     {
-        return self::fetchAllPagesAsModels(sprintf('users/%d/groups', $userId), $params);
+        $endpoint = sprintf('users/%d/groups', $userId);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+
+        return array_map(fn($data) => new self($data), $allData);
     }
 
     /**
@@ -365,26 +373,11 @@ class Group extends AbstractBaseApi
 
         $endpoint = sprintf('groups/%d/users', $this->id);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-        $allData = $paginatedResponse->fetchAllPages();
+        $allData = $paginatedResponse->all();
 
         return array_map(fn($data) => new User($data), $allData);
     }
 
-    /**
-     * Get paginated group members
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public function membersPaginated(array $params = []): PaginatedResponse
-    {
-        if (!$this->id) {
-            throw new CanvasApiException('Group ID is required to fetch group members');
-        }
-
-        return self::getPaginatedResponse(sprintf('groups/%d/users', $this->id), $params);
-    }
 
     /**
      * Add user to group
@@ -399,7 +392,7 @@ class Group extends AbstractBaseApi
         try {
             $membership = $this->createMembership(['user_id' => $userId]);
             return $membership !== null;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }
@@ -436,21 +429,6 @@ class Group extends AbstractBaseApi
         return GroupMembership::fetchAllForGroup($this->id, $params);
     }
 
-    /**
-     * Get paginated memberships for this group
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public function membershipsPaginated(array $params = []): PaginatedResponse
-    {
-        if (!$this->id) {
-            throw new CanvasApiException('Group ID is required to fetch memberships');
-        }
-
-        return GroupMembership::fetchAllPaginated($this->id, $params);
-    }
 
     /**
      * Invite users to this group

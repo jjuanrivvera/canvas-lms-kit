@@ -60,12 +60,12 @@ class AbstractBaseApiTest extends TestCase
                 return 'test_items';
             }
             
-            public static function find(int $id): self
+            public static function find(int $id, array $params = []): self
             {
                 return new self(['id' => $id, 'name' => 'Test Item']);
             }
             
-            public static function fetchAll(array $params = []): array
+            public static function get(array $params = []): array
             {
                 return [
                     new self(['id' => 1, 'name' => 'Test Item 1']),
@@ -83,10 +83,6 @@ class AbstractBaseApiTest extends TestCase
                 return parent::convertPaginatedResponseToModels($paginatedResponse);
             }
             
-            public static function testFetchAllPagesAsModels(string $endpoint, array $params = []): array
-            {
-                return parent::fetchAllPagesAsModels($endpoint, $params);
-            }
             
             public static function testCreatePaginationResult(\CanvasLMS\Pagination\PaginatedResponse $paginatedResponse): \CanvasLMS\Pagination\PaginationResult
             {
@@ -143,9 +139,9 @@ class AbstractBaseApiTest extends TestCase
     }
 
     /**
-     * Test fetchAllPagesAsModels method
+     * Test fetching all pages using the new pattern
      */
-    public function testFetchAllPagesAsModels(): void
+    public function testFetchAllPagesNewPattern(): void
     {
         $allPagesData = [
             ['id' => 1, 'name' => 'Item 1'],
@@ -156,7 +152,7 @@ class AbstractBaseApiTest extends TestCase
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('all')
             ->willReturn($allPagesData);
 
         $this->mockHttpClient->expects($this->once())
@@ -164,7 +160,10 @@ class AbstractBaseApiTest extends TestCase
             ->with('/test/endpoint', ['query' => ['per_page' => 50]])
             ->willReturn($mockPaginatedResponse);
 
-        $models = $this->testApiClass::testFetchAllPagesAsModels('/test/endpoint', ['per_page' => 50]);
+        // Test the new pattern: getPaginatedResponse + all() + array_map
+        $paginatedResponse = $this->testApiClass::testGetPaginatedResponse('/test/endpoint', ['per_page' => 50]);
+        $allData = $paginatedResponse->all();
+        $models = array_map(fn($data) => new $this->testApiClass($data), $allData);
 
         $this->assertIsArray($models);
         $this->assertCount(4, $models);
@@ -267,7 +266,7 @@ class AbstractBaseApiTest extends TestCase
             ->willReturn($mockResponse);
 
         $testClass::setApiClient($this->mockHttpClient);
-        $result = $testClass::fetchAll(['per_page' => 10]);
+        $result = $testClass::get(['per_page' => 10]);
 
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
@@ -296,12 +295,12 @@ class AbstractBaseApiTest extends TestCase
                 return 'test';
             }
             
-            public static function find(int $id): self
+            public static function find(int $id, array $params = []): self
             {
                 return new self(['id' => $id, 'name' => 'Test Item']);
             }
             
-            public static function fetchAll(array $params = []): array
+            public static function get(array $params = []): array
             {
                 self::checkApiClient();
                 
@@ -374,12 +373,12 @@ class AbstractBaseApiTest extends TestCase
                 return 'test';
             }
             
-            public static function find(int $id): self
+            public static function find(int $id, array $params = []): self
             {
                 return new self(['id' => $id]);
             }
             
-            public static function fetchAll(array $params = []): array
+            public static function get(array $params = []): array
             {
                 return [];
             }
@@ -393,5 +392,69 @@ class AbstractBaseApiTest extends TestCase
         $instance = new $className($data);
 
         $this->assertEquals('test value', $instance->someProperty);
+    }
+
+    /**
+     * Test that populate method correctly handles camelCase properties
+     */
+    public function testPopulateHandlesCamelCaseProperties(): void
+    {
+        // Create a test class with camelCase properties
+        $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
+        {
+            public ?string $firstName = null;
+            public ?string $lastName = null;
+            public ?int $userId = null;
+            public ?bool $isActive = null;
+            
+            protected static function getEndpoint(): string
+            {
+                return 'test';
+            }
+            
+            public static function find(int $id, array $params = []): self
+            {
+                return new self(['id' => $id]);
+            }
+            
+            // Make populate method public for testing
+            public function testPopulate(array $data): void
+            {
+                $this->populate($data);
+            }
+        };
+        
+        $className = get_class($testClass);
+        $instance = new $className([]);
+        
+        // Test with snake_case input data
+        $snakeCaseData = [
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'user_id' => 123,
+            'is_active' => true
+        ];
+        
+        $instance->testPopulate($snakeCaseData);
+        
+        $this->assertEquals('John', $instance->firstName);
+        $this->assertEquals('Doe', $instance->lastName);
+        $this->assertEquals(123, $instance->userId);
+        $this->assertTrue($instance->isActive);
+        
+        // Test with camelCase input data (should also work)
+        $camelCaseData = [
+            'firstName' => 'Jane',
+            'lastName' => 'Smith',
+            'userId' => 456,
+            'isActive' => false
+        ];
+        
+        $instance->testPopulate($camelCaseData);
+        
+        $this->assertEquals('Jane', $instance->firstName);
+        $this->assertEquals('Smith', $instance->lastName);
+        $this->assertEquals(456, $instance->userId);
+        $this->assertFalse($instance->isActive);
     }
 }

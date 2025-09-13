@@ -57,7 +57,7 @@ class MediaObjectTest extends TestCase
     /**
      * Test fetching all media objects (global context)
      */
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $mockData = [
             'media_objects' => [
@@ -81,7 +81,7 @@ class MediaObjectTest extends TestCase
 
         $this->setHttpClient($mockClient);
 
-        $mediaObjects = MediaObject::fetchAll();
+        $mediaObjects = MediaObject::get();
 
         $this->assertIsArray($mediaObjects);
         $this->assertCount(1, $mediaObjects);
@@ -93,7 +93,7 @@ class MediaObjectTest extends TestCase
     /**
      * Test fetching media objects with parameters
      */
-    public function testFetchAllWithParams(): void
+    public function testGetWithParams(): void
     {
         $params = [
             'sort' => 'title',
@@ -111,7 +111,7 @@ class MediaObjectTest extends TestCase
 
         $this->setHttpClient($mockClient);
 
-        $mediaObjects = MediaObject::fetchAll($params);
+        $mediaObjects = MediaObject::get($params);
 
         $this->assertIsArray($mediaObjects);
         $this->assertEmpty($mediaObjects);

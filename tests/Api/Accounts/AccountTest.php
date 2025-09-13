@@ -260,7 +260,7 @@ class AccountTest extends TestCase
      * Test the fetchAll method
      * @return void
      */
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $expectedResult = [
             ['id' => 1, 'name' => 'Account 1'],
@@ -276,7 +276,7 @@ class AccountTest extends TestCase
             ->with($this->equalTo('accounts'))
             ->willReturn($response);
 
-        $accounts = Account::fetchAll();
+        $accounts = Account::get();
 
         $this->assertIsArray($accounts);
         $this->assertCount(3, $accounts);
@@ -437,7 +437,7 @@ class AccountTest extends TestCase
             ->with($this->equalTo('accounts/1/sub_accounts'))
             ->willReturn($response);
 
-        $subAccounts = $this->account->getSubAccounts();
+        $subAccounts = $this->account->subAccounts();
 
         $this->assertIsArray($subAccounts);
         $this->assertCount(2, $subAccounts);
@@ -467,7 +467,7 @@ class AccountTest extends TestCase
             ->with($this->equalTo('accounts/1'))
             ->willReturn($response);
 
-        $parentAccount = $this->account->getParentAccount();
+        $parentAccount = $this->account->parentAccount();
 
         $this->assertInstanceOf(Account::class, $parentAccount);
         $this->assertEquals(1, $parentAccount->getId());
@@ -482,7 +482,7 @@ class AccountTest extends TestCase
     {
         $this->account->parentAccountId = null;
 
-        $parentAccount = $this->account->getParentAccount();
+        $parentAccount = $this->account->parentAccount();
 
         $this->assertNull($parentAccount);
     }
@@ -625,7 +625,7 @@ class AccountTest extends TestCase
             ->with($this->equalTo('accounts/1/courses'))
             ->willReturn($response);
 
-        $courses = $this->account->getCourses();
+        $courses = $this->account->courses();
 
         $this->assertIsArray($courses);
         $this->assertCount(2, $courses);

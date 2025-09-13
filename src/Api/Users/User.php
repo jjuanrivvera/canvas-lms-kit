@@ -11,7 +11,6 @@ use CanvasLMS\Api\Logins\Login;
 use CanvasLMS\Dto\Users\UpdateUserDTO;
 use CanvasLMS\Dto\Users\CreateUserDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Objects\ActivityStreamItem;
 use CanvasLMS\Objects\ActivityStreamSummary;
 use CanvasLMS\Objects\TodoItem;
@@ -45,7 +44,7 @@ use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
  * ```php
  * // Current user operations (using the self pattern)
  * $currentUser = User::self();
- * $profile = $currentUser->getProfile();
+ * $profile = $currentUser->profile();
  * $courses = $currentUser->courses();
  * $todos = $currentUser->getTodo();        // Short alias
  * $todoItems = $currentUser->getTodoItems(); // Full method name
@@ -251,7 +250,7 @@ class User extends AbstractBaseApi
      * ```php
      * // Get current user's profile
      * $currentUser = User::self();
-     * $profile = $currentUser->getProfile();
+     * $profile = $currentUser->profile();
      *
      * // Get current user's todo items
      * $todos = $currentUser->getTodoItems();
@@ -290,7 +289,7 @@ class User extends AbstractBaseApi
      *
      * // You can then use all User methods with the fetched data
      * $courses = $currentUser->courses();
-     * $profile = $currentUser->getProfile();
+     * $profile = $currentUser->profile();
      * ```
      *
      * @return self A fully populated User instance with all user data
@@ -341,7 +340,7 @@ class User extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkApiClient();
 
@@ -1185,7 +1184,7 @@ class User extends AbstractBaseApi
      * @return Profile The user's profile
      * @throws CanvasApiException
      */
-    public function getProfile(): Profile
+    public function profile(): Profile
     {
         self::checkApiClient();
 
@@ -1358,7 +1357,7 @@ class User extends AbstractBaseApi
      * @return CourseNickname|null The course nickname or null
      * @throws CanvasApiException
      */
-    public function getCourseNickname(int $courseId): ?CourseNickname
+    public function courseNickname(int $courseId): ?CourseNickname
     {
         self::checkApiClient();
 
@@ -1602,24 +1601,6 @@ class User extends AbstractBaseApi
         }, $data);
     }
 
-    /**
-     * Get paginated calendar events for this user
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public function getCalendarEventsPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkApiClient();
-
-        if (!isset($this->id)) {
-            throw new CanvasApiException('User ID is required to get calendar events');
-        }
-
-        $endpoint = sprintf('users/%d/calendar_events', $this->id);
-        return CalendarEvent::getPaginatedResponse($endpoint, $params);
-    }
 
     /**
      * Create a calendar event for this user
@@ -1658,12 +1639,12 @@ class User extends AbstractBaseApi
 
         if (!isset($this->id)) {
             // Special case: Canvas supports /users/self/groups endpoint
-            $response = self::$apiClient->get('users/self/groups', ['query' => $params]);
-            $groupsData = json_decode($response->getBody(), true);
+            $paginatedResponse = self::getPaginatedResponse('users/self/groups', $params);
+            $allData = $paginatedResponse->all();
 
             return array_map(function ($groupData) {
                 return new Group($groupData);
-            }, $groupsData);
+            }, $allData);
         }
 
         // For regular users with IDs, use the standard method
@@ -1686,12 +1667,12 @@ class User extends AbstractBaseApi
 
         if (!isset($this->id)) {
             // Special case: Canvas supports /users/self/logins endpoint
-            $response = self::$apiClient->get('users/self/logins', ['query' => $params]);
-            $loginsData = json_decode($response->getBody()->getContents(), true);
+            $paginatedResponse = self::getPaginatedResponse('users/self/logins', $params);
+            $allData = $paginatedResponse->all();
 
             return array_map(function ($loginData) {
                 return new Login($loginData);
-            }, $loginsData);
+            }, $allData);
         }
 
         // For regular users with IDs, use the Login fetchByContext method
@@ -1714,11 +1695,11 @@ class User extends AbstractBaseApi
         }
 
         $endpoint = sprintf('users/%d/courses', $this->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $coursesData = json_decode($response->getBody(), true);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
 
         $courses = [];
-        foreach ($coursesData as $courseData) {
+        foreach ($allData as $courseData) {
             $courses[] = new Course($courseData);
         }
 
@@ -1781,7 +1762,7 @@ class User extends AbstractBaseApi
      * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
      * @throws CanvasApiException
      */
-    public function getFeatureFlag(string $featureName): \CanvasLMS\Api\FeatureFlags\FeatureFlag
+    public function featureFlag(string $featureName): \CanvasLMS\Api\FeatureFlags\FeatureFlag
     {
         if (!isset($this->id) || !$this->id) {
             throw new CanvasApiException('User ID is required to get feature flag');

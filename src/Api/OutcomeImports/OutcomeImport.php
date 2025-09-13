@@ -470,7 +470,7 @@ class OutcomeImport extends AbstractBaseApi
      * @return static
      * @throws CanvasApiException
      */
-    public static function find(int $id): static
+    public static function find(int $id, array $params = []): static
     {
         throw new CanvasApiException(
             'The find() method is not applicable for OutcomeImport. Use getStatus() instead.'
@@ -484,10 +484,10 @@ class OutcomeImport extends AbstractBaseApi
      * @return array<int, static>
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         throw new CanvasApiException(
-            'The fetchAll() method is not applicable for OutcomeImport. Use import() or importFromData() instead.'
+            'The get() method is not applicable for OutcomeImport. Use import() or importFromData() instead.'
         );
     }
 

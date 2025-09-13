@@ -37,7 +37,7 @@ class PageTest extends TestCase
         $reflection = new \ReflectionClass(Page::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, new Course(['id' => 0]));
+        $property->setValue(null, null);
     }
 
     public function testSetCourse(): void
@@ -56,7 +56,7 @@ class PageTest extends TestCase
         $reflection = new \ReflectionClass(Page::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, new Course([]));
+        $property->setValue(null, null);
 
         Page::checkCourse();
     }
@@ -331,7 +331,7 @@ class PageTest extends TestCase
         $this->assertEquals('Test Page With Spaces', $page->getTitle());
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $responseData = [
             [
@@ -364,7 +364,7 @@ class PageTest extends TestCase
             ->with('courses/123/pages', ['query' => []])
             ->willReturn($responseMock);
 
-        $pages = Page::fetchAll();
+        $pages = Page::get();
 
         $this->assertCount(2, $pages);
         $this->assertInstanceOf(Page::class, $pages[0]);
@@ -375,7 +375,7 @@ class PageTest extends TestCase
         $this->assertEquals('Page 2', $pages[1]->getTitle());
     }
 
-    public function testFetchAllWithParams(): void
+    public function testGetWithParams(): void
     {
         $params = ['published' => true, 'sort' => 'title'];
         $responseData = [];
@@ -396,14 +396,14 @@ class PageTest extends TestCase
             ->with('courses/123/pages', ['query' => $params])
             ->willReturn($responseMock);
 
-        $pages = Page::fetchAll($params);
+        $pages = Page::get($params);
 
         $this->assertCount(0, $pages);
     }
 
-    public function testFetchAllPaginated(): void
+    public function testGetPaginated(): void
     {
-        $this->assertTrue(method_exists(Page::class, 'fetchAllPaginated'));
+        $this->assertTrue(method_exists(Page::class, 'paginate'));
     }
 
     public function testCreate(): void
@@ -934,7 +934,7 @@ class PageTest extends TestCase
             ->with('courses/123/pages/test-page/revisions')
             ->willReturn($responseMock);
 
-        $revisions = $page->getRevisions();
+        $revisions = $page->revisions();
 
         $this->assertCount(2, $revisions);
         $this->assertInstanceOf(PageRevision::class, $revisions[0]);
@@ -949,7 +949,7 @@ class PageTest extends TestCase
         $this->expectExceptionMessage('Page URL is required');
 
         $page = new Page();
-        $page->getRevisions();
+        $page->revisions();
     }
 
     public function testToArray(): void
@@ -1102,7 +1102,7 @@ class PageTest extends TestCase
             ->with('courses/123/pages/test-page/revisions/3', ['query' => []])
             ->willReturn($responseMock);
 
-        $revision = $page->getRevision(3);
+        $revision = $page->revision(3);
 
         $this->assertInstanceOf(PageRevision::class, $revision);
         $this->assertEquals(3, $revision->getRevisionId());
@@ -1134,7 +1134,7 @@ class PageTest extends TestCase
             ->with('courses/123/pages/test-page/revisions/latest', ['query' => []])
             ->willReturn($responseMock);
 
-        $revision = $page->getRevision('latest');
+        $revision = $page->revision('latest');
 
         $this->assertInstanceOf(PageRevision::class, $revision);
         $this->assertTrue($revision->getLatest());
@@ -1167,7 +1167,7 @@ class PageTest extends TestCase
             ->with('courses/123/pages/test-page/revisions/3', ['query' => ['summary' => true]])
             ->willReturn($responseMock);
 
-        $revision = $page->getRevision(3, true);
+        $revision = $page->revision(3, true);
 
         $this->assertInstanceOf(PageRevision::class, $revision);
         $this->assertNull($revision->getBody());
@@ -1245,7 +1245,7 @@ class PageTest extends TestCase
         $this->assertTrue($frontPage->getFrontPage());
     }
 
-    public function testFetchAllWithQueryParams(): void
+    public function testGetWithQueryParams(): void
     {
         $params = [
             'sort' => 'title',
@@ -1289,7 +1289,7 @@ class PageTest extends TestCase
             ->with('courses/123/pages', ['query' => $expectedParams])
             ->willReturn($responseMock);
 
-        $pages = Page::fetchAll($params);
+        $pages = Page::get($params);
 
         $this->assertCount(2, $pages);
         $this->assertEquals('Test Page 1', $pages[0]->getTitle());

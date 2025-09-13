@@ -350,7 +350,7 @@ class GradebookHistory extends AbstractBaseApi
      * @return static
      * @throws CanvasApiException
      */
-    public static function find(int $id): static
+    public static function find(int $id, array $params = []): static
     {
         throw new CanvasApiException(
             'The Gradebook History API does not support finding individual records by ID. ' .

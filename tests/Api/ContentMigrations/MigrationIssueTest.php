@@ -60,13 +60,13 @@ class MigrationIssueTest extends TestCase
         MigrationIssue::find(123);
     }
 
-    public function testFetchAllThrowsException(): void
+    public function testGetThrowsException(): void
     {
         $this->expectException(CanvasApiException::class);
-        MigrationIssue::fetchAll();
+        MigrationIssue::get();
     }
 
-    public function testFetchAllInMigration(): void
+    public function testGetInMigration(): void
     {
         $issuesData = [
             ['id' => 1, 'issue_type' => 'warning', 'workflow_state' => 'active'],
@@ -74,7 +74,7 @@ class MigrationIssueTest extends TestCase
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')->willReturn($issuesData);
+        $mockPaginatedResponse->method('all')->willReturn($issuesData);
         
         $this->mockClient->method('getPaginated')
             ->with('courses/1/content_migrations/456/migration_issues', ['query' => []])

@@ -9,6 +9,7 @@ use CanvasLMS\Config;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Pagination\PaginationResult;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Message\ResponseInterface;
@@ -26,7 +27,7 @@ class CalendarEventAccountContextTest extends TestCase
         Config::setAccountId(1);
     }
 
-    public function testFetchAllDefaultsToAccountContext(): void
+    public function testGetDefaultsToAccountContext(): void
     {
         $mockResponse = $this->createMockResponseWithBody([
             [
@@ -56,7 +57,7 @@ class CalendarEventAccountContextTest extends TestCase
             ->with('calendar_events', $expectedParams)
             ->willReturn($mockResponse);
 
-        $events = CalendarEvent::fetchAll();
+        $events = CalendarEvent::get();
 
         $this->assertCount(2, $events);
         $this->assertInstanceOf(CalendarEvent::class, $events[0]);
@@ -65,7 +66,7 @@ class CalendarEventAccountContextTest extends TestCase
         $this->assertEquals(1, $events[0]->getContextId());
     }
 
-    public function testFetchAllWithCustomContextCodes(): void
+    public function testGetWithCustomContextCodes(): void
     {
         $mockResponse = $this->createMockResponseWithBody([
             ['id' => 3, 'title' => 'Course Event', 'context_code' => 'course_123']
@@ -81,15 +82,26 @@ class CalendarEventAccountContextTest extends TestCase
             ->with('calendar_events', $expectedParams)
             ->willReturn($mockResponse);
 
-        $events = CalendarEvent::fetchAll($params);
+        $events = CalendarEvent::get($params);
 
         $this->assertCount(1, $events);
         $this->assertEquals('Course Event', $events[0]->title);
     }
 
-    public function testFetchAllPaginatedDefaultsToAccountContext(): void
+    public function testGetPaginatedDefaultsToAccountContext(): void
     {
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn([
+                ['id' => 1, 'title' => 'Test Event', 'context_code' => 'account_1']
+            ]);
+        
+        $mockPaginationResult = $this->createMock(PaginationResult::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('toPaginationResult')
+            ->with($this->isType('array'))
+            ->willReturn($mockPaginationResult);
 
         $expectedParams = [
             'query' => [
@@ -102,9 +114,9 @@ class CalendarEventAccountContextTest extends TestCase
             ->with('calendar_events', $expectedParams)
             ->willReturn($mockPaginatedResponse);
 
-        $response = CalendarEvent::fetchAllPaginated();
+        $response = CalendarEvent::paginate();
 
-        $this->assertInstanceOf(PaginatedResponse::class, $response);
+        $this->assertInstanceOf(PaginationResult::class, $response);
     }
 
     public function testFetchByContextForCourse(): void
@@ -265,7 +277,7 @@ class CalendarEventAccountContextTest extends TestCase
         $this->assertEquals(123, $event->getContextId());
     }
 
-    public function testFetchAllThrowsExceptionWithoutAccountId(): void
+    public function testGetThrowsExceptionWithoutAccountId(): void
     {
         // Set account ID to 0 (invalid)
         Config::setAccountId(0);
@@ -273,7 +285,7 @@ class CalendarEventAccountContextTest extends TestCase
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Account ID must be configured to fetch calendar events');
 
-        CalendarEvent::fetchAll();
+        CalendarEvent::get();
         
         // Reset to valid value for other tests
         Config::setAccountId(1);

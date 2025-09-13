@@ -398,9 +398,9 @@ class CourseReportsTest extends TestCase
     public function testUnsupportedFetchAllMethod(): void
     {
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage('Use specific report type methods (last, getReport) instead of fetchAll');
+        $this->expectExceptionMessage('Use specific report type methods (last, getReport) instead of get');
         
-        CourseReports::fetchAll();
+        CourseReports::get();
     }
 
     public function testPropertyConversionFromSnakeCaseToCamelCase(): void

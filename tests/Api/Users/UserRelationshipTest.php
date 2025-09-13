@@ -144,7 +144,7 @@ class UserRelationshipTest extends TestCase
         // Mock paginated response
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('all')
             ->willReturn($groupsData);
 
         // Set up mock expectations for paginated request

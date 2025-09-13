@@ -27,10 +27,10 @@ use CanvasLMS\Pagination\PaginationResult;
  * Module::setCourse($course);
  *
  * // Get all modules for a course (first page only)
- * $modules = Module::fetchAll();
+ * $modules = Module::get();
  *
  * // Get modules with query parameters
- * $modules = Module::fetchAll([
+ * $modules = Module::get([
  *     'include' => ['items', 'content_details'],
  *     'search_term' => 'Introduction',
  *     'student_id' => '123'
@@ -40,17 +40,12 @@ use CanvasLMS\Pagination\PaginationResult;
  * $module = Module::find(1, ['include' => ['items']]);
  *
  * // Fetch modules with pagination support
- * $paginatedResponse = Module::fetchAllPaginated(['per_page' => 10]);
- * $modules = $paginatedResponse->getJsonData();
- * $pagination = $paginatedResponse->toPaginationResult($modules);
- *
- * // Fetch a specific page of modules
- * $paginationResult = Module::fetchPage(['page' => 2, 'per_page' => 10]);
+ * $paginationResult = Module::paginate(['per_page' => 10]);
  * $modules = $paginationResult->getData();
  * $hasNext = $paginationResult->hasNext();
  *
  * // Fetch all modules from all pages
- * $allModules = Module::fetchAllPages(['per_page' => 50]);
+ * $allModules = Module::all(['per_page' => 50]);
  *
  * // Create a new module
  * $module = Module::create([
@@ -122,7 +117,7 @@ class Module extends AbstractBaseApi
      * Course
      * @var Course
      */
-    protected static Course $course;
+    protected static ?Course $course = null;
 
     /**
      * Module constructor.
@@ -283,7 +278,7 @@ class Module extends AbstractBaseApi
      */
     protected static function validatePrerequisitePositions(array $prerequisiteModuleIds, int $position): void
     {
-        $modules = self::fetchAll();
+        $modules = self::get();
         $modulePositions = [];
 
         foreach ($modules as $module) {
@@ -383,67 +378,6 @@ class Module extends AbstractBaseApi
         $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
 
         return new self($moduleData);
-    }
-
-    /**
-     * Get all modules for a course.
-     * @param mixed[] $params Query parameters (include[], search_term, student_id)
-     * @return mixed[]
-     * @throws CanvasApiException
-     */
-    public static function fetchAll(array $params = []): array
-    {
-        self::checkApiClient();
-        self::checkCourse();
-
-        $response = self::$apiClient->get(sprintf('courses/%d/modules', self::$course->id), [
-            'query' => $params
-        ]);
-
-        $modulesData = json_decode($response->getBody()->getContents(), true) ?? [];
-
-        $modules = [];
-        foreach ($modulesData as $moduleData) {
-            $modules[] = new self($moduleData);
-        }
-
-        return $modules;
-    }
-
-    /**
-     * Fetch modules with pagination support
-     * @param mixed[] $params Query parameters for the request
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkCourse();
-        return self::getPaginatedResponse(sprintf('courses/%d/modules', self::$course->id), $params);
-    }
-
-    /**
-     * Fetch modules from a specific page
-     * @param mixed[] $params Query parameters for the request
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Fetch all modules from all pages
-     * @param mixed[] $params Query parameters for the request
-     * @return Module[]
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        self::checkCourse();
-        return self::fetchAllPagesAsModels(sprintf('courses/%d/modules', self::$course->id), $params);
     }
 
     /**
@@ -760,7 +694,7 @@ class Module extends AbstractBaseApi
         ModuleItem::setCourse(self::$course);
         ModuleItem::setModule($this);
 
-        return ModuleItem::fetchAll($params);
+        return ModuleItem::all($params);
     }
 
     /**
@@ -911,7 +845,7 @@ class Module extends AbstractBaseApi
      * }
      *
      * // Track progress across all modules
-     * $modules = Module::fetchAll();
+     * $modules = Module::get();
      * foreach ($modules as $module) {
      *     $rate = $module->getCompletionRate();
      *     echo "{$module->name}: {$rate}% complete\n";

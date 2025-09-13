@@ -41,13 +41,13 @@ use CanvasLMS\Pagination\PaginationResult;
  * $announcement = Announcement::find(456);
  *
  * // List all announcements for the course
- * $announcements = Announcement::fetchAll();
+ * $announcements = Announcement::get();
  *
  * // Get only active announcements
- * $activeAnnouncements = Announcement::fetchAll(['active_only' => true]);
+ * $activeAnnouncements = Announcement::get(['active_only' => true]);
  *
  * // Get paginated announcements
- * $paginatedAnnouncements = Announcement::fetchAllPaginated();
+ * $paginatedAnnouncements = Announcement::paginate();
  *
  * // Update an announcement
  * $updatedAnnouncement = Announcement::update(456, ['title' => 'Updated: Exam Schedule']);
@@ -77,7 +77,7 @@ class Announcement extends DiscussionTopic
      * @return array<Announcement> Array of Announcement objects
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         $params['only_announcements'] = true;
 
@@ -97,33 +97,13 @@ class Announcement extends DiscussionTopic
     }
 
     /**
-     * Fetch all announcements with pagination support
-     * Overrides parent to automatically filter for announcements only
+     * Get paginated announcements
      *
-     * @param array<string, mixed> $params Optional parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        $params['only_announcements'] = true;
-
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
-
-    /**
-     * Fetch a single page of announcements
-     * Overrides parent to automatically filter for announcements only
-     *
-     * @param array<string, mixed> $params Optional parameters
+     * @param array<string, mixed> $params Query parameters
      * @return PaginationResult
      * @throws CanvasApiException
      */
-    public static function fetchPage(array $params = []): PaginationResult
+    public static function paginate(array $params = []): PaginationResult
     {
         $params['only_announcements'] = true;
 
@@ -133,18 +113,23 @@ class Announcement extends DiscussionTopic
         $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
 
-        return self::createPaginationResult($paginatedResponse);
+        // Convert data to models
+        $data = [];
+        foreach ($paginatedResponse->getJsonData() as $item) {
+            $data[] = new self($item);
+        }
+
+        return $paginatedResponse->toPaginationResult($data);
     }
 
     /**
-     * Fetch all pages of announcements
-     * Overrides parent to automatically filter for announcements only
+     * Get all announcements from all pages
      *
-     * @param array<string, mixed> $params Optional parameters
-     * @return array<Announcement> Array of Announcement objects from all pages
+     * @param array<string, mixed> $params Query parameters
+     * @return array<int, self>
      * @throws CanvasApiException
      */
-    public static function fetchAllPages(array $params = []): array
+    public static function all(array $params = []): array
     {
         $params['only_announcements'] = true;
 
@@ -152,7 +137,26 @@ class Announcement extends DiscussionTopic
         self::checkApiClient();
 
         $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
-        return self::fetchAllPagesAsModels($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+
+        $announcements = [];
+        foreach ($allData as $item) {
+            $announcements[] = new self($item);
+        }
+
+        return $announcements;
+    }
+
+    /**
+     * Get the API endpoint for this resource
+     * @return string
+     * @throws CanvasApiException
+     */
+    protected static function getEndpoint(): string
+    {
+        self::checkCourse();
+        return sprintf('courses/%d/discussion_topics', self::$course->id);
     }
 
     /**

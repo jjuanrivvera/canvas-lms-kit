@@ -58,19 +58,19 @@ class SubmissionComment extends AbstractBaseApi
      * Course context (required)
      * @var Course
      */
-    protected static Course $course;
+    protected static ?Course $course = null;
 
     /**
      * Assignment context (required)
      * @var Assignment
      */
-    protected static Assignment $assignment;
+    protected static ?Assignment $assignment = null;
 
     /**
      * User ID context (required) - the user whose submission this comment belongs to
      * @var int
      */
-    protected static int $userId;
+    protected static ?int $userId = null;
 
     /**
      * Comment unique identifier
@@ -268,7 +268,7 @@ class SubmissionComment extends AbstractBaseApi
      * Note: Canvas API doesn't provide a direct endpoint for individual comment retrieval
      * @throws Exception
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         throw new Exception(
             'SubmissionComment::find() is not supported by Canvas API. Comments are retrieved through submissions.'
@@ -282,10 +282,10 @@ class SubmissionComment extends AbstractBaseApi
      * @return array<self>
      * @throws Exception
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         throw new Exception(
-            'SubmissionComment::fetchAll() is not supported by Canvas API. Comments are retrieved through submissions.'
+            'SubmissionComment::get() is not supported by Canvas API. Comments are retrieved through submissions.'
         );
     }
 

@@ -25,7 +25,7 @@ class ExternalToolAccountContextTest extends TestCase
         Config::setAccountId(1);
     }
 
-    public function testFetchAllUsesAccountContext(): void
+    public function testGetUsesAccountContext(): void
     {
         $toolsData = [
             ['id' => 1, 'name' => 'Tool 1', 'consumer_key' => 'key1'],
@@ -43,7 +43,7 @@ class ExternalToolAccountContextTest extends TestCase
             ->with('accounts/1/external_tools', ['query' => []])
             ->willReturn($mockResponse);
 
-        $tools = ExternalTool::fetchAll();
+        $tools = ExternalTool::get();
 
         $this->assertCount(2, $tools);
         $this->assertInstanceOf(ExternalTool::class, $tools[0]);
@@ -56,10 +56,13 @@ class ExternalToolAccountContextTest extends TestCase
     {
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('getJsonData')
             ->willReturn([
                 ['id' => 3, 'name' => 'Course Tool', 'consumer_key' => 'key3']
             ]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->mockClient->expects($this->once())
             ->method('getPaginated')

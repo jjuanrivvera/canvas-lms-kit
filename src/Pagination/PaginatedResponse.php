@@ -419,9 +419,20 @@ class PaginatedResponse
     }
 
     /**
+     * Get all data from all pages (new simplified method)
+     *
+     * @return mixed[] Array containing all data from all pages
+     */
+    public function all(): array
+    {
+        return $this->fetchAllPages();
+    }
+
+    /**
      * Fetch all pages starting from current page
      *
      * @return mixed[] Array containing all data from all pages
+     * @deprecated Use all() instead
      */
     public function fetchAllPages(): array
     {

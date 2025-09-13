@@ -32,10 +32,13 @@ use CanvasLMS\Pagination\PaginatedResponse;
  * $admin = Admin::create($adminData, 1); // Account ID 1
  *
  * // Finding all admins for an account
- * $admins = Admin::fetchAll(1);
+ * $admins = Admin::get(['account_id' => 1]);
+ *
+ * // Get all admins from all pages
+ * $allAdmins = Admin::all(['account_id' => 1]);
  *
  * // Removing admin privileges
- * $admin = Admin::find(123, 1); // User ID 123, Account ID 1
+ * $admin = Admin::find(123, ['account_id' => 1]); // User ID 123, Account ID 1
  * $admin->delete();
  *
  * // Getting available admin roles
@@ -153,7 +156,7 @@ class Admin extends AbstractBaseApi
         }
 
         // First, we need to get all admins and find the specific one
-        $admins = self::fetchAll(['account_id' => $accountId, 'user_id' => [$userId]]);
+        $admins = self::get(['account_id' => $accountId, 'user_id' => [$userId]]);
 
         if (empty($admins)) {
             throw new CanvasApiException("Admin with user ID {$userId} not found in account {$accountId}");
@@ -163,13 +166,13 @@ class Admin extends AbstractBaseApi
     }
 
     /**
-     * Get a list of account admins
+     * Get first page of admins
      *
      * @param array<string, mixed> $params Query parameters (can include 'account_id')
      * @return array<int, self>
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         self::checkApiClient();
 
@@ -192,56 +195,13 @@ class Admin extends AbstractBaseApi
     }
 
     /**
-     * Get admins with pagination support
-     *
-     * @param array<string, mixed> $params Query parameters (can include 'account_id')
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkApiClient();
-
-        $accountId = $params['account_id'] ?? Config::getAccountId();
-        unset($params['account_id']); // Remove from query params
-
-        if (empty($accountId)) {
-            throw new CanvasApiException("Account ID must be provided or set in Config");
-        }
-
-        $endpoint = sprintf('accounts/%d/admins', $accountId);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
-
-    /**
-     * Get a specific page of admins
-     *
-     * @param array<string, mixed> $params Query parameters including page, per_page, and account_id
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $accountId = $params['account_id'] ?? Config::getAccountId();
-        $paginatedResponse = self::fetchAllPaginated($params);
-        $data = self::convertPaginatedResponseToModels($paginatedResponse);
-
-        // Add account ID to each admin
-        foreach ($data as $admin) {
-            $admin->accountId = $accountId;
-        }
-
-        return $paginatedResponse->toPaginationResult($data);
-    }
-
-    /**
      * Get all admins from all pages
      *
      * @param array<string, mixed> $params Query parameters (can include 'account_id')
      * @return array<int, self>
      * @throws CanvasApiException
      */
-    public static function fetchAllPages(array $params = []): array
+    public static function all(array $params = []): array
     {
         self::checkApiClient();
 
@@ -253,15 +213,54 @@ class Admin extends AbstractBaseApi
         }
 
         $endpoint = sprintf('accounts/%d/admins', $accountId);
-        $admins = self::fetchAllPagesAsModels($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
 
-        // Add account ID to each admin
-        foreach ($admins as $admin) {
+        $admins = [];
+        foreach ($allData as $item) {
+            $admin = new self($item);
             $admin->accountId = $accountId;
+            $admins[] = $admin;
         }
 
         return $admins;
     }
+
+
+    /**
+     * Get paginated admins
+     *
+     * @param array<string, mixed> $params Query parameters (can include 'account_id')
+     * @return PaginationResult
+     * @throws CanvasApiException
+     */
+    public static function paginate(array $params = []): PaginationResult
+    {
+        self::checkApiClient();
+
+        $accountId = $params['account_id'] ?? Config::getAccountId();
+        unset($params['account_id']); // Remove from query params
+
+        if (empty($accountId)) {
+            throw new CanvasApiException("Account ID must be provided or set in Config");
+        }
+
+        $endpoint = sprintf('accounts/%d/admins', $accountId);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+
+        // Convert data to models with account ID
+        $data = [];
+        foreach ($paginatedResponse->getJsonData() as $item) {
+            $admin = new self($item);
+            $admin->accountId = $accountId;
+            $data[] = $admin;
+        }
+
+        return $paginatedResponse->toPaginationResult($data);
+    }
+
+
+
 
     /**
      * Remove admin privileges (delete admin)

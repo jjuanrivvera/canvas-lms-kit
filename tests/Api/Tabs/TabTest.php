@@ -36,7 +36,7 @@ class TabTest extends TestCase
         $reflection = new \ReflectionClass(Tab::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, new Course(['id' => 0]));
+        $property->setValue(null, null);
     }
 
     public function testSetCourse(): void
@@ -58,7 +58,7 @@ class TabTest extends TestCase
         $reflection = new \ReflectionClass(Tab::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, new Course([]));
+        $property->setValue(null, null);
 
         Tab::checkCourse();
     }
@@ -112,7 +112,7 @@ class TabTest extends TestCase
         $this->assertEquals(1, $tab->getPosition());
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $responseData = [
             [
@@ -151,7 +151,7 @@ class TabTest extends TestCase
             ->with('courses/123/tabs', ['query' => []])
             ->willReturn($responseMock);
 
-        $tabs = Tab::fetchAll();
+        $tabs = Tab::get();
 
         $this->assertCount(2, $tabs);
         $this->assertInstanceOf(Tab::class, $tabs[0]);
@@ -159,7 +159,7 @@ class TabTest extends TestCase
         $this->assertEquals('assignments', $tabs[1]->getId());
     }
 
-    public function testFetchAllWithParams(): void
+    public function testGetWithParams(): void
     {
         $params = ['include' => ['course_subject_tabs']];
         $responseData = [];
@@ -180,12 +180,12 @@ class TabTest extends TestCase
             ->with('courses/123/tabs', ['query' => $params])
             ->willReturn($responseMock);
 
-        $tabs = Tab::fetchAll($params);
+        $tabs = Tab::get($params);
 
         $this->assertCount(0, $tabs);
     }
 
-    public function testFetchAllPaginated(): void
+    public function testGetPaginated(): void
     {
         $paginatedResponseMock = $this->createMock(PaginatedResponse::class);
 
@@ -199,7 +199,7 @@ class TabTest extends TestCase
 
         // Since we can't easily mock static methods, we'll test that the method exists
         // and returns the expected type from the parent class
-        $this->assertTrue(method_exists(Tab::class, 'fetchAllPaginated'));
+        $this->assertTrue(method_exists(Tab::class, 'paginate'));
     }
 
     public function testUpdate(): void
@@ -371,7 +371,7 @@ class TabTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage(
-            'Canvas API does not support finding individual tabs by ID. Use fetchAll() to retrieve all tabs.'
+            'Canvas API does not support finding individual tabs by ID. Use get() to retrieve all tabs.'
         );
 
         Tab::find(123);

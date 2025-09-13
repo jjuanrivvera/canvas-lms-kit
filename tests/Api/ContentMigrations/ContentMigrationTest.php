@@ -61,7 +61,7 @@ class ContentMigrationTest extends TestCase
         ContentMigration::find(123);
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $migrationsData = [
             ['id' => 1, 'migration_type' => 'course_copy_importer'],
@@ -75,7 +75,7 @@ class ContentMigrationTest extends TestCase
             ->with('accounts/1/content_migrations', ['query' => []])
             ->willReturn($this->mockResponse);
 
-        $migrations = ContentMigration::fetchAll();
+        $migrations = ContentMigration::get();
 
         $this->assertCount(2, $migrations);
         $this->assertInstanceOf(ContentMigration::class, $migrations[0]);
@@ -228,7 +228,7 @@ class ContentMigrationTest extends TestCase
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')->willReturn($issuesData);
+        $mockPaginatedResponse->method('all')->willReturn($issuesData);
         
         $this->mockClient->method('getPaginated')
             ->with('courses/456/content_migrations/123/migration_issues', ['query' => []])

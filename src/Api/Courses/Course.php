@@ -12,7 +12,6 @@ use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Objects\CalendarLink;
 use CanvasLMS\Objects\CourseProgress;
 use CanvasLMS\Objects\Term;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
@@ -564,7 +563,7 @@ class Course extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkApiClient();
 
@@ -581,7 +580,7 @@ class Course extends AbstractBaseApi
      * @return Course[]
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         self::checkApiClient();
 
@@ -600,39 +599,16 @@ class Course extends AbstractBaseApi
 
     /**
      * Fetch courses with pagination support
-     * @param mixed[] $params Query parameters for the request
+     * @param array<string, mixed> $params Query parameters for the request
      * @return PaginatedResponse
      * @throws CanvasApiException
      */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
+    public static function paginateRaw(array $params = []): PaginatedResponse
     {
         $accountId = Config::getAccountId();
         return self::getPaginatedResponse("/accounts/{$accountId}/courses", $params);
     }
 
-    /**
-     * Fetch courses from a specific page
-     * @param mixed[] $params Query parameters for the request
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Fetch all courses from all pages
-     * @param mixed[] $params Query parameters for the request
-     * @return Course[]
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        $accountId = Config::getAccountId();
-        return self::fetchAllPagesAsModels("/accounts/{$accountId}/courses", $params);
-    }
 
     /**
      * Save the course to the Canvas LMS system
@@ -724,10 +700,8 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to fetch group categories');
         }
 
-        return \CanvasLMS\Api\GroupCategories\GroupCategory::fetchAllPagesAsModels(
-            sprintf('courses/%d/group_categories', $this->id),
-            $params
-        );
+        \CanvasLMS\Api\GroupCategories\GroupCategory::setCourse($this);
+        return \CanvasLMS\Api\GroupCategories\GroupCategory::all($params);
     }
 
     /**
@@ -1440,13 +1414,10 @@ class Course extends AbstractBaseApi
 
         // Set this course as the context and fetch enrollments
         Enrollment::setCourse($this);
-        return Enrollment::fetchAll($params);
+        return Enrollment::all($params);
     }
 
     // Enrollment Relationship Methods
-    // NOTE: All relationship methods return FIRST PAGE ONLY for performance.
-    // To get all items, use the static methods with context:
-    // Assignment::setCourse($course); $all = Assignment::all();
 
 
     /**
@@ -2721,17 +2692,12 @@ class Course extends AbstractBaseApi
     // Assignment Relationship Methods
 
     /**
-     * Get assignments for this course (first page only)
+     * Get assignments for this course
      *
-     * NOTE: Returns FIRST PAGE of assignments only for performance.
-     * To get ALL assignments:
-     * ```php
-     * Assignment::setCourse($course);
-     * $allAssignments = Assignment::all();
-     * ```
+     * Returns ALL assignments for this course.
      *
      * @param array<string, mixed> $params Query parameters
-     * @return Assignment[] First page of assignments
+     * @return Assignment[] All assignments
      * @throws CanvasApiException
      */
     public function assignments(array $params = []): array
@@ -2741,7 +2707,7 @@ class Course extends AbstractBaseApi
         }
 
         Assignment::setCourse($this);
-        return Assignment::fetchAll($params); // fetchAll() is aliased to get() - first page only
+        return Assignment::all($params);
     }
 
 
@@ -2761,7 +2727,7 @@ class Course extends AbstractBaseApi
         }
 
         Module::setCourse($this);
-        return Module::fetchAll($params);
+        return Module::all($params);
     }
 
 
@@ -2782,7 +2748,7 @@ class Course extends AbstractBaseApi
         }
 
         Page::setCourse($this);
-        return Page::fetchAll($params);
+        return Page::all($params);
     }
 
 
@@ -2802,7 +2768,7 @@ class Course extends AbstractBaseApi
         }
 
         Section::setCourse($this);
-        return Section::fetchAll($params);
+        return Section::all($params);
     }
 
 
@@ -2822,16 +2788,13 @@ class Course extends AbstractBaseApi
         }
 
         DiscussionTopic::setCourse($this);
-        return DiscussionTopic::fetchAll($params);
+        return DiscussionTopic::all($params);
     }
 
     /**
      * Get announcements for this course
      *
-     * Returns the first page of announcements for performance. To fetch more announcements, use:
-     * - Announcement::fetchAllPaginated() for pagination metadata
-     * - Announcement::fetchAllPages() for all announcements (memory intensive)
-     * - Announcement::fetchPage() for single page with navigation
+     * Returns ALL announcements for this course.
      *
      * @example
      * ```php
@@ -2843,7 +2806,7 @@ class Course extends AbstractBaseApi
      * ```
      *
      * @param array<string, mixed> $params Query parameters (active_only, etc.)
-     * @return Announcement[] First page of announcements
+     * @return Announcement[] All announcements
      * @throws CanvasApiException
      */
     public function announcements(array $params = []): array
@@ -2853,7 +2816,7 @@ class Course extends AbstractBaseApi
         }
 
         Announcement::setCourse($this);
-        return Announcement::fetchAll($params);
+        return Announcement::all($params);
     }
 
 
@@ -2873,7 +2836,7 @@ class Course extends AbstractBaseApi
         }
 
         Quiz::setCourse($this);
-        return Quiz::fetchAll($params);
+        return Quiz::all($params);
     }
 
 
@@ -2964,7 +2927,7 @@ class Course extends AbstractBaseApi
         }
 
         Tab::setCourse($this);
-        return Tab::fetchAll();
+        return Tab::all();
     }
 
     /**
@@ -3027,7 +2990,7 @@ class Course extends AbstractBaseApi
      * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
      * @throws CanvasApiException
      */
-    public function getFeatureFlag(string $featureName): \CanvasLMS\Api\FeatureFlags\FeatureFlag
+    public function featureFlag(string $featureName): \CanvasLMS\Api\FeatureFlags\FeatureFlag
     {
         if (!$this->id) {
             throw new CanvasApiException('Course ID is required to get feature flag');
@@ -3238,7 +3201,7 @@ class Course extends AbstractBaseApi
      * @return \CanvasLMS\Api\OutcomeImports\OutcomeImport
      * @throws CanvasApiException
      */
-    public function getOutcomeImportStatus(int|string $importId): \CanvasLMS\Api\OutcomeImports\OutcomeImport
+    public function outcomeImportStatus(int|string $importId): \CanvasLMS\Api\OutcomeImports\OutcomeImport
     {
         if (!$this->id) {
             throw new CanvasApiException('Course ID is required to get import status');

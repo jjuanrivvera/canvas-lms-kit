@@ -25,7 +25,7 @@ class FileContextTest extends TestCase
         Config::setAccountId(1);
     }
 
-    public function testFetchAllUsesUserContext(): void
+    public function testGetUsesUserContext(): void
     {
         $mockBody = $this->createMock(StreamInterface::class);
         $mockBody->method('getContents')->willReturn(json_encode([
@@ -41,7 +41,7 @@ class FileContextTest extends TestCase
             ->with('/users/self/files', ['query' => []])
             ->willReturn($mockResponse);
 
-        $files = File::fetchAll();
+        $files = File::get();
 
         $this->assertCount(2, $files);
         $this->assertInstanceOf(File::class, $files[0]);
@@ -54,10 +54,13 @@ class FileContextTest extends TestCase
     {
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('getJsonData')
             ->willReturn([
                 ['id' => 3, 'filename' => 'syllabus.pdf', 'display_name' => 'Course Syllabus']
             ]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->mockClient->expects($this->once())
             ->method('getPaginated')
@@ -76,10 +79,13 @@ class FileContextTest extends TestCase
     {
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('getJsonData')
             ->willReturn([
                 ['id' => 4, 'filename' => 'group_project.zip', 'display_name' => 'Group Project']
             ]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->mockClient->expects($this->once())
             ->method('getPaginated')
@@ -98,10 +104,13 @@ class FileContextTest extends TestCase
     {
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('getJsonData')
             ->willReturn([
                 ['id' => 5, 'filename' => 'lecture.pdf', 'display_name' => 'Lecture Notes']
             ]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->mockClient->expects($this->once())
             ->method('getPaginated')
@@ -127,16 +136,29 @@ class FileContextTest extends TestCase
             'upload_params' => ['key' => 'value']
         ]);
 
+        // Mock for Step 2 - Upload to external storage (with Location header)
+        $mockUploadStorageResponse = $this->createMock(ResponseInterface::class);
+        $mockUploadStorageResponse->method('getStatusCode')->willReturn(302);
+        $mockUploadStorageResponse->method('getHeader')
+            ->with('Location')
+            ->willReturn(['https://canvas.example.com/confirm']);
+        $mockUploadStorageResponse->method('getBody')
+            ->willReturn($this->createMock(StreamInterface::class));
+
         $mockFileResponse = $this->createMockResponseWithBody([
             'id' => 100,
             'filename' => 'uploaded.pdf',
             'display_name' => 'Uploaded File'
         ]);
 
-        $this->mockClient->expects($this->exactly(2))
+        $this->mockClient->expects($this->once())
             ->method('post')
+            ->willReturn($mockUploadResponse);
+        
+        $this->mockClient->expects($this->exactly(2))
+            ->method('rawRequest')
             ->willReturnOnConsecutiveCalls(
-                $mockUploadResponse,
+                $mockUploadStorageResponse,
                 $mockFileResponse
             );
 
@@ -167,16 +189,29 @@ class FileContextTest extends TestCase
             'upload_params' => ['key' => 'value']
         ]);
 
+        // Mock for Step 2 - Upload to external storage (with Location header)
+        $mockUploadStorageResponse = $this->createMock(ResponseInterface::class);
+        $mockUploadStorageResponse->method('getStatusCode')->willReturn(302);
+        $mockUploadStorageResponse->method('getHeader')
+            ->with('Location')
+            ->willReturn(['https://canvas.example.com/confirm']);
+        $mockUploadStorageResponse->method('getBody')
+            ->willReturn($this->createMock(StreamInterface::class));
+
         $mockFileResponse = $this->createMockResponseWithBody([
             'id' => 200,
             'filename' => 'course_doc.pdf',
             'display_name' => 'Course Document'
         ]);
 
-        $this->mockClient->expects($this->exactly(2))
+        $this->mockClient->expects($this->once())
             ->method('post')
+            ->willReturn($mockUploadResponse);
+        
+        $this->mockClient->expects($this->exactly(2))
+            ->method('rawRequest')
             ->willReturnOnConsecutiveCalls(
-                $mockUploadResponse,
+                $mockUploadStorageResponse,
                 $mockFileResponse
             );
 
@@ -196,7 +231,7 @@ class FileContextTest extends TestCase
         unlink($tempFile);
     }
 
-    public function testFetchAllPagesWithUserContext(): void
+    public function testGetPagesWithUserContext(): void
     {
         // Create mock for first page
         $firstPageData = [['id' => 10, 'filename' => 'personal1.pdf']];

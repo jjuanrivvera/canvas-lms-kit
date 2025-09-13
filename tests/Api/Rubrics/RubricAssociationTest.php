@@ -183,12 +183,12 @@ class RubricAssociationTest extends TestCase
     /**
      * Test fetchAll method throws exception
      */
-    public function testFetchAllThrowsException(): void
+    public function testGetThrowsException(): void
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage("Fetching all rubric associations is not supported");
 
-        RubricAssociation::fetchAll();
+        RubricAssociation::get();
     }
 
     /**

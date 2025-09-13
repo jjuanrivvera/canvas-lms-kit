@@ -9,7 +9,6 @@ use CanvasLMS\Dto\ContentMigrations\UpdateMigrationIssueDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
 use DateTime;
-use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Migration Issues API
@@ -89,10 +88,10 @@ class MigrationIssue extends AbstractBaseApi
     /**
      * Set the parent content migration
      *
-     * @param ContentMigration $contentMigration
+     * @param ContentMigration $_contentMigration
      * @deprecated This method is no longer used and will be removed in a future version
      */
-    public static function setContentMigration(ContentMigration $contentMigration): void
+    public static function setContentMigration(ContentMigration $_contentMigration): void
     {
         // No-op: This method is deprecated and does nothing
     }
@@ -115,7 +114,7 @@ class MigrationIssue extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         throw new CanvasApiException(
             'Direct find() not supported for MigrationIssue. Use findInMigration() instead.'
@@ -160,10 +159,23 @@ class MigrationIssue extends AbstractBaseApi
      * @return array<MigrationIssue>
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         throw new CanvasApiException(
-            'Direct fetchAll() not supported for MigrationIssue. Use fetchAllInMigration() instead.'
+            'Direct get() not supported for MigrationIssue. Use fetchAllInMigration() instead.'
+        );
+    }
+
+    /**
+     * Get all pages of records (interface method)
+     * @param array<string, mixed> $params
+     * @return array<MigrationIssue>
+     * @throws CanvasApiException
+     */
+    public static function all(array $params = []): array
+    {
+        throw new CanvasApiException(
+            'Direct all() not supported for MigrationIssue. Use allInMigration() instead.'
         );
     }
 
@@ -183,7 +195,7 @@ class MigrationIssue extends AbstractBaseApi
         int $migrationId,
         array $params = []
     ): array {
-        return self::fetchAllPages($contextType, $contextId, $migrationId, $params);
+        return self::allInMigration($contextType, $contextId, $migrationId, $params);
     }
 
     /**
@@ -196,7 +208,7 @@ class MigrationIssue extends AbstractBaseApi
      * @return PaginatedResponse
      * @throws CanvasApiException
      */
-    public static function fetchAllPaginated(
+    public static function paginateInMigration(
         string $contextType,
         int $contextId,
         int $migrationId,
@@ -212,26 +224,6 @@ class MigrationIssue extends AbstractBaseApi
     }
 
     /**
-     * Get a single page of migration issues
-     *
-     * @param string $contextType Context type (accounts, courses, groups, users)
-     * @param int $contextId Context ID
-     * @param int $migrationId Content migration ID
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(
-        string $contextType,
-        int $contextId,
-        int $migrationId,
-        array $params = []
-    ): PaginationResult {
-        $paginatedResponse = self::fetchAllPaginated($contextType, $contextId, $migrationId, $params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
      * Get all pages of migration issues
      *
      * @param string $contextType Context type (accounts, courses, groups, users)
@@ -241,7 +233,7 @@ class MigrationIssue extends AbstractBaseApi
      * @return array<MigrationIssue>
      * @throws CanvasApiException
      */
-    public static function fetchAllPages(
+    public static function allInMigration(
         string $contextType,
         int $contextId,
         int $migrationId,
@@ -253,7 +245,9 @@ class MigrationIssue extends AbstractBaseApi
             $contextId,
             $migrationId
         );
-        return self::fetchAllPagesAsModels($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+        return array_map(fn($data) => new self($data), $allData);
     }
 
     /**
@@ -333,7 +327,7 @@ class MigrationIssue extends AbstractBaseApi
                 $this->workflowState = $updated->getWorkflowState();
                 $this->updatedAt = $updated->getUpdatedAt();
                 return true;
-            } catch (\Exception $e) {
+            } catch (\Exception $_e) {
                 return false;
             }
         }
@@ -377,7 +371,7 @@ class MigrationIssue extends AbstractBaseApi
                 $this->workflowState = $updated->getWorkflowState();
                 $this->updatedAt = $updated->getUpdatedAt();
                 return true;
-            } catch (\Exception $e) {
+            } catch (\Exception $_e) {
                 return false;
             }
         }

@@ -30,7 +30,7 @@ use CanvasLMS\Pagination\PaginationResult;
  * ModuleItem::setModule($module);
  *
  * // Get all module items
- * $items = ModuleItem::fetchAll();
+ * $items = ModuleItem::get();
  *
  * // Create new assignment module item
  * $item = ModuleItem::create([
@@ -103,13 +103,13 @@ class ModuleItem extends AbstractBaseApi
      * Course context (required)
      * @var Course
      */
-    protected static Course $course;
+    protected static ?Course $course = null;
 
     /**
      * Module context (required)
      * @var Module
      */
-    protected static Module $module;
+    protected static ?Module $module = null;
 
     /**
      * Unique identifier for the module item.
@@ -373,17 +373,18 @@ class ModuleItem extends AbstractBaseApi
     /**
      * Find a module item by its ID.
      * @param int $id
+     * @param array<string, mixed> $params Optional query parameters
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkApiClient();
         self::checkCourse();
         self::checkModule();
 
         $endpoint = sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
 
         $moduleItemData = json_decode($response->getBody()->getContents(), true);
 
@@ -396,7 +397,7 @@ class ModuleItem extends AbstractBaseApi
      * @return mixed[]
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         self::checkApiClient();
         self::checkCourse();
@@ -417,31 +418,7 @@ class ModuleItem extends AbstractBaseApi
         return $moduleItems;
     }
 
-    /**
-     * Fetch module items with pagination support
-     * @param mixed[] $params Query parameters for the request
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkCourse();
-        self::checkModule();
-        $endpoint = sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
 
-    /**
-     * Fetch module items from a specific page
-     * @param mixed[] $params Query parameters for the request
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
 
     /**
      * Fetch all module items from all pages
@@ -449,12 +426,21 @@ class ModuleItem extends AbstractBaseApi
      * @return ModuleItem[]
      * @throws CanvasApiException
      */
-    public static function fetchAllPages(array $params = []): array
+    public static function all(array $params = []): array
     {
         self::checkCourse();
         self::checkModule();
+        self::checkApiClient();
         $endpoint = sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id);
-        return self::fetchAllPagesAsModels($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+
+        $items = [];
+        foreach ($allData as $item) {
+            $items[] = new self($item);
+        }
+
+        return $items;
     }
 
     /**

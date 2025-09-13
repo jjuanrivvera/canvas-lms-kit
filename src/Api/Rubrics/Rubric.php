@@ -24,7 +24,7 @@ use CanvasLMS\Pagination\PaginatedResponse;
  *
  * ```php
  * // Account context (default)
- * $rubrics = Rubric::fetchAll();
+ * $rubrics = Rubric::get();
  * $rubric = Rubric::create([
  *     'title' => 'Account Rubric',
  *     'criteria' => [...]
@@ -410,7 +410,19 @@ class Rubric extends AbstractBaseApi
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
-        return self::fetchAllPagesAsModels(sprintf('%s/%d/rubrics', $contextType, $contextId), $params);
+        $endpoint = sprintf('%s/%d/rubrics', $contextType, $contextId);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+
+        $allData = [];
+        do {
+            $data = $paginatedResponse->getJsonData();
+            foreach ($data as $item) {
+                $allData[] = $item;
+            }
+            $paginatedResponse = $paginatedResponse->getNext();
+        } while ($paginatedResponse !== null);
+
+        return array_map(fn($data) => new self($data), $allData);
     }
 
 

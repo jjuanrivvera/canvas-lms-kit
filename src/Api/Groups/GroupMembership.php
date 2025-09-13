@@ -90,21 +90,26 @@ class GroupMembership extends AbstractBaseApi
     /**
      * Get a single group membership
      *
-     * @param int $id Membership ID (for interface compatibility)
-     * @param int|null $groupId Group ID (required for this resource)
+     * @param int $id Membership ID
+     * @param array<string, mixed> $params Query parameters (must include 'group_id')
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id, ?int $groupId = null): self
+    public static function find(int $id, array $params = []): self
     {
-        if ($groupId === null) {
-            throw new CanvasApiException('Group ID is required to find a membership');
+        if (!isset($params['group_id'])) {
+            throw new CanvasApiException(
+                'Group ID is required in params array. Use find($id, [\'group_id\' => $groupId])'
+            );
         }
+
+        $groupId = (int) $params['group_id'];
+        unset($params['group_id']); // Remove from query params
 
         self::checkApiClient();
 
         $endpoint = sprintf('groups/%d/memberships/%d', $groupId, $id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $data = json_decode($response->getBody()->getContents(), true);
 
         return new self($data);
@@ -117,7 +122,7 @@ class GroupMembership extends AbstractBaseApi
      * @return array<GroupMembership>
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         throw new CanvasApiException('Group ID is required. Use fetchAllForGroup($groupId, $params) instead.');
     }
@@ -132,47 +137,40 @@ class GroupMembership extends AbstractBaseApi
      */
     public static function fetchAllForGroup(int $groupId, array $params = []): array
     {
-        return self::fetchAllPages($groupId, $params);
+        self::checkApiClient();
+        $endpoint = sprintf('groups/%d/memberships', $groupId);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+
+        $memberships = [];
+        foreach ($allData as $item) {
+            $memberships[] = new self($item);
+        }
+
+        return $memberships;
     }
 
-    /**
-     * Get paginated group memberships
-     *
-     * @param int $groupId Group ID
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(int $groupId, array $params = []): PaginatedResponse
-    {
-        return self::getPaginatedResponse(sprintf('groups/%d/memberships', $groupId), $params);
-    }
 
-    /**
-     * Get a single page of group memberships
-     *
-     * @param int $groupId Group ID
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(int $groupId, array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($groupId, $params);
-        return self::createPaginationResult($paginatedResponse);
-    }
 
     /**
      * Get all pages of group memberships
      *
-     * @param int $groupId Group ID
-     * @param array<string, mixed> $params Query parameters
+     * @param array<string, mixed> $params Query parameters (must include 'group_id')
      * @return array<GroupMembership>
      * @throws CanvasApiException
      */
-    public static function fetchAllPages(int $groupId, array $params = []): array
+    public static function all(array $params = []): array
     {
-        return self::fetchAllPagesAsModels(sprintf('groups/%d/memberships', $groupId), $params);
+        if (!isset($params['group_id'])) {
+            throw new CanvasApiException(
+                'Group ID is required in params array. Use all([\'group_id\' => $groupId])'
+            );
+        }
+
+        $groupId = (int) $params['group_id'];
+        unset($params['group_id']); // Remove from query params
+
+        return self::fetchAllForGroup($groupId, $params);
     }
 
     /**

@@ -36,7 +36,7 @@ class QuizTest extends TestCase
         $reflection = new \ReflectionClass(Quiz::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, new Course(['id' => 0]));
+        $property->setValue(null, null);
     }
 
     public function testSetCourse(): void
@@ -55,7 +55,7 @@ class QuizTest extends TestCase
         $reflection = new \ReflectionClass(Quiz::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, new Course([]));
+        $property->setValue(null, null);
 
         Quiz::checkCourse();
     }
@@ -283,7 +283,7 @@ class QuizTest extends TestCase
         $this->assertEquals('assignment', $quiz->getQuizType());
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $quizzesData = [
             ['id' => 1, 'title' => 'Quiz 1', 'quiz_type' => 'assignment'],
@@ -306,7 +306,7 @@ class QuizTest extends TestCase
             ->with('courses/123/quizzes', ['query' => []])
             ->willReturn($responseMock);
 
-        $quizzes = Quiz::fetchAll();
+        $quizzes = Quiz::get();
 
         $this->assertIsArray($quizzes);
         $this->assertCount(2, $quizzes);
@@ -316,7 +316,7 @@ class QuizTest extends TestCase
         $this->assertEquals('Quiz 2', $quizzes[1]->getTitle());
     }
 
-    public function testFetchAllWithParams(): void
+    public function testGetWithParams(): void
     {
         $params = ['published' => true];
         $quizzesData = [
@@ -339,7 +339,7 @@ class QuizTest extends TestCase
             ->with('courses/123/quizzes', ['query' => $params])
             ->willReturn($responseMock);
 
-        $quizzes = Quiz::fetchAll($params);
+        $quizzes = Quiz::get($params);
 
         $this->assertIsArray($quizzes);
         $this->assertCount(1, $quizzes);

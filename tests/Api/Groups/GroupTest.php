@@ -99,7 +99,7 @@ class GroupTest extends TestCase
         $this->assertEquals('Test Group', $group->name);
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $groupsData = [
             ['id' => 1, 'name' => 'Group 1'],
@@ -114,7 +114,7 @@ class GroupTest extends TestCase
             ->with('accounts/1/groups', ['query' => []])
             ->willReturn($this->mockResponse);
 
-        $groups = Group::fetchAll();
+        $groups = Group::get();
 
         $this->assertIsArray($groups);
         $this->assertCount(2, $groups);
@@ -244,7 +244,7 @@ class GroupTest extends TestCase
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')
+        $mockPaginatedResponse->method('all')
             ->willReturn($membersData);
         
         $this->mockHttpClient->expects($this->once())
@@ -373,7 +373,7 @@ class GroupTest extends TestCase
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('all')
             ->willReturn($membershipsData);
         
         $this->mockHttpClient->expects($this->once())
@@ -424,16 +424,18 @@ class GroupTest extends TestCase
         
         // Mock finding the membership
         $membershipData = [
-            'id' => 456,
-            'user_id' => 789,
-            'group_id' => 123,
-            'workflow_state' => 'accepted'
+            [
+                'id' => 456,
+                'user_id' => 789,
+                'group_id' => 123,
+                'workflow_state' => 'accepted'
+            ]
         ];
         
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
-            ->willReturn([$membershipData]);
+            ->method('all')
+            ->willReturn($membershipData);
         
         // Mock fetching memberships
         $this->mockHttpClient->expects($this->once())
@@ -460,7 +462,7 @@ class GroupTest extends TestCase
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')
+        $mockPaginatedResponse->method('all')
             ->willReturn($groupsData);
         
         $this->mockHttpClient->expects($this->once())
@@ -483,7 +485,7 @@ class GroupTest extends TestCase
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')
+        $mockPaginatedResponse->method('all')
             ->willReturn($groupsData);
         
         $this->mockHttpClient->expects($this->once())

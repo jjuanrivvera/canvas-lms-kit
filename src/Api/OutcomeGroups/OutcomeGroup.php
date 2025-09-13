@@ -41,13 +41,26 @@ class OutcomeGroup extends AbstractBaseApi
     public ?int $subgroupsCount = null;
 
     /**
-     * Fetch all outcome groups (defaults to Account context).
+     * Get first page of outcome groups (defaults to Account context).
      *
      * @param array<string, mixed> $params Optional query parameters
      * @return array<int, OutcomeGroup> Array of OutcomeGroup objects
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
+    {
+        return parent::get($params);
+    }
+
+
+    /**
+     * Get paginated outcome groups (defaults to Account context).
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return PaginationResult Paginated result with metadata
+     * @throws CanvasApiException
+     */
+    public static function paginate(array $params = []): PaginationResult
     {
         $accountId = Config::getAccountId();
 
@@ -55,7 +68,7 @@ class OutcomeGroup extends AbstractBaseApi
             throw new CanvasApiException('Account ID must be configured to fetch outcome groups');
         }
 
-        return self::fetchByContext('accounts', $accountId, $params);
+        return self::fetchByContextPaginated('accounts', $accountId, $params);
     }
 
     /**
@@ -68,7 +81,9 @@ class OutcomeGroup extends AbstractBaseApi
     public static function fetchGlobal(array $params = []): array
     {
         $endpoint = 'global/outcome_groups';
-        return self::fetchAllPagesAsModels($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+        return array_map(fn($data) => new self($data), $allData);
     }
 
     /**
@@ -83,7 +98,9 @@ class OutcomeGroup extends AbstractBaseApi
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
         $endpoint = sprintf('%s/%d/outcome_groups', $contextType, $contextId);
-        return self::fetchAllPagesAsModels($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+        return array_map(fn($data) => new self($data), $allData);
     }
 
     /**
@@ -112,7 +129,7 @@ class OutcomeGroup extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         $accountId = Config::getAccountId();
 
@@ -343,7 +360,7 @@ class OutcomeGroup extends AbstractBaseApi
         );
 
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-        $allData = $paginatedResponse->fetchAllPages();
+        $allData = $paginatedResponse->all();
 
         return array_map(fn($data) => new self($data), $allData);
     }
@@ -374,7 +391,7 @@ class OutcomeGroup extends AbstractBaseApi
         }
 
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-        $allData = $paginatedResponse->fetchAllPages();
+        $allData = $paginatedResponse->all();
 
         // Canvas returns OutcomeLink objects from this endpoint
         return array_map(fn($data) => new OutcomeLink($data), $allData);
@@ -570,7 +587,7 @@ class OutcomeGroup extends AbstractBaseApi
     {
         $endpoint = sprintf('%s/%d/outcome_group_links', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-        $allData = $paginatedResponse->fetchAllPages();
+        $allData = $paginatedResponse->all();
 
         return array_map(fn($data) => new OutcomeLink($data), $allData);
     }

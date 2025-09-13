@@ -34,23 +34,26 @@ class OutcomeGroupTest extends TestCase
         Config::setAccountId(1);
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $responseData = [
             ['id' => 1, 'title' => 'Group 1'],
             ['id' => 2, 'title' => 'Group 2']
         ];
 
-        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')
-            ->willReturn($responseData);
+        $mockResponse = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
+        $mockStream = $this->createMock(\Psr\Http\Message\StreamInterface::class);
+        $mockStream->method('getContents')
+            ->willReturn(json_encode($responseData));
+        $mockResponse->method('getBody')
+            ->willReturn($mockStream);
 
         $this->mockClient->expects($this->once())
-            ->method('getPaginated')
+            ->method('get')
             ->with('accounts/1/outcome_groups', ['query' => []])
-            ->willReturn($mockPaginatedResponse);
+            ->willReturn($mockResponse);
 
-        $groups = OutcomeGroup::fetchAll();
+        $groups = OutcomeGroup::get();
 
         $this->assertCount(2, $groups);
         $this->assertInstanceOf(OutcomeGroup::class, $groups[0]);
@@ -66,7 +69,7 @@ class OutcomeGroupTest extends TestCase
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')
+        $mockPaginatedResponse->method('all')
             ->willReturn($responseData);
 
         $this->mockClient->expects($this->once())
@@ -185,7 +188,7 @@ class OutcomeGroupTest extends TestCase
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')
+        $mockPaginatedResponse->method('all')
             ->willReturn($responseData);
 
         $this->mockClient->expects($this->once())
@@ -289,7 +292,7 @@ class OutcomeGroupTest extends TestCase
         $this->assertEquals('/api/v1/accounts/1/outcome_groups/123/outcomes/789', $link->url);
     }
 
-    public function testFetchAllLinks(): void
+    public function testGetLinks(): void
     {
         $responseData = [
             [
@@ -300,7 +303,7 @@ class OutcomeGroupTest extends TestCase
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')
+        $mockPaginatedResponse->method('all')
             ->willReturn($responseData);
 
         $this->mockClient->expects($this->once())
@@ -315,7 +318,7 @@ class OutcomeGroupTest extends TestCase
         $this->assertEquals('/api/v1/accounts/1/outcome_group_links/1', $links[0]->url);
     }
 
-    public function testFetchAllLinksByContext(): void
+    public function testGetLinksByContext(): void
     {
         $responseData = [
             [
@@ -325,7 +328,7 @@ class OutcomeGroupTest extends TestCase
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->method('fetchAllPages')
+        $mockPaginatedResponse->method('all')
             ->willReturn($responseData);
 
         $this->mockClient->expects($this->once())

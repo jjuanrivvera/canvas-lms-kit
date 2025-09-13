@@ -199,7 +199,7 @@ class ModuleItemTest extends TestCase
         $this->assertEquals($moduleItemData['type'], $moduleItem->getType());
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $moduleItemsData = [
             [
@@ -231,7 +231,7 @@ class ModuleItemTest extends TestCase
             )
             ->willReturn($this->mockResponse);
 
-        $moduleItems = ModuleItem::fetchAll();
+        $moduleItems = ModuleItem::get();
         
         $this->assertCount(2, $moduleItems);
         $this->assertContainsOnlyInstancesOf(ModuleItem::class, $moduleItems);
@@ -392,18 +392,32 @@ class ModuleItemTest extends TestCase
         $this->assertInstanceOf(ModuleItem::class, $result);
     }
 
-    public function testFetchAllPaginated(): void
+    public function testGetPaginated(): void
     {
         $paginatedResponse = $this->createMock(PaginatedResponse::class);
+        $paginatedResponse->method('getJsonData')->willReturn([
+            ['id' => 1, 'title' => 'Item 1'],
+            ['id' => 2, 'title' => 'Item 2']
+        ]);
+        $paginatedResponse->method('toPaginationResult')->willReturnCallback(function ($data) {
+            return new \CanvasLMS\Pagination\PaginationResult(
+                $data,
+                [],
+                1,
+                1,
+                count($data)
+            );
+        });
 
         $this->httpClientMock->expects($this->once())
             ->method('getPaginated')
             ->with('courses/1/modules/2/items', ['query' => []])
             ->willReturn($paginatedResponse);
 
-        $result = ModuleItem::fetchAllPaginated();
+        $result = ModuleItem::paginate();
         
-        $this->assertSame($paginatedResponse, $result);
+        $this->assertInstanceOf(\CanvasLMS\Pagination\PaginationResult::class, $result);
+        $this->assertCount(2, $result->getData());
     }
 
     public function testModuleItemConstants(): void

@@ -240,12 +240,12 @@ class RubricAssessmentTest extends TestCase
     /**
      * Test fetchAll method throws exception
      */
-    public function testFetchAllThrowsException(): void
+    public function testGetThrowsException(): void
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage("Fetching all rubric assessments is not supported");
 
-        RubricAssessment::fetchAll();
+        RubricAssessment::get();
     }
 
     /**

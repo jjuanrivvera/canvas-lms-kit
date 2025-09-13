@@ -7,7 +7,6 @@ namespace CanvasLMS\Api\CourseReports;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
 
 /**
  * Canvas Course Reports API
@@ -129,7 +128,7 @@ class CourseReports extends AbstractBaseApi
      * @return static Never returns, always throws exception
      * @throws CanvasApiException Always thrown - use getReport() instead
      */
-    public static function find(int $id): static
+    public static function find(int $id, array $params = []): static
     {
         throw new CanvasApiException(
             'Course reports cannot be found by ID alone. Use getReport($reportType, $reportId) instead.'
@@ -295,11 +294,12 @@ class CourseReports extends AbstractBaseApi
 
     /**
      * @param array<string, mixed> $params
+     * @return array<static>
      * @throws CanvasApiException Always thrown
      */
-    public static function fetchAll(array $params = []): PaginatedResponse
+    public static function get(array $params = []): array
     {
-        throw new CanvasApiException('Use specific report type methods (last, getReport) instead of fetchAll');
+        throw new CanvasApiException('Use specific report type methods (last, getReport) instead of get');
     }
 
     /**
