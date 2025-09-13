@@ -533,7 +533,15 @@ class File extends AbstractBaseApi
     {
         $endpoint = sprintf('%s/%d/files', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-        $allData = $paginatedResponse->all();
+
+        $allData = [];
+        do {
+            $data = $paginatedResponse->getJsonData();
+            foreach ($data as $item) {
+                $allData[] = $item;
+            }
+            $paginatedResponse = $paginatedResponse->getNext();
+        } while ($paginatedResponse !== null);
 
         $files = array_map(fn($data) => new self($data), $allData);
 

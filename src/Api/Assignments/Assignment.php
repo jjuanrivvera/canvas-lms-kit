@@ -1460,7 +1460,7 @@ class Assignment extends AbstractBaseApi
 
         Submission::setCourse(self::$course);
         Submission::setAssignment($this);
-        return Submission::get($params);
+        return Submission::all($params);
     }
 
 
@@ -1471,7 +1471,7 @@ class Assignment extends AbstractBaseApi
      * @return Submission|null
      * @throws CanvasApiException
      */
-    public function getSubmissionForUser(int $userId): ?Submission
+    public function submissionForUser(int $userId): ?Submission
     {
         if (!isset($this->id) || !$this->id) {
             throw new CanvasApiException('Assignment ID is required to fetch submission');

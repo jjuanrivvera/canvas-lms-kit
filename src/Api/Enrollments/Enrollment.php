@@ -817,7 +817,21 @@ class Enrollment extends AbstractBaseApi
      */
     public function course(): ?Course
     {
-        return $this->getCourse();
+        if (!$this->courseId) {
+            return null;
+        }
+
+        // If the static course context matches this enrollment's course, use it
+        if (isset(self::$course) && self::$course->id === $this->courseId) {
+            return self::$course;
+        }
+
+        // Otherwise, fetch the course from the API
+        try {
+            return Course::find($this->courseId);
+        } catch (\Exception $e) {
+            throw new CanvasApiException("Could not load course with ID {$this->courseId}: " . $e->getMessage());
+        }
     }
 
     /**
@@ -838,23 +852,6 @@ class Enrollment extends AbstractBaseApi
      */
     public function user(): ?User
     {
-        return $this->getUser();
-    }
-
-    // Relationship Methods
-
-    /**
-     * Get the associated User object
-     *
-     * If user data is embedded in the enrollment (from Canvas API include),
-     * creates a User instance from that data. Otherwise, fetches the user
-     * from the API using the userId.
-     *
-     * @return User|null The user object or null if no userId is set
-     * @throws CanvasApiException If user cannot be loaded
-     */
-    public function getUser(): ?User
-    {
         if (!$this->userId) {
             return null;
         }
@@ -872,33 +869,9 @@ class Enrollment extends AbstractBaseApi
         }
     }
 
-    /**
-     * Get the associated Course object
-     *
-     * If the static course context is set and matches this enrollment's courseId,
-     * returns that course. Otherwise, fetches the course from the API.
-     *
-     * @return Course|null The course object or null if no courseId is set
-     * @throws CanvasApiException If course cannot be loaded
-     */
-    public function getCourse(): ?Course
-    {
-        if (!$this->courseId) {
-            return null;
-        }
+    // Relationship Methods
 
-        // If the static course context matches this enrollment's course, use it
-        if (isset(self::$course) && self::$course->id === $this->courseId) {
-            return self::$course;
-        }
 
-        // Otherwise, fetch the course from the API
-        try {
-            return Course::find($this->courseId);
-        } catch (\Exception $e) {
-            throw new CanvasApiException("Could not load course with ID {$this->courseId}: " . $e->getMessage());
-        }
-    }
 
     /**
      * Check if this enrollment is for a student

@@ -694,7 +694,7 @@ class Module extends AbstractBaseApi
         ModuleItem::setCourse(self::$course);
         ModuleItem::setModule($this);
 
-        return ModuleItem::get($params);
+        return ModuleItem::all($params);
     }
 
     /**

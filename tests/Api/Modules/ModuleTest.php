@@ -564,16 +564,16 @@ class ModuleTest extends TestCase
             ['id' => 2, 'title' => 'Item 2']
         ];
 
-        $response = $this->createMock(ResponseInterface::class);
-        $stream = $this->createMock(StreamInterface::class);
-        
-        $stream->method('getContents')->willReturn(json_encode($itemsData));
-        $response->method('getBody')->willReturn($stream);
+        // Mock paginated response
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('all')
+            ->willReturn($itemsData);
 
         $this->httpClient->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/1/modules/123/items', ['query' => []])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $items = $module->items();
 
@@ -589,18 +589,18 @@ class ModuleTest extends TestCase
             ['id' => 1, 'title' => 'Item 1', 'content_details' => ['points_possible' => 10]]
         ];
 
-        $response = $this->createMock(ResponseInterface::class);
-        $stream = $this->createMock(StreamInterface::class);
-        
-        $stream->method('getContents')->willReturn(json_encode($itemsData));
-        $response->method('getBody')->willReturn($stream);
-
         $params = ['include' => ['content_details']];
 
+        // Mock paginated response
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('all')
+            ->willReturn($itemsData);
+
         $this->httpClient->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/1/modules/123/items', ['query' => $params])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $items = $module->items($params);
 

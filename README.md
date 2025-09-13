@@ -454,22 +454,27 @@ $assignments = Assignment::get(['per_page' => 100]);     // If you need subset
 $assignments = Assignment::paginate(['per_page' => 100]); // If processing batches
 $assignments = Assignment::all();                         // If you need everything
 
-// 📕 Large datasets (1000+ items): Always paginate
+// 📕 Large datasets (1000+ items): Use paginate() for memory efficiency
 $users = User::paginate(['per_page' => 100]);
 $enrollments = Enrollment::paginate(['per_page' => 500]);
+
+// Note: The SDK includes built-in rate limiting and retry logic,
+// so fetching all pages is safe from an API perspective.
+// The main consideration is memory usage for very large datasets.
 ```
 
-### Relationship Method Note
+### Relationship Methods & Large Datasets
 
-**Important**: When using relationship methods on Course/User/Group instances, they return **first page only** for performance:
+**Important**: Relationship methods on Course/User/Group instances return **ALL pages** for completeness:
 
 ```php
 $course = Course::find(123);
-$modules = $course->modules();      // Returns first page only!
+$modules = $course->modules();      // Returns ALL modules (all pages)
+$enrollments = $course->enrollments(); // Returns ALL enrollments (could be thousands!)
 
-// To get ALL modules for a course:
-Module::setCourse($course);
-$allModules = Module::all();        // Now fetches all pages
+// For large datasets, consider using pagination directly:
+Enrollment::setCourse($course);
+$paginatedEnrollments = Enrollment::paginate(['per_page' => 100]); // Memory efficient
 
 // Or use paginate for control:
 $paginatedModules = Module::paginate(['per_page' => 50]);

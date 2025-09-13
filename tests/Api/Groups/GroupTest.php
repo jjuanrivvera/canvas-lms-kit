@@ -424,16 +424,18 @@ class GroupTest extends TestCase
         
         // Mock finding the membership
         $membershipData = [
-            'id' => 456,
-            'user_id' => 789,
-            'group_id' => 123,
-            'workflow_state' => 'accepted'
+            [
+                'id' => 456,
+                'user_id' => 789,
+                'group_id' => 123,
+                'workflow_state' => 'accepted'
+            ]
         ];
         
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
             ->method('all')
-            ->willReturn([$membershipData]);
+            ->willReturn($membershipData);
         
         // Mock fetching memberships
         $this->mockHttpClient->expects($this->once())

@@ -12,7 +12,6 @@ use CanvasLMS\Dto\Groups\CreateGroupMembershipDTO;
 use CanvasLMS\Dto\Groups\UpdateGroupDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Api\ContentMigrations\ContentMigration;
 use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 
@@ -379,21 +378,6 @@ class Group extends AbstractBaseApi
         return array_map(fn($data) => new User($data), $allData);
     }
 
-    /**
-     * Get paginated group members
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public function membersPaginated(array $params = []): PaginatedResponse
-    {
-        if (!$this->id) {
-            throw new CanvasApiException('Group ID is required to fetch group members');
-        }
-
-        return self::getPaginatedResponse(sprintf('groups/%d/users', $this->id), $params);
-    }
 
     /**
      * Add user to group
@@ -408,7 +392,7 @@ class Group extends AbstractBaseApi
         try {
             $membership = $this->createMembership(['user_id' => $userId]);
             return $membership !== null;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }
@@ -445,21 +429,6 @@ class Group extends AbstractBaseApi
         return GroupMembership::fetchAllForGroup($this->id, $params);
     }
 
-    /**
-     * Get paginated memberships for this group
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public function membershipsPaginated(array $params = []): PaginationResult
-    {
-        if (!$this->id) {
-            throw new CanvasApiException('Group ID is required to fetch memberships');
-        }
-
-        return GroupMembership::paginate(['group_id' => $this->id] + $params);
-    }
 
     /**
      * Invite users to this group

@@ -31,7 +31,19 @@ class CourseRelationshipTest extends TestCase
     {
         parent::setUp();
         $this->httpClient = $this->createMock(HttpClientInterface::class);
+        
+        // Set API client for all classes that will be used in tests
         Course::setApiClient($this->httpClient);
+        Assignment::setApiClient($this->httpClient);
+        Module::setApiClient($this->httpClient);
+        Page::setApiClient($this->httpClient);
+        Section::setApiClient($this->httpClient);
+        DiscussionTopic::setApiClient($this->httpClient);
+        Quiz::setApiClient($this->httpClient);
+        File::setApiClient($this->httpClient);
+        Rubric::setApiClient($this->httpClient);
+        ExternalTool::setApiClient($this->httpClient);
+        Tab::setApiClient($this->httpClient);
         
         // Create a course instance with ID
         $this->course = new Course(['id' => 123]);
@@ -45,11 +57,19 @@ class CourseRelationshipTest extends TestCase
             ['id' => 2, 'name' => 'Assignment 2']
         ];
 
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($responseData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
         $this->httpClient
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/assignments', ['query' => []])
-            ->willReturn(new Response(200, [], json_encode($responseData)));
+            ->willReturn($mockPaginatedResponse);
 
         $assignments = $this->course->assignments();
 
@@ -75,11 +95,19 @@ class CourseRelationshipTest extends TestCase
             ['id' => 2, 'name' => 'Module 2']
         ];
 
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($responseData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
         $this->httpClient
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/modules', ['query' => []])
-            ->willReturn(new Response(200, [], json_encode($responseData)));
+            ->willReturn($mockPaginatedResponse);
 
         $modules = $this->course->modules();
 
@@ -96,11 +124,19 @@ class CourseRelationshipTest extends TestCase
             ['url' => 'page-2', 'title' => 'Page 2']
         ];
 
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($responseData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
         $this->httpClient
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/pages', ['query' => []])
-            ->willReturn(new Response(200, [], json_encode($responseData)));
+            ->willReturn($mockPaginatedResponse);
 
         $pages = $this->course->pages();
 
@@ -116,11 +152,16 @@ class CourseRelationshipTest extends TestCase
             ['id' => 2, 'name' => 'Section B']
         ];
 
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('all')
+            ->willReturn($responseData);
+
         $this->httpClient
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/sections', ['query' => []])
-            ->willReturn(new Response(200, [], json_encode($responseData)));
+            ->willReturn($mockPaginatedResponse);
 
         $sections = $this->course->sections();
 
@@ -136,11 +177,19 @@ class CourseRelationshipTest extends TestCase
             ['id' => 2, 'title' => 'Topic 2']
         ];
 
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($responseData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
         $this->httpClient
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/discussion_topics', ['query' => []])
-            ->willReturn(new Response(200, [], json_encode($responseData)));
+            ->willReturn($mockPaginatedResponse);
 
         $discussionTopics = $this->course->discussionTopics();
 
@@ -156,11 +205,19 @@ class CourseRelationshipTest extends TestCase
             ['id' => 2, 'title' => 'Quiz 2']
         ];
 
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($responseData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
         $this->httpClient
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/quizzes', ['query' => []])
-            ->willReturn(new Response(200, [], json_encode($responseData)));
+            ->willReturn($mockPaginatedResponse);
 
         $quizzes = $this->course->quizzes();
 
@@ -178,8 +235,11 @@ class CourseRelationshipTest extends TestCase
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('all')
+            ->method('getJsonData')
             ->willReturn($responseData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
 
         $this->httpClient
             ->expects($this->once())
@@ -203,8 +263,11 @@ class CourseRelationshipTest extends TestCase
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('all')
+            ->method('getJsonData')
             ->willReturn($responseData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
 
         $this->httpClient
             ->expects($this->once())
@@ -228,8 +291,11 @@ class CourseRelationshipTest extends TestCase
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('all')
+            ->method('getJsonData')
             ->willReturn($responseData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
 
         $this->httpClient
             ->expects($this->once())
@@ -251,11 +317,19 @@ class CourseRelationshipTest extends TestCase
             ['id' => 'assignments', 'label' => 'Assignments']
         ];
 
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($responseData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
         $this->httpClient
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/tabs', ['query' => []])
-            ->willReturn(new Response(200, [], json_encode($responseData)));
+            ->willReturn($mockPaginatedResponse);
 
         $tabs = $this->course->tabs();
 
@@ -268,11 +342,19 @@ class CourseRelationshipTest extends TestCase
     {
         $params = ['per_page' => 50, 'include[]' => ['total_scores']];
         
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn([]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
         $this->httpClient
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/assignments', ['query' => $params])
-            ->willReturn(new Response(200, [], json_encode([])));
+            ->willReturn($mockPaginatedResponse);
 
         $assignments = $this->course->assignments($params);
         $this->assertIsArray($assignments);

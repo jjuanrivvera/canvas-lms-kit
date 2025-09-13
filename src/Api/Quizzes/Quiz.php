@@ -1269,11 +1269,11 @@ class Quiz extends AbstractBaseApi
      * @return QuizSubmission[] Array of quiz submission instances
      * @throws CanvasApiException If course not set or API error
      */
-    public function getSubmissions(array $params = []): array
+    public function submissions(array $params = []): array
     {
         QuizSubmission::setCourse(self::$course);
         QuizSubmission::setQuiz($this);
-        return QuizSubmission::get($params);
+        return QuizSubmission::all($params);
     }
 
     /**
@@ -1282,7 +1282,7 @@ class Quiz extends AbstractBaseApi
      * @return QuizSubmission|null Quiz submission instance or null if no submission
      * @throws CanvasApiException If course not set or API error
      */
-    public function getCurrentUserSubmission(): ?QuizSubmission
+    public function currentUserSubmission(): ?QuizSubmission
     {
         QuizSubmission::setCourse(self::$course);
         QuizSubmission::setQuiz($this);
@@ -1303,19 +1303,6 @@ class Quiz extends AbstractBaseApi
         return QuizSubmission::start($params);
     }
 
-    /**
-     * Get paginated submissions for this quiz
-     *
-     * @param mixed[] $params Optional parameters for filtering
-     * @return PaginationResult Pagination result with submissions
-     * @throws CanvasApiException If course not set or API error
-     */
-    public function getSubmissionsPaginated(array $params = []): PaginationResult
-    {
-        QuizSubmission::setCourse(self::$course);
-        QuizSubmission::setQuiz($this);
-        return QuizSubmission::paginate($params);
-    }
 
     /**
      * Get the API endpoint for this resource

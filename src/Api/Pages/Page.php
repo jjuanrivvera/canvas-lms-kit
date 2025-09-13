@@ -1119,32 +1119,6 @@ class Page extends AbstractBaseApi
         return $this;
     }
 
-    /**
-     * Get page revisions
-     *
-     * @return array<PageRevision> Array of PageRevision objects
-     * @throws CanvasApiException
-     */
-    public function getRevisions(): array
-    {
-        if (!$this->url) {
-            throw new CanvasApiException('Page URL is required');
-        }
-
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/pages/%s/revisions', self::$course->id, rawurlencode($this->url));
-        $response = self::$apiClient->get($endpoint);
-        $revisionsData = json_decode($response->getBody()->getContents(), true);
-
-        $revisions = [];
-        foreach ($revisionsData as $revisionData) {
-            $revisions[] = new PageRevision($revisionData);
-        }
-
-        return $revisions;
-    }
 
     /**
      * Duplicate this page
@@ -1177,7 +1151,7 @@ class Page extends AbstractBaseApi
      * @return PageRevision Revision object
      * @throws CanvasApiException
      */
-    public function getRevision(int|string $revisionId, bool $summary = false): PageRevision
+    public function revision(int|string $revisionId, bool $summary = false): PageRevision
     {
         if (!$this->url) {
             throw new CanvasApiException('Page URL is required');
@@ -1271,7 +1245,23 @@ class Page extends AbstractBaseApi
      */
     public function revisions(array $params = []): array
     {
-        return $this->getRevisions();
+        if (!$this->url) {
+            throw new CanvasApiException('Page URL is required');
+        }
+
+        self::checkCourse();
+        self::checkApiClient();
+
+        $endpoint = sprintf('courses/%d/pages/%s/revisions', self::$course->id, rawurlencode($this->url));
+        $response = self::$apiClient->get($endpoint);
+        $revisionsData = json_decode($response->getBody()->getContents(), true);
+
+        $revisions = [];
+        foreach ($revisionsData as $revisionData) {
+            $revisions[] = new PageRevision($revisionData);
+        }
+
+        return $revisions;
     }
 
     /**

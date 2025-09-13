@@ -934,7 +934,7 @@ class PageTest extends TestCase
             ->with('courses/123/pages/test-page/revisions')
             ->willReturn($responseMock);
 
-        $revisions = $page->getRevisions();
+        $revisions = $page->revisions();
 
         $this->assertCount(2, $revisions);
         $this->assertInstanceOf(PageRevision::class, $revisions[0]);
@@ -949,7 +949,7 @@ class PageTest extends TestCase
         $this->expectExceptionMessage('Page URL is required');
 
         $page = new Page();
-        $page->getRevisions();
+        $page->revisions();
     }
 
     public function testToArray(): void
@@ -1102,7 +1102,7 @@ class PageTest extends TestCase
             ->with('courses/123/pages/test-page/revisions/3', ['query' => []])
             ->willReturn($responseMock);
 
-        $revision = $page->getRevision(3);
+        $revision = $page->revision(3);
 
         $this->assertInstanceOf(PageRevision::class, $revision);
         $this->assertEquals(3, $revision->getRevisionId());
@@ -1134,7 +1134,7 @@ class PageTest extends TestCase
             ->with('courses/123/pages/test-page/revisions/latest', ['query' => []])
             ->willReturn($responseMock);
 
-        $revision = $page->getRevision('latest');
+        $revision = $page->revision('latest');
 
         $this->assertInstanceOf(PageRevision::class, $revision);
         $this->assertTrue($revision->getLatest());
@@ -1167,7 +1167,7 @@ class PageTest extends TestCase
             ->with('courses/123/pages/test-page/revisions/3', ['query' => ['summary' => true]])
             ->willReturn($responseMock);
 
-        $revision = $page->getRevision(3, true);
+        $revision = $page->revision(3, true);
 
         $this->assertInstanceOf(PageRevision::class, $revision);
         $this->assertNull($revision->getBody());

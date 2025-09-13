@@ -56,10 +56,13 @@ class ExternalToolAccountContextTest extends TestCase
     {
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('all')
+            ->method('getJsonData')
             ->willReturn([
                 ['id' => 3, 'name' => 'Course Tool', 'consumer_key' => 'key3']
             ]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->mockClient->expects($this->once())
             ->method('getPaginated')

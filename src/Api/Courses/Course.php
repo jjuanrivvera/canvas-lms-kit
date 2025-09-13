@@ -1414,13 +1414,10 @@ class Course extends AbstractBaseApi
 
         // Set this course as the context and fetch enrollments
         Enrollment::setCourse($this);
-        return Enrollment::get($params);
+        return Enrollment::all($params);
     }
 
     // Enrollment Relationship Methods
-    // NOTE: All relationship methods return FIRST PAGE ONLY for performance.
-    // To get all items, use the static methods with context:
-    // Assignment::setCourse($course); $all = Assignment::all();
 
 
     /**
@@ -2695,17 +2692,12 @@ class Course extends AbstractBaseApi
     // Assignment Relationship Methods
 
     /**
-     * Get assignments for this course (first page only)
+     * Get assignments for this course
      *
-     * NOTE: Returns FIRST PAGE of assignments only for performance.
-     * To get ALL assignments:
-     * ```php
-     * Assignment::setCourse($course);
-     * $allAssignments = Assignment::all();
-     * ```
+     * Returns ALL assignments for this course.
      *
      * @param array<string, mixed> $params Query parameters
-     * @return Assignment[] First page of assignments
+     * @return Assignment[] All assignments
      * @throws CanvasApiException
      */
     public function assignments(array $params = []): array
@@ -2715,7 +2707,7 @@ class Course extends AbstractBaseApi
         }
 
         Assignment::setCourse($this);
-        return Assignment::get($params); // get() returns first page only
+        return Assignment::all($params);
     }
 
 
@@ -2735,7 +2727,7 @@ class Course extends AbstractBaseApi
         }
 
         Module::setCourse($this);
-        return Module::get($params);
+        return Module::all($params);
     }
 
 
@@ -2756,7 +2748,7 @@ class Course extends AbstractBaseApi
         }
 
         Page::setCourse($this);
-        return Page::get($params);
+        return Page::all($params);
     }
 
 
@@ -2776,7 +2768,7 @@ class Course extends AbstractBaseApi
         }
 
         Section::setCourse($this);
-        return Section::get($params);
+        return Section::all($params);
     }
 
 
@@ -2796,16 +2788,13 @@ class Course extends AbstractBaseApi
         }
 
         DiscussionTopic::setCourse($this);
-        return DiscussionTopic::get($params);
+        return DiscussionTopic::all($params);
     }
 
     /**
      * Get announcements for this course
      *
-     * Returns the first page of announcements for performance. To fetch more announcements, use:
-     * - Announcement::paginate() for pagination metadata
-     * - Announcement::all() for all announcements (memory intensive)
-     * - Announcement::paginate() for single page with navigation
+     * Returns ALL announcements for this course.
      *
      * @example
      * ```php
@@ -2817,7 +2806,7 @@ class Course extends AbstractBaseApi
      * ```
      *
      * @param array<string, mixed> $params Query parameters (active_only, etc.)
-     * @return Announcement[] First page of announcements
+     * @return Announcement[] All announcements
      * @throws CanvasApiException
      */
     public function announcements(array $params = []): array
@@ -2827,7 +2816,7 @@ class Course extends AbstractBaseApi
         }
 
         Announcement::setCourse($this);
-        return Announcement::get($params);
+        return Announcement::all($params);
     }
 
 
@@ -2847,7 +2836,7 @@ class Course extends AbstractBaseApi
         }
 
         Quiz::setCourse($this);
-        return Quiz::get($params);
+        return Quiz::all($params);
     }
 
 
@@ -2938,7 +2927,7 @@ class Course extends AbstractBaseApi
         }
 
         Tab::setCourse($this);
-        return Tab::get();
+        return Tab::all();
     }
 
     /**
@@ -3001,7 +2990,7 @@ class Course extends AbstractBaseApi
      * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
      * @throws CanvasApiException
      */
-    public function getFeatureFlag(string $featureName): \CanvasLMS\Api\FeatureFlags\FeatureFlag
+    public function featureFlag(string $featureName): \CanvasLMS\Api\FeatureFlags\FeatureFlag
     {
         if (!$this->id) {
             throw new CanvasApiException('Course ID is required to get feature flag');
@@ -3212,7 +3201,7 @@ class Course extends AbstractBaseApi
      * @return \CanvasLMS\Api\OutcomeImports\OutcomeImport
      * @throws CanvasApiException
      */
-    public function getOutcomeImportStatus(int|string $importId): \CanvasLMS\Api\OutcomeImports\OutcomeImport
+    public function outcomeImportStatus(int|string $importId): \CanvasLMS\Api\OutcomeImports\OutcomeImport
     {
         if (!$this->id) {
             throw new CanvasApiException('Course ID is required to get import status');

@@ -412,7 +412,16 @@ class Rubric extends AbstractBaseApi
     {
         $endpoint = sprintf('%s/%d/rubrics', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-        $allData = $paginatedResponse->all();
+
+        $allData = [];
+        do {
+            $data = $paginatedResponse->getJsonData();
+            foreach ($data as $item) {
+                $allData[] = $item;
+            }
+            $paginatedResponse = $paginatedResponse->getNext();
+        } while ($paginatedResponse !== null);
+
         return array_map(fn($data) => new self($data), $allData);
     }
 

@@ -655,7 +655,7 @@ class EnrollmentTest extends TestCase
             'user' => $userData
         ]);
 
-        $user = $enrollment->getUser();
+        $user = $enrollment->user();
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertEquals(100, $user->getId());
@@ -683,7 +683,7 @@ class EnrollmentTest extends TestCase
             ->method('get')
             ->willReturn($response);
 
-        $user = $enrollment->getUser();
+        $user = $enrollment->user();
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertEquals(100, $user->getId());
@@ -695,7 +695,7 @@ class EnrollmentTest extends TestCase
     {
         $enrollment = new Enrollment(['id' => 1, 'userId' => null]);
 
-        $user = $enrollment->getUser();
+        $user = $enrollment->user();
 
         $this->assertNull($user);
     }
@@ -717,7 +717,7 @@ class EnrollmentTest extends TestCase
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Could not load user with ID 999');
 
-        $enrollment->getUser();
+        $enrollment->user();
     }
 
     public function testGetCourseFromStaticContext(): void
@@ -730,7 +730,7 @@ class EnrollmentTest extends TestCase
             'courseId' => 123
         ]);
 
-        $retrievedCourse = $enrollment->getCourse();
+        $retrievedCourse = $enrollment->course();
 
         $this->assertInstanceOf(Course::class, $retrievedCourse);
         $this->assertEquals(123, $retrievedCourse->getId());
@@ -760,7 +760,7 @@ class EnrollmentTest extends TestCase
             ->with('/courses/789')
             ->willReturn($response);
 
-        $course = $enrollment->getCourse();
+        $course = $enrollment->course();
 
         $this->assertInstanceOf(Course::class, $course);
         $this->assertEquals(789, $course->getId());
@@ -771,7 +771,7 @@ class EnrollmentTest extends TestCase
     {
         $enrollment = new Enrollment(['id' => 1, 'courseId' => null]);
 
-        $course = $enrollment->getCourse();
+        $course = $enrollment->course();
 
         $this->assertNull($course);
     }
@@ -792,7 +792,7 @@ class EnrollmentTest extends TestCase
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Could not load course with ID 999');
 
-        $enrollment->getCourse();
+        $enrollment->course();
     }
 
     // Enrollment Type Check Tests

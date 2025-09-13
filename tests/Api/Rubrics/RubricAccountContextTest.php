@@ -66,8 +66,11 @@ class RubricAccountContextTest extends TestCase
         $mockResponse = new Response(200, [], json_encode($rubricsData));
         $paginatedResponse = $this->createMock(PaginatedResponse::class);
         $paginatedResponse->expects($this->once())
-            ->method('all')
+            ->method('getJsonData')
             ->willReturn($rubricsData);
+        $paginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
         
         $this->httpClientMock->expects($this->once())
             ->method('getPaginated')

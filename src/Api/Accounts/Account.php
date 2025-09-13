@@ -8,8 +8,6 @@ use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Dto\Accounts\CreateAccountDTO;
 use CanvasLMS\Dto\Accounts\UpdateAccountDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
 use CanvasLMS\Api\Rubrics\Rubric;
@@ -42,7 +40,7 @@ use CanvasLMS\Dto\Rubrics\CreateRubricDTO;
  * $account->save();
  *
  * // Getting sub-accounts (two approaches)
- * $subAccounts = $account->getSubAccounts();  // Instance method
+ * $subAccounts = $account->subAccounts();  // Instance method
  * $subAccounts = Account::fetchSubAccounts(1); // Static method
  *
  * // Getting account settings
@@ -396,7 +394,7 @@ class Account extends AbstractBaseApi
      * @return array<int, self>
      * @throws CanvasApiException
      */
-    public function getSubAccounts(array $params = []): array
+    public function subAccounts(array $params = []): array
     {
         if (!$this->id) {
             throw new CanvasApiException("Account ID is required");
@@ -417,7 +415,7 @@ class Account extends AbstractBaseApi
      * @return self|null
      * @throws CanvasApiException
      */
-    public function getParentAccount(): ?self
+    public function parentAccount(): ?self
     {
         if (!$this->parentAccountId) {
             return null;
@@ -564,7 +562,7 @@ class Account extends AbstractBaseApi
      * @return array<int, Course>
      * @throws CanvasApiException
      */
-    public function getCourses(array $params = []): array
+    public function courses(array $params = []): array
     {
         if (!$this->id) {
             throw new CanvasApiException("Account ID is required");
@@ -653,32 +651,16 @@ class Account extends AbstractBaseApi
      * @return CalendarEvent[]
      * @throws CanvasApiException
      */
-    public function getCalendarEvents(array $params = []): array
+    public function calendarEvents(array $params = []): array
     {
         if (!$this->id) {
             throw new CanvasApiException('Account ID is required to get calendar events');
         }
 
         $params['context_codes'] = [sprintf('account_%d', $this->id)];
-        return CalendarEvent::get($params);
+        return CalendarEvent::all($params);
     }
 
-    /**
-     * Get paginated calendar events for this account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public function getCalendarEventsPaginated(array $params = []): PaginationResult
-    {
-        if (!$this->id) {
-            throw new CanvasApiException('Account ID is required to get calendar events');
-        }
-
-        $params['context_codes'] = [sprintf('account_%d', $this->id)];
-        return CalendarEvent::paginate($params);
-    }
 
     /**
      * Create a calendar event for this account
@@ -705,7 +687,7 @@ class Account extends AbstractBaseApi
      * @return array<int, Rubric>
      * @throws CanvasApiException
      */
-    public function getRubrics(array $params = []): array
+    public function rubrics(array $params = []): array
     {
         if (!$this->id) {
             throw new CanvasApiException('Account ID is required to get rubrics');
@@ -720,22 +702,6 @@ class Account extends AbstractBaseApi
         }, $responseData);
     }
 
-    /**
-     * Get paginated rubrics for this account
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public function getRubricsPaginated(array $params = []): PaginatedResponse
-    {
-        if (!$this->id) {
-            throw new CanvasApiException('Account ID is required to get rubrics');
-        }
-
-        $endpoint = sprintf('accounts/%d/rubrics', $this->id);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
 
     /**
      * Create a rubric for this account

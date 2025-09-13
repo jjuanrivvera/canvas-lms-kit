@@ -54,10 +54,13 @@ class FileContextTest extends TestCase
     {
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('all')
+            ->method('getJsonData')
             ->willReturn([
                 ['id' => 3, 'filename' => 'syllabus.pdf', 'display_name' => 'Course Syllabus']
             ]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->mockClient->expects($this->once())
             ->method('getPaginated')
@@ -76,10 +79,13 @@ class FileContextTest extends TestCase
     {
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('all')
+            ->method('getJsonData')
             ->willReturn([
                 ['id' => 4, 'filename' => 'group_project.zip', 'display_name' => 'Group Project']
             ]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->mockClient->expects($this->once())
             ->method('getPaginated')
@@ -98,10 +104,13 @@ class FileContextTest extends TestCase
     {
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('all')
+            ->method('getJsonData')
             ->willReturn([
                 ['id' => 5, 'filename' => 'lecture.pdf', 'display_name' => 'Lecture Notes']
             ]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->mockClient->expects($this->once())
             ->method('getPaginated')
