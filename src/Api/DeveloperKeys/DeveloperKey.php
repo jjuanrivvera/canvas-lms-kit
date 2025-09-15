@@ -171,7 +171,7 @@ class DeveloperKey extends AbstractBaseApi
      * @return self The DeveloperKey instance
      * @throws CanvasApiException If key not found
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         $keys = self::get();
 

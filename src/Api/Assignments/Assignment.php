@@ -9,11 +9,9 @@ use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Dto\Assignments\CreateAssignmentDTO;
 use CanvasLMS\Dto\Assignments\UpdateAssignmentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Api\Submissions\Submission;
 use CanvasLMS\Api\Rubrics\Rubric;
 use CanvasLMS\Api\Rubrics\RubricAssociation;
-use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Assignments API
@@ -75,7 +73,7 @@ use CanvasLMS\Pagination\PaginationResult;
  */
 class Assignment extends AbstractBaseApi
 {
-    protected static Course $course;
+    protected static ?Course $course = null;
 
     /**
      * Assignment unique identifier
@@ -1271,90 +1269,16 @@ class Assignment extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkCourse();
         self::checkApiClient();
 
         $endpoint = sprintf('courses/%d/assignments/%d', self::$course->id, $id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $assignmentData = json_decode($response->getBody()->getContents(), true);
 
         return new self($assignmentData);
-    }
-
-    /**
-     * Fetch all assignments for the course
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return array<Assignment> Array of Assignment objects
-     * @throws CanvasApiException
-     */
-    public static function fetchAll(array $params = []): array
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/assignments', self::$course->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $assignmentsData = json_decode($response->getBody()->getContents(), true);
-
-        $assignments = [];
-        foreach ($assignmentsData as $assignmentData) {
-            $assignments[] = new self($assignmentData);
-        }
-
-        return $assignments;
-    }
-
-    /**
-     * Fetch all assignments with pagination support
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/assignments', self::$course->id);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
-
-    /**
-     * Fetch a single page of assignments
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/assignments', self::$course->id);
-        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Fetch all pages of assignments
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return array<Assignment> Array of Assignment objects from all pages
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/assignments', self::$course->id);
-        return self::fetchAllPagesAsModels($endpoint, $params);
     }
 
     /**
@@ -1536,7 +1460,7 @@ class Assignment extends AbstractBaseApi
 
         Submission::setCourse(self::$course);
         Submission::setAssignment($this);
-        return Submission::fetchAll($params);
+        return Submission::all($params);
     }
 
 
@@ -1547,7 +1471,7 @@ class Assignment extends AbstractBaseApi
      * @return Submission|null
      * @throws CanvasApiException
      */
-    public function getSubmissionForUser(int $userId): ?Submission
+    public function submissionForUser(int $userId): ?Submission
     {
         if (!isset($this->id) || !$this->id) {
             throw new CanvasApiException('Assignment ID is required to fetch submission');

@@ -7,6 +7,7 @@ use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Config;
 use CanvasLMS\Dto\Files\UploadFileDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * File Class
@@ -42,20 +43,15 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * $downloadUrl = $file->getDownloadUrl();
  *
  * // Fetch all files from current user (first page only)
- * $files = File::fetchAll();
+ * $files = File::get();
  *
- * // Fetch files with pagination support
- * $paginatedResponse = File::fetchAllPaginated(['per_page' => 10]);
- * $files = $paginatedResponse->getJsonData();
- * $pagination = $paginatedResponse->toPaginationResult($files);
- *
- * // Fetch a specific page of files
- * $paginationResult = File::fetchPage(['page' => 2, 'per_page' => 10]);
+ * // Get paginated files
+ * $paginationResult = File::paginate(['per_page' => 10]);
  * $files = $paginationResult->getData();
  * $hasNext = $paginationResult->hasNext();
  *
  * // Fetch all files from all pages
- * $allFiles = File::fetchAllPages(['per_page' => 50]);
+ * $allFiles = File::all(['per_page' => 50]);
  * ```
  *
  * @package CanvasLMS\Api\Files
@@ -64,39 +60,39 @@ class File extends AbstractBaseApi
 {
     /**
      * The unique identifier for the file
-     * @var int
+     * @var int|null
      */
-    public int $id;
+    public ?int $id = null;
 
     /**
      * The UUID of the file
-     * @var string
+     * @var string|null
      */
-    public string $uuid;
+    public ?string $uuid = null;
 
     /**
      * The folder_id of the folder containing the file
-     * @var int
+     * @var int|null
      */
-    public int $folderId;
+    public ?int $folderId = null;
 
     /**
      * The display name of the file
-     * @var string
+     * @var string|null
      */
-    public string $displayName;
+    public ?string $displayName = null;
 
     /**
      * The filename of the file
-     * @var string
+     * @var string|null
      */
-    public string $filename;
+    public ?string $filename = null;
 
     /**
      * The content-type of the file
-     * @var string
+     * @var string|null
      */
-    public string $contentType;
+    public ?string $contentType = null;
 
     /**
      * The URL to download the file (not present for file upload requests)
@@ -106,21 +102,21 @@ class File extends AbstractBaseApi
 
     /**
      * The file size in bytes
-     * @var int
+     * @var int|null
      */
-    public int $size;
+    public ?int $size = null;
 
     /**
      * The datetime the file was created
-     * @var string
+     * @var string|null
      */
-    public string $createdAt;
+    public ?string $createdAt = null;
 
     /**
      * The datetime the file was last updated
-     * @var string
+     * @var string|null
      */
-    public string $updatedAt;
+    public ?string $updatedAt = null;
 
     /**
      * The datetime the file will be deleted (not present for file upload requests)
@@ -373,8 +369,11 @@ class File extends AbstractBaseApi
             ]);
 
             $startTime = microtime(true);
-            $uploadResponse = self::$apiClient->post($uploadUrl, [
-                'multipart' => $multipartData
+            // Use rawRequest with skipAuth and skipDomainValidation for external uploads (e.g., S3)
+            $uploadResponse = self::$apiClient->rawRequest($uploadUrl, 'POST', [
+                'multipart' => $multipartData,
+                'skipAuth' => true,  // Don't send Canvas Bearer token to external storage
+                'skipDomainValidation' => true  // Allow external storage URLs
             ]);
             $uploadDuration = microtime(true) - $startTime;
 
@@ -406,7 +405,11 @@ class File extends AbstractBaseApi
         $location = $uploadResponse->getHeader('Location')[0] ?? '';
         if (!empty($location)) {
             $logger->debug('File Upload: Step 3 - Following redirect to confirm upload');
-            $confirmResponse = self::$apiClient->get($location);
+            // Use rawRequest with skipAuth and skipDomainValidation for external redirect URLs
+            $confirmResponse = self::$apiClient->rawRequest($location, 'GET', [
+                'skipAuth' => true,  // Don't send Canvas Bearer token to external location
+                'skipDomainValidation' => true  // Allow external redirect URLs
+            ]);
             $fileData = json_decode($confirmResponse->getBody(), true);
         } else {
             $logger->debug('File Upload: Step 3 - Processing upload response directly');
@@ -420,7 +423,7 @@ class File extends AbstractBaseApi
             'content_type' => $fileData['content-type'] ?? null
         ]);
 
-        return new self($fileData);
+        return new self($fileData ?? []);
     }
 
     /**
@@ -429,7 +432,7 @@ class File extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkApiClient();
 
@@ -472,6 +475,29 @@ class File extends AbstractBaseApi
     }
 
     /**
+     * Get paginated files from current user's personal files.
+     * Overrides base to set context information.
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return PaginationResult
+     */
+    public static function paginate(array $params = []): PaginationResult
+    {
+        $paginatedResponse = parent::getPaginatedResponse(self::getEndpoint(), $params);
+
+        // Convert data to models with context information
+        $data = [];
+        foreach ($paginatedResponse->getJsonData() as $item) {
+            $file = new static($item);
+            $file->contextType = 'user';
+            $file->contextId = null; // 'self' user ID is not known at this point
+            $data[] = $file;
+        }
+
+        return $paginatedResponse->toPaginationResult($data);
+    }
+
+    /**
      * Get all files from current user's personal files.
      * Overrides base to set context information.
      *
@@ -507,7 +533,15 @@ class File extends AbstractBaseApi
     {
         $endpoint = sprintf('%s/%d/files', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-        $allData = $paginatedResponse->fetchAllPages();
+
+        $allData = [];
+        do {
+            $data = $paginatedResponse->getJsonData();
+            foreach ($data as $item) {
+                $allData[] = $item;
+            }
+            $paginatedResponse = $paginatedResponse->getNext();
+        } while ($paginatedResponse !== null);
 
         $files = array_map(fn($data) => new self($data), $allData);
 

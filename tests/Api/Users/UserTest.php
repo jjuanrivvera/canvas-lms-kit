@@ -407,7 +407,7 @@ class UserTest extends TestCase
             ->willReturn($response);
         
         $currentUser = User::self();
-        $profile = $currentUser->getProfile();
+        $profile = $currentUser->profile();
         
         $this->assertEquals('Current User', $profile->name);
     }
@@ -527,7 +527,7 @@ class UserTest extends TestCase
         $currentUser = User::fetchSelf();
         
         // Now use a method that requires ID
-        $profile = $currentUser->getProfile();
+        $profile = $currentUser->profile();
         
         $this->assertEquals('Test bio', $profile->bio);
     }
@@ -579,7 +579,7 @@ class UserTest extends TestCase
         
         // First mock for User::find()
         $userResponse = new Response(200, [], json_encode($userData));
-        // Second mock for getProfile()
+        // Second mock for profile()
         $profileResponse = new Response(200, [], json_encode($profileData));
         
         $this->httpClientMock
@@ -596,7 +596,7 @@ class UserTest extends TestCase
         $user = User::find($userId);
         $this->assertEquals($userId, $user->getId());
         
-        $profile = $user->getProfile();
+        $profile = $user->profile();
         $this->assertEquals('Specific User', $profile->name);
     }
 
@@ -634,13 +634,16 @@ class UserTest extends TestCase
             ['id' => 2, 'name' => 'Group 2']
         ];
         
-        $response = new Response(200, [], json_encode($groupsData));
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('all')
+            ->willReturn($groupsData);
         
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
-            ->with('users/self/groups', $this->anything())
-            ->willReturn($response);
+            ->method('getPaginated')
+            ->with('users/self/groups', ['query' => []])
+            ->willReturn($mockPaginatedResponse);
         
         $currentUser = User::self();
         $groups = $currentUser->groups();
@@ -736,13 +739,16 @@ class UserTest extends TestCase
             ]
         ];
         
-        $response = new Response(200, [], json_encode($loginData));
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('all')
+            ->willReturn($loginData);
         
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
-            ->with('users/self/logins', $this->anything())
-            ->willReturn($response);
+            ->method('getPaginated')
+            ->with('users/self/logins', ['query' => []])
+            ->willReturn($mockPaginatedResponse);
         
         $user = User::self();
         $logins = $user->logins();

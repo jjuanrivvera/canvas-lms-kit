@@ -36,7 +36,7 @@ class DiscussionTopicTest extends TestCase
         $reflection = new \ReflectionClass(DiscussionTopic::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, new Course(['id' => 0]));
+        $property->setValue(null, null);
     }
 
     public function testSetCourse(): void
@@ -55,7 +55,7 @@ class DiscussionTopicTest extends TestCase
         $reflection = new \ReflectionClass(DiscussionTopic::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, new Course([]));
+        $property->setValue(null, null);
 
         DiscussionTopic::checkCourse();
     }
@@ -228,7 +228,7 @@ class DiscussionTopicTest extends TestCase
         $this->assertTrue($discussionTopic->getPublished());
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $responseData = [
             [
@@ -263,7 +263,7 @@ class DiscussionTopicTest extends TestCase
             ->with('courses/123/discussion_topics', ['query' => []])
             ->willReturn($responseMock);
 
-        $discussionTopics = DiscussionTopic::fetchAll();
+        $discussionTopics = DiscussionTopic::get();
 
         $this->assertIsArray($discussionTopics);
         $this->assertCount(2, $discussionTopics);

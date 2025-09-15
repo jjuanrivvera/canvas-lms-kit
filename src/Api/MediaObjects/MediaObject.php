@@ -91,7 +91,7 @@ class MediaObject extends AbstractBaseApi
      * @return array<MediaObject> Array of MediaObject instances
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         $response = self::$apiClient->get('/media_objects', ['query' => $params]);
         $data = json_decode($response->getBody()->getContents(), true);
@@ -210,7 +210,7 @@ class MediaObject extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException Always throws as Canvas doesn't support this operation
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         throw new CanvasApiException('Direct media object retrieval is not supported by Canvas API');
     }

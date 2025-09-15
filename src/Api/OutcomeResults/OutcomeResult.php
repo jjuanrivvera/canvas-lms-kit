@@ -54,7 +54,7 @@ class OutcomeResult extends AbstractBaseApi
      * @return array<int, static> Never returns - always throws exception
      * @throws CanvasApiException Always thrown as method requires context
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         throw new CanvasApiException(
             'OutcomeResult requires context. Use fetchByContext() instead.'
@@ -112,7 +112,7 @@ class OutcomeResult extends AbstractBaseApi
      * @return static Never returns - always throws exception
      * @throws CanvasApiException Always thrown as OutcomeResult doesn't support direct find
      */
-    public static function find(int $id): static
+    public static function find(int $id, array $params = []): static
     {
         throw new CanvasApiException(
             'OutcomeResult does not support find(). Results are accessed through course or user context.'

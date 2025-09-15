@@ -62,6 +62,42 @@ class Outcome extends AbstractBaseApi
         return sprintf('accounts/%d/outcome_groups/global/outcomes', $accountId);
     }
 
+    /**
+     * Get first page of outcomes (defaults to Account context).
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return array<int, static> Array of Outcome objects
+     * @throws CanvasApiException
+     */
+    public static function get(array $params = []): array
+    {
+        self::checkApiClient();
+        $endpoint = self::getEndpoint();
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $data = json_decode($response->getBody()->getContents(), true);
+
+        return array_map(fn(array $item) => new static($item), $data);
+    }
+
+
+    /**
+     * Get paginated outcomes (defaults to Account context).
+     *
+     * @param array<string, mixed> $params Optional query parameters
+     * @return PaginationResult Paginated result with metadata
+     * @throws CanvasApiException
+     */
+    public static function paginate(array $params = []): PaginationResult
+    {
+        $accountId = Config::getAccountId();
+
+        if (!$accountId) {
+            throw new CanvasApiException('Account ID must be configured to fetch outcomes');
+        }
+
+        return self::fetchByContextPaginated('accounts', $accountId, $params);
+    }
+
 
     /**
      * Fetch outcomes by specific context.
@@ -76,7 +112,7 @@ class Outcome extends AbstractBaseApi
     {
         $endpoint = sprintf('%s/%d/outcome_groups/global/outcomes', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-        $allData = $paginatedResponse->fetchAllPages();
+        $allData = $paginatedResponse->all();
 
         return array_map(fn($data) => new static($data), $allData);
     }
@@ -107,7 +143,7 @@ class Outcome extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         $response = self::$apiClient->get(sprintf('outcomes/%d', $id));
         return new self(json_decode($response->getBody()->getContents(), true));

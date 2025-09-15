@@ -80,17 +80,17 @@ class ModuleRelationshipTest extends TestCase
             ]
         ];
 
-        // Set up mock expectations
-        $this->mockStream->method('getContents')
-            ->willReturn(json_encode($itemsData));
+        // Mock paginated response
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('all')
+            ->willReturn($itemsData);
 
-        $this->mockResponse->method('getBody')
-            ->willReturn($this->mockStream);
-
+        // Set up mock expectations for paginated request
         $this->mockHttpClient->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/modules/456/items', ['query' => []])
-            ->willReturn($this->mockResponse);
+            ->willReturn($mockPaginatedResponse);
 
         // Test the method
         $items = $module->items();
@@ -113,19 +113,19 @@ class ModuleRelationshipTest extends TestCase
             ['id' => 1, 'module_id' => 456, 'title' => 'Item 1']
         ];
 
-        // Set up mock expectations
-        $this->mockStream->method('getContents')
-            ->willReturn(json_encode($itemsData));
-
-        $this->mockResponse->method('getBody')
-            ->willReturn($this->mockStream);
-
         $params = ['include' => ['content_details'], 'per_page' => 50];
 
+        // Mock paginated response
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('all')
+            ->willReturn($itemsData);
+
+        // Set up mock expectations for paginated request
         $this->mockHttpClient->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/modules/456/items', ['query' => $params])
-            ->willReturn($this->mockResponse);
+            ->willReturn($mockPaginatedResponse);
 
         // Test the method
         $items = $module->items($params);

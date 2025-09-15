@@ -31,7 +31,7 @@ class RubricAccountContextTest extends TestCase
     /**
      * Test fetching rubrics from account context (default)
      */
-    public function testFetchAllFromAccountContext(): void
+    public function testGetFromAccountContext(): void
     {
         $rubricsData = [
             ['id' => 1, 'title' => 'Account Rubric 1', 'context_type' => 'Account', 'context_id' => 1],
@@ -45,7 +45,7 @@ class RubricAccountContextTest extends TestCase
             ->with('accounts/1/rubrics', ['query' => []])
             ->willReturn($mockResponse);
         
-        $rubrics = Rubric::fetchAll();
+        $rubrics = Rubric::get();
         
         $this->assertCount(2, $rubrics);
         $this->assertInstanceOf(Rubric::class, $rubrics[0]);
@@ -66,8 +66,11 @@ class RubricAccountContextTest extends TestCase
         $mockResponse = new Response(200, [], json_encode($rubricsData));
         $paginatedResponse = $this->createMock(PaginatedResponse::class);
         $paginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('getJsonData')
             ->willReturn($rubricsData);
+        $paginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
         
         $this->httpClientMock->expects($this->once())
             ->method('getPaginated')

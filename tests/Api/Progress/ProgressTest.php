@@ -277,12 +277,12 @@ class ProgressTest extends TestCase
         $this->assertEquals(['success' => true], $progress->getResults());
     }
 
-    public function testFetchAllThrowsException(): void
+    public function testGetThrowsException(): void
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Progress API does not support listing all progress objects. Use find() with specific ID.');
 
-        Progress::fetchAll();
+        Progress::get();
     }
 
     public function testAllGettersAndSetters(): void

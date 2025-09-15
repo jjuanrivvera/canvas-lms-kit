@@ -41,14 +41,13 @@ use CanvasLMS\Pagination\PaginationResult;
  * $quiz = Quiz::find(456);
  *
  * // List all quizzes for the course
- * $quizzes = Quiz::fetchAll();
+ * $quizzes = Quiz::get();
  *
  * // Get published quizzes only
- * $publishedQuizzes = Quiz::fetchAll(['published' => true]);
+ * $publishedQuizzes = Quiz::get(['published' => true]);
  *
  * // Get paginated quizzes
- * $paginatedQuizzes = Quiz::fetchAllPaginated();
- * $paginationResult = Quiz::fetchPage();
+ * $paginationResult = Quiz::paginate();
  *
  * // Update a quiz
  * $updatedQuiz = Quiz::update(456, ['time_limit' => 90]);
@@ -94,7 +93,7 @@ class Quiz extends AbstractBaseApi
         'until_after_last_attempt'
     ];
 
-    protected static Course $course;
+    protected static ?Course $course = null;
 
     /**
      * Quiz unique identifier
@@ -1059,7 +1058,7 @@ class Quiz extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkCourse();
         self::checkApiClient();
@@ -1069,80 +1068,6 @@ class Quiz extends AbstractBaseApi
         $quizData = json_decode($response->getBody()->getContents(), true);
 
         return new self($quizData);
-    }
-
-    /**
-     * Fetch all quizzes for the course
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return array<Quiz> Array of Quiz objects
-     * @throws CanvasApiException
-     */
-    public static function fetchAll(array $params = []): array
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/quizzes', self::$course->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $quizzesData = json_decode($response->getBody()->getContents(), true);
-
-        $quizzes = [];
-        foreach ($quizzesData as $quizData) {
-            $quizzes[] = new self($quizData);
-        }
-
-        return $quizzes;
-    }
-
-    /**
-     * Fetch all quizzes with pagination support
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/quizzes', self::$course->id);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
-
-    /**
-     * Fetch a single page of quizzes
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/quizzes', self::$course->id);
-        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Fetch all pages of quizzes
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return array<Quiz> Array of Quiz objects from all pages
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/quizzes', self::$course->id);
-        return self::fetchAllPagesAsModels($endpoint, $params);
     }
 
     /**
@@ -1344,11 +1269,11 @@ class Quiz extends AbstractBaseApi
      * @return QuizSubmission[] Array of quiz submission instances
      * @throws CanvasApiException If course not set or API error
      */
-    public function getSubmissions(array $params = []): array
+    public function submissions(array $params = []): array
     {
         QuizSubmission::setCourse(self::$course);
         QuizSubmission::setQuiz($this);
-        return QuizSubmission::fetchAll($params);
+        return QuizSubmission::all($params);
     }
 
     /**
@@ -1357,7 +1282,7 @@ class Quiz extends AbstractBaseApi
      * @return QuizSubmission|null Quiz submission instance or null if no submission
      * @throws CanvasApiException If course not set or API error
      */
-    public function getCurrentUserSubmission(): ?QuizSubmission
+    public function currentUserSubmission(): ?QuizSubmission
     {
         QuizSubmission::setCourse(self::$course);
         QuizSubmission::setQuiz($this);
@@ -1378,19 +1303,6 @@ class Quiz extends AbstractBaseApi
         return QuizSubmission::start($params);
     }
 
-    /**
-     * Get paginated submissions for this quiz
-     *
-     * @param mixed[] $params Optional parameters for filtering
-     * @return PaginationResult Pagination result with submissions
-     * @throws CanvasApiException If course not set or API error
-     */
-    public function getSubmissionsPaginated(array $params = []): PaginationResult
-    {
-        QuizSubmission::setCourse(self::$course);
-        QuizSubmission::setQuiz($this);
-        return QuizSubmission::fetchPage($params);
-    }
 
     /**
      * Get the API endpoint for this resource

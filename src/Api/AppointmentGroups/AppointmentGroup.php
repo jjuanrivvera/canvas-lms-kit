@@ -44,7 +44,7 @@ use CanvasLMS\Pagination\PaginatedResponse;
  * $appointmentGroup = AppointmentGroup::find(543);
  *
  * // Listing appointment groups
- * $groups = AppointmentGroup::fetchAll(['scope' => 'manageable']);
+ * $groups = AppointmentGroup::get(['scope' => 'manageable']);
  *
  * // Publishing an appointment group
  * $appointmentGroup->publish();
@@ -322,7 +322,7 @@ class AppointmentGroup extends AbstractBaseApi
      * @return array<int, self>
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         self::checkApiClient();
         $response = self::$apiClient->get('appointment_groups', ['query' => $params]);
@@ -333,18 +333,6 @@ class AppointmentGroup extends AbstractBaseApi
         }, $data);
     }
 
-    /**
-     * Get paginated appointment groups
-     *
-     * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkApiClient();
-        return self::getPaginatedResponse('appointment_groups', $params);
-    }
 
     /**
      * Save the appointment group (create or update)

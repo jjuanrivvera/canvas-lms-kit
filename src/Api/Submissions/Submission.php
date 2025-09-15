@@ -57,7 +57,7 @@ use CanvasLMS\Pagination\PaginationResult;
  * $submission = Submission::find(789);
  *
  * // List all submissions for the assignment
- * $submissions = Submission::fetchAll();
+ * $submissions = Submission::get();
  *
  * // Grade a submission
  * $gradedSubmission = Submission::update(789, [
@@ -90,13 +90,13 @@ class Submission extends AbstractBaseApi
      * Course context (required)
      * @var Course
      */
-    protected static Course $course;
+    protected static ?Course $course = null;
 
     /**
      * Assignment context (required)
      * @var Assignment
      */
-    protected static Assignment $assignment;
+    protected static ?Assignment $assignment = null;
 
     /**
      * Submission unique identifier
@@ -335,11 +335,13 @@ class Submission extends AbstractBaseApi
 
     /**
      * Find a submission by user ID
+     * @param int $id User ID (submissions are fetched by user ID)
+     * @param array<string, mixed> $params Optional query parameters
      * @return static
      * @throws CanvasApiException
      * @throws Exception
      */
-    public static function find(int $userId): static
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
         self::checkContexts();
@@ -348,10 +350,10 @@ class Submission extends AbstractBaseApi
             'courses/%d/assignments/%d/submissions/%d',
             self::$course->id,
             self::$assignment->id,
-            $userId
+            $id
         );
 
-        $response = self::$apiClient->get($endpoint);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $submissionData = json_decode($response->getBody()->getContents(), true);
 
         /** @phpstan-ignore-next-line */
@@ -365,7 +367,7 @@ class Submission extends AbstractBaseApi
      * @throws CanvasApiException
      * @throws Exception
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         self::checkApiClient();
         self::checkContexts();
@@ -382,28 +384,16 @@ class Submission extends AbstractBaseApi
         return $submissions;
     }
 
+
+
     /**
-     * Fetch submissions with pagination
+     * Get paginated submissions
      * @param array<string, mixed> $params Query parameters
+     * @return PaginationResult
      * @throws CanvasApiException
      * @throws Exception
      */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkApiClient();
-        self::checkContexts();
-
-        $endpoint = sprintf('courses/%d/assignments/%d/submissions', self::$course->id, self::$assignment->id);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
-
-    /**
-     * Fetch a single page of submissions
-     * @param array<string, mixed> $params Query parameters
-     * @throws CanvasApiException
-     * @throws Exception
-     */
-    public static function fetchPage(array $params = []): PaginationResult
+    public static function paginate(array $params = []): PaginationResult
     {
         self::checkApiClient();
         self::checkContexts();
@@ -421,13 +411,21 @@ class Submission extends AbstractBaseApi
      * @throws CanvasApiException
      * @throws Exception
      */
-    public static function fetchAllPages(array $params = []): array
+    public static function all(array $params = []): array
     {
         self::checkApiClient();
         self::checkContexts();
 
         $endpoint = sprintf('courses/%d/assignments/%d/submissions', self::$course->id, self::$assignment->id);
-        return self::fetchAllPagesAsModels($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+
+        $submissions = [];
+        foreach ($allData as $item) {
+            $submissions[] = new self($item);
+        }
+
+        return $submissions;
     }
 
     /**

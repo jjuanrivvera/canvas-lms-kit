@@ -56,17 +56,17 @@ class AssignmentRelationshipTest extends TestCase
             ['id' => 2, 'user_id' => 101, 'assignment_id' => 456, 'score' => 88],
         ];
 
-        // Set up mock expectations
-        $this->mockStream->method('getContents')
-            ->willReturn(json_encode($submissionsData));
+        // Mock paginated response
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('all')
+            ->willReturn($submissionsData);
 
-        $this->mockResponse->method('getBody')
-            ->willReturn($this->mockStream);
-
+        // Set up mock expectations for paginated request
         $this->mockHttpClient->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/assignments/456/submissions', ['query' => []])
-            ->willReturn($this->mockResponse);
+            ->willReturn($mockPaginatedResponse);
 
         // Test the method  
         $submissions = $assignment->submissions();
@@ -106,7 +106,7 @@ class AssignmentRelationshipTest extends TestCase
             ->willReturn($this->mockResponse);
 
         // Test the method
-        $submission = $assignment->getSubmissionForUser(100);
+        $submission = $assignment->submissionForUser(100);
 
         // Assertions
         $this->assertInstanceOf(Submission::class, $submission);
@@ -126,7 +126,7 @@ class AssignmentRelationshipTest extends TestCase
             ->willThrowException(new CanvasApiException('404 Not Found'));
 
         // Test the method
-        $submission = $assignment->getSubmissionForUser(100);
+        $submission = $assignment->submissionForUser(100);
 
         // Assertions
         $this->assertNull($submission);
@@ -144,17 +144,17 @@ class AssignmentRelationshipTest extends TestCase
             ['id' => 3, 'user_id' => 102],
         ];
 
-        // Set up mock expectations
-        $this->mockStream->method('getContents')
-            ->willReturn(json_encode($submissionsData));
+        // Mock paginated response
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('all')
+            ->willReturn($submissionsData);
 
-        $this->mockResponse->method('getBody')
-            ->willReturn($this->mockStream);
-
+        // Set up mock expectations for paginated request
         $this->mockHttpClient->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/assignments/456/submissions', ['query' => ['per_page' => 100]])
-            ->willReturn($this->mockResponse);
+            ->willReturn($mockPaginatedResponse);
 
         // Test the method
         $count = $assignment->getSubmissionCount();

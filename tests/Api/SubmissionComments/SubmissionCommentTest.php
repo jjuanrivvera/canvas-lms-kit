@@ -43,11 +43,11 @@ class SubmissionCommentTest extends TestCase
         
         $courseProperty = $reflection->getProperty('course');
         $courseProperty->setAccessible(true);
-        $courseProperty->setValue(null, new Course(['id' => 0]));
+        $courseProperty->setValue(null, null);
         
         $assignmentProperty = $reflection->getProperty('assignment');
         $assignmentProperty->setAccessible(true);
-        $assignmentProperty->setValue(null, new Assignment(['id' => 0]));
+        $assignmentProperty->setValue(null, null);
         
         $userIdProperty = $reflection->getProperty('userId');
         $userIdProperty->setAccessible(true);

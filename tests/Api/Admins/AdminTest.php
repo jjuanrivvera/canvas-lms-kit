@@ -252,7 +252,7 @@ class AdminTest extends TestCase
      * Test the fetchAll method
      * @return void
      */
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $expectedResult = [
             ['id' => 1, 'name' => 'Admin 1', 'role' => 'AccountAdmin'],
@@ -268,7 +268,7 @@ class AdminTest extends TestCase
             ->with($this->equalTo('accounts/1/admins'))
             ->willReturn($response);
 
-        $admins = Admin::fetchAll();
+        $admins = Admin::get();
 
         $this->assertIsArray($admins);
         $this->assertCount(3, $admins);
@@ -443,7 +443,7 @@ class AdminTest extends TestCase
      * Test fetchAll with custom account ID
      * @return void
      */
-    public function testFetchAllWithAccountId(): void
+    public function testGetWithAccountId(): void
     {
         $expectedResult = [
             ['id' => 1, 'name' => 'Admin 1', 'role' => 'AccountAdmin']
@@ -457,7 +457,7 @@ class AdminTest extends TestCase
             ->with($this->equalTo('accounts/5/admins'))
             ->willReturn($response);
 
-        $admins = Admin::fetchAll(['account_id' => 5]);
+        $admins = Admin::get(['account_id' => 5]);
 
         $this->assertIsArray($admins);
         $this->assertCount(1, $admins);
@@ -473,6 +473,6 @@ class AdminTest extends TestCase
         Config::setAccountId(0);
 
         $this->expectException(CanvasApiException::class);
-        Admin::fetchAllPaginated();
+        Admin::paginate();
     }
 }

@@ -25,11 +25,10 @@ use CanvasLMS\Pagination\PaginationResult;
  * Tab::setCourse($course);
  *
  * // List all tabs for the course
- * $tabs = Tab::fetchAll();
+ * $tabs = Tab::get();
  *
  * // Get paginated tabs
- * $paginatedTabs = Tab::fetchAllPaginated();
- * $paginationResult = Tab::fetchPage();
+ * $paginationResult = Tab::paginate();
  *
  * // Update a tab
  * $updatedTab = Tab::update('assignments', ['position' => 3, 'hidden' => false]);
@@ -39,7 +38,7 @@ use CanvasLMS\Pagination\PaginationResult;
  * $updatedTab = Tab::update('home', $updateDto);
  *
  * // Update using instance method
- * $tab = Tab::fetchAll()[0];
+ * $tab = Tab::get()[0];
  * $tab->position = 5;
  * $tab->hidden = true;
  * $success = $tab->save();
@@ -49,7 +48,7 @@ use CanvasLMS\Pagination\PaginationResult;
  */
 class Tab extends AbstractBaseApi
 {
-    protected static Course $course;
+    protected static ?Course $course = null;
 
     /**
      * HTML URL of the tab
@@ -270,30 +269,6 @@ class Tab extends AbstractBaseApi
     }
 
     /**
-     * Fetch all tabs for the course
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return array<Tab> Array of Tab objects
-     * @throws CanvasApiException
-     */
-    public static function fetchAll(array $params = []): array
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/tabs', self::$course->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $tabsData = json_decode($response->getBody()->getContents(), true);
-
-        $tabs = [];
-        foreach ($tabsData as $tabData) {
-            $tabs[] = new self($tabData);
-        }
-
-        return $tabs;
-    }
-
-    /**
      * Find a single tab by ID
      *
      * Note: Canvas API doesn't support finding individual tabs by ID.
@@ -303,61 +278,11 @@ class Tab extends AbstractBaseApi
      * @return static
      * @throws CanvasApiException Always throws as this operation is not supported
      */
-    public static function find(int $id): static
+    public static function find(int $id, array $params = []): static
     {
         throw new CanvasApiException(
-            'Canvas API does not support finding individual tabs by ID. Use fetchAll() to retrieve all tabs.'
+            'Canvas API does not support finding individual tabs by ID. Use get() to retrieve all tabs.'
         );
-    }
-
-    /**
-     * Fetch all tabs with pagination support
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/tabs', self::$course->id);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
-
-    /**
-     * Fetch a single page of tabs
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/tabs', self::$course->id);
-        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Fetch all pages of tabs
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return array<Tab> Array of Tab objects from all pages
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/tabs', self::$course->id);
-        return self::fetchAllPagesAsModels($endpoint, $params);
     }
 
     /**

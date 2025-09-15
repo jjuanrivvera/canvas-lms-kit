@@ -36,7 +36,7 @@ class AssignmentTest extends TestCase
         $reflection = new \ReflectionClass(Assignment::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, new Course(['id' => 0]));
+        $property->setValue(null, null);
     }
 
     public function testSetCourse(): void
@@ -55,7 +55,7 @@ class AssignmentTest extends TestCase
         $reflection = new \ReflectionClass(Assignment::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
-        $property->setValue(null, new Course([]));
+        $property->setValue(null, null);
 
         Assignment::checkCourse();
     }
@@ -214,7 +214,7 @@ class AssignmentTest extends TestCase
         $this->assertTrue($assignment->getPublished());
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $responseData = [
             [
@@ -249,7 +249,7 @@ class AssignmentTest extends TestCase
             ->with('courses/123/assignments', ['query' => []])
             ->willReturn($responseMock);
 
-        $assignments = Assignment::fetchAll();
+        $assignments = Assignment::get();
 
         $this->assertCount(2, $assignments);
         $this->assertInstanceOf(Assignment::class, $assignments[0]);
@@ -260,7 +260,7 @@ class AssignmentTest extends TestCase
         $this->assertEquals('Assignment 2', $assignments[1]->getName());
     }
 
-    public function testFetchAllWithParams(): void
+    public function testGetWithParams(): void
     {
         $params = ['include' => ['submission'], 'order_by' => 'name'];
         $responseData = [];
@@ -281,14 +281,14 @@ class AssignmentTest extends TestCase
             ->with('courses/123/assignments', ['query' => $params])
             ->willReturn($responseMock);
 
-        $assignments = Assignment::fetchAll($params);
+        $assignments = Assignment::get($params);
 
         $this->assertCount(0, $assignments);
     }
 
-    public function testFetchAllPaginated(): void
+    public function testGetPaginated(): void
     {
-        $this->assertTrue(method_exists(Assignment::class, 'fetchAllPaginated'));
+        $this->assertTrue(method_exists(Assignment::class, 'paginate'));
     }
 
     public function testCreate(): void

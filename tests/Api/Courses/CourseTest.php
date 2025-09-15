@@ -11,6 +11,7 @@ use CanvasLMS\Dto\Courses\CreateCourseDTO;
 use CanvasLMS\Dto\Courses\UpdateCourseDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Config;
+use CanvasLMS\Pagination\PaginatedResponse;
 
 class CourseTest extends TestCase
 {
@@ -408,13 +409,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => []])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $enrollments = $course->enrollments();
 
@@ -443,13 +450,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['state[]' => ['active']]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $enrollments = $course->getActiveEnrollments();
 
@@ -475,13 +488,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['type[]' => ['StudentEnrollment']]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $enrollments = $course->getStudentEnrollments();
 
@@ -507,13 +526,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['type[]' => ['TeacherEnrollment']]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $enrollments = $course->getTeacherEnrollments();
 
@@ -539,13 +564,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['type[]' => ['TaEnrollment']]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $enrollments = $course->getTaEnrollments();
 
@@ -571,13 +602,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['type[]' => ['ObserverEnrollment']]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $enrollments = $course->getObserverEnrollments();
 
@@ -603,13 +640,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['type[]' => ['DesignerEnrollment']]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $enrollments = $course->getDesignerEnrollments();
 
@@ -635,13 +678,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['user_id' => 101]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $hasUser = $course->hasUserEnrolled(101);
 
@@ -666,13 +715,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['user_id' => 101, 'type[]' => ['StudentEnrollment']]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $hasStudent = $course->hasUserEnrolled(101, 'StudentEnrollment');
 
@@ -687,13 +742,19 @@ class CourseTest extends TestCase
         $courseData = ['id' => 123, 'name' => 'Test Course'];
         $course = new Course($courseData);
 
-        $response = new Response(200, [], json_encode([]));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn([]); // Empty array means no enrollments
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['user_id' => 101]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $hasUser = $course->hasUserEnrolled(101);
 
@@ -718,13 +779,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['user_id' => 101, 'type[]' => ['StudentEnrollment']]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $hasStudent = $course->hasStudentEnrolled(101);
 
@@ -749,13 +816,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['user_id' => 101, 'type[]' => ['TeacherEnrollment']]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $hasTeacher = $course->hasTeacherEnrolled(101);
 
@@ -787,13 +860,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['type[]' => ['StudentEnrollment']]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $count = $course->getStudentCount();
 
@@ -818,13 +897,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['type[]' => ['TeacherEnrollment']]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $count = $course->getTeacherCount();
 
@@ -856,13 +941,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => []])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $count = $course->getTotalEnrollmentCount();
 
@@ -920,13 +1011,19 @@ class CourseTest extends TestCase
             ]
         ];
 
-        $response = new Response(200, [], json_encode($enrollmentData));
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($enrollmentData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null); // No more pages
 
         $this->httpClientMock
             ->expects($this->once())
-            ->method('get')
+            ->method('getPaginated')
             ->with('courses/123/enrollments', ['query' => ['type[]' => ['StudentEnrollment']]])
-            ->willReturn($response);
+            ->willReturn($mockPaginatedResponse);
 
         $enrollments = $course->enrollments(['type[]' => ['StudentEnrollment']]); // Method access with params
 

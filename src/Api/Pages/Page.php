@@ -41,10 +41,10 @@ use CanvasLMS\Pagination\PaginationResult;
  * $page = Page::findByUrl('course-syllabus');
  *
  * // List all pages for the course
- * $pages = Page::fetchAll();
+ * $pages = Page::get();
  *
  * // Get only published pages
- * $publishedPages = Page::fetchAll(['published' => true]);
+ * $publishedPages = Page::get(['published' => true]);
  *
  * // Get the course front page
  * $frontPage = Page::fetchFrontPage();
@@ -73,7 +73,7 @@ use CanvasLMS\Pagination\PaginationResult;
  */
 class Page extends AbstractBaseApi
 {
-    protected static Course $course;
+    protected static ?Course $course = null;
 
     /**
      * Page editing roles constants
@@ -752,10 +752,11 @@ class Page extends AbstractBaseApi
      * Find a single page by ID
      *
      * @param int $id Page ID
+     * @param array<string, mixed> $params Optional query parameters
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkCourse();
         self::checkApiClient();
@@ -811,7 +812,7 @@ class Page extends AbstractBaseApi
      * @return array<Page> Array of Page objects
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         self::checkCourse();
         self::checkApiClient();
@@ -833,55 +834,8 @@ class Page extends AbstractBaseApi
         return $pages;
     }
 
-    /**
-     * Fetch all pages with pagination support
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkCourse();
-        self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/pages', self::$course->id);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
 
-    /**
-     * Fetch a single page of pages
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return PaginationResult
-     * @throws CanvasApiException
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/pages', self::$course->id);
-        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Fetch all pages of pages
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return array<Page> Array of Page objects from all pages
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/pages', self::$course->id);
-        return self::fetchAllPagesAsModels($endpoint, $params);
-    }
 
     /**
      * Create a new page
@@ -1165,32 +1119,6 @@ class Page extends AbstractBaseApi
         return $this;
     }
 
-    /**
-     * Get page revisions
-     *
-     * @return array<PageRevision> Array of PageRevision objects
-     * @throws CanvasApiException
-     */
-    public function getRevisions(): array
-    {
-        if (!$this->url) {
-            throw new CanvasApiException('Page URL is required');
-        }
-
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/pages/%s/revisions', self::$course->id, rawurlencode($this->url));
-        $response = self::$apiClient->get($endpoint);
-        $revisionsData = json_decode($response->getBody()->getContents(), true);
-
-        $revisions = [];
-        foreach ($revisionsData as $revisionData) {
-            $revisions[] = new PageRevision($revisionData);
-        }
-
-        return $revisions;
-    }
 
     /**
      * Duplicate this page
@@ -1223,7 +1151,7 @@ class Page extends AbstractBaseApi
      * @return PageRevision Revision object
      * @throws CanvasApiException
      */
-    public function getRevision(int|string $revisionId, bool $summary = false): PageRevision
+    public function revision(int|string $revisionId, bool $summary = false): PageRevision
     {
         if (!$this->url) {
             throw new CanvasApiException('Page URL is required');
@@ -1317,7 +1245,23 @@ class Page extends AbstractBaseApi
      */
     public function revisions(array $params = []): array
     {
-        return $this->getRevisions();
+        if (!$this->url) {
+            throw new CanvasApiException('Page URL is required');
+        }
+
+        self::checkCourse();
+        self::checkApiClient();
+
+        $endpoint = sprintf('courses/%d/pages/%s/revisions', self::$course->id, rawurlencode($this->url));
+        $response = self::$apiClient->get($endpoint);
+        $revisionsData = json_decode($response->getBody()->getContents(), true);
+
+        $revisions = [];
+        foreach ($revisionsData as $revisionData) {
+            $revisions[] = new PageRevision($revisionData);
+        }
+
+        return $revisions;
     }
 
     /**

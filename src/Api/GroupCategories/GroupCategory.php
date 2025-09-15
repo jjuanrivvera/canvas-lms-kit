@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CanvasLMS\Api\GroupCategories;
 
 use CanvasLMS\Api\AbstractBaseApi;
+use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Groups\Group;
 use CanvasLMS\Api\Users\User;
 use CanvasLMS\Config;
@@ -26,6 +27,11 @@ use CanvasLMS\Pagination\PaginationResult;
  */
 class GroupCategory extends AbstractBaseApi
 {
+    /**
+     * Course context for group categories
+     */
+    protected static ?Course $course = null;
+
     /**
      * The ID of the group category
      */
@@ -104,7 +110,7 @@ class GroupCategory extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkApiClient();
 
@@ -116,6 +122,22 @@ class GroupCategory extends AbstractBaseApi
     }
 
     /**
+     * Set the course context for group category operations
+     */
+    public static function setCourse(Course $course): void
+    {
+        self::$course = $course;
+    }
+
+    /**
+     * Check if course context is set
+     */
+    public static function checkCourse(): bool
+    {
+        return isset(self::$course);
+    }
+
+    /**
      * Get the endpoint for this resource.
      *
      * @return string
@@ -123,6 +145,10 @@ class GroupCategory extends AbstractBaseApi
      */
     protected static function getEndpoint(): string
     {
+        if (self::checkCourse()) {
+            return sprintf('courses/%d/group_categories', self::$course->getId());
+        }
+
         $accountId = Config::getAccountId();
         return sprintf('accounts/%d/group_categories', $accountId);
     }
@@ -232,7 +258,7 @@ class GroupCategory extends AbstractBaseApi
 
         $endpoint = sprintf('group_categories/%d/groups', $this->id);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
-        $allData = $paginatedResponse->fetchAllPages();
+        $allData = $paginatedResponse->all();
 
         return array_map(fn($data) => new Group($data), $allData);
     }

@@ -11,8 +11,6 @@ use CanvasLMS\Api\Sections\Section;
 use CanvasLMS\Dto\Enrollments\CreateEnrollmentDTO;
 use CanvasLMS\Dto\Enrollments\UpdateEnrollmentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Enrollment API Class
@@ -82,7 +80,7 @@ use CanvasLMS\Pagination\PaginationResult;
 class Enrollment extends AbstractBaseApi
 {
     // Course context (required pattern)
-    protected static Course $course;
+    protected static ?Course $course = null;
 
     // Core enrollment properties
     public ?int $id = null;
@@ -179,13 +177,13 @@ class Enrollment extends AbstractBaseApi
     /**
      * @return self
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkCourse();
         self::checkApiClient();
 
         $endpoint = sprintf('courses/%d/enrollments/%d', self::$course->id, $id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $data = json_decode((string) $response->getBody(), true);
 
         return new self($data);
@@ -202,7 +200,7 @@ class Enrollment extends AbstractBaseApi
      * @param array<string, mixed> $params
      * @return array<self>
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         self::checkCourse();
         self::checkApiClient();
@@ -219,48 +217,6 @@ class Enrollment extends AbstractBaseApi
         return $enrollments;
     }
 
-    /**
-     * Fetch all enrollments with pagination support
-     */
-    /**
-     * @param mixed[] $params
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/enrollments', self::$course->id);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
-
-    /**
-     * Fetch a single page of enrollments
-     */
-    /**
-     * @param mixed[] $params
-     */
-    public static function fetchPage(array $params = []): PaginationResult
-    {
-        $paginatedResponse = self::fetchAllPaginated($params);
-        return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Fetch all pages of enrollments
-     */
-    /**
-     * @param mixed[] $params
-     * @return self[]
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/enrollments', self::$course->id);
-        return self::fetchAllPagesAsModels($endpoint, $params);
-    }
 
     /**
      * Create a new enrollment
@@ -861,7 +817,21 @@ class Enrollment extends AbstractBaseApi
      */
     public function course(): ?Course
     {
-        return $this->getCourse();
+        if (!$this->courseId) {
+            return null;
+        }
+
+        // If the static course context matches this enrollment's course, use it
+        if (isset(self::$course) && self::$course->id === $this->courseId) {
+            return self::$course;
+        }
+
+        // Otherwise, fetch the course from the API
+        try {
+            return Course::find($this->courseId);
+        } catch (\Exception $e) {
+            throw new CanvasApiException("Could not load course with ID {$this->courseId}: " . $e->getMessage());
+        }
     }
 
     /**
@@ -882,23 +852,6 @@ class Enrollment extends AbstractBaseApi
      */
     public function user(): ?User
     {
-        return $this->getUser();
-    }
-
-    // Relationship Methods
-
-    /**
-     * Get the associated User object
-     *
-     * If user data is embedded in the enrollment (from Canvas API include),
-     * creates a User instance from that data. Otherwise, fetches the user
-     * from the API using the userId.
-     *
-     * @return User|null The user object or null if no userId is set
-     * @throws CanvasApiException If user cannot be loaded
-     */
-    public function getUser(): ?User
-    {
         if (!$this->userId) {
             return null;
         }
@@ -916,33 +869,9 @@ class Enrollment extends AbstractBaseApi
         }
     }
 
-    /**
-     * Get the associated Course object
-     *
-     * If the static course context is set and matches this enrollment's courseId,
-     * returns that course. Otherwise, fetches the course from the API.
-     *
-     * @return Course|null The course object or null if no courseId is set
-     * @throws CanvasApiException If course cannot be loaded
-     */
-    public function getCourse(): ?Course
-    {
-        if (!$this->courseId) {
-            return null;
-        }
+    // Relationship Methods
 
-        // If the static course context matches this enrollment's course, use it
-        if (isset(self::$course) && self::$course->id === $this->courseId) {
-            return self::$course;
-        }
 
-        // Otherwise, fetch the course from the API
-        try {
-            return Course::find($this->courseId);
-        } catch (\Exception $e) {
-            throw new CanvasApiException("Could not load course with ID {$this->courseId}: " . $e->getMessage());
-        }
-    }
 
     /**
      * Check if this enrollment is for a student

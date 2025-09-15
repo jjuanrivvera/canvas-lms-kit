@@ -523,7 +523,7 @@ class PaginatedResponseTest extends TestCase
     /**
      * Test fetch all pages
      */
-    public function testFetchAllPages(): void
+    public function testGetPages(): void
     {
         // Mock the current response
         $currentResponseBody = json_encode([['id' => 1, 'name' => 'Course 1']]);
@@ -567,7 +567,7 @@ class PaginatedResponseTest extends TestCase
 
         $paginatedResponse = new PaginatedResponse($this->mockResponse, $this->mockHttpClient);
 
-        $allData = $paginatedResponse->fetchAllPages();
+        $allData = $paginatedResponse->all();
 
         $expectedData = [
             ['id' => 1, 'name' => 'Course 1'],
@@ -580,7 +580,7 @@ class PaginatedResponseTest extends TestCase
     /**
      * Test fetch all pages with single page
      */
-    public function testFetchAllPagesWithSinglePage(): void
+    public function testGetPagesWithSinglePage(): void
     {
         $responseBody = json_encode($this->sampleData);
         $mockStream = $this->createMock(StreamInterface::class);
@@ -600,7 +600,7 @@ class PaginatedResponseTest extends TestCase
 
         $paginatedResponse = new PaginatedResponse($this->mockResponse, $this->mockHttpClient);
 
-        $allData = $paginatedResponse->fetchAllPages();
+        $allData = $paginatedResponse->all();
 
         $this->assertEquals($this->sampleData, $allData);
     }

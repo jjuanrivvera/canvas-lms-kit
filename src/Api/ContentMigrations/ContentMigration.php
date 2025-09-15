@@ -149,7 +149,7 @@ class ContentMigration extends AbstractBaseApi
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         throw new CanvasApiException(
             'Direct find() not supported for ContentMigration. Use findByContext() instead.'
@@ -202,7 +202,10 @@ class ContentMigration extends AbstractBaseApi
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
-        return self::fetchAllPagesAsModels(sprintf('%s/%d/content_migrations', $contextType, $contextId), $params);
+        $endpoint = sprintf('%s/%d/content_migrations', $contextType, $contextId);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+        return array_map(fn($data) => new self($data), $allData);
     }
 
     /**

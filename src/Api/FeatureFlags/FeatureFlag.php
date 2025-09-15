@@ -180,7 +180,7 @@ class FeatureFlag
      * @return array<int, self> Array of FeatureFlag objects
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         $accountId = Config::getAccountId();
         return self::fetchByContext('accounts', $accountId, $params);

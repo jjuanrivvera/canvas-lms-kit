@@ -284,6 +284,204 @@ foreach ($userIds as $userId) {
 Config::stopMasquerading();
 ```
 
+## 📄 Pagination
+
+Canvas LMS Kit provides three simple, consistent methods for handling paginated data across all resources:
+
+### The Three Methods
+
+```php
+// 1. get() - Fetch first page only (default: 10 items)
+$courses = Course::get();                    // First 10 courses
+$courses = Course::get(['per_page' => 50]); // First 50 courses
+
+// 2. paginate() - Get results with pagination metadata
+$result = Course::paginate(['per_page' => 25]);
+echo "Page {$result->getCurrentPage()} of {$result->getTotalPages()}";
+echo "Total courses: {$result->getTotalCount()}";
+
+// 3. all() - Fetch ALL items from all pages automatically
+$allCourses = Course::all();  // ⚠️ Use with caution on large datasets!
+```
+
+### When to Use Each Method
+
+| Method | Use Case | Memory Usage | API Calls |
+|--------|----------|--------------|-----------|
+| `get()` | Dashboards, quick views, limited displays | Low (1 page) | 1 |
+| `paginate()` | UI tables, batch processing, when you need metadata | Low (1 page) | 1 per page |
+| `all()` | Complete data export, small datasets (< 1000 items) | High (all data) | As many as needed |
+
+### Memory-Safe Processing of Large Datasets
+
+```php
+// ❌ WRONG - May exhaust memory with large datasets
+$allUsers = User::all();  // Could be 50,000+ users!
+foreach ($allUsers as $user) {
+    processUser($user);
+}
+
+// ✅ CORRECT - Process in batches using paginate()
+$page = 1;
+do {
+    $batch = User::paginate(['page' => $page++, 'per_page' => 100]);
+    
+    foreach ($batch->getData() as $user) {
+        processUser($user);
+    }
+    
+    // Optional: Add delay to respect rate limits
+    if ($batch->hasNextPage()) {
+        sleep(1);
+    }
+    
+} while ($batch->hasNextPage());
+```
+
+### Common Pagination Patterns
+
+#### Pattern 1: Building a Paginated UI
+```php
+// In your controller
+$page = $_GET['page'] ?? 1;
+$result = Course::paginate(['page' => $page, 'per_page' => 25]);
+
+// In your view
+foreach ($result->getData() as $course) {
+    echo "<tr><td>{$course->name}</td></tr>";
+}
+
+// Pagination controls
+if ($result->hasPreviousPage()) {
+    echo "<a href='?page=" . ($page - 1) . "'>Previous</a>";
+}
+if ($result->hasNextPage()) {
+    echo "<a href='?page=" . ($page + 1) . "'>Next</a>";
+}
+echo "Page {$result->getCurrentPage()} of {$result->getTotalPages()}";
+```
+
+#### Pattern 2: Exporting All Data
+```php
+// For small datasets (< 1000 items)
+$assignments = Assignment::all(['course_id' => 123]);
+exportToCSV($assignments);
+
+// For large datasets - stream to file
+$csvFile = fopen('enrollments.csv', 'w');
+$page = 1;
+
+do {
+    $batch = Enrollment::paginate(['page' => $page++, 'per_page' => 500]);
+    
+    foreach ($batch->getData() as $enrollment) {
+        fputcsv($csvFile, [
+            $enrollment->userId,
+            $enrollment->courseId,
+            $enrollment->enrollmentState
+        ]);
+    }
+    
+} while ($batch->hasNextPage());
+
+fclose($csvFile);
+```
+
+#### Pattern 3: Finding Specific Items
+```php
+// When you need just a subset
+$recentAssignments = Assignment::get([
+    'per_page' => 10,
+    'order_by' => 'due_at'
+]);
+
+// When searching through all pages
+$found = false;
+$page = 1;
+
+do {
+    $batch = User::paginate([
+        'page' => $page++,
+        'search_term' => 'john.doe@example.com'
+    ]);
+    
+    foreach ($batch->getData() as $user) {
+        if ($user->email === 'john.doe@example.com') {
+            $found = $user;
+            break 2; // Exit both loops
+        }
+    }
+    
+} while ($batch->hasNextPage() && !$found);
+```
+
+### PaginationResult Methods
+
+The `paginate()` method returns a `PaginationResult` object with helpful methods:
+
+```php
+$result = Course::paginate(['per_page' => 20]);
+
+// Data access
+$courses = $result->getData();           // Array of Course objects
+$total = $result->getTotalCount();       // Total number of courses
+
+// Navigation
+$result->hasNextPage();                  // true/false
+$result->hasPreviousPage();              // true/false
+$result->getNextPage();                  // Fetches next page (returns new PaginationResult)
+$result->getPreviousPage();              // Fetches previous page
+
+// Page information
+$result->getCurrentPage();               // Current page number
+$result->getTotalPages();                // Total number of pages
+$result->getPerPage();                   // Items per page
+
+// URL access (for custom implementations)
+$result->getNextUrl();                   // Next page URL
+$result->getPreviousUrl();               // Previous page URL
+```
+
+### Performance Guidelines
+
+```php
+// 📗 Small datasets (< 100 items): Safe to use all()
+$modules = Module::all();
+$sections = Section::all();
+
+// 📙 Medium datasets (100-1000 items): Consider your use case
+$assignments = Assignment::get(['per_page' => 100]);     // If you need subset
+$assignments = Assignment::paginate(['per_page' => 100]); // If processing batches
+$assignments = Assignment::all();                         // If you need everything
+
+// 📕 Large datasets (1000+ items): Use paginate() for memory efficiency
+$users = User::paginate(['per_page' => 100]);
+$enrollments = Enrollment::paginate(['per_page' => 500]);
+
+// Note: The SDK includes built-in rate limiting and retry logic,
+// so fetching all pages is safe from an API perspective.
+// The main consideration is memory usage for very large datasets.
+```
+
+### Relationship Methods & Large Datasets
+
+**Important**: Relationship methods on Course/User/Group instances return **ALL pages** for completeness:
+
+```php
+$course = Course::find(123);
+$modules = $course->modules();      // Returns ALL modules (all pages)
+$enrollments = $course->enrollments(); // Returns ALL enrollments (could be thousands!)
+
+// For large datasets, consider using pagination directly:
+Enrollment::setCourse($course);
+$paginatedEnrollments = Enrollment::paginate(['per_page' => 100]); // Memory efficient
+
+// Or use paginate for control:
+$paginatedModules = Module::paginate(['per_page' => 50]);
+```
+
+📖 **[View Complete Pagination Guide](https://github.com/jjuanrivvera/canvas-lms-kit/wiki/Pagination-Guide)** for advanced examples and patterns.
+
 ## 💡 Usage Examples
 
 ### Working with Courses

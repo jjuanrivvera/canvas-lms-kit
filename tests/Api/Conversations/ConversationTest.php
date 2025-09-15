@@ -48,7 +48,7 @@ class ConversationTest extends TestCase
     /**
      * Test fetching all conversations
      */
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $mockResponse = $this->createMockResponse([
             [
@@ -78,7 +78,7 @@ class ConversationTest extends TestCase
             ->willReturn($mockResponse);
 
         Conversation::setApiClient($this->httpClientMock);
-        $conversations = Conversation::fetchAll();
+        $conversations = Conversation::get();
 
         $this->assertCount(2, $conversations);
         $this->assertInstanceOf(Conversation::class, $conversations[0]);
@@ -90,7 +90,7 @@ class ConversationTest extends TestCase
     /**
      * Test fetching all conversations with include_all_conversation_ids
      */
-    public function testFetchAllWithAllIds(): void
+    public function testGetWithAllIds(): void
     {
         $mockResponse = $this->createMockResponse([
             'conversations' => [
@@ -110,7 +110,7 @@ class ConversationTest extends TestCase
             ->willReturn($mockResponse);
 
         Conversation::setApiClient($this->httpClientMock);
-        $conversations = Conversation::fetchAll(['include_all_conversation_ids' => true]);
+        $conversations = Conversation::get(['include_all_conversation_ids' => true]);
 
         $this->assertCount(1, $conversations);
         $this->assertEquals(1, $conversations[0]->id);

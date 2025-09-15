@@ -131,7 +131,7 @@ class ExternalToolTest extends TestCase
         $this->assertEquals('Test Tool', $tool->getName());
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $toolsData = [
             ['id' => 1, 'name' => 'Tool 1', 'privacy_level' => 'public'],
@@ -147,7 +147,7 @@ class ExternalToolTest extends TestCase
             ->with('accounts/1/external_tools', ['query' => []])
             ->willReturn($this->mockResponse);
         
-        $tools = ExternalTool::fetchAll();
+        $tools = ExternalTool::get();
         
         $this->assertIsArray($tools);
         $this->assertCount(2, $tools);
@@ -155,7 +155,7 @@ class ExternalToolTest extends TestCase
         $this->assertEquals('Tool 1', $tools[0]->getName());
     }
 
-    public function testFetchAllWithParams(): void
+    public function testGetWithParams(): void
     {
         $params = ['include_parents' => true, 'placement' => 'editor_button'];
         $toolsData = [['id' => 1, 'name' => 'Tool 1', 'privacy_level' => 'public']];
@@ -169,7 +169,7 @@ class ExternalToolTest extends TestCase
             ->with('accounts/1/external_tools', ['query' => $params])
             ->willReturn($this->mockResponse);
         
-        $tools = ExternalTool::fetchAll($params);
+        $tools = ExternalTool::get($params);
         
         $this->assertIsArray($tools);
         $this->assertCount(1, $tools);

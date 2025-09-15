@@ -316,4 +316,119 @@ class CalendarEventTest extends TestCase
         $this->assertEquals('user', $result['type']);
         $this->assertEquals('456', $result['id']);
     }
+
+    /**
+     * Test the update calendar event method uses multipart format
+     * @return void
+     */
+    public function testUpdateCalendarEventUsesMultipartFormat(): void
+    {
+        $updateData = [
+            'title' => 'Updated Event',
+            'description' => 'Updated Description'
+        ];
+
+        $response = new Response(200, [], json_encode(['id' => 123, 'title' => 'Updated Event']));
+
+        $dto = new UpdateCalendarEventDTO($updateData);
+        $expectedPayload = $dto->toApiArray();
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('put')
+            ->with(
+                $this->equalTo('calendar_events/123'),
+                $this->callback(function ($subject) use ($expectedPayload) {
+                    return isset($subject['multipart']) && $subject['multipart'] === $expectedPayload;
+                })
+            )
+            ->willReturn($response);
+
+        $event = CalendarEvent::update(123, $dto);
+
+        $this->assertEquals('Updated Event', $event->title);
+    }
+
+    /**
+     * Test the saveEnabledAccountCalendars method uses multipart format
+     * @return void
+     */
+    public function testSaveEnabledAccountCalendarsUsesMultipartFormat(): void
+    {
+        $accountIds = [1, 2, 3];
+        $expectedResult = ['status' => 'success'];
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                $this->equalTo('calendar_events/save_enabled_account_calendars'),
+                $this->callback(function ($subject) use ($accountIds) {
+                    // Check that multipart format is used
+                    if (!isset($subject['multipart'])) {
+                        return false;
+                    }
+                    
+                    $multipart = $subject['multipart'];
+                    
+                    // Check account IDs are properly formatted
+                    $accountIdCount = 0;
+                    foreach ($multipart as $part) {
+                        if (strpos($part['name'], 'enabled_account_calendars[') === 0) {
+                            $accountIdCount++;
+                        }
+                    }
+                    
+                    return $accountIdCount === count($accountIds);
+                })
+            )
+            ->willReturn($response);
+
+        $result = CalendarEvent::saveEnabledAccountCalendars($accountIds);
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * Test the saveEnabledAccountCalendars with markAsSeen option
+     * @return void
+     */
+    public function testSaveEnabledAccountCalendarsWithMarkAsSeen(): void
+    {
+        $accountIds = [1, 2];
+        $expectedResult = ['status' => 'success'];
+        $response = new Response(200, [], json_encode($expectedResult));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('post')
+            ->with(
+                $this->equalTo('calendar_events/save_enabled_account_calendars'),
+                $this->callback(function ($subject) {
+                    // Check that multipart format is used
+                    if (!isset($subject['multipart'])) {
+                        return false;
+                    }
+                    
+                    $multipart = $subject['multipart'];
+                    
+                    // Check mark_feature_as_seen is included
+                    $hasMarkAsSeen = false;
+                    foreach ($multipart as $part) {
+                        if ($part['name'] === 'mark_feature_as_seen' && $part['contents'] === '1') {
+                            $hasMarkAsSeen = true;
+                            break;
+                        }
+                    }
+                    
+                    return $hasMarkAsSeen;
+                })
+            )
+            ->willReturn($response);
+
+        $result = CalendarEvent::saveEnabledAccountCalendars($accountIds, true);
+
+        $this->assertEquals($expectedResult, $result);
+    }
 }

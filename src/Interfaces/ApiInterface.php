@@ -9,14 +9,15 @@ interface ApiInterface
     /**
      * Find a single record by ID
      * @param int $id
+     * @param array<string, mixed> $params Optional query parameters
      * @return static
      * @throws CanvasApiException
      */
-    public static function find(int $id);
+    public static function find(int $id, array $params = []);
 
     /**
      * Get first page of records
-     * @param mixed[] $params
+     * @param array<string, mixed> $params
      * @return static[]
      * @throws CanvasApiException
      */
@@ -24,7 +25,7 @@ interface ApiInterface
 
     /**
      * Get all records from all pages
-     * @param mixed[] $params
+     * @param array<string, mixed> $params
      * @return static[]
      * @throws CanvasApiException
      */

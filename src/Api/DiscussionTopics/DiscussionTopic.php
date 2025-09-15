@@ -40,11 +40,11 @@ use CanvasLMS\Pagination\PaginationResult;
  * $discussion = DiscussionTopic::find(456);
  *
  * // List all discussion topics for the course
- * $discussions = DiscussionTopic::fetchAll();
+ * $discussions = DiscussionTopic::get();
  *
  * // Get paginated discussion topics
- * $paginatedDiscussions = DiscussionTopic::fetchAllPaginated();
- * $paginationResult = DiscussionTopic::fetchPage();
+ * $paginatedDiscussions = DiscussionTopic::paginate();
+ * $allDiscussions = DiscussionTopic::all();
  *
  * // Update a discussion topic
  * $updatedDiscussion = DiscussionTopic::update(456, ['title' => 'Updated Discussion Title']);
@@ -75,7 +75,7 @@ use CanvasLMS\Pagination\PaginationResult;
  */
 class DiscussionTopic extends AbstractBaseApi
 {
-    protected static Course $course;
+    protected static ?Course $course = null;
 
     /**
      * Discussion topic unique identifier
@@ -1453,16 +1453,17 @@ class DiscussionTopic extends AbstractBaseApi
      * Find a single discussion topic by ID
      *
      * @param int $id Discussion topic ID
+     * @param array<string, mixed> $params Optional query parameters
      * @return self
      * @throws CanvasApiException
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkCourse();
         self::checkApiClient();
 
         $endpoint = sprintf('courses/%d/discussion_topics/%d', self::$course->id, $id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $discussionData = json_decode($response->getBody()->getContents(), true);
 
         return new self($discussionData);
@@ -1475,7 +1476,7 @@ class DiscussionTopic extends AbstractBaseApi
      * @return array<DiscussionTopic> Array of DiscussionTopic objects
      * @throws CanvasApiException
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         self::checkCourse();
         self::checkApiClient();
@@ -1493,29 +1494,13 @@ class DiscussionTopic extends AbstractBaseApi
     }
 
     /**
-     * Fetch all discussion topics with pagination support
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return PaginatedResponse
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
-        return self::getPaginatedResponse($endpoint, $params);
-    }
-
-    /**
-     * Fetch a single page of discussion topics
+     * Get paginated discussion topics
      *
      * @param array<string, mixed> $params Optional parameters
      * @return PaginationResult
      * @throws CanvasApiException
      */
-    public static function fetchPage(array $params = []): PaginationResult
+    public static function paginate(array $params = []): PaginationResult
     {
         self::checkCourse();
         self::checkApiClient();
@@ -1524,22 +1509,6 @@ class DiscussionTopic extends AbstractBaseApi
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
 
         return self::createPaginationResult($paginatedResponse);
-    }
-
-    /**
-     * Fetch all pages of discussion topics
-     *
-     * @param array<string, mixed> $params Optional parameters
-     * @return array<DiscussionTopic> Array of DiscussionTopic objects from all pages
-     * @throws CanvasApiException
-     */
-    public static function fetchAllPages(array $params = []): array
-    {
-        self::checkCourse();
-        self::checkApiClient();
-
-        $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
-        return self::fetchAllPagesAsModels($endpoint, $params);
     }
 
     /**

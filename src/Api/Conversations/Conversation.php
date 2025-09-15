@@ -103,7 +103,7 @@ class Conversation extends AbstractBaseApi
      *                      - include[]: participant_avatars
      * @return array<Conversation> Array of Conversation objects
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         self::checkApiClient();
         $response = self::$apiClient->get(self::$endpoint, $params);

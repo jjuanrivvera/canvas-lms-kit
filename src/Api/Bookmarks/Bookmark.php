@@ -72,9 +72,31 @@ class Bookmark extends AbstractBaseApi
      * @param array<string, mixed> $params Query parameters
      * @return array<self>
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
-        return self::get($params);
+        return parent::get($params);
+    }
+
+    /**
+     * Get paginated results with metadata
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return \CanvasLMS\Pagination\PaginationResult
+     */
+    public static function paginate(array $params = []): \CanvasLMS\Pagination\PaginationResult
+    {
+        return parent::paginate($params);
+    }
+
+    /**
+     * Get all pages of results
+     *
+     * @param array<string, mixed> $params Query parameters
+     * @return array<self>
+     */
+    public static function all(array $params = []): array
+    {
+        return parent::all($params);
     }
 
     /**
@@ -83,7 +105,7 @@ class Bookmark extends AbstractBaseApi
      * @param int $id Bookmark ID
      * @return self
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         $response = self::$apiClient->get(
             self::getEndpoint() . '/' . $id

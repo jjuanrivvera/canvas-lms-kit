@@ -46,15 +46,29 @@ class SectionTest extends TestCase
 
     public function testCheckCourse(): void
     {
+        // With course context set
         $this->assertTrue(Section::checkCourse());
         
-        // Clean course context and test again
+        // Clean course context and test exception
         $reflection = new \ReflectionClass(Section::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
         $property->setValue(null);
         
-        $this->assertFalse(Section::checkCourse());
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Course context is required');
+        Section::checkCourse();
+    }
+
+    public function testCheckCourseWithInvalidCourse(): void
+    {
+        // Set course without ID
+        $invalidCourse = new Course(['name' => 'Test Course']);
+        Section::setCourse($invalidCourse);
+        
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('Course context is required');
+        Section::checkCourse();
     }
 
     public function testFindWithCourseContext(): void
@@ -140,7 +154,7 @@ class SectionTest extends TestCase
         $this->assertEquals(25, $section->totalStudents);
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $sectionsData = [
             ['id' => 1, 'name' => 'Section A', 'course_id' => 123],
@@ -152,7 +166,7 @@ class SectionTest extends TestCase
             ->with('courses/123/sections', ['query' => []])
             ->willReturn(new Response(200, [], json_encode($sectionsData)));
 
-        $sections = Section::fetchAll();
+        $sections = Section::get();
 
         $this->assertIsArray($sections);
         $this->assertCount(2, $sections);
@@ -161,7 +175,7 @@ class SectionTest extends TestCase
         $this->assertEquals(123, $sections[0]->courseId);
     }
 
-    public function testFetchAllWithSearchTerm(): void
+    public function testGetWithSearchTerm(): void
     {
         $sectionsData = [
             ['id' => 1, 'name' => 'Lab Section', 'course_id' => 123]
@@ -174,21 +188,21 @@ class SectionTest extends TestCase
             ->with('courses/123/sections', ['query' => $params])
             ->willReturn(new Response(200, [], json_encode($sectionsData)));
 
-        $sections = Section::fetchAll($params);
+        $sections = Section::get($params);
 
         $this->assertCount(1, $sections);
         $this->assertEquals('Lab Section', $sections[0]->name);
     }
 
-    public function testFetchAllWithInvalidSearchTerm(): void
+    public function testGetWithInvalidSearchTerm(): void
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('search_term must be at least 2 characters');
 
-        Section::fetchAll(['search_term' => 'a']);
+        Section::get(['search_term' => 'a']);
     }
 
-    public function testFetchAllWithoutCourseContext(): void
+    public function testGetWithoutCourseContext(): void
     {
         // Remove course context
         $reflection = new \ReflectionClass(Section::class);
@@ -197,23 +211,32 @@ class SectionTest extends TestCase
         $property->setValue(null);
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage('Course context is required for listing sections');
+        $this->expectExceptionMessage('Course context is required');
 
-        Section::fetchAll();
+        Section::get();
     }
 
-    public function testFetchAllPaginated(): void
+    public function testPaginate(): void
     {
         $paginatedResponse = $this->createMock(PaginatedResponse::class);
+        $paginationResult = $this->createMock(PaginationResult::class);
+        
+        $paginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn([['id' => 1, 'name' => 'Section 1']]);
+            
+        $paginatedResponse->expects($this->once())
+            ->method('toPaginationResult')
+            ->willReturn($paginationResult);
 
         $this->mockClient->expects($this->once())
             ->method('getPaginated')
             ->with('courses/123/sections', ['query' => []])
             ->willReturn($paginatedResponse);
 
-        $result = Section::fetchAllPaginated();
+        $result = Section::paginate();
 
-        $this->assertSame($paginatedResponse, $result);
+        $this->assertSame($paginationResult, $result);
     }
 
     public function testCreate(): void
@@ -445,44 +468,29 @@ class SectionTest extends TestCase
         $this->assertArrayNotHasKey('total_students', $dtoArray);
     }
 
-    public function testFetchPage(): void
+    public function testAll(): void
     {
-        $paginatedResponse = $this->createMock(PaginatedResponse::class);
-        $paginationResult = $this->createMock(PaginationResult::class);
-        
-        $paginatedResponse->expects($this->once())
-            ->method('toPaginationResult')
-            ->willReturn($paginationResult);
-
-        $this->mockClient->expects($this->once())
-            ->method('getPaginated')
-            ->with('courses/123/sections', ['query' => []])
-            ->willReturn($paginatedResponse);
-
-        $result = Section::fetchPage();
-
-        $this->assertSame($paginationResult, $result);
-    }
-
-    public function testFetchAllPages(): void
-    {
-        $allPagesData = [
+        $firstPageData = [
             ['id' => 1, 'name' => 'Section A', 'course_id' => 123],
-            ['id' => 2, 'name' => 'Section B', 'course_id' => 123],
+            ['id' => 2, 'name' => 'Section B', 'course_id' => 123]
+        ];
+        $secondPageData = [
             ['id' => 3, 'name' => 'Section C', 'course_id' => 123]
         ];
 
+        $allData = array_merge($firstPageData, $secondPageData);
+        
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
-            ->willReturn($allPagesData);
+            ->method('all')
+            ->willReturn($allData);
 
         $this->mockClient->expects($this->once())
             ->method('getPaginated')
             ->with('courses/123/sections', ['query' => []])
             ->willReturn($mockPaginatedResponse);
 
-        $sections = Section::fetchAllPages();
+        $sections = Section::all();
 
         $this->assertIsArray($sections);
         $this->assertCount(3, $sections);

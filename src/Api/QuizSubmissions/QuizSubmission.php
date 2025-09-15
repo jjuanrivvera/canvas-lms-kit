@@ -35,10 +35,10 @@ use CanvasLMS\Pagination\PaginationResult;
  * $submission = QuizSubmission::getCurrentUserSubmission();
  *
  * // List all submissions for the quiz
- * $submissions = QuizSubmission::fetchAll();
+ * $submissions = QuizSubmission::get();
  *
  * // Get submissions with specific parameters
- * $submissions = QuizSubmission::fetchAll(['include' => ['user', 'quiz']]);
+ * $submissions = QuizSubmission::get(['include' => ['user', 'quiz']]);
  *
  * // Find specific submission
  * $submission = QuizSubmission::find(789);
@@ -65,8 +65,8 @@ use CanvasLMS\Pagination\PaginationResult;
  */
 class QuizSubmission extends AbstractBaseApi
 {
-    protected static Course $course;
-    protected static Quiz $quiz;
+    protected static ?Course $course = null;
+    protected static ?Quiz $quiz = null;
 
     /**
      * Quiz submission unique identifier
@@ -630,10 +630,11 @@ class QuizSubmission extends AbstractBaseApi
      * Find a specific quiz submission by ID
      *
      * @param int $id Quiz submission ID
+     * @param array<string, mixed> $params Optional query parameters
      * @return self Quiz submission instance
      * @throws CanvasApiException If course/quiz not set or API error
      */
-    public static function find(int $id): self
+    public static function find(int $id, array $params = []): self
     {
         self::checkContext();
 
@@ -645,7 +646,7 @@ class QuizSubmission extends AbstractBaseApi
             self::$quiz->getId(),
             $id
         );
-        $response = self::$apiClient->get($endpoint);
+        $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $responseData = json_decode($response->getBody()->getContents(), true);
 
         $data = $responseData['quiz_submissions'][0] ?? $responseData;
@@ -693,7 +694,7 @@ class QuizSubmission extends AbstractBaseApi
      * @return self[] Array of quiz submission instances
      * @throws CanvasApiException If course/quiz not set or API error
      */
-    public static function fetchAll(array $params = []): array
+    public static function get(array $params = []): array
     {
         self::checkContext();
 
@@ -715,35 +716,25 @@ class QuizSubmission extends AbstractBaseApi
         return $submissions;
     }
 
-    /**
-     * Fetch paginated quiz submissions
-     *
-     * @param mixed[] $params Optional parameters for filtering
-     * @return PaginatedResponse Paginated response instance
-     * @throws CanvasApiException If course/quiz not set or API error
-     */
-    public static function fetchAllPaginated(array $params = []): PaginatedResponse
-    {
-        self::checkContext();
 
-        $endpoint = sprintf(
-            'courses/%d/quizzes/%d/submissions',
-            self::$course->getId(),
-            self::$quiz->getId()
-        );
-        return self::getPaginatedResponse($endpoint, $params);
-    }
 
     /**
-     * Fetch a single page of quiz submissions
+     * Get paginated quiz submissions
      *
      * @param mixed[] $params Optional parameters for filtering
      * @return PaginationResult Pagination result with submissions
      * @throws CanvasApiException If course/quiz not set or API error
      */
-    public static function fetchPage(array $params = []): PaginationResult
+    public static function paginate(array $params = []): PaginationResult
     {
-        $paginatedResponse = self::fetchAllPaginated($params);
+        self::checkContext();
+        self::checkApiClient();
+        $endpoint = sprintf(
+            'courses/%d/quizzes/%d/submissions',
+            self::$course->getId(),
+            self::$quiz->getId()
+        );
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         return self::createPaginationResult($paginatedResponse);
     }
 
@@ -754,15 +745,31 @@ class QuizSubmission extends AbstractBaseApi
      * @return self[] Array of all quiz submission instances
      * @throws CanvasApiException If course/quiz not set or API error
      */
-    public static function fetchAllPages(array $params = []): array
+    public static function all(array $params = []): array
     {
-        $paginatedResponse = self::fetchAllPaginated($params);
+        self::checkContext();
+        self::checkApiClient();
         $endpoint = sprintf(
             'courses/%d/quizzes/%d/submissions',
             self::$course->getId(),
             self::$quiz->getId()
         );
-        return self::fetchAllPagesAsModels($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $allData = $paginatedResponse->all();
+
+        $submissions = [];
+        foreach ($allData as $item) {
+            // Extract submission data from the response structure
+            if (isset($item['quiz_submissions'])) {
+                foreach ($item['quiz_submissions'] as $submissionData) {
+                    $submissions[] = new self($submissionData);
+                }
+            } else {
+                $submissions[] = new self($item);
+            }
+        }
+
+        return $submissions;
     }
 
     /**

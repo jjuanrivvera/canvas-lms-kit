@@ -445,8 +445,12 @@ class HttpClient implements HttpClientInterface
         $isAbsoluteUrl = filter_var($url, FILTER_VALIDATE_URL) !== false;
 
         if ($isAbsoluteUrl) {
-            // Validate that the URL points to the configured Canvas domain
-            $this->validateCanvasUrl($url);
+            // Skip domain validation for external URLs when skipDomainValidation is set
+            // This is necessary for file uploads to external storage (e.g., S3)
+            if (!isset($options['skipDomainValidation']) || $options['skipDomainValidation'] !== true) {
+                // Validate that the URL points to the configured Canvas domain
+                $this->validateCanvasUrl($url);
+            }
         } else {
             // For relative URLs, prepend base URL (without API version)
             $baseUrl = Config::getBaseUrl();
@@ -478,8 +482,9 @@ class HttpClient implements HttpClientInterface
             }
         }
 
-        // Remove skipAuth from options as it's not a valid HTTP client option
+        // Remove skipAuth and skipDomainValidation from options as they're not valid HTTP client options
         unset($options['skipAuth']);
+        unset($options['skipDomainValidation']);
 
         // Add masquerading parameter if active
         $masqueradeUserId = Config::getMasqueradeUserId();

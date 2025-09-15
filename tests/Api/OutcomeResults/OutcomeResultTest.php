@@ -30,7 +30,7 @@ class OutcomeResultTest extends TestCase
         Config::setAccountId(1);
     }
 
-    public function testFetchAll(): void
+    public function testGet(): void
     {
         $responseData = [
             [
@@ -76,7 +76,7 @@ class OutcomeResultTest extends TestCase
         $this->assertEquals(1001, $results[0]->links['user']);
     }
 
-    public function testFetchAllWithUserAndOutcomeIds(): void
+    public function testGetWithUserAndOutcomeIds(): void
     {
         $responseData = [
             [
@@ -115,7 +115,7 @@ class OutcomeResultTest extends TestCase
         $this->assertEquals(2002, $results[0]->links['learning_outcome']);
     }
 
-    public function testFetchAllWithIncludeParameter(): void
+    public function testGetWithIncludeParameter(): void
     {
         $responseData = [
             [
@@ -165,7 +165,7 @@ class OutcomeResultTest extends TestCase
         $this->assertEquals('Essay Assignment', $results[0]->alignment['name']);
     }
 
-    public function testFetchAllReturnsEmptyArrayOnNoResults(): void
+    public function testGetReturnsEmptyArrayOnNoResults(): void
     {
         $this->mockStream->method('getContents')
             ->willReturn(json_encode([]));
@@ -184,7 +184,7 @@ class OutcomeResultTest extends TestCase
         $this->assertEmpty($results);
     }
 
-    public function testFetchAllWithPagination(): void
+    public function testGetWithPagination(): void
     {
         $responseData = [
             ['id' => 1, 'score' => 3.5],

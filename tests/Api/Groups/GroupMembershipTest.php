@@ -75,22 +75,22 @@ class GroupMembershipTest extends TestCase
             ->with('groups/456/memberships/123')
             ->willReturn($this->mockResponse);
 
-        $membership = GroupMembership::find(123, 456);
+        $membership = GroupMembership::find(123, ['group_id' => 456]);
 
         $this->assertInstanceOf(GroupMembership::class, $membership);
         $this->assertEquals(123, $membership->id);
         $this->assertEquals(456, $membership->groupId);
     }
 
-    public function testFetchAllThrowsException(): void
+    public function testGetThrowsException(): void
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Group ID is required. Use fetchAllForGroup($groupId, $params) instead.');
         
-        GroupMembership::fetchAll();
+        GroupMembership::get();
     }
 
-    public function testFetchAllForGroup(): void
+    public function testGetForGroup(): void
     {
         $membershipsData = [
             ['id' => 1, 'user_id' => 100, 'workflow_state' => 'accepted'],
@@ -99,7 +99,7 @@ class GroupMembershipTest extends TestCase
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
-            ->method('fetchAllPages')
+            ->method('all')
             ->willReturn($membershipsData);
         
         $this->mockHttpClient->expects($this->once())
