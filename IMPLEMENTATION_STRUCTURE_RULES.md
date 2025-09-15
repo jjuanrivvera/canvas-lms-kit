@@ -236,8 +236,8 @@ These classes violate the convention and need to be refactored to use camelCase 
 **Implementation Pattern**:
 ```php
 // Default: Account context
-$rubrics = Rubric::fetchAll();  // Uses Config::getAccountId()
-$tools = ExternalTool::fetchAll();  // Uses Config::getAccountId()
+$rubrics = Rubric::get();  // Uses Config::getAccountId()
+$tools = ExternalTool::get();  // Uses Config::getAccountId()
 
 // Course context via Course instance
 $course = Course::find(123);
