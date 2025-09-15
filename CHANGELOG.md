@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.2] - 2025-09-15
+
+### Fixed
+- Fixed Course API endpoint method to consistently use account-level scope
+  - The `getEndpoint()` method now returns `accounts/{accountId}/courses` to align with `get()` and `paginate()` methods
+  - Ensures consistent behavior across all Course API methods
+
 ## [1.5.1] - 2025-09-15
 
 ### Fixed
