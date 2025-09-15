@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.1] - 2025-09-15
+
+### Fixed
+- **Pagination API Standardization** (#133)
+  - Standardized pagination methods across all API classes for consistent behavior
+  - Fixed critical test failures related to pagination edge cases
+  - Improved safety of pagination handling with better error recovery
+  - Enhanced backward compatibility for existing pagination methods
+  - Added comprehensive edge case testing for pagination scenarios
+  - Resolved issues with `fetchAll()` methods across various endpoints
+  - Improved performance of paginated responses with optimized link parsing
+
 ## [1.5.0] - 2025-09-09
 
 ### Added
