@@ -14,14 +14,14 @@ class Version
      *
      * @var string
      */
-    public const VERSION = '1.0.0';
+    public const VERSION = '1.5.2';
 
     /**
      * Release date of current version
      *
      * @var string
      */
-    public const RELEASE_DATE = '2025-01-31';
+    public const RELEASE_DATE = '2025-09-15';
 
     /**
      * Minimum PHP version required
