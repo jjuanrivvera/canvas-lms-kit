@@ -3632,6 +3632,7 @@ class Course extends AbstractBaseApi
      */
     protected static function getEndpoint(): string
     {
-        return 'courses';
+        $accountId = Config::getAccountId();
+        return "accounts/{$accountId}/courses";
     }
 }
