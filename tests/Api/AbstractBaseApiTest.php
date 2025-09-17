@@ -93,6 +93,11 @@ class AbstractBaseApiTest extends TestCase
             {
                 return parent::parseJsonResponse($response);
             }
+
+            public function testCastValue(string $key, mixed $value): mixed
+            {
+                return parent::castValue($key, $value);
+            }
         };
 
         return get_class($testClass);
@@ -608,5 +613,122 @@ class AbstractBaseApiTest extends TestCase
         $result = $this->testApiClass::testParseJsonResponse($mockResponse);
 
         $this->assertEquals($responseData, $result);
+    }
+
+    /**
+     * Test castValue method correctly casts date fields to DateTime
+     */
+    public function testCastValueConvertsDateFieldsToDateTime(): void
+    {
+        $testInstance = new $this->testApiClass([]);
+
+        $dateFields = [
+            'startAt' => '2024-01-15T10:00:00Z',
+            'endAt' => '2024-01-20T18:00:00Z',
+            'createdAt' => '2024-01-01T00:00:00Z',
+            'updatedAt' => '2024-01-10T12:30:00Z',
+            'deletedAt' => '2024-01-25T15:00:00Z',
+            'publishedAt' => '2024-01-05T08:00:00Z',
+            'postedAt' => '2024-01-07T09:00:00Z',
+            'dueAt' => '2024-01-30T23:59:59Z',
+            'lockAt' => '2024-02-01T00:00:00Z',
+            'unlockAt' => '2024-01-02T06:00:00Z',
+            'submittedAt' => '2024-01-29T22:00:00Z',
+            'gradedAt' => '2024-01-31T14:00:00Z'
+        ];
+
+        foreach ($dateFields as $field => $dateString) {
+            $result = $testInstance->testCastValue($field, $dateString);
+            $this->assertInstanceOf(\DateTime::class, $result, "Field '$field' should be cast to DateTime");
+            $this->assertEquals($dateString, $result->format('Y-m-d\TH:i:s\Z'));
+        }
+    }
+
+    /**
+     * Test castValue method does not cast non-date fields
+     */
+    public function testCastValueDoesNotCastNonDateFields(): void
+    {
+        $testInstance = new $this->testApiClass([]);
+
+        // Test various non-date fields
+        $nonDateFields = [
+            'id' => 123,
+            'name' => 'Test Name',
+            'isPublished' => true,
+            'score' => 95.5,
+            'gradeMatchesCurrentSubmission' => true,  // This is the field we fixed!
+            'someRandomField' => 'some value'
+        ];
+
+        foreach ($nonDateFields as $field => $value) {
+            $result = $testInstance->testCastValue($field, $value);
+            $this->assertNotInstanceOf(\DateTime::class, $result, "Field '$field' should not be cast to DateTime");
+            $this->assertEquals($value, $result, "Field '$field' should remain unchanged");
+        }
+    }
+
+    /**
+     * Test castValue specifically for gradeMatchesCurrentSubmission boolean field
+     */
+    public function testCastValueHandlesGradeMatchesCurrentSubmissionAsBoolean(): void
+    {
+        $testInstance = new $this->testApiClass([]);
+
+        // Test with boolean true
+        $result = $testInstance->testCastValue('gradeMatchesCurrentSubmission', true);
+        $this->assertIsBool($result);
+        $this->assertTrue($result);
+
+        // Test with boolean false
+        $result = $testInstance->testCastValue('gradeMatchesCurrentSubmission', false);
+        $this->assertIsBool($result);
+        $this->assertFalse($result);
+
+        // Test with string that looks like a date but should not be converted
+        $result = $testInstance->testCastValue('gradeMatchesCurrentSubmission', '2024-01-01T00:00:00Z');
+        $this->assertIsString($result);
+        $this->assertEquals('2024-01-01T00:00:00Z', $result);
+        $this->assertNotInstanceOf(\DateTime::class, $result);
+    }
+
+    /**
+     * Test castValue handles empty and null date values
+     */
+    public function testCastValueHandlesEmptyDateValues(): void
+    {
+        $testInstance = new $this->testApiClass([]);
+
+        // Empty string should not be converted
+        $result = $testInstance->testCastValue('createdAt', '');
+        $this->assertEquals('', $result);
+        $this->assertNotInstanceOf(\DateTime::class, $result);
+
+        // Null should remain null
+        $result = $testInstance->testCastValue('createdAt', null);
+        $this->assertNull($result);
+
+        // Non-string date values should not be converted
+        $result = $testInstance->testCastValue('createdAt', 12345);
+        $this->assertEquals(12345, $result);
+        $this->assertNotInstanceOf(\DateTime::class, $result);
+    }
+
+    /**
+     * Test castValue preserves non-string values even for date fields
+     */
+    public function testCastValuePreservesNonStringDateFieldValues(): void
+    {
+        $testInstance = new $this->testApiClass([]);
+
+        // Integer value for a date field should not be converted
+        $result = $testInstance->testCastValue('startAt', 1234567890);
+        $this->assertEquals(1234567890, $result);
+        $this->assertNotInstanceOf(\DateTime::class, $result);
+
+        // Array value for a date field should not be converted
+        $result = $testInstance->testCastValue('endAt', ['some' => 'array']);
+        $this->assertEquals(['some' => 'array'], $result);
+        $this->assertNotInstanceOf(\DateTime::class, $result);
     }
 }
