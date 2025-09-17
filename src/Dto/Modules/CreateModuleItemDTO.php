@@ -6,6 +6,7 @@ namespace CanvasLMS\Dto\Modules;
 
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
+use CanvasLMS\Utilities\Str;
 
 /**
  * Create Module Item DTO
@@ -324,7 +325,7 @@ class CreateModuleItemDTO extends AbstractBaseDto implements DTOInterface
                 continue;
             }
 
-            $propertyName = $this->apiPropertyName . '[' . str_to_snake_case($property) . ']';
+            $propertyName = $this->apiPropertyName . '[' . Str::toSnakeCase($property) . ']';
 
             // Handle nested arrays (iframe, completionRequirement)
             if (is_array($value) && in_array($property, ['iframe', 'completionRequirement'], true)) {

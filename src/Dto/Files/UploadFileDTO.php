@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CanvasLMS\Dto\Files;
 
 use CanvasLMS\Dto\AbstractBaseDto;
+use CanvasLMS\Utilities\Str;
 use Exception;
 
 /**
@@ -131,7 +132,7 @@ class UploadFileDTO extends AbstractBaseDto
                 continue;
             }
 
-            $propertyName = str_to_snake_case($property);
+            $propertyName = Str::toSnakeCase($property);
 
             $modifiedProperties[] = [
                 'name' => $propertyName,
