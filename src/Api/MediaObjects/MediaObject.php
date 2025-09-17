@@ -94,7 +94,7 @@ class MediaObject extends AbstractBaseApi
     public static function get(array $params = []): array
     {
         $response = self::$apiClient->get('/media_objects', ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
             return array_map(fn($item) => new self($item), $data['media_objects']);
@@ -113,7 +113,7 @@ class MediaObject extends AbstractBaseApi
     public static function fetchAttachments(array $params = []): array
     {
         $response = self::$apiClient->get('/media_attachments', ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
             return array_map(fn($item) => new self($item), $data['media_objects']);
@@ -133,7 +133,7 @@ class MediaObject extends AbstractBaseApi
     public static function fetchByCourse(int $courseId, array $params = []): array
     {
         $response = self::$apiClient->get("/courses/{$courseId}/media_objects", ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
             return array_map(fn($item) => new self($item), $data['media_objects']);
@@ -153,7 +153,7 @@ class MediaObject extends AbstractBaseApi
     public static function fetchAttachmentsByCourse(int $courseId, array $params = []): array
     {
         $response = self::$apiClient->get("/courses/{$courseId}/media_attachments", ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
             return array_map(fn($item) => new self($item), $data['media_objects']);
@@ -173,7 +173,7 @@ class MediaObject extends AbstractBaseApi
     public static function fetchByGroup(int $groupId, array $params = []): array
     {
         $response = self::$apiClient->get("/groups/{$groupId}/media_objects", ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
             return array_map(fn($item) => new self($item), $data['media_objects']);
@@ -193,7 +193,7 @@ class MediaObject extends AbstractBaseApi
     public static function fetchAttachmentsByGroup(int $groupId, array $params = []): array
     {
         $response = self::$apiClient->get("/groups/{$groupId}/media_attachments", ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
             return array_map(fn($item) => new self($item), $data['media_objects']);
@@ -237,7 +237,7 @@ class MediaObject extends AbstractBaseApi
             ['json' => $data->toArray()]
         );
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Update current instance with new data
         foreach ($responseData as $key => $value) {
@@ -269,7 +269,7 @@ class MediaObject extends AbstractBaseApi
             ['json' => $data->toArray()]
         );
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Update current instance with new data
         foreach ($responseData as $key => $value) {
@@ -300,7 +300,7 @@ class MediaObject extends AbstractBaseApi
             ['query' => $params]
         );
 
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return array_map(fn($track) => new MediaTrack($track), $data);
     }
@@ -320,7 +320,7 @@ class MediaObject extends AbstractBaseApi
             ['query' => $params]
         );
 
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return array_map(fn($track) => new MediaTrack($track), $data);
     }
@@ -352,7 +352,7 @@ class MediaObject extends AbstractBaseApi
             ]
         );
 
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         // Update current instance's tracks
         $this->mediaTracks = array_map(fn($track) => new MediaTrack($track), $data);
@@ -387,7 +387,7 @@ class MediaObject extends AbstractBaseApi
             ]
         );
 
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return array_map(fn($track) => new MediaTrack($track), $data);
     }

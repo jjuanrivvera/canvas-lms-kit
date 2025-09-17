@@ -225,6 +225,19 @@ abstract class AbstractBaseApi implements ApiInterface
     }
 
     /**
+     * Parse JSON response from API safely handling StreamInterface
+     *
+     * @param \Psr\Http\Message\ResponseInterface $response
+     * @return array<mixed>
+     */
+    protected static function parseJsonResponse(\Psr\Http\Message\ResponseInterface $response): array
+    {
+        $body = $response->getBody()->getContents();
+        $data = json_decode($body, true);
+        return is_array($data) ? $data : [];
+    }
+
+    /**
      * Get first page of results
      * @param array<string, mixed> $params Query parameters
      * @return array<static>
@@ -235,11 +248,7 @@ abstract class AbstractBaseApi implements ApiInterface
         $endpoint = static::getEndpoint();
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
 
-        $data = json_decode($response->getBody()->getContents(), true);
-
-        if (!is_array($data)) {
-            return [];
-        }
+        $data = self::parseJsonResponse($response);
 
         return array_map(fn($item) => new static($item), $data);
     }

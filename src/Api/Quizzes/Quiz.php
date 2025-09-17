@@ -1065,7 +1065,7 @@ class Quiz extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/quizzes/%d', self::$course->id, $id);
         $response = self::$apiClient->get($endpoint);
-        $quizData = json_decode($response->getBody()->getContents(), true);
+        $quizData = self::parseJsonResponse($response);
 
         return new self($quizData);
     }
@@ -1088,7 +1088,7 @@ class Quiz extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/quizzes', self::$course->id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $quizData = json_decode($response->getBody()->getContents(), true);
+        $quizData = self::parseJsonResponse($response);
 
         return new self($quizData);
     }
@@ -1112,7 +1112,7 @@ class Quiz extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/quizzes/%d', self::$course->id, $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $quizData = json_decode($response->getBody()->getContents(), true);
+        $quizData = self::parseJsonResponse($response);
 
         return new self($quizData);
     }

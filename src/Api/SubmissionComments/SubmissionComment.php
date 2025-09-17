@@ -236,7 +236,7 @@ class SubmissionComment extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        $commentData = json_decode($response->getBody()->getContents(), true);
+        $commentData = self::parseJsonResponse($response);
 
         return new self($commentData);
     }
@@ -312,7 +312,7 @@ class SubmissionComment extends AbstractBaseApi
             'json' => $fileData
         ]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -344,7 +344,7 @@ class SubmissionComment extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        $commentData = json_decode($response->getBody()->getContents(), true);
+        $commentData = self::parseJsonResponse($response);
 
         // Update the current instance with the response data
         foreach ($commentData as $key => $value) {

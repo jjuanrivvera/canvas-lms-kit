@@ -109,7 +109,7 @@ class OutcomeImport extends AbstractBaseApi
                 'multipart' => $multipart
             ]);
 
-            $responseData = json_decode($response->getBody()->getContents(), true);
+            $responseData = self::parseJsonResponse($response);
             return new self($responseData);
         } finally {
             if (isset($fileResource) && is_resource($fileResource)) {
@@ -173,7 +173,7 @@ class OutcomeImport extends AbstractBaseApi
             'body' => $csvData
         ]);
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
         return new self($responseData);
     }
 
@@ -194,7 +194,7 @@ class OutcomeImport extends AbstractBaseApi
         $endpoint = sprintf('%s/%d/outcome_imports/%s', $contextType, $contextId, $importId);
 
         $response = self::$apiClient->get($endpoint);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }

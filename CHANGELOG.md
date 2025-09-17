@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Critical StreamInterface TypeError Fix** (#134)
+  - Fixed critical bug where `json_decode()` was receiving StreamInterface objects instead of strings
+  - Added centralized `parseJsonResponse()` helper method to AbstractBaseApi
+  - Fixed 275 occurrences across 44 API files for PHP 8+ compatibility
+  - Added comprehensive test coverage for JSON response parsing
+  - Eliminates runtime TypeErrors when processing Canvas API responses
+  - Maintains full backward compatibility with existing code
+  - Improved error handling for malformed JSON responses
+  - Standardized response parsing across entire SDK
+
 ## [1.5.2] - 2025-09-15
 
 ### Fixed

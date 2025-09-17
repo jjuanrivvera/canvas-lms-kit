@@ -62,7 +62,7 @@ class Bookmark extends AbstractBaseApi
             $data->toApiArray()
         );
 
-        $bookmarkData = json_decode($response->getBody()->getContents(), true);
+        $bookmarkData = self::parseJsonResponse($response);
         return new self($bookmarkData);
     }
 
@@ -111,7 +111,7 @@ class Bookmark extends AbstractBaseApi
             self::getEndpoint() . '/' . $id
         );
 
-        $bookmarkData = json_decode($response->getBody()->getContents(), true);
+        $bookmarkData = self::parseJsonResponse($response);
         return new self($bookmarkData);
     }
 
@@ -133,7 +133,7 @@ class Bookmark extends AbstractBaseApi
             $data->toApiArray()
         );
 
-        $bookmarkData = json_decode($response->getBody()->getContents(), true);
+        $bookmarkData = self::parseJsonResponse($response);
         return new self($bookmarkData);
     }
 
@@ -167,7 +167,7 @@ class Bookmark extends AbstractBaseApi
             );
         }
 
-        $bookmarkData = json_decode($response->getBody()->getContents(), true);
+        $bookmarkData = self::parseJsonResponse($response);
 
         // Update instance properties with response data
         foreach ($bookmarkData as $key => $value) {
@@ -195,7 +195,7 @@ class Bookmark extends AbstractBaseApi
             self::getEndpoint() . '/' . $this->id
         );
 
-        json_decode($response->getBody()->getContents(), true);
+        self::parseJsonResponse($response);
 
         return $this;
     }

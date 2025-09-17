@@ -84,7 +84,7 @@ class OutcomeResult extends AbstractBaseApi
             'query' => $params
         ]);
 
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         $results = [];
         // Check if data is wrapped in 'outcome_results' or is a direct array

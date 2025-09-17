@@ -765,7 +765,7 @@ class Page extends AbstractBaseApi
         // Canvas API doesn't provide direct page lookup by numeric ID
         $endpoint = sprintf('courses/%d/pages', self::$course->id);
         $response = self::$apiClient->get($endpoint);
-        $pagesData = json_decode($response->getBody()->getContents(), true);
+        $pagesData = self::parseJsonResponse($response);
 
         foreach ($pagesData as $pageData) {
             if (isset($pageData['page_id']) && $pageData['page_id'] === $id) {
@@ -795,7 +795,7 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, rawurlencode($url));
         $response = self::$apiClient->get($endpoint);
-        $pageData = json_decode($response->getBody()->getContents(), true);
+        $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
     }
@@ -824,7 +824,7 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/pages', self::$course->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $pagesData = json_decode($response->getBody()->getContents(), true);
+        $pagesData = self::parseJsonResponse($response);
 
         $pages = [];
         foreach ($pagesData as $pageData) {
@@ -855,7 +855,7 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/pages', self::$course->id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $pageData = json_decode($response->getBody()->getContents(), true);
+        $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
     }
@@ -879,7 +879,7 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, rawurlencode($url));
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $pageData = json_decode($response->getBody()->getContents(), true);
+        $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
     }
@@ -962,7 +962,7 @@ class Page extends AbstractBaseApi
         try {
             $endpoint = sprintf('courses/%d/front_page', self::$course->id);
             $response = self::$apiClient->get($endpoint);
-            $pageData = json_decode($response->getBody()->getContents(), true);
+            $pageData = self::parseJsonResponse($response);
 
             return new self($pageData);
         } catch (CanvasApiException $e) {
@@ -1138,7 +1138,7 @@ class Page extends AbstractBaseApi
         $identifier = $this->url ?: (string)$this->pageId;
         $endpoint = sprintf('courses/%d/pages/%s/duplicate', self::$course->id, rawurlencode($identifier));
         $response = self::$apiClient->post($endpoint);
-        $pageData = json_decode($response->getBody()->getContents(), true);
+        $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
     }
@@ -1168,7 +1168,7 @@ class Page extends AbstractBaseApi
             $revisionId
         );
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $revisionData = json_decode($response->getBody()->getContents(), true);
+        $revisionData = self::parseJsonResponse($response);
 
         return new PageRevision($revisionData);
     }
@@ -1196,7 +1196,7 @@ class Page extends AbstractBaseApi
             $revisionId
         );
         $response = self::$apiClient->post($endpoint);
-        $revisionData = json_decode($response->getBody()->getContents(), true);
+        $revisionData = self::parseJsonResponse($response);
 
         return new PageRevision($revisionData);
     }
@@ -1219,7 +1219,7 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/front_page', self::$course->id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $pageData = json_decode($response->getBody()->getContents(), true);
+        $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
     }
@@ -1254,7 +1254,7 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/pages/%s/revisions', self::$course->id, rawurlencode($this->url));
         $response = self::$apiClient->get($endpoint);
-        $revisionsData = json_decode($response->getBody()->getContents(), true);
+        $revisionsData = self::parseJsonResponse($response);
 
         $revisions = [];
         foreach ($revisionsData as $revisionData) {

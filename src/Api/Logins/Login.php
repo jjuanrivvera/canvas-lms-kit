@@ -69,7 +69,7 @@ class Login extends AbstractBaseApi
         self::checkApiClient();
         $endpoint = self::getEndpoint();
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return array_map(fn(array $item) => new self($item), $data);
     }
@@ -117,7 +117,7 @@ class Login extends AbstractBaseApi
         $response = self::$apiClient->post($endpoint, [
             'multipart' => $data->toApiArray()
         ]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -166,7 +166,7 @@ class Login extends AbstractBaseApi
         $response = self::$apiClient->put($endpoint, [
             'multipart' => $data->toApiArray()
         ]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Update current instance using parent constructor pattern
         $updatedInstance = new self($responseData);
@@ -198,7 +198,7 @@ class Login extends AbstractBaseApi
         $endpoint = sprintf('users/%d/logins/%d', $this->userId, $this->id);
         $response = self::$apiClient->delete($endpoint);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -223,7 +223,7 @@ class Login extends AbstractBaseApi
             'multipart' => $data->toApiArray()
         ]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -239,7 +239,7 @@ class Login extends AbstractBaseApi
         self::checkApiClient();
         $endpoint = sprintf('%s/%d/logins', $contextType, $contextId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
         return array_map(fn(array $item) => new self($item), $data);
     }
 

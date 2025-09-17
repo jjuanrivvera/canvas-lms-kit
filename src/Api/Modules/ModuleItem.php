@@ -337,7 +337,7 @@ class ModuleItem extends AbstractBaseApi
             'multipart' => $data->toApiArray()
             ]);
 
-        $moduleItemData = json_decode($response->getBody()->getContents(), true);
+        $moduleItemData = self::parseJsonResponse($response);
 
         return new self($moduleItemData);
     }
@@ -365,7 +365,7 @@ class ModuleItem extends AbstractBaseApi
             'multipart' => $data->toApiArray()
             ]);
 
-        $moduleItemData = json_decode($response->getBody()->getContents(), true);
+        $moduleItemData = self::parseJsonResponse($response);
 
         return new self($moduleItemData);
     }
@@ -386,7 +386,7 @@ class ModuleItem extends AbstractBaseApi
         $endpoint = sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
 
-        $moduleItemData = json_decode($response->getBody()->getContents(), true);
+        $moduleItemData = self::parseJsonResponse($response);
 
         return new self($moduleItemData);
     }
@@ -408,7 +408,7 @@ class ModuleItem extends AbstractBaseApi
             'query' => $params
             ]);
 
-        $moduleItemsData = json_decode($response->getBody()->getContents(), true);
+        $moduleItemsData = self::parseJsonResponse($response);
 
         $moduleItems = [];
         foreach ($moduleItemsData as $moduleItemData) {
@@ -466,7 +466,7 @@ class ModuleItem extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        $moduleItemData = json_decode($response->getBody()->getContents(), true);
+        $moduleItemData = self::parseJsonResponse($response);
         $this->populate($moduleItemData);
 
         return $this;

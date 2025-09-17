@@ -318,7 +318,7 @@ class Tab extends AbstractBaseApi
         }
 
         $response = self::$apiClient->put($endpoint, ['multipart' => $data]);
-        $tabData = json_decode($response->getBody()->getContents(), true);
+        $tabData = self::parseJsonResponse($response);
 
         return new self($tabData);
     }

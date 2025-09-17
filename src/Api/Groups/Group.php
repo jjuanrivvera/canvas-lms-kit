@@ -192,7 +192,7 @@ class Group extends AbstractBaseApi
 
         $endpoint = sprintf('groups/%d', $id);
         $response = self::$apiClient->get($endpoint);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -290,7 +290,7 @@ class Group extends AbstractBaseApi
         $accountId = Config::getAccountId();
         $endpoint = sprintf('accounts/%d/groups', $accountId);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $groupData = json_decode($response->getBody()->getContents(), true);
+        $groupData = self::parseJsonResponse($response);
 
         return new self($groupData);
     }
@@ -313,7 +313,7 @@ class Group extends AbstractBaseApi
 
         $endpoint = sprintf('groups/%d', $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $groupData = json_decode($response->getBody()->getContents(), true);
+        $groupData = self::parseJsonResponse($response);
 
         return new self($groupData);
     }
@@ -541,7 +541,7 @@ class Group extends AbstractBaseApi
         $endpoint = sprintf('groups/%d/activity_stream', $this->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -567,7 +567,7 @@ class Group extends AbstractBaseApi
         $endpoint = sprintf('groups/%d/activity_stream/summary', $this->id);
         $response = self::$apiClient->get($endpoint);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -593,7 +593,7 @@ class Group extends AbstractBaseApi
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**

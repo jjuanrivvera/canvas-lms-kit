@@ -201,7 +201,7 @@ class FeatureFlag
 
         $endpoint = sprintf('%s/%d/features', $contextType, $contextId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $featuresData = json_decode($response->getBody()->getContents(), true);
+        $featuresData = self::parseJsonResponse($response);
 
         $features = [];
         foreach ($featuresData as $featureData) {
@@ -243,7 +243,7 @@ class FeatureFlag
 
         $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, $featureName);
         $response = self::$apiClient->get($endpoint);
-        $featureData = json_decode($response->getBody()->getContents(), true);
+        $featureData = self::parseJsonResponse($response);
 
         $feature = new self();
         self::hydrateProperties($feature, $featureData);
@@ -293,7 +293,7 @@ class FeatureFlag
         $response = self::$apiClient->put($endpoint, [
             'multipart' => $data->toMultipart()
         ]);
-        $featureData = json_decode($response->getBody()->getContents(), true);
+        $featureData = self::parseJsonResponse($response);
 
         $feature = new self();
         self::hydrateProperties($feature, $featureData);
@@ -536,6 +536,25 @@ class FeatureFlag
     public function isDevelopment(): bool
     {
         return $this->development === true;
+    }
+
+    /**
+     * Parse JSON response from HTTP response
+     *
+     * @param \Psr\Http\Message\ResponseInterface $response The HTTP response
+     * @return array<string, mixed> The parsed JSON data
+     * @throws CanvasApiException If JSON parsing fails
+     */
+    protected static function parseJsonResponse(\Psr\Http\Message\ResponseInterface $response): array
+    {
+        $content = $response->getBody()->getContents();
+        $data = json_decode($content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new CanvasApiException('Failed to parse JSON response: ' . json_last_error_msg());
+        }
+
+        return $data;
     }
 
     /**

@@ -198,7 +198,7 @@ class Section extends AbstractBaseApi
         }
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -222,7 +222,7 @@ class Section extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/sections', self::$course->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         if (!is_array($data)) {
             return [];
@@ -293,7 +293,7 @@ class Section extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/sections', self::$course->id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $sectionData = json_decode($response->getBody()->getContents(), true);
+        $sectionData = self::parseJsonResponse($response);
 
         return new self($sectionData);
     }
@@ -316,7 +316,7 @@ class Section extends AbstractBaseApi
 
         $endpoint = sprintf('sections/%d', $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $sectionData = json_decode($response->getBody()->getContents(), true);
+        $sectionData = self::parseJsonResponse($response);
 
         return new self($sectionData);
     }
@@ -569,7 +569,7 @@ class Section extends AbstractBaseApi
         ];
 
         $response = self::$apiClient->post($endpoint, ['multipart' => $multipart]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -590,7 +590,7 @@ class Section extends AbstractBaseApi
         $queryParams = ['override_sis_stickiness' => $overrideSisStickiness];
 
         $response = self::$apiClient->delete($endpoint, ['query' => $queryParams]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }

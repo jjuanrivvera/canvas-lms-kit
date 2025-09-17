@@ -1464,7 +1464,7 @@ class DiscussionTopic extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/discussion_topics/%d', self::$course->id, $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $discussionData = json_decode($response->getBody()->getContents(), true);
+        $discussionData = self::parseJsonResponse($response);
 
         return new self($discussionData);
     }
@@ -1483,7 +1483,7 @@ class DiscussionTopic extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $discussionTopicsData = json_decode($response->getBody()->getContents(), true);
+        $discussionTopicsData = self::parseJsonResponse($response);
 
         $discussionTopics = [];
         foreach ($discussionTopicsData as $discussionData) {
@@ -1529,7 +1529,7 @@ class DiscussionTopic extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $discussionData = json_decode($response->getBody()->getContents(), true);
+        $discussionData = self::parseJsonResponse($response);
 
         return new self($discussionData);
     }
@@ -1553,7 +1553,7 @@ class DiscussionTopic extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/discussion_topics/%d', self::$course->id, $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $discussionData = json_decode($response->getBody()->getContents(), true);
+        $discussionData = self::parseJsonResponse($response);
 
         return new self($discussionData);
     }

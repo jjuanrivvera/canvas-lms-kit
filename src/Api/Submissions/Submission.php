@@ -328,7 +328,7 @@ class Submission extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        $submissionData = json_decode($response->getBody()->getContents(), true);
+        $submissionData = self::parseJsonResponse($response);
 
         return new self($submissionData);
     }
@@ -354,7 +354,7 @@ class Submission extends AbstractBaseApi
         );
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $submissionData = json_decode($response->getBody()->getContents(), true);
+        $submissionData = self::parseJsonResponse($response);
 
         /** @phpstan-ignore-next-line */
         return new self($submissionData);
@@ -374,7 +374,7 @@ class Submission extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/assignments/%d/submissions', self::$course->id, self::$assignment->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $submissionsData = json_decode($response->getBody()->getContents(), true);
+        $submissionsData = self::parseJsonResponse($response);
 
         $submissions = [];
         foreach ($submissionsData as $submissionData) {
@@ -452,7 +452,7 @@ class Submission extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        $submissionData = json_decode($response->getBody()->getContents(), true);
+        $submissionData = self::parseJsonResponse($response);
 
         return new self($submissionData);
     }
@@ -574,7 +574,7 @@ class Submission extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        $submissionData = json_decode($response->getBody()->getContents(), true);
+        $submissionData = self::parseJsonResponse($response);
 
         // Update the current instance with the response data
         foreach ($submissionData as $key => $value) {

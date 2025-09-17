@@ -248,7 +248,7 @@ class AppointmentGroup extends AbstractBaseApi
 
         self::checkApiClient();
         $response = self::$apiClient->post('appointment_groups', ['multipart' => $data->toApiArray()]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         return new self($responseData);
     }
 
@@ -265,7 +265,7 @@ class AppointmentGroup extends AbstractBaseApi
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d', $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
         return new self($data);
     }
 
@@ -286,7 +286,7 @@ class AppointmentGroup extends AbstractBaseApi
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d', $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $updateData->toApiArray()]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         return new self($responseData);
     }
 
@@ -326,7 +326,7 @@ class AppointmentGroup extends AbstractBaseApi
     {
         self::checkApiClient();
         $response = self::$apiClient->get('appointment_groups', ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new self($item);
@@ -429,7 +429,7 @@ class AppointmentGroup extends AbstractBaseApi
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d/users', $this->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -466,7 +466,7 @@ class AppointmentGroup extends AbstractBaseApi
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d/groups', $this->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**

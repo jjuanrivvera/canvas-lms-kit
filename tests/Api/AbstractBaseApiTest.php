@@ -88,6 +88,11 @@ class AbstractBaseApiTest extends TestCase
             {
                 return parent::createPaginationResult($paginatedResponse);
             }
+
+            public static function testParseJsonResponse(\Psr\Http\Message\ResponseInterface $response): array
+            {
+                return parent::parseJsonResponse($response);
+            }
         };
 
         return get_class($testClass);
@@ -406,27 +411,27 @@ class AbstractBaseApiTest extends TestCase
             public ?string $lastName = null;
             public ?int $userId = null;
             public ?bool $isActive = null;
-            
+
             protected static function getEndpoint(): string
             {
                 return 'test';
             }
-            
+
             public static function find(int $id, array $params = []): self
             {
                 return new self(['id' => $id]);
             }
-            
+
             // Make populate method public for testing
             public function testPopulate(array $data): void
             {
                 $this->populate($data);
             }
         };
-        
+
         $className = get_class($testClass);
         $instance = new $className([]);
-        
+
         // Test with snake_case input data
         $snakeCaseData = [
             'first_name' => 'John',
@@ -434,14 +439,14 @@ class AbstractBaseApiTest extends TestCase
             'user_id' => 123,
             'is_active' => true
         ];
-        
+
         $instance->testPopulate($snakeCaseData);
-        
+
         $this->assertEquals('John', $instance->firstName);
         $this->assertEquals('Doe', $instance->lastName);
         $this->assertEquals(123, $instance->userId);
         $this->assertTrue($instance->isActive);
-        
+
         // Test with camelCase input data (should also work)
         $camelCaseData = [
             'firstName' => 'Jane',
@@ -449,12 +454,159 @@ class AbstractBaseApiTest extends TestCase
             'userId' => 456,
             'isActive' => false
         ];
-        
+
         $instance->testPopulate($camelCaseData);
-        
+
         $this->assertEquals('Jane', $instance->firstName);
         $this->assertEquals('Smith', $instance->lastName);
         $this->assertEquals(456, $instance->userId);
         $this->assertFalse($instance->isActive);
+    }
+
+    /**
+     * Test parseJsonResponse method with valid JSON
+     */
+    public function testParseJsonResponseWithValidJson(): void
+    {
+        $mockResponse = $this->createMock(ResponseInterface::class);
+        $mockStream = $this->createMock(StreamInterface::class);
+
+        $responseData = [
+            'id' => 123,
+            'name' => 'Test Item',
+            'status' => 'active'
+        ];
+
+        $mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn(json_encode($responseData));
+
+        $mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($mockStream);
+
+        $result = $this->testApiClass::testParseJsonResponse($mockResponse);
+
+        $this->assertIsArray($result);
+        $this->assertEquals($responseData, $result);
+    }
+
+    /**
+     * Test parseJsonResponse method with invalid JSON
+     */
+    public function testParseJsonResponseWithInvalidJson(): void
+    {
+        $mockResponse = $this->createMock(ResponseInterface::class);
+        $mockStream = $this->createMock(StreamInterface::class);
+
+        $mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn('{"invalid json"');
+
+        $mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($mockStream);
+
+        $result = $this->testApiClass::testParseJsonResponse($mockResponse);
+
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * Test parseJsonResponse method with empty response
+     */
+    public function testParseJsonResponseWithEmptyResponse(): void
+    {
+        $mockResponse = $this->createMock(ResponseInterface::class);
+        $mockStream = $this->createMock(StreamInterface::class);
+
+        $mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn('');
+
+        $mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($mockStream);
+
+        $result = $this->testApiClass::testParseJsonResponse($mockResponse);
+
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * Test parseJsonResponse method with null response
+     */
+    public function testParseJsonResponseWithNullString(): void
+    {
+        $mockResponse = $this->createMock(ResponseInterface::class);
+        $mockStream = $this->createMock(StreamInterface::class);
+
+        $mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn('null');
+
+        $mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($mockStream);
+
+        $result = $this->testApiClass::testParseJsonResponse($mockResponse);
+
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * Test parseJsonResponse method with array response
+     */
+    public function testParseJsonResponseWithArrayResponse(): void
+    {
+        $mockResponse = $this->createMock(ResponseInterface::class);
+        $mockStream = $this->createMock(StreamInterface::class);
+
+        $responseData = [
+            ['id' => 1, 'name' => 'Item 1'],
+            ['id' => 2, 'name' => 'Item 2'],
+            ['id' => 3, 'name' => 'Item 3']
+        ];
+
+        $mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn(json_encode($responseData));
+
+        $mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($mockStream);
+
+        $result = $this->testApiClass::testParseJsonResponse($mockResponse);
+
+        $this->assertIsArray($result);
+        $this->assertCount(3, $result);
+        $this->assertEquals($responseData, $result);
+    }
+
+    /**
+     * Test parseJsonResponse method properly handles StreamInterface
+     */
+    public function testParseJsonResponseHandlesStreamInterface(): void
+    {
+        $mockResponse = $this->createMock(ResponseInterface::class);
+        $mockStream = $this->createMock(StreamInterface::class);
+
+        $responseData = ['success' => true, 'data' => 'test'];
+
+        // Verify that getContents() is called on the StreamInterface object
+        $mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn(json_encode($responseData));
+
+        $mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($mockStream);
+
+        $result = $this->testApiClass::testParseJsonResponse($mockResponse);
+
+        $this->assertEquals($responseData, $result);
     }
 }
