@@ -122,6 +122,7 @@ class ExternalTool extends AbstractBaseApi
 
     /**
      * Custom fields that will be sent to the tool consumer
+     *
      * @var array<string, string>|null
      */
     public ?array $customFields = null;
@@ -138,66 +139,77 @@ class ExternalTool extends AbstractBaseApi
 
     /**
      * The configuration for account navigation links
+     *
      * @var array<string, mixed>|null
      */
     public ?array $accountNavigation = null;
 
     /**
      * The configuration for assignment selection links
+     *
      * @var array<string, mixed>|null
      */
     public ?array $assignmentSelection = null;
 
     /**
      * The configuration for course home navigation links
+     *
      * @var array<string, mixed>|null
      */
     public ?array $courseHomeSubNavigation = null;
 
     /**
      * The configuration for course navigation links
+     *
      * @var array<string, mixed>|null
      */
     public ?array $courseNavigation = null;
 
     /**
      * The configuration for a WYSIWYG editor button
+     *
      * @var array<string, mixed>|null
      */
     public ?array $editorButton = null;
 
     /**
      * The configuration for homework submission selection
+     *
      * @var array<string, mixed>|null
      */
     public ?array $homeworkSubmission = null;
 
     /**
      * The configuration for link selection
+     *
      * @var array<string, mixed>|null
      */
     public ?array $linkSelection = null;
 
     /**
      * The configuration for migration selection
+     *
      * @var array<string, mixed>|null
      */
     public ?array $migrationSelection = null;
 
     /**
      * The configuration for a resource selector in modules
+     *
      * @var array<string, mixed>|null
      */
     public ?array $resourceSelection = null;
 
     /**
      * The configuration for a tool configuration link
+     *
      * @var array<string, mixed>|null
      */
     public ?array $toolConfiguration = null;
 
     /**
      * The configuration for user navigation links
+     *
      * @var array<string, mixed>|null
      */
     public ?array $userNavigation = null;
@@ -281,6 +293,7 @@ class ExternalTool extends AbstractBaseApi
      * Set external tool ID
      *
      * @param int|null $id
+     *
      * @return void
      */
     public function setId(?int $id): void
@@ -302,6 +315,7 @@ class ExternalTool extends AbstractBaseApi
      * Set context type
      *
      * @param string|null $contextType
+     *
      * @return void
      */
     public function setContextType(?string $contextType): void
@@ -323,6 +337,7 @@ class ExternalTool extends AbstractBaseApi
      * Set context ID
      *
      * @param int|null $contextId
+     *
      * @return void
      */
     public function setContextId(?int $contextId): void
@@ -344,6 +359,7 @@ class ExternalTool extends AbstractBaseApi
      * Set external tool name
      *
      * @param string|null $name
+     *
      * @return void
      */
     public function setName(?string $name): void
@@ -365,6 +381,7 @@ class ExternalTool extends AbstractBaseApi
      * Set external tool description
      *
      * @param string|null $description
+     *
      * @return void
      */
     public function setDescription(?string $description): void
@@ -386,6 +403,7 @@ class ExternalTool extends AbstractBaseApi
      * Set domain
      *
      * @param string|null $domain
+     *
      * @return void
      */
     public function setDomain(?string $domain): void
@@ -407,6 +425,7 @@ class ExternalTool extends AbstractBaseApi
      * Set URL
      *
      * @param string|null $url
+     *
      * @return void
      */
     public function setUrl(?string $url): void
@@ -428,6 +447,7 @@ class ExternalTool extends AbstractBaseApi
      * Set consumer key
      *
      * @param string|null $consumerKey
+     *
      * @return void
      */
     public function setConsumerKey(?string $consumerKey): void
@@ -449,6 +469,7 @@ class ExternalTool extends AbstractBaseApi
      * Set shared secret
      *
      * @param string|null $sharedSecret
+     *
      * @return void
      */
     public function setSharedSecret(?string $sharedSecret): void
@@ -470,6 +491,7 @@ class ExternalTool extends AbstractBaseApi
      * Set privacy level
      *
      * @param string|null $privacyLevel
+     *
      * @return void
      */
     public function setPrivacyLevel(?string $privacyLevel): void
@@ -491,6 +513,7 @@ class ExternalTool extends AbstractBaseApi
      * Set custom fields
      *
      * @param array<string, string>|null $customFields
+     *
      * @return void
      */
     public function setCustomFields(?array $customFields): void
@@ -512,6 +535,7 @@ class ExternalTool extends AbstractBaseApi
      * Set RCE favorite status
      *
      * @param bool|null $isRceFavorite
+     *
      * @return void
      */
     public function setIsRceFavorite(?bool $isRceFavorite): void
@@ -533,6 +557,7 @@ class ExternalTool extends AbstractBaseApi
      * Set top navigation favorite status
      *
      * @param bool|null $isTopNavFavorite
+     *
      * @return void
      */
     public function setIsTopNavFavorite(?bool $isTopNavFavorite): void
@@ -554,6 +579,7 @@ class ExternalTool extends AbstractBaseApi
      * Set account navigation configuration
      *
      * @param array<string, mixed>|null $accountNavigation
+     *
      * @return void
      */
     public function setAccountNavigation(?array $accountNavigation): void
@@ -575,6 +601,7 @@ class ExternalTool extends AbstractBaseApi
      * Set assignment selection configuration
      *
      * @param array<string, mixed>|null $assignmentSelection
+     *
      * @return void
      */
     public function setAssignmentSelection(?array $assignmentSelection): void
@@ -596,6 +623,7 @@ class ExternalTool extends AbstractBaseApi
      * Set course home sub navigation configuration
      *
      * @param array<string, mixed>|null $courseHomeSubNavigation
+     *
      * @return void
      */
     public function setCourseHomeSubNavigation(?array $courseHomeSubNavigation): void
@@ -617,6 +645,7 @@ class ExternalTool extends AbstractBaseApi
      * Set course navigation configuration
      *
      * @param array<string, mixed>|null $courseNavigation
+     *
      * @return void
      */
     public function setCourseNavigation(?array $courseNavigation): void
@@ -638,6 +667,7 @@ class ExternalTool extends AbstractBaseApi
      * Set editor button configuration
      *
      * @param array<string, mixed>|null $editorButton
+     *
      * @return void
      */
     public function setEditorButton(?array $editorButton): void
@@ -659,6 +689,7 @@ class ExternalTool extends AbstractBaseApi
      * Set homework submission configuration
      *
      * @param array<string, mixed>|null $homeworkSubmission
+     *
      * @return void
      */
     public function setHomeworkSubmission(?array $homeworkSubmission): void
@@ -680,6 +711,7 @@ class ExternalTool extends AbstractBaseApi
      * Set link selection configuration
      *
      * @param array<string, mixed>|null $linkSelection
+     *
      * @return void
      */
     public function setLinkSelection(?array $linkSelection): void
@@ -701,6 +733,7 @@ class ExternalTool extends AbstractBaseApi
      * Set migration selection configuration
      *
      * @param array<string, mixed>|null $migrationSelection
+     *
      * @return void
      */
     public function setMigrationSelection(?array $migrationSelection): void
@@ -722,6 +755,7 @@ class ExternalTool extends AbstractBaseApi
      * Set resource selection configuration
      *
      * @param array<string, mixed>|null $resourceSelection
+     *
      * @return void
      */
     public function setResourceSelection(?array $resourceSelection): void
@@ -743,6 +777,7 @@ class ExternalTool extends AbstractBaseApi
      * Set tool configuration
      *
      * @param array<string, mixed>|null $toolConfiguration
+     *
      * @return void
      */
     public function setToolConfiguration(?array $toolConfiguration): void
@@ -764,6 +799,7 @@ class ExternalTool extends AbstractBaseApi
      * Set user navigation configuration
      *
      * @param array<string, mixed>|null $userNavigation
+     *
      * @return void
      */
     public function setUserNavigation(?array $userNavigation): void
@@ -785,6 +821,7 @@ class ExternalTool extends AbstractBaseApi
      * Set selection width
      *
      * @param int|null $selectionWidth
+     *
      * @return void
      */
     public function setSelectionWidth(?int $selectionWidth): void
@@ -806,6 +843,7 @@ class ExternalTool extends AbstractBaseApi
      * Set selection height
      *
      * @param int|null $selectionHeight
+     *
      * @return void
      */
     public function setSelectionHeight(?int $selectionHeight): void
@@ -827,6 +865,7 @@ class ExternalTool extends AbstractBaseApi
      * Set icon URL
      *
      * @param string|null $iconUrl
+     *
      * @return void
      */
     public function setIconUrl(?string $iconUrl): void
@@ -848,6 +887,7 @@ class ExternalTool extends AbstractBaseApi
      * Set not selectable status
      *
      * @param bool|null $notSelectable
+     *
      * @return void
      */
     public function setNotSelectable(?bool $notSelectable): void
@@ -869,6 +909,7 @@ class ExternalTool extends AbstractBaseApi
      * Set workflow state
      *
      * @param string|null $workflowState
+     *
      * @return void
      */
     public function setWorkflowState(?string $workflowState): void
@@ -890,6 +931,7 @@ class ExternalTool extends AbstractBaseApi
      * Set created at timestamp
      *
      * @param string|null $createdAt
+     *
      * @return void
      */
     public function setCreatedAt(?string $createdAt): void
@@ -911,6 +953,7 @@ class ExternalTool extends AbstractBaseApi
      * Set updated at timestamp
      *
      * @param string|null $updatedAt
+     *
      * @return void
      */
     public function setUpdatedAt(?string $updatedAt): void
@@ -932,6 +975,7 @@ class ExternalTool extends AbstractBaseApi
      * Set deployment ID
      *
      * @param string|null $deploymentId
+     *
      * @return void
      */
     public function setDeploymentId(?string $deploymentId): void
@@ -953,6 +997,7 @@ class ExternalTool extends AbstractBaseApi
      * Set unified tool ID
      *
      * @param string|null $unifiedToolId
+     *
      * @return void
      */
     public function setUnifiedToolId(?string $unifiedToolId): void
@@ -1033,19 +1078,22 @@ class ExternalTool extends AbstractBaseApi
             'selection_height' => $this->selectionHeight,
             'icon_url' => $this->iconUrl,
             'not_selectable' => $this->notSelectable,
-        ], fn($value) => $value !== null);
+        ], fn ($value) => $value !== null);
     }
 
     /**
      * Find a single external tool by ID in the default account context
      *
      * @param int $id External tool ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
         $accountId = Config::getAccountId();
+
         return self::findByContext('accounts', $accountId, $id);
     }
 
@@ -1055,8 +1103,10 @@ class ExternalTool extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses)
      * @param int $contextId Context ID
      * @param int $id External tool ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function findByContext(string $contextType, int $contextId, int $id): self
     {
@@ -1076,11 +1126,13 @@ class ExternalTool extends AbstractBaseApi
 
     /**
      * Get the API endpoint for this resource
+     *
      * @return string
      */
     protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
+
         return sprintf('accounts/%d/external_tools', $accountId);
     }
 
@@ -1089,6 +1141,7 @@ class ExternalTool extends AbstractBaseApi
      * Overrides base to set context information.
      *
      * @param array<string, mixed> $params Query parameters
+     *
      * @return array<static>
      */
     public static function get(array $params = []): array
@@ -1110,6 +1163,7 @@ class ExternalTool extends AbstractBaseApi
      * Overrides base to set context information.
      *
      * @param array<string, mixed> $params Query parameters
+     *
      * @return array<static>
      */
     public static function all(array $params = []): array
@@ -1132,8 +1186,10 @@ class ExternalTool extends AbstractBaseApi
      * @param string $contextType 'accounts' or 'courses'
      * @param int $contextId Account or Course ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<self>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<self>
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
@@ -1149,7 +1205,7 @@ class ExternalTool extends AbstractBaseApi
             $paginatedResponse = $paginatedResponse->getNext();
         } while ($paginatedResponse !== null);
 
-        $tools = array_map(fn($data) => new self($data), $allData);
+        $tools = array_map(fn ($data) => new self($data), $allData);
 
         // Set context information on each tool
         $singularContext = rtrim($contextType, 's');
@@ -1161,15 +1217,16 @@ class ExternalTool extends AbstractBaseApi
         return $tools;
     }
 
-
     /**
      * Get paginated external tools for a specific context
      *
      * @param string $contextType 'accounts' or 'courses'
      * @param int $contextId Account or Course ID
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public static function fetchByContextPaginated(
         string $contextType,
@@ -1179,18 +1236,19 @@ class ExternalTool extends AbstractBaseApi
         return self::getPaginatedResponse(sprintf('%s/%d/external_tools', $contextType, $contextId), $params);
     }
 
-
-
     /**
      * Create a new external tool in the default account context
      *
      * @param array<string, mixed>|CreateExternalToolDTO $data External tool data
-     * @return self Created ExternalTool object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Created ExternalTool object
      */
     public static function create(array|CreateExternalToolDTO $data): self
     {
         $accountId = Config::getAccountId();
+
         return self::createInContext('accounts', $accountId, $data);
     }
 
@@ -1200,8 +1258,10 @@ class ExternalTool extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses)
      * @param int $contextId Context ID
      * @param array<string, mixed>|CreateExternalToolDTO $data External tool data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function createInContext(
         string $contextType,
@@ -1231,12 +1291,15 @@ class ExternalTool extends AbstractBaseApi
      *
      * @param int $id External tool ID
      * @param array<string, mixed>|UpdateExternalToolDTO $data External tool data
-     * @return self Updated ExternalTool object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Updated ExternalTool object
      */
     public static function update(int $id, array|UpdateExternalToolDTO $data): self
     {
         $accountId = Config::getAccountId();
+
         return self::updateInContext('accounts', $accountId, $id, $data);
     }
 
@@ -1247,8 +1310,10 @@ class ExternalTool extends AbstractBaseApi
      * @param int $contextId Context ID
      * @param int $id External tool ID
      * @param array<string, mixed>|UpdateExternalToolDTO $data External tool data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function updateInContext(
         string $contextType,
@@ -1278,12 +1343,15 @@ class ExternalTool extends AbstractBaseApi
      * Generate a sessionless launch URL for an external tool in account context
      *
      * @param array<string, mixed> $params Launch parameters
-     * @return array<string, mixed> Launch data with id, name, and url
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Launch data with id, name, and url
      */
     public static function generateSessionlessLaunch(array $params): array
     {
         $accountId = Config::getAccountId();
+
         return self::generateSessionlessLaunchInContext('accounts', $accountId, $params);
     }
 
@@ -1293,8 +1361,10 @@ class ExternalTool extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses)
      * @param int $contextId Context ID
      * @param array<string, mixed> $params Launch parameters
-     * @return array<string, mixed> Launch data with id, name, and url
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Launch data with id, name, and url
      */
     public static function generateSessionlessLaunchInContext(
         string $contextType,
@@ -1312,8 +1382,9 @@ class ExternalTool extends AbstractBaseApi
     /**
      * Save the current external tool (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -1406,8 +1477,9 @@ class ExternalTool extends AbstractBaseApi
     /**
      * Delete the external tool
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
@@ -1436,8 +1508,10 @@ class ExternalTool extends AbstractBaseApi
      * Generate launch URL for this external tool
      *
      * @param array<string, mixed> $params Optional launch parameters
-     * @return string The launch URL
+     *
      * @throws CanvasApiException
+     *
+     * @return string The launch URL
      */
     public function getLaunchUrl(array $params = []): string
     {
@@ -1495,6 +1569,7 @@ class ExternalTool extends AbstractBaseApi
      * Validate URL for security (HTTPS only, no malicious schemes)
      *
      * @param string $url URL to validate
+     *
      * @return bool True if URL is valid and secure
      */
     private function isValidUrl(string $url): bool
@@ -1535,7 +1610,7 @@ class ExternalTool extends AbstractBaseApi
         // Block malicious schemes and hosts
         $maliciousPatterns = [
             'javascript:', 'data:', 'vbscript:', 'file:', 'ftp:',
-            'localhost', '127.0.0.1', '0.0.0.0', '::1'
+            'localhost', '127.0.0.1', '0.0.0.0', '::1',
         ];
 
         foreach ($maliciousPatterns as $pattern) {

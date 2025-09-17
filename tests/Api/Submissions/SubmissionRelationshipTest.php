@@ -4,22 +4,26 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\Submissions;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\Submissions\Submission;
-use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Assignments\Assignment;
+use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Submissions\Submission;
 use CanvasLMS\Api\Users\User;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 class SubmissionRelationshipTest extends TestCase
 {
     private HttpClientInterface $mockHttpClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
+
     private Course $mockCourse;
+
     private Assignment $mockAssignment;
 
     protected function setUp(): void
@@ -54,7 +58,7 @@ class SubmissionRelationshipTest extends TestCase
         $submission = new Submission([
             'id' => 789,
             'assignment_id' => 456,
-            'user_id' => 111
+            'user_id' => 111,
         ]);
 
         // Test the method
@@ -72,7 +76,7 @@ class SubmissionRelationshipTest extends TestCase
         $submission = new Submission([
             'id' => 789,
             'assignment_id' => 456,
-            'user_id' => 111
+            'user_id' => 111,
         ]);
 
         // Test the method
@@ -90,20 +94,20 @@ class SubmissionRelationshipTest extends TestCase
         $submission = new Submission([
             'id' => 789,
             'assignment_id' => 456,
-            'user_id' => 111
+            'user_id' => 111,
         ]);
 
         // Mock user response
         $userData = [
             'id' => 111,
             'name' => 'Student Name',
-            'email' => 'student@example.com'
+            'email' => 'student@example.com',
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($userData));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode($userData));
 
@@ -129,7 +133,7 @@ class SubmissionRelationshipTest extends TestCase
         // Create submission without user_id
         $submission = new Submission([
             'id' => 789,
-            'assignment_id' => 456
+            'assignment_id' => 456,
         ]);
 
         // Test the method
@@ -144,7 +148,7 @@ class SubmissionRelationshipTest extends TestCase
         // Create test submission
         $submission = new Submission([
             'id' => 789,
-            'user_id' => 111
+            'user_id' => 111,
         ]);
 
         // Set up mock to throw exception
@@ -164,20 +168,20 @@ class SubmissionRelationshipTest extends TestCase
         $submission = new Submission([
             'id' => 789,
             'assignment_id' => 456,
-            'grader_id' => 222
+            'grader_id' => 222,
         ]);
 
         // Mock grader response
         $graderData = [
             'id' => 222,
             'name' => 'Teacher Name',
-            'email' => 'teacher@example.com'
+            'email' => 'teacher@example.com',
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($graderData));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode($graderData));
 
@@ -204,7 +208,7 @@ class SubmissionRelationshipTest extends TestCase
         $submission = new Submission([
             'id' => 789,
             'assignment_id' => 456,
-            'user_id' => 111
+            'user_id' => 111,
         ]);
 
         // Test the method
@@ -219,7 +223,7 @@ class SubmissionRelationshipTest extends TestCase
         // Create test submission
         $submission = new Submission([
             'id' => 789,
-            'grader_id' => 222
+            'grader_id' => 222,
         ]);
 
         // Set up mock to throw exception
@@ -232,5 +236,4 @@ class SubmissionRelationshipTest extends TestCase
         $this->expectExceptionMessage('Could not load grader: Grader not found');
         $submission->grader();
     }
-
 }

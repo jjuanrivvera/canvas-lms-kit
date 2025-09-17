@@ -18,7 +18,7 @@ class CreateSectionDTOTest extends TestCase
             'start_at' => '2024-01-15T08:00:00Z',
             'end_at' => '2024-05-15T17:00:00Z',
             'restrict_enrollments_to_section_dates' => true,
-            'enable_sis_reactivation' => false
+            'enable_sis_reactivation' => false,
         ];
 
         $dto = new CreateSectionDTO($data);
@@ -38,7 +38,7 @@ class CreateSectionDTOTest extends TestCase
             'name' => 'Section B',
             'sis_section_id' => 'SIS-001',
             'start_at' => '2024-01-01T00:00:00Z',
-            'restrict_enrollments_to_section_dates' => true
+            'restrict_enrollments_to_section_dates' => true,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -46,7 +46,7 @@ class CreateSectionDTOTest extends TestCase
         // Should be multipart format
         $this->assertIsArray($apiArray);
         $this->assertCount(4, $apiArray);
-        
+
         // Extract names and contents for easier testing
         $formattedArray = [];
         foreach ($apiArray as $item) {
@@ -57,7 +57,7 @@ class CreateSectionDTOTest extends TestCase
             'course_section[name]' => 'Section B',
             'course_section[sis_section_id]' => 'SIS-001',
             'course_section[start_at]' => '2024-01-01T00:00:00+00:00',
-            'course_section[restrict_enrollments_to_section_dates]' => true
+            'course_section[restrict_enrollments_to_section_dates]' => true,
         ];
 
         $this->assertEquals($expected, $formattedArray);
@@ -67,7 +67,7 @@ class CreateSectionDTOTest extends TestCase
     {
         $dto = new CreateSectionDTO([
             'name' => 'Section C',
-            'enable_sis_reactivation' => true
+            'enable_sis_reactivation' => true,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -75,7 +75,7 @@ class CreateSectionDTOTest extends TestCase
         // Should be multipart format
         $this->assertIsArray($apiArray);
         $this->assertCount(2, $apiArray);
-        
+
         // Extract names and contents for easier testing
         $formattedArray = [];
         foreach ($apiArray as $item) {
@@ -84,7 +84,7 @@ class CreateSectionDTOTest extends TestCase
 
         $expected = [
             'course_section[name]' => 'Section C',
-            'enable_sis_reactivation' => true
+            'enable_sis_reactivation' => true,
         ];
 
         $this->assertEquals($expected, $formattedArray);
@@ -97,7 +97,7 @@ class CreateSectionDTOTest extends TestCase
         $dto = new CreateSectionDTO([
             'name' => 'Section D',
             'sis_section_id' => null,
-            'integration_id' => null
+            'integration_id' => null,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -138,7 +138,7 @@ class CreateSectionDTOTest extends TestCase
         $dto = new CreateSectionDTO([
             'name' => 'Date Test Section',
             'start_at' => '2024-01-15T08:00:00Z',
-            'end_at' => '2024-05-15T17:00:00Z'
+            'end_at' => '2024-05-15T17:00:00Z',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -158,39 +158,39 @@ class CreateSectionDTOTest extends TestCase
         // Test with true
         $dto1 = new CreateSectionDTO([
             'name' => 'Boolean Test 1',
-            'restrict_enrollments_to_section_dates' => true
+            'restrict_enrollments_to_section_dates' => true,
         ]);
 
         $apiArray1 = $dto1->toApiArray();
-        
+
         // Extract names and contents for easier testing
         $formattedArray1 = [];
         foreach ($apiArray1 as $item) {
             $formattedArray1[$item['name']] = $item['contents'];
         }
-        
+
         $this->assertTrue($formattedArray1['course_section[restrict_enrollments_to_section_dates]']);
 
         // Test with false
         $dto2 = new CreateSectionDTO([
             'name' => 'Boolean Test 2',
-            'restrict_enrollments_to_section_dates' => false
+            'restrict_enrollments_to_section_dates' => false,
         ]);
 
         $apiArray2 = $dto2->toApiArray();
-        
+
         // Extract names and contents for easier testing
         $formattedArray2 = [];
         foreach ($apiArray2 as $item) {
             $formattedArray2[$item['name']] = $item['contents'];
         }
-        
+
         $this->assertFalse($formattedArray2['course_section[restrict_enrollments_to_section_dates]']);
 
         // Test with null (should be excluded)
         $dto3 = new CreateSectionDTO([
             'name' => 'Boolean Test 3',
-            'restrict_enrollments_to_section_dates' => null
+            'restrict_enrollments_to_section_dates' => null,
         ]);
 
         $apiArray3 = $dto3->toApiArray();

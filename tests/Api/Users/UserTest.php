@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Users;
 
-use CanvasLMS\Api\Users\User;
 use CanvasLMS\Api\Enrollments\Enrollment;
 use CanvasLMS\Api\Groups\Group;
-use GuzzleHttp\Psr7\Response;
-use CanvasLMS\Http\HttpClient;
-use PHPUnit\Framework\TestCase;
+use CanvasLMS\Api\Users\User;
+use CanvasLMS\Config;
 use CanvasLMS\Dto\Users\CreateUserDTO;
 use CanvasLMS\Dto\Users\UpdateUserDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Config;
+use CanvasLMS\Http\HttpClient;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 class UserTest extends TestCase
 {
@@ -32,7 +34,7 @@ class UserTest extends TestCase
     {
         // Set up test configuration
         Config::setAccountId(1);
-        
+
         $this->httpClientMock = $this->createMock(HttpClient::class);
         User::setApiClient($this->httpClientMock);
         $this->user = new User([]);
@@ -40,6 +42,7 @@ class UserTest extends TestCase
 
     /**
      * User data provider
+     *
      * @return array
      */
     public static function userDataProvider(): array
@@ -52,16 +55,19 @@ class UserTest extends TestCase
                 [
                     'id' => 1,
                     'name' => 'Test User',
-                ]
+                ],
             ],
         ];
     }
 
     /**
      * Test the create user method
+     *
      * @dataProvider userDataProvider
+     *
      * @param array $userData
      * @param array $expectedResult
+     *
      * @return void
      */
     public function testCreateUser(array $userData, array $expectedResult): void
@@ -80,9 +86,12 @@ class UserTest extends TestCase
 
     /**
      * Test the create user method with DTO
+     *
      * @dataProvider userDataProvider
+     *
      * @param array $userData
      * @param array $expectedResult
+     *
      * @return void
      */
     public function testCreateUserWithDto(array $userData, array $expectedResult): void
@@ -111,16 +120,17 @@ class UserTest extends TestCase
 
     /**
      * Test that User::create uses the configured account ID
+     *
      * @return void
      */
     public function testCreateUserUsesConfiguredAccountId(): void
     {
         // Set a custom account ID
         Config::setAccountId(789);
-        
+
         $userData = [
             'name' => 'Test User',
-            'unique_id' => 'testuser789'
+            'unique_id' => 'testuser789',
         ];
 
         $dto = new CreateUserDTO($userData);
@@ -144,23 +154,24 @@ class UserTest extends TestCase
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertEquals('Test User', $user->getName());
-        
+
         // Reset to default for other tests
         Config::setAccountId(1);
     }
 
     /**
      * Test that User::create uses default account ID when none is configured
+     *
      * @return void
      */
     public function testCreateUserUsesDefaultAccountId(): void
     {
         // Reset config to ensure we're using defaults
         Config::resetContext(Config::getContext());
-        
+
         $userData = [
             'name' => 'Test User',
-            'unique_id' => 'testuser_default'
+            'unique_id' => 'testuser_default',
         ];
 
         $dto = new CreateUserDTO($userData);
@@ -185,13 +196,14 @@ class UserTest extends TestCase
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertEquals('Test User', $user->getName());
-        
+
         // Restore configured account ID for other tests
         Config::setAccountId(1);
     }
 
     /**
      * Test the find user method
+     *
      * @return void
      */
     public function testFindUser(): void
@@ -210,6 +222,7 @@ class UserTest extends TestCase
 
     /**
      * Test the update user method
+     *
      * @return void
      */
     public function testUpdateUser(): void
@@ -231,6 +244,7 @@ class UserTest extends TestCase
 
     /**
      * Test the update user method with DTO
+     *
      * @return void
      */
     public function testUpdateUserWithDto(): void
@@ -251,6 +265,7 @@ class UserTest extends TestCase
 
     /**
      * Test the save user method
+     *
      * @return void
      */
     public function testSaveUser(): void
@@ -281,6 +296,7 @@ class UserTest extends TestCase
 
     /**
      * Test the save user method
+     *
      * @return void
      */
     public function testSaveUserShouldThrowExceptionWhenApiFails(): void
@@ -314,8 +330,8 @@ class UserTest extends TestCase
                 'user_id' => 123,
                 'course_id' => 456,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $response = new Response(200, [], json_encode($enrollmentData));
@@ -341,7 +357,7 @@ class UserTest extends TestCase
             'id' => 123,
             'name' => 'Test User',
             'effective_locale' => 'en-US',
-            'can_update_name' => true
+            'can_update_name' => true,
         ];
 
         $user = new User($userData);
@@ -364,7 +380,7 @@ class UserTest extends TestCase
     {
         $userData = [
             'id' => 123,
-            'name' => 'Test User'
+            'name' => 'Test User',
         ];
 
         $user = new User($userData);
@@ -381,7 +397,7 @@ class UserTest extends TestCase
     public function testSelfReturnsUserInstanceWithoutId(): void
     {
         $currentUser = User::self();
-        
+
         $this->assertInstanceOf(User::class, $currentUser);
         $this->assertFalse(isset($currentUser->id), 'self() should return a User instance without ID set');
     }
@@ -395,20 +411,20 @@ class UserTest extends TestCase
             'id' => 123,
             'name' => 'Current User',
             'short_name' => 'Current',
-            'login_id' => 'current@example.com'
+            'login_id' => 'current@example.com',
         ];
-        
+
         $response = new Response(200, [], json_encode($profileData));
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
             ->with('/users/self/profile')
             ->willReturn($response);
-        
+
         $currentUser = User::self();
         $profile = $currentUser->profile();
-        
+
         $this->assertEquals('Current User', $profile->name);
     }
 
@@ -419,7 +435,7 @@ class UserTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('User ID is required to fetch missing submissions');
-        
+
         $currentUser = User::self();
         $currentUser->getMissingSubmissions();
     }
@@ -443,19 +459,19 @@ class UserTest extends TestCase
             'effective_locale' => 'en',
             'last_login' => '2025-01-20T10:30:00Z',
             'time_zone' => 'America/New_York',
-            'bio' => null
+            'bio' => null,
         ];
-        
+
         $response = new Response(200, [], json_encode($userData));
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
             ->with('/users/self')
             ->willReturn($response);
-        
+
         $currentUser = User::fetchSelf();
-        
+
         // Assert user instance is properly populated
         $this->assertInstanceOf(User::class, $currentUser);
         $this->assertEquals(54699, $currentUser->id);
@@ -473,27 +489,27 @@ class UserTest extends TestCase
         // Set up OAuth authentication
         Config::setOAuthToken('test-oauth-token');
         Config::useOAuth();
-        
+
         $userData = [
             'id' => 12345,
             'name' => 'OAuth User',
-            'email' => 'oauth@example.com'
+            'email' => 'oauth@example.com',
         ];
-        
+
         $response = new Response(200, [], json_encode($userData));
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
             ->with('/users/self')
             ->willReturn($response);
-        
+
         $currentUser = User::fetchSelf();
-        
+
         $this->assertEquals(12345, $currentUser->id);
         $this->assertEquals('OAuth User', $currentUser->name);
         $this->assertEquals('oauth@example.com', $currentUser->email);
-        
+
         // Reset to API key auth
         Config::useApiKey();
     }
@@ -506,29 +522,29 @@ class UserTest extends TestCase
         $userData = [
             'id' => 789,
             'name' => 'Test User',
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ];
-        
+
         $profileData = [
             'id' => 789,
             'name' => 'Test User',
-            'bio' => 'Test bio'
+            'bio' => 'Test bio',
         ];
-        
+
         $userResponse = new Response(200, [], json_encode($userData));
         $profileResponse = new Response(200, [], json_encode($profileData));
-        
+
         $this->httpClientMock
             ->expects($this->exactly(2))
             ->method('get')
             ->willReturnOnConsecutiveCalls($userResponse, $profileResponse);
-        
+
         // First fetch the user
         $currentUser = User::fetchSelf();
-        
+
         // Now use a method that requires ID
         $profile = $currentUser->profile();
-        
+
         $this->assertEquals('Test bio', $profile->bio);
     }
 
@@ -539,7 +555,7 @@ class UserTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('User ID is required to set custom data');
-        
+
         $currentUser = User::self();
         $currentUser->setCustomData('namespace', ['data' => 'value']);
     }
@@ -551,7 +567,7 @@ class UserTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('User ID is required to get custom data');
-        
+
         $currentUser = User::self();
         $currentUser->getCustomData('namespace');
     }
@@ -563,7 +579,7 @@ class UserTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('User ID is required to get courses');
-        
+
         $currentUser = User::self();
         $currentUser->courses();
     }
@@ -576,12 +592,12 @@ class UserTest extends TestCase
         $userId = 456;
         $userData = ['id' => $userId, 'name' => 'Specific User'];
         $profileData = ['id' => $userId, 'name' => 'Specific User', 'short_name' => 'Specific'];
-        
+
         // First mock for User::find()
         $userResponse = new Response(200, [], json_encode($userData));
         // Second mock for profile()
         $profileResponse = new Response(200, [], json_encode($profileData));
-        
+
         $this->httpClientMock
             ->expects($this->exactly(2))
             ->method('get')
@@ -592,10 +608,10 @@ class UserTest extends TestCase
                     return $profileResponse;
                 }
             });
-        
+
         $user = User::find($userId);
         $this->assertEquals($userId, $user->getId());
-        
+
         $profile = $user->profile();
         $this->assertEquals('Specific User', $profile->name);
     }
@@ -607,7 +623,7 @@ class UserTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('User ID is required to get calendar events');
-        
+
         $currentUser = User::self();
         $currentUser->getCalendarEvents();
     }
@@ -619,7 +635,7 @@ class UserTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('User ID is required to split user');
-        
+
         $currentUser = User::self();
         $currentUser->split();
     }
@@ -631,23 +647,23 @@ class UserTest extends TestCase
     {
         $groupsData = [
             ['id' => 1, 'name' => 'Group 1'],
-            ['id' => 2, 'name' => 'Group 2']
+            ['id' => 2, 'name' => 'Group 2'],
         ];
-        
+
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
             ->method('all')
             ->willReturn($groupsData);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('getPaginated')
             ->with('users/self/groups', ['query' => []])
             ->willReturn($mockPaginatedResponse);
-        
+
         $currentUser = User::self();
         $groups = $currentUser->groups();
-        
+
         $this->assertCount(2, $groups);
         $this->assertInstanceOf(Group::class, $groups[0]);
         $this->assertEquals('Group 1', $groups[0]->name);
@@ -660,7 +676,7 @@ class UserTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('User ID is required to get files');
-        
+
         $currentUser = User::self();
         $currentUser->files();
     }
@@ -674,25 +690,25 @@ class UserTest extends TestCase
             [
                 'type' => 'grading',
                 'assignment' => ['id' => 1, 'name' => 'Assignment 1'],
-                'needs_grading_count' => 5
+                'needs_grading_count' => 5,
             ],
             [
                 'type' => 'submitting',
-                'assignment' => ['id' => 2, 'name' => 'Assignment 2']
-            ]
+                'assignment' => ['id' => 2, 'name' => 'Assignment 2'],
+            ],
         ];
-        
+
         $response = new Response(200, [], json_encode($todoData));
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
             ->with('/users/self/todo', $this->anything())
             ->willReturn($response);
-        
+
         $currentUser = User::self();
         $todos = $currentUser->getTodo();
-        
+
         $this->assertCount(2, $todos);
         $this->assertEquals('grading', $todos[0]->type);
         $this->assertEquals('submitting', $todos[1]->type);
@@ -706,21 +722,21 @@ class UserTest extends TestCase
         $todoData = [
             [
                 'type' => 'grading',
-                'assignment' => ['id' => 1, 'name' => 'Assignment 1']
-            ]
+                'assignment' => ['id' => 1, 'name' => 'Assignment 1'],
+            ],
         ];
-        
+
         $response = new Response(200, [], json_encode($todoData));
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
             ->with('/users/123/todo', $this->anything())
             ->willReturn($response);
-        
+
         $user = new User(['id' => 123]);
         $todos = $user->getTodo();
-        
+
         $this->assertCount(1, $todos);
         $this->assertEquals('grading', $todos[0]->type);
     }
@@ -735,24 +751,24 @@ class UserTest extends TestCase
                 'id' => 1,
                 'unique_id' => 'test@example.com',
                 'user_id' => 123,
-                'workflow_state' => 'active'
-            ]
+                'workflow_state' => 'active',
+            ],
         ];
-        
+
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
             ->method('all')
             ->willReturn($loginData);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('getPaginated')
             ->with('users/self/logins', ['query' => []])
             ->willReturn($mockPaginatedResponse);
-        
+
         $user = User::self();
         $logins = $user->logins();
-        
+
         $this->assertIsArray($logins);
         $this->assertCount(1, $logins);
         $this->assertInstanceOf('CanvasLMS\Api\Logins\Login', $logins[0]);
@@ -768,21 +784,21 @@ class UserTest extends TestCase
                 'id' => 1,
                 'unique_id' => 'test@example.com',
                 'user_id' => 123,
-                'workflow_state' => 'active'
-            ]
+                'workflow_state' => 'active',
+            ],
         ];
-        
+
         $response = new Response(200, [], json_encode($loginData));
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
             ->with('users/123/logins', $this->anything())
             ->willReturn($response);
-        
+
         $user = new User(['id' => 123]);
         $logins = $user->logins();
-        
+
         $this->assertIsArray($logins);
         $this->assertCount(1, $logins);
         $this->assertInstanceOf('CanvasLMS\Api\Logins\Login', $logins[0]);

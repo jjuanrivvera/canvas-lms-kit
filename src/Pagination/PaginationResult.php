@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Pagination;
 
 /**
@@ -27,58 +29,66 @@ class PaginationResult
 {
     /**
      * The actual data from the API response
+     *
      * @var mixed[]
      */
     private array $data;
 
     /**
      * URL for the next page of results
+     *
      * @var string|null
      */
     private ?string $nextUrl;
 
     /**
      * URL for the previous page of results
+     *
      * @var string|null
      */
     private ?string $prevUrl;
 
     /**
      * URL for the first page of results
+     *
      * @var string|null
      */
     private ?string $firstUrl;
 
     /**
      * URL for the last page of results
+     *
      * @var string|null
      */
     private ?string $lastUrl;
 
     /**
      * URL for the current page of results
+     *
      * @var string|null
      */
     private ?string $currentUrl;
 
     /**
      * Current page number
+     *
      * @var int
      */
     private int $currentPage;
 
     /**
      * Total number of pages (if determinable)
+     *
      * @var int|null
      */
     private ?int $totalPages;
 
     /**
      * Number of items per page
+     *
      * @var int|null
      */
     private ?int $perPage;
-
 
     /**
      * PaginationResult constructor
@@ -112,6 +122,7 @@ class PaginationResult
      *
      * @param mixed[] $data The API response data
      * @param string $linkHeader The Link header string
+     *
      * @return self
      */
     public static function fromLinkHeader(array $data, string $linkHeader): self

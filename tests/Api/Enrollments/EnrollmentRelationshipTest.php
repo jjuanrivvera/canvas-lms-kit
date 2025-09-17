@@ -4,21 +4,24 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\Enrollments;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\Enrollments\Enrollment;
 use CanvasLMS\Api\Courses\Course;
-use CanvasLMS\Api\Users\User;
+use CanvasLMS\Api\Enrollments\Enrollment;
 use CanvasLMS\Api\Sections\Section;
+use CanvasLMS\Api\Users\User;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 class EnrollmentRelationshipTest extends TestCase
 {
     private HttpClientInterface $mockHttpClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
+
     private Course $mockCourse;
 
     protected function setUp(): void
@@ -53,7 +56,7 @@ class EnrollmentRelationshipTest extends TestCase
         $enrollment = new Enrollment([
             'id' => 1,
             'course_id' => 123,
-            'user_id' => 456
+            'user_id' => 456,
         ]);
 
         // Test the method
@@ -69,19 +72,19 @@ class EnrollmentRelationshipTest extends TestCase
     {
         // Skip this test as we can't set course to null
         $this->markTestSkipped('Cannot set course context to null');
-        
+
         // Create test enrollment with course ID
         $enrollment = new Enrollment([
             'id' => 1,
             'course_id' => 789,
-            'user_id' => 456
+            'user_id' => 456,
         ]);
 
         // Mock course response
         $courseData = [
             'id' => 789,
             'name' => 'Test Course',
-            'course_code' => 'TEST101'
+            'course_code' => 'TEST101',
         ];
 
         // Set up mock expectations
@@ -110,7 +113,7 @@ class EnrollmentRelationshipTest extends TestCase
         // Create test enrollment without course ID
         $enrollment = new Enrollment([
             'id' => 1,
-            'user_id' => 456
+            'user_id' => 456,
         ]);
 
         // Test the method
@@ -126,20 +129,20 @@ class EnrollmentRelationshipTest extends TestCase
         $enrollment = new Enrollment([
             'id' => 1,
             'course_id' => 123,
-            'user_id' => 456
+            'user_id' => 456,
         ]);
 
         // Mock user response
         $userData = [
             'id' => 456,
             'name' => 'Test User',
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($userData));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode($userData));
 
@@ -165,7 +168,7 @@ class EnrollmentRelationshipTest extends TestCase
         // Create test enrollment without user ID
         $enrollment = new Enrollment([
             'id' => 1,
-            'course_id' => 123
+            'course_id' => 123,
         ]);
 
         // Test the method
@@ -180,7 +183,7 @@ class EnrollmentRelationshipTest extends TestCase
         // Create test enrollment
         $enrollment = new Enrollment([
             'id' => 1,
-            'user_id' => 456
+            'user_id' => 456,
         ]);
 
         // Set up mock to throw exception
@@ -200,14 +203,14 @@ class EnrollmentRelationshipTest extends TestCase
         $enrollment = new Enrollment([
             'id' => 1,
             'course_id' => 123,
-            'section_id' => 789
+            'section_id' => 789,
         ]);
 
         // Mock section response
         $sectionData = [
             'id' => 789,
             'name' => 'Section A',
-            'course_id' => 123
+            'course_id' => 123,
         ];
 
         // Set up mock expectations
@@ -237,7 +240,7 @@ class EnrollmentRelationshipTest extends TestCase
         $enrollment = new Enrollment([
             'id' => 1,
             'course_id' => 123,
-            'user_id' => 456
+            'user_id' => 456,
         ]);
 
         // Test the method
@@ -252,7 +255,7 @@ class EnrollmentRelationshipTest extends TestCase
         // Create test enrollment
         $enrollment = new Enrollment([
             'id' => 1,
-            'section_id' => 789
+            'section_id' => 789,
         ]);
 
         // Set up mock to throw exception

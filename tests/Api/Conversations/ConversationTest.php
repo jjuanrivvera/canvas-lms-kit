@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Conversations;
 
 use CanvasLMS\Api\Conversations\Conversation;
 use CanvasLMS\Dto\Conversations\CreateConversationDTO;
 use CanvasLMS\Http\HttpClient;
-use PHPUnit\Framework\TestCase;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 class ConversationTest extends TestCase
 {
@@ -26,8 +28,10 @@ class ConversationTest extends TestCase
 
     /**
      * Create a mock response
+     *
      * @param array $data
      * @param int $statusCode
+     *
      * @return Response
      */
     private function createMockResponse(array $data, int $statusCode = 200): Response
@@ -37,14 +41,17 @@ class ConversationTest extends TestCase
 
     /**
      * Create a mock response with status code
+     *
      * @param array $data
      * @param int $statusCode
+     *
      * @return Response
      */
     private function createMockResponseWithStatus(array $data, int $statusCode): Response
     {
         return $this->createMockResponse($data, $statusCode);
     }
+
     /**
      * Test fetching all conversations
      */
@@ -58,7 +65,7 @@ class ConversationTest extends TestCase
                 'last_message' => 'Hello there',
                 'message_count' => 2,
                 'starred' => false,
-                'private' => true
+                'private' => true,
             ],
             [
                 'id' => 2,
@@ -67,8 +74,8 @@ class ConversationTest extends TestCase
                 'last_message' => 'How are you?',
                 'message_count' => 5,
                 'starred' => true,
-                'private' => false
-            ]
+                'private' => false,
+            ],
         ]);
 
         $this->httpClientMock
@@ -97,10 +104,10 @@ class ConversationTest extends TestCase
                 [
                     'id' => 1,
                     'subject' => 'Test Conversation',
-                    'workflow_state' => 'unread'
-                ]
+                    'workflow_state' => 'unread',
+                ],
             ],
-            'conversation_ids' => [1, 2, 3, 4, 5]
+            'conversation_ids' => [1, 2, 3, 4, 5],
         ]);
 
         $this->httpClientMock
@@ -131,12 +138,12 @@ class ConversationTest extends TestCase
                 [
                     'id' => 1,
                     'body' => 'First message',
-                    'author_id' => 456
-                ]
+                    'author_id' => 456,
+                ],
             ],
             'participants' => [
-                ['id' => 456, 'name' => 'John Doe']
-            ]
+                ['id' => 456, 'name' => 'John Doe'],
+            ],
         ]);
 
         $this->httpClientMock
@@ -164,7 +171,7 @@ class ConversationTest extends TestCase
             'recipients' => ['1', '2', 'course_123'],
             'subject' => 'New Conversation',
             'body' => 'Hello everyone!',
-            'groupConversation' => true
+            'groupConversation' => true,
         ];
 
         $mockResponse = $this->createMockResponse([
@@ -172,7 +179,7 @@ class ConversationTest extends TestCase
             'subject' => 'New Conversation',
             'workflow_state' => 'read',
             'last_message' => 'Hello everyone!',
-            'message_count' => 1
+            'message_count' => 1,
         ]);
 
         $this->httpClientMock
@@ -185,11 +192,11 @@ class ConversationTest extends TestCase
                     if (!isset($options['multipart']) || !is_array($options['multipart'])) {
                         return false;
                     }
-                    
+
                     $hasRecipients = false;
                     $hasBody = false;
                     $bodyContent = '';
-                    
+
                     foreach ($options['multipart'] as $field) {
                         if ($field['name'] === 'recipients[]') {
                             $hasRecipients = true;
@@ -199,7 +206,7 @@ class ConversationTest extends TestCase
                             $bodyContent = $field['contents'];
                         }
                     }
-                    
+
                     return $hasRecipients && $hasBody && $bodyContent === 'Hello everyone!';
                 })
             )
@@ -222,15 +229,15 @@ class ConversationTest extends TestCase
             'recipients' => ['user_1', 'group_456'],
             'subject' => 'DTO Conversation',
             'body' => 'Created with DTO',
-            'groupConversation' => false
+            'groupConversation' => false,
         ]);
 
         $mockResponse = $this->createMockResponse([
             [
                 'id' => 789,
                 'subject' => 'DTO Conversation',
-                'workflow_state' => 'read'
-            ]
+                'workflow_state' => 'read',
+            ],
         ]);
 
         $this->httpClientMock
@@ -257,7 +264,7 @@ class ConversationTest extends TestCase
         $mockResponse = $this->createMockResponse([
             'id' => 123,
             'starred' => true,
-            'workflow_state' => 'archived'
+            'workflow_state' => 'archived',
         ]);
 
         $this->httpClientMock
@@ -270,10 +277,10 @@ class ConversationTest extends TestCase
                     if (!isset($options['multipart']) || !is_array($options['multipart'])) {
                         return false;
                     }
-                    
+
                     $hasStarred = false;
                     $hasWorkflowState = false;
-                    
+
                     foreach ($options['multipart'] as $field) {
                         if ($field['name'] === 'conversation[starred]') {
                             $hasStarred = true;
@@ -282,7 +289,7 @@ class ConversationTest extends TestCase
                             $hasWorkflowState = true;
                         }
                     }
-                    
+
                     return $hasStarred && $hasWorkflowState;
                 })
             )
@@ -323,16 +330,16 @@ class ConversationTest extends TestCase
     public function testAddMessage(): void
     {
         $conversation = new Conversation(['id' => 123]);
-        
+
         $messageData = [
             'body' => 'This is a new message',
-            'attachmentIds' => [456, 789]
+            'attachmentIds' => [456, 789],
         ];
 
         $mockResponse = $this->createMockResponse([
             'id' => 123,
             'last_message' => 'This is a new message',
-            'message_count' => 5
+            'message_count' => 5,
         ]);
 
         $this->httpClientMock
@@ -345,17 +352,17 @@ class ConversationTest extends TestCase
                     if (!isset($options['multipart']) || !is_array($options['multipart'])) {
                         return false;
                     }
-                    
+
                     $hasBody = false;
                     $bodyContent = '';
-                    
+
                     foreach ($options['multipart'] as $field) {
                         if ($field['name'] === 'body') {
                             $hasBody = true;
                             $bodyContent = $field['contents'];
                         }
                     }
-                    
+
                     return $hasBody && $bodyContent === 'This is a new message';
                 })
             )
@@ -374,14 +381,14 @@ class ConversationTest extends TestCase
     public function testAddRecipients(): void
     {
         $conversation = new Conversation(['id' => 123]);
-        
+
         $recipientData = [
-            'recipients' => ['user_456', 'user_789']
+            'recipients' => ['user_456', 'user_789'],
         ];
 
         $mockResponse = $this->createMockResponse([
             'id' => 123,
-            'audience' => [456, 789]
+            'audience' => [456, 789],
         ]);
 
         $this->httpClientMock
@@ -406,7 +413,7 @@ class ConversationTest extends TestCase
 
         $mockResponse = $this->createMockResponse([
             'id' => 123,
-            'message_count' => 3
+            'message_count' => 3,
         ]);
 
         $this->httpClientMock
@@ -419,14 +426,14 @@ class ConversationTest extends TestCase
                     if (!isset($options['multipart']) || !is_array($options['multipart'])) {
                         return false;
                     }
-                    
+
                     $removeCount = 0;
                     foreach ($options['multipart'] as $field) {
                         if ($field['name'] === 'remove[]') {
                             $removeCount++;
                         }
                     }
-                    
+
                     return $removeCount === 3; // We're removing 3 messages
                 })
             )
@@ -446,7 +453,7 @@ class ConversationTest extends TestCase
     {
         $mockResponse = $this->createMockResponse([
             'progress' => 100,
-            'message' => 'Complete'
+            'message' => 'Complete',
         ]);
 
         $this->httpClientMock
@@ -459,10 +466,10 @@ class ConversationTest extends TestCase
                     if (!isset($options['multipart']) || !is_array($options['multipart'])) {
                         return false;
                     }
-                    
+
                     $conversationCount = 0;
                     $hasEvent = false;
-                    
+
                     foreach ($options['multipart'] as $field) {
                         if ($field['name'] === 'conversation_ids[]') {
                             $conversationCount++;
@@ -471,7 +478,7 @@ class ConversationTest extends TestCase
                             $hasEvent = true;
                         }
                     }
-                    
+
                     return $conversationCount === 3 && $hasEvent;
                 })
             )
@@ -509,7 +516,7 @@ class ConversationTest extends TestCase
     public function testGetUnreadCount(): void
     {
         $mockResponse = $this->createMockResponse([
-            'unread_count' => 42
+            'unread_count' => 42,
         ]);
 
         $this->httpClientMock
@@ -533,8 +540,8 @@ class ConversationTest extends TestCase
             [
                 'id' => 1,
                 'workflow_state' => 'running',
-                'completion' => 0.5
-            ]
+                'completion' => 0.5,
+            ],
         ]);
 
         $this->httpClientMock
@@ -564,55 +571,55 @@ class ConversationTest extends TestCase
             ->expects($this->once())
             ->method('put')
             ->willReturn($this->createMockResponse(['id' => 123, 'workflow_state' => 'read']));
-        
+
         $conversation->markAsRead();
         $this->assertEquals('read', $conversation->workflowState);
 
         // Reset mock for markAsUnread
         $this->httpClientMock = $this->createMock(HttpClient::class);
         Conversation::setApiClient($this->httpClientMock);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
             ->willReturn($this->createMockResponse(['id' => 123, 'workflow_state' => 'unread']));
-        
+
         $conversation->markAsUnread();
         $this->assertEquals('unread', $conversation->workflowState);
 
         // Reset mock for star
         $this->httpClientMock = $this->createMock(HttpClient::class);
         Conversation::setApiClient($this->httpClientMock);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
             ->willReturn($this->createMockResponse(['id' => 123, 'starred' => true]));
-        
+
         $conversation->star();
         $this->assertTrue($conversation->starred);
 
         // Reset mock for unstar
         $this->httpClientMock = $this->createMock(HttpClient::class);
         Conversation::setApiClient($this->httpClientMock);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
             ->willReturn($this->createMockResponse(['id' => 123, 'starred' => false]));
-        
+
         $conversation->unstar();
         $this->assertFalse($conversation->starred);
 
         // Reset mock for archive
         $this->httpClientMock = $this->createMock(HttpClient::class);
         Conversation::setApiClient($this->httpClientMock);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
             ->willReturn($this->createMockResponse(['id' => 123, 'workflow_state' => 'archived']));
-        
+
         $conversation->archive();
         $this->assertEquals('archived', $conversation->workflowState);
     }

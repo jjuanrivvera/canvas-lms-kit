@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Exceptions;
 
 use Exception;
@@ -13,6 +15,7 @@ class CanvasApiException extends Exception
 
     /**
      * CanvasApiException constructor.
+     *
      * @param string $message
      * @param int $code
      * @param mixed[] $errors
@@ -26,6 +29,7 @@ class CanvasApiException extends Exception
 
     /**
      * Get the errors
+     *
      * @return mixed[]
      */
     public function getErrors(): array

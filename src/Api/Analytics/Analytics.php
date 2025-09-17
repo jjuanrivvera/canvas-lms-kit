@@ -22,6 +22,7 @@ use Psr\Log\NullLogger;
 class Analytics
 {
     private static ?HttpClientInterface $httpClient = null;
+
     private static LoggerInterface $logger;
 
     /**
@@ -73,8 +74,10 @@ class Analytics
      *
      * @param string $endpoint
      * @param array<string, mixed> $params
-     * @return mixed[]
+     *
      * @throws CanvasApiException
+     *
+     * @return mixed[]
      */
     private static function get(string $endpoint, array $params = []): array
     {
@@ -83,7 +86,7 @@ class Analytics
 
         self::$logger->info('Analytics API GET request', [
             'endpoint' => $endpoint,
-            'params' => $params
+            'params' => $params,
         ]);
 
         try {
@@ -99,7 +102,7 @@ class Analytics
         } catch (\Exception $e) {
             self::$logger->error('Analytics API request failed', [
                 'endpoint' => $endpoint,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             if ($e instanceof CanvasApiException) {
@@ -119,13 +122,16 @@ class Analytics
      *
      * @param int|null $accountId Account ID (defaults to Config::getAccountId())
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns ['by_date' => [...], 'by_category' => [...]]
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns ['by_date' => [...], 'by_category' => [...]]
      */
     public static function fetchAccountActivity(?int $accountId = null, array $params = []): array
     {
         $accountId = $accountId ?? Config::getAccountId();
         $endpoint = "/accounts/{$accountId}/analytics/current/activity";
+
         return self::get($endpoint, $params);
     }
 
@@ -135,13 +141,16 @@ class Analytics
      * @param int $termId Term ID
      * @param int|null $accountId Account ID (defaults to Config::getAccountId())
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns ['by_date' => [...], 'by_category' => [...]]
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns ['by_date' => [...], 'by_category' => [...]]
      */
     public static function fetchAccountActivityByTerm(int $termId, ?int $accountId = null, array $params = []): array
     {
         $accountId = $accountId ?? Config::getAccountId();
         $endpoint = "/accounts/{$accountId}/analytics/terms/{$termId}/activity";
+
         return self::get($endpoint, $params);
     }
 
@@ -150,13 +159,16 @@ class Analytics
      *
      * @param int|null $accountId Account ID (defaults to Config::getAccountId())
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns grade distribution with scores as keys
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns grade distribution with scores as keys
      */
     public static function fetchAccountGrades(?int $accountId = null, array $params = []): array
     {
         $accountId = $accountId ?? Config::getAccountId();
         $endpoint = "/accounts/{$accountId}/analytics/current/grades";
+
         return self::get($endpoint, $params);
     }
 
@@ -166,13 +178,16 @@ class Analytics
      * @param int $termId Term ID
      * @param int|null $accountId Account ID (defaults to Config::getAccountId())
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns grade distribution with scores as keys
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns grade distribution with scores as keys
      */
     public static function fetchAccountGradesByTerm(int $termId, ?int $accountId = null, array $params = []): array
     {
         $accountId = $accountId ?? Config::getAccountId();
         $endpoint = "/accounts/{$accountId}/analytics/terms/{$termId}/grades";
+
         return self::get($endpoint, $params);
     }
 
@@ -181,13 +196,16 @@ class Analytics
      *
      * @param int|null $accountId Account ID (defaults to Config::getAccountId())
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns statistics array
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns statistics array
      */
     public static function fetchAccountStatistics(?int $accountId = null, array $params = []): array
     {
         $accountId = $accountId ?? Config::getAccountId();
         $endpoint = "/accounts/{$accountId}/analytics/current/statistics";
+
         return self::get($endpoint, $params);
     }
 
@@ -197,13 +215,16 @@ class Analytics
      * @param int $termId Term ID
      * @param int|null $accountId Account ID (defaults to Config::getAccountId())
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns statistics array
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns statistics array
      */
     public static function fetchAccountStatisticsByTerm(int $termId, ?int $accountId = null, array $params = []): array
     {
         $accountId = $accountId ?? Config::getAccountId();
         $endpoint = "/accounts/{$accountId}/analytics/terms/{$termId}/statistics";
+
         return self::get($endpoint, $params);
     }
 
@@ -212,13 +233,16 @@ class Analytics
      *
      * @param int|null $accountId Account ID (defaults to Config::getAccountId())
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns ['accounts' => [...]]
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns ['accounts' => [...]]
      */
     public static function fetchAccountStatisticsBySubaccount(?int $accountId = null, array $params = []): array
     {
         $accountId = $accountId ?? Config::getAccountId();
         $endpoint = "/accounts/{$accountId}/analytics/current/statistics_by_subaccount";
+
         return self::get($endpoint, $params);
     }
 
@@ -228,8 +252,10 @@ class Analytics
      * @param int $termId Term ID
      * @param int|null $accountId Account ID (defaults to Config::getAccountId())
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns ['accounts' => [...]]
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns ['accounts' => [...]]
      */
     public static function fetchAccountStatisticsBySubaccountByTerm(
         int $termId,
@@ -238,6 +264,7 @@ class Analytics
     ): array {
         $accountId = $accountId ?? Config::getAccountId();
         $endpoint = "/accounts/{$accountId}/analytics/terms/{$termId}/statistics_by_subaccount";
+
         return self::get($endpoint, $params);
     }
 
@@ -250,12 +277,15 @@ class Analytics
      *
      * @param int $courseId Course ID
      * @param array<string, mixed> $params Additional parameters
-     * @return array<int, array<string, mixed>> Returns array of activity data by date
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, array<string, mixed>> Returns array of activity data by date
      */
     public static function fetchCourseActivity(int $courseId, array $params = []): array
     {
         $endpoint = "/courses/{$courseId}/analytics/activity";
+
         return self::get($endpoint, $params);
     }
 
@@ -264,12 +294,15 @@ class Analytics
      *
      * @param int $courseId Course ID
      * @param array<string, mixed> $params Additional parameters (e.g., ['async' => true])
-     * @return array<int, array<string, mixed>>|array<string, string> Array of assignments or progress URL
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, array<string, mixed>>|array<string, string> Array of assignments or progress URL
      */
     public static function fetchCourseAssignments(int $courseId, array $params = []): array
     {
         $endpoint = "/courses/{$courseId}/analytics/assignments";
+
         return self::get($endpoint, $params);
     }
 
@@ -278,12 +311,15 @@ class Analytics
      *
      * @param int $courseId Course ID
      * @param array<string, mixed> $params Additional parameters (e.g., ['sort_column' => 'name'])
-     * @return array<int, array<string, mixed>> Returns array of student summaries
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, array<string, mixed>> Returns array of student summaries
      */
     public static function fetchCourseStudentSummaries(int $courseId, array $params = []): array
     {
         $endpoint = "/courses/{$courseId}/analytics/student_summaries";
+
         return self::get($endpoint, $params);
     }
 
@@ -297,12 +333,15 @@ class Analytics
      * @param int $courseId Course ID
      * @param int $userId User/Student ID
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns ['page_views' => [...], 'participations' => [...]]
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns ['page_views' => [...], 'participations' => [...]]
      */
     public static function fetchUserCourseActivity(int $courseId, int $userId, array $params = []): array
     {
         $endpoint = "/courses/{$courseId}/analytics/users/{$userId}/activity";
+
         return self::get($endpoint, $params);
     }
 
@@ -312,12 +351,15 @@ class Analytics
      * @param int $courseId Course ID
      * @param int $userId User/Student ID
      * @param array<string, mixed> $params Additional parameters
-     * @return array<int, array<string, mixed>> Returns array of assignment data with submission info
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, array<string, mixed>> Returns array of assignment data with submission info
      */
     public static function fetchUserCourseAssignments(int $courseId, int $userId, array $params = []): array
     {
         $endpoint = "/courses/{$courseId}/analytics/users/{$userId}/assignments";
+
         return self::get($endpoint, $params);
     }
 
@@ -327,12 +369,15 @@ class Analytics
      * @param int $courseId Course ID
      * @param int $userId User/Student ID
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns messaging data grouped by date
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns messaging data grouped by date
      */
     public static function fetchUserCourseCommunication(int $courseId, int $userId, array $params = []): array
     {
         $endpoint = "/courses/{$courseId}/analytics/users/{$userId}/communication";
+
         return self::get($endpoint, $params);
     }
 
@@ -345,13 +390,16 @@ class Analytics
      *
      * @param int|null $accountId Account ID (defaults to Config::getAccountId())
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns ['by_date' => [...], 'by_category' => [...]]
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns ['by_date' => [...], 'by_category' => [...]]
      */
     public static function fetchAccountCompletedActivity(?int $accountId = null, array $params = []): array
     {
         $accountId = $accountId ?? Config::getAccountId();
         $endpoint = "/accounts/{$accountId}/analytics/completed/activity";
+
         return self::get($endpoint, $params);
     }
 
@@ -360,13 +408,16 @@ class Analytics
      *
      * @param int|null $accountId Account ID (defaults to Config::getAccountId())
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns grade distribution with scores as keys
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns grade distribution with scores as keys
      */
     public static function fetchAccountCompletedGrades(?int $accountId = null, array $params = []): array
     {
         $accountId = $accountId ?? Config::getAccountId();
         $endpoint = "/accounts/{$accountId}/analytics/completed/grades";
+
         return self::get($endpoint, $params);
     }
 
@@ -375,13 +426,16 @@ class Analytics
      *
      * @param int|null $accountId Account ID (defaults to Config::getAccountId())
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns statistics array
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns statistics array
      */
     public static function fetchAccountCompletedStatistics(?int $accountId = null, array $params = []): array
     {
         $accountId = $accountId ?? Config::getAccountId();
         $endpoint = "/accounts/{$accountId}/analytics/completed/statistics";
+
         return self::get($endpoint, $params);
     }
 
@@ -390,8 +444,10 @@ class Analytics
      *
      * @param int|null $accountId Account ID (defaults to Config::getAccountId())
      * @param array<string, mixed> $params Additional parameters
-     * @return array<string, mixed> Returns ['accounts' => [...]]
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Returns ['accounts' => [...]]
      */
     public static function fetchAccountCompletedStatisticsBySubaccount(
         ?int $accountId = null,
@@ -399,6 +455,7 @@ class Analytics
     ): array {
         $accountId = $accountId ?? Config::getAccountId();
         $endpoint = "/accounts/{$accountId}/analytics/completed/statistics_by_subaccount";
+
         return self::get($endpoint, $params);
     }
 }

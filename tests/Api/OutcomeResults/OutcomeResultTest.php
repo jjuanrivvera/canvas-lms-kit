@@ -15,7 +15,9 @@ use Psr\Http\Message\StreamInterface;
 class OutcomeResultTest extends TestCase
 {
     private HttpClientInterface $mockClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
 
     protected function setUp(): void
@@ -40,8 +42,8 @@ class OutcomeResultTest extends TestCase
                 'links' => [
                     'user' => 1001,
                     'learning_outcome' => 2001,
-                    'alignment' => 'assignment_123'
-                ]
+                    'alignment' => 'assignment_123',
+                ],
             ],
             [
                 'id' => 2,
@@ -50,9 +52,9 @@ class OutcomeResultTest extends TestCase
                 'links' => [
                     'user' => 1002,
                     'learning_outcome' => 2001,
-                    'alignment' => 'quiz_456'
-                ]
-            ]
+                    'alignment' => 'quiz_456',
+                ],
+            ],
         ];
 
         $this->mockStream->method('getContents')
@@ -84,9 +86,9 @@ class OutcomeResultTest extends TestCase
                 'score' => 4.5,
                 'links' => [
                     'user' => 1001,
-                    'learning_outcome' => 2002
-                ]
-            ]
+                    'learning_outcome' => 2002,
+                ],
+            ],
         ];
 
         $this->mockStream->method('getContents')
@@ -124,13 +126,13 @@ class OutcomeResultTest extends TestCase
                 'outcome' => [
                     'id' => 2001,
                     'title' => 'Critical Thinking',
-                    'mastery_points' => 3
+                    'mastery_points' => 3,
                 ],
                 'alignment' => [
                     'id' => 'assignment_789',
-                    'name' => 'Essay Assignment'
-                ]
-            ]
+                    'name' => 'Essay Assignment',
+                ],
+            ],
         ];
 
         $this->mockStream->method('getContents')
@@ -145,14 +147,14 @@ class OutcomeResultTest extends TestCase
                 'courses/123/outcome_results',
                 $this->callback(function ($options) {
                     return isset($options['query']) &&
-                           in_array('outcomes', $options['query']['include']) &&
-                           in_array('alignments', $options['query']['include']);
+                           in_array('outcomes', $options['query']['include'], true) &&
+                           in_array('alignments', $options['query']['include'], true);
                 })
             )
             ->willReturn($this->mockResponse);
 
         $params = [
-            'include' => ['outcomes', 'alignments']
+            'include' => ['outcomes', 'alignments'],
         ];
 
         $results = OutcomeResult::fetchByContext('courses', 123, $params);
@@ -188,7 +190,7 @@ class OutcomeResultTest extends TestCase
     {
         $responseData = [
             ['id' => 1, 'score' => 3.5],
-            ['id' => 2, 'score' => 4.0]
+            ['id' => 2, 'score' => 4.0],
         ];
 
         $this->mockStream->method('getContents')
@@ -200,7 +202,7 @@ class OutcomeResultTest extends TestCase
         $this->mockResponse->method('getHeader')
             ->with('Link')
             ->willReturn([
-                '<https://canvas.example.com/api/v1/courses/123/outcome_results?page=2>; rel="next"'
+                '<https://canvas.example.com/api/v1/courses/123/outcome_results?page=2>; rel="next"',
             ]);
 
         $mockPaginatedResponse = $this->getMockBuilder(PaginatedResponse::class)
@@ -236,7 +238,7 @@ class OutcomeResultTest extends TestCase
     public function testSupportsMultipleContextTypes(): void
     {
         $contexts = ['courses', 'users'];
-        
+
         $this->mockStream->method('getContents')
             ->willReturn(json_encode([]));
 
@@ -247,6 +249,7 @@ class OutcomeResultTest extends TestCase
             ->method('get')
             ->willReturnCallback(function ($endpoint) {
                 $this->assertMatchesRegularExpression('/^(courses|users)\/123\/outcome_results$/', $endpoint);
+
                 return $this->mockResponse;
             });
 

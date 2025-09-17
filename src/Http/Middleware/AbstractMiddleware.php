@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Http\Middleware;
 
 /**
@@ -43,6 +45,7 @@ abstract class AbstractMiddleware implements MiddlewareInterface
      *
      * @param string $key
      * @param mixed $default
+     *
      * @return mixed
      */
     protected function getConfig(string $key, $default = null)

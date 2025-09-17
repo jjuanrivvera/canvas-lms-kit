@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Objects;
 
 /**
@@ -59,6 +61,7 @@ class TodoItem
 
     /**
      * Constructor
+     *
      * @param array<string, mixed> $data
      */
     public function __construct(array $data = [])
@@ -73,6 +76,7 @@ class TodoItem
 
     /**
      * Check if this is a grading todo
+     *
      * @return bool
      */
     public function isGrading(): bool
@@ -82,6 +86,7 @@ class TodoItem
 
     /**
      * Check if this is a submitting todo
+     *
      * @return bool
      */
     public function isSubmitting(): bool
@@ -91,6 +96,7 @@ class TodoItem
 
     /**
      * Convert to array
+     *
      * @return array<string, mixed>
      */
     public function toArray(): array

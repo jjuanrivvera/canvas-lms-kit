@@ -36,6 +36,7 @@ class Term
 
     /**
      * Constructor
+     *
      * @param mixed[] $data
      */
     public function __construct(array $data = [])
@@ -146,6 +147,7 @@ class Term
 
     /**
      * Convert to array
+     *
      * @return mixed[]
      */
     public function toArray(): array

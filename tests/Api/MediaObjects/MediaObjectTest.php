@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace Tests\Api\MediaObjects;
 
 use CanvasLMS\Api\MediaObjects\MediaObject;
-use CanvasLMS\Canvas;
 use CanvasLMS\Config;
 use CanvasLMS\Dto\MediaObjects\UpdateMediaObjectDTO;
 use CanvasLMS\Dto\MediaObjects\UpdateMediaTracksDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Objects\MediaTrack;
 use CanvasLMS\Objects\MediaSource;
-use PHPUnit\Framework\TestCase;
+use CanvasLMS\Objects\MediaTrack;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Api\MediaObjects\MediaObject
@@ -27,11 +26,11 @@ class MediaObjectTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Set up Config
         Config::setBaseUrl('https://canvas.example.com/');
         Config::setApiKey('test-api-key');
-        
+
         // Reset HTTP client for each test
         MediaObject::setApiClient($this->createMock(HttpClientInterface::class));
     }
@@ -68,9 +67,9 @@ class MediaObjectTest extends TestCase
                     'media_id' => 'm-test123',
                     'media_type' => 'video',
                     'media_tracks' => [],
-                    'media_sources' => []
-                ]
-            ]
+                    'media_sources' => [],
+                ],
+            ],
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -98,7 +97,7 @@ class MediaObjectTest extends TestCase
         $params = [
             'sort' => 'title',
             'order' => 'asc',
-            'exclude[]' => ['sources', 'tracks']
+            'exclude[]' => ['sources', 'tracks'],
         ];
 
         $mockData = ['media_objects' => []];
@@ -128,9 +127,9 @@ class MediaObjectTest extends TestCase
                     'can_add_captions' => true,
                     'title' => 'Attachment Video',
                     'media_id' => 'm-attach123',
-                    'media_type' => 'video'
-                ]
-            ]
+                    'media_type' => 'video',
+                ],
+            ],
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -159,9 +158,9 @@ class MediaObjectTest extends TestCase
                 [
                     'title' => 'Course Video',
                     'media_id' => 'm-course123',
-                    'media_type' => 'video'
-                ]
-            ]
+                    'media_type' => 'video',
+                ],
+            ],
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -189,9 +188,9 @@ class MediaObjectTest extends TestCase
             'media_objects' => [
                 [
                     'title' => 'Course Attachment',
-                    'media_id' => 'm-courseattach123'
-                ]
-            ]
+                    'media_id' => 'm-courseattach123',
+                ],
+            ],
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -219,9 +218,9 @@ class MediaObjectTest extends TestCase
             'media_objects' => [
                 [
                     'title' => 'Group Video',
-                    'media_id' => 'm-group456'
-                ]
-            ]
+                    'media_id' => 'm-group456',
+                ],
+            ],
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -249,9 +248,9 @@ class MediaObjectTest extends TestCase
             'media_objects' => [
                 [
                     'title' => 'Group Attachment',
-                    'media_id' => 'm-groupattach456'
-                ]
-            ]
+                    'media_id' => 'm-groupattach456',
+                ],
+            ],
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -280,7 +279,6 @@ class MediaObjectTest extends TestCase
         MediaObject::find(123);
     }
 
-
     /**
      * Test updating a media object
      */
@@ -288,14 +286,14 @@ class MediaObjectTest extends TestCase
     {
         $mediaObject = new MediaObject([
             'media_id' => 'm-test123',
-            'title' => 'Old Title'
+            'title' => 'Old Title',
         ]);
 
         $updateData = ['userEnteredTitle' => 'New Title'];
         $responseData = [
             'user_entered_title' => 'New Title',
             'title' => 'New Title',
-            'media_id' => 'm-test123'
+            'media_id' => 'm-test123',
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -322,14 +320,14 @@ class MediaObjectTest extends TestCase
     public function testUpdateWithDTO(): void
     {
         $mediaObject = new MediaObject([
-            'media_id' => 'm-test123'
+            'media_id' => 'm-test123',
         ]);
 
         $dto = new UpdateMediaObjectDTO('New Title via DTO');
         $responseData = [
             'user_entered_title' => 'New Title via DTO',
             'title' => 'New Title via DTO',
-            'media_id' => 'm-test123'
+            'media_id' => 'm-test123',
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -372,7 +370,7 @@ class MediaObjectTest extends TestCase
         $updateData = ['userEnteredTitle' => 'Updated via Attachment'];
         $responseData = [
             'user_entered_title' => 'Updated via Attachment',
-            'title' => 'Updated via Attachment'
+            'title' => 'Updated via Attachment',
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -405,13 +403,13 @@ class MediaObjectTest extends TestCase
                 'media_object_id' => 'm-test123',
                 'kind' => 'subtitles',
                 'locale' => 'en',
-                'content' => 'Test content'
+                'content' => 'Test content',
             ],
             [
                 'id' => 2,
                 'kind' => 'captions',
-                'locale' => 'es'
-            ]
+                'locale' => 'es',
+            ],
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -456,8 +454,8 @@ class MediaObjectTest extends TestCase
             [
                 'id' => 3,
                 'kind' => 'descriptions',
-                'locale' => 'fr'
-            ]
+                'locale' => 'fr',
+            ],
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -484,7 +482,7 @@ class MediaObjectTest extends TestCase
 
         $tracksToUpdate = [
             ['locale' => 'en', 'content' => 'English subtitles', 'kind' => 'subtitles'],
-            ['locale' => 'es', 'content' => 'Subtítulos en español', 'kind' => 'subtitles']
+            ['locale' => 'es', 'content' => 'Subtítulos en español', 'kind' => 'subtitles'],
         ];
 
         $responseData = [
@@ -492,14 +490,14 @@ class MediaObjectTest extends TestCase
                 'id' => 10,
                 'locale' => 'en',
                 'kind' => 'subtitles',
-                'content' => 'English subtitles'
+                'content' => 'English subtitles',
             ],
             [
                 'id' => 11,
                 'locale' => 'es',
                 'kind' => 'subtitles',
-                'content' => 'Subtítulos en español'
-            ]
+                'content' => 'Subtítulos en español',
+            ],
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -509,7 +507,7 @@ class MediaObjectTest extends TestCase
                 '/media_objects/m-test123/media_tracks',
                 [
                     'json' => $tracksToUpdate,
-                    'query' => []
+                    'query' => [],
                 ]
             )
             ->willReturn(new Response(200, [], json_encode($responseData)));
@@ -534,15 +532,15 @@ class MediaObjectTest extends TestCase
         $mediaObject = new MediaObject(['media_id' => 'm-test123']);
 
         $dto = new UpdateMediaTracksDTO([
-            ['locale' => 'de', 'content' => 'Deutsche Untertitel', 'kind' => 'subtitles']
+            ['locale' => 'de', 'content' => 'Deutsche Untertitel', 'kind' => 'subtitles'],
         ]);
 
         $responseData = [
             [
                 'id' => 12,
                 'locale' => 'de',
-                'kind' => 'subtitles'
-            ]
+                'kind' => 'subtitles',
+            ],
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -552,7 +550,7 @@ class MediaObjectTest extends TestCase
                 '/media_objects/m-test123/media_tracks',
                 [
                     'json' => $dto->toArray(),
-                    'query' => []
+                    'query' => [],
                 ]
             )
             ->willReturn(new Response(200, [], json_encode($responseData)));
@@ -588,15 +586,15 @@ class MediaObjectTest extends TestCase
         $attachmentId = 555;
 
         $tracksToUpdate = [
-            ['locale' => 'ja', 'kind' => 'captions']
+            ['locale' => 'ja', 'kind' => 'captions'],
         ];
 
         $responseData = [
             [
                 'id' => 13,
                 'locale' => 'ja',
-                'kind' => 'captions'
-            ]
+                'kind' => 'captions',
+            ],
         ];
 
         $mockClient = $this->createMock(HttpClientInterface::class);
@@ -606,7 +604,7 @@ class MediaObjectTest extends TestCase
                 "/media_attachments/{$attachmentId}/media_tracks",
                 [
                     'json' => $tracksToUpdate,
-                    'query' => []
+                    'query' => [],
                 ]
             )
             ->willReturn(new Response(200, [], json_encode($responseData)));
@@ -629,8 +627,8 @@ class MediaObjectTest extends TestCase
             'media_id' => 'm-test123',
             'media_tracks' => [
                 ['id' => 1, 'locale' => 'en', 'kind' => 'subtitles'],
-                ['id' => 2, 'locale' => 'es', 'kind' => 'captions']
-            ]
+                ['id' => 2, 'locale' => 'es', 'kind' => 'captions'],
+            ],
         ];
 
         $mediaObject = new MediaObject($data);
@@ -653,15 +651,15 @@ class MediaObjectTest extends TestCase
                     'height' => '720',
                     'width' => '1280',
                     'content_type' => 'video/mp4',
-                    'url' => 'https://example.com/video.mp4'
+                    'url' => 'https://example.com/video.mp4',
                 ],
                 [
                     'height' => '480',
                     'width' => '854',
                     'content_type' => 'video/webm',
-                    'url' => 'https://example.com/video.webm'
-                ]
-            ]
+                    'url' => 'https://example.com/video.webm',
+                ],
+            ],
         ];
 
         $mediaObject = new MediaObject($data);
@@ -685,11 +683,11 @@ class MediaObjectTest extends TestCase
             'media_id' => 'm-test123',
             'media_type' => 'video',
             'media_tracks' => [
-                ['id' => 1, 'locale' => 'en']
+                ['id' => 1, 'locale' => 'en'],
             ],
             'media_sources' => [
-                ['height' => '720', 'width' => '1280']
-            ]
+                ['height' => '720', 'width' => '1280'],
+            ],
         ]);
 
         $array = $mediaObject->toArray();

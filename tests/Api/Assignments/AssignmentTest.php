@@ -1,16 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Assignments;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Assignments\Assignment;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Dto\Assignments\CreateAssignmentDTO;
 use CanvasLMS\Dto\Assignments\UpdateAssignmentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -20,6 +20,7 @@ use Psr\Http\Message\StreamInterface;
 class AssignmentTest extends TestCase
 {
     private HttpClientInterface $httpClientMock;
+
     private Course $course;
 
     protected function setUp(): void
@@ -75,7 +76,7 @@ class AssignmentTest extends TestCase
             'due_at' => '2024-12-31T23:59:59Z',
             'published' => true,
             'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-01T00:00:00Z'
+            'updated_at' => '2024-01-01T00:00:00Z',
         ];
 
         $assignment = new Assignment($data);
@@ -185,7 +186,7 @@ class AssignmentTest extends TestCase
             'name' => 'Test Assignment',
             'course_id' => 123,
             'points_possible' => 100.0,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -222,15 +223,15 @@ class AssignmentTest extends TestCase
                 'name' => 'Assignment 1',
                 'course_id' => 123,
                 'points_possible' => 100.0,
-                'published' => true
+                'published' => true,
             ],
             [
                 'id' => 2,
                 'name' => 'Assignment 2',
                 'course_id' => 123,
                 'points_possible' => 50.0,
-                'published' => false
-            ]
+                'published' => false,
+            ],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -297,7 +298,7 @@ class AssignmentTest extends TestCase
             'name' => 'New Assignment',
             'description' => 'New description',
             'points_possible' => 75.0,
-            'published' => true
+            'published' => true,
         ];
 
         $responseData = [
@@ -306,7 +307,7 @@ class AssignmentTest extends TestCase
             'course_id' => 123,
             'description' => 'New description',
             'points_possible' => 75.0,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -340,7 +341,7 @@ class AssignmentTest extends TestCase
             'name' => 'New Assignment',
             'description' => 'New description',
             'points_possible' => 75.0,
-            'published' => true
+            'published' => true,
         ]);
 
         $responseData = [
@@ -349,7 +350,7 @@ class AssignmentTest extends TestCase
             'course_id' => 123,
             'description' => 'New description',
             'points_possible' => 75.0,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -380,7 +381,7 @@ class AssignmentTest extends TestCase
         $assignmentId = 1;
         $updateData = [
             'name' => 'Updated Assignment',
-            'points_possible' => 90.0
+            'points_possible' => 90.0,
         ];
 
         $responseData = [
@@ -388,7 +389,7 @@ class AssignmentTest extends TestCase
             'name' => 'Updated Assignment',
             'course_id' => 123,
             'points_possible' => 90.0,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -420,7 +421,7 @@ class AssignmentTest extends TestCase
         $assignmentId = 1;
         $updateDto = new UpdateAssignmentDTO([
             'name' => 'Updated Assignment',
-            'points_possible' => 90.0
+            'points_possible' => 90.0,
         ]);
 
         $responseData = [
@@ -428,7 +429,7 @@ class AssignmentTest extends TestCase
             'name' => 'Updated Assignment',
             'course_id' => 123,
             'points_possible' => 90.0,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -465,7 +466,7 @@ class AssignmentTest extends TestCase
             'name' => 'Test Assignment',
             'course_id' => 123,
             'points_possible' => 100.0,
-            'published' => false
+            'published' => false,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -498,7 +499,7 @@ class AssignmentTest extends TestCase
             'id' => 1,
             'name' => 'Test Assignment',
             'course_id' => 123,
-            'points_possible' => 100.0
+            'points_possible' => 100.0,
         ]);
 
         $assignment->setName('Updated Assignment');
@@ -509,7 +510,7 @@ class AssignmentTest extends TestCase
             'name' => 'Updated Assignment',
             'course_id' => 123,
             'points_possible' => 125.0,
-            'published' => false
+            'published' => false,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -615,7 +616,7 @@ class AssignmentTest extends TestCase
             'name' => 'Duplicated Assignment',
             'course_id' => 123,
             'points_possible' => 100.0,
-            'published' => false
+            'published' => false,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -753,7 +754,7 @@ class AssignmentTest extends TestCase
             'lock_at' => '2025-01-01T00:00:00Z',
             'unlock_at' => '2024-01-01T00:00:00Z',
             'published' => true,
-            'assignment_group_id' => 456
+            'assignment_group_id' => 456,
         ]);
 
         $result = $assignment->toDtoArray();
@@ -768,7 +769,7 @@ class AssignmentTest extends TestCase
             'lock_at' => '2025-01-01T00:00:00Z',
             'unlock_at' => '2024-01-01T00:00:00Z',
             'published' => true,
-            'assignment_group_id' => 456
+            'assignment_group_id' => 456,
         ];
 
         $this->assertEquals($expected, $result);

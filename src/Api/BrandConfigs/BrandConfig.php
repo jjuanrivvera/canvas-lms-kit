@@ -29,8 +29,9 @@ class BrandConfig
      *
      * API Endpoint: GET /api/v1/brand_variables
      *
-     * @return array<string, mixed> The brand configuration variables including colors, fonts, and logos
      * @throws CanvasApiException If the API request fails
+     *
+     * @return array<string, mixed> The brand configuration variables including colors, fonts, and logos
      *
      * @example
      * ```php

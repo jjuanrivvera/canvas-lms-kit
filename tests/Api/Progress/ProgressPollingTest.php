@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace Tests\Api\Progress;
 
-use PHPUnit\Framework\TestCase;
+use CanvasLMS\Api\Progress\Progress;
+use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Interfaces\HttpClientInterface;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use CanvasLMS\Api\Progress\Progress;
-use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Exceptions\CanvasApiException;
 
 class ProgressPollingTest extends TestCase
 {
     private HttpClientInterface|MockObject $mockHttpClient;
+
     private ResponseInterface|MockObject $mockResponse;
+
     private StreamInterface|MockObject $mockStream;
 
     protected function setUp(): void
@@ -41,7 +43,7 @@ class ProgressPollingTest extends TestCase
         $responses = [
             ['id' => 123, 'workflow_state' => 'running', 'completion' => 30],
             ['id' => 123, 'workflow_state' => 'running', 'completion' => 60],
-            ['id' => 123, 'workflow_state' => 'completed', 'completion' => 100, 'results' => ['success' => true]]
+            ['id' => 123, 'workflow_state' => 'completed', 'completion' => 100, 'results' => ['success' => true]],
         ];
 
         $this->mockStream->method('getContents')->willReturnOnConsecutiveCalls(
@@ -65,7 +67,7 @@ class ProgressPollingTest extends TestCase
         // Mock progression: running -> failed
         $responses = [
             ['id' => 123, 'workflow_state' => 'running', 'completion' => 30],
-            ['id' => 123, 'workflow_state' => 'failed', 'completion' => 30, 'message' => 'Connection timeout']
+            ['id' => 123, 'workflow_state' => 'failed', 'completion' => 30, 'message' => 'Connection timeout'],
         ];
 
         $this->mockStream->method('getContents')->willReturnOnConsecutiveCalls(
@@ -86,7 +88,7 @@ class ProgressPollingTest extends TestCase
 
         // Mock continuous running state (never completes)
         $runningResponse = ['id' => 123, 'workflow_state' => 'running', 'completion' => 30];
-        
+
         $this->mockStream->method('getContents')->willReturn(json_encode($runningResponse));
         $this->mockResponse->method('getBody')->willReturn($this->mockStream);
         $this->mockHttpClient->method('get')->with('/progress/123')->willReturn($this->mockResponse);
@@ -100,10 +102,10 @@ class ProgressPollingTest extends TestCase
     public function testWaitForCompletionAlreadyCompleted(): void
     {
         $progress = new Progress([
-            'id' => 123, 
-            'workflow_state' => 'completed', 
+            'id' => 123,
+            'workflow_state' => 'completed',
             'completion' => 100,
-            'results' => ['data' => 'test']
+            'results' => ['data' => 'test'],
         ]);
 
         // Should return immediately without API calls
@@ -116,9 +118,9 @@ class ProgressPollingTest extends TestCase
     public function testWaitForCompletionAlreadyFailed(): void
     {
         $progress = new Progress([
-            'id' => 123, 
-            'workflow_state' => 'failed', 
-            'message' => 'Previously failed'
+            'id' => 123,
+            'workflow_state' => 'failed',
+            'message' => 'Previously failed',
         ]);
 
         $this->expectException(CanvasApiException::class);
@@ -133,7 +135,7 @@ class ProgressPollingTest extends TestCase
         $findResponse = ['id' => 123, 'workflow_state' => 'queued', 'completion' => 0];
         $pollingResponses = [
             ['id' => 123, 'workflow_state' => 'running', 'completion' => 50],
-            ['id' => 123, 'workflow_state' => 'completed', 'completion' => 100]
+            ['id' => 123, 'workflow_state' => 'completed', 'completion' => 100],
         ];
 
         $this->mockStream->method('getContents')->willReturnOnConsecutiveCalls(
@@ -158,10 +160,10 @@ class ProgressPollingTest extends TestCase
         // Create a mock that tracks sleep calls to verify backoff behavior
         $startTime = time();
         $sleepTimes = [];
-        
+
         // Mock running responses for multiple iterations
         $runningResponse = ['id' => 123, 'workflow_state' => 'running', 'completion' => 30];
-        
+
         // Override sleep function to track calls (this is conceptual - actual implementation would need more setup)
         $this->mockStream->method('getContents')->willReturn(json_encode($runningResponse));
         $this->mockResponse->method('getBody')->willReturn($this->mockStream);
@@ -185,7 +187,7 @@ class ProgressPollingTest extends TestCase
             ['id' => 123, 'workflow_state' => 'running', 'completion' => 25],
             ['id' => 123, 'workflow_state' => 'running', 'completion' => 50],
             ['id' => 123, 'workflow_state' => 'running', 'completion' => 75],
-            ['id' => 123, 'workflow_state' => 'completed', 'completion' => 100, 'results' => ['final' => 'result']]
+            ['id' => 123, 'workflow_state' => 'completed', 'completion' => 100, 'results' => ['final' => 'result']],
         ];
 
         $this->mockStream->method('getContents')->willReturnOnConsecutiveCalls(
@@ -208,10 +210,10 @@ class ProgressPollingTest extends TestCase
     {
         // Test failed with error message
         $failedProgress = new Progress(['id' => 123, 'workflow_state' => 'running']);
-        
+
         $responses = [
             ['id' => 123, 'workflow_state' => 'running', 'completion' => 50],
-            ['id' => 123, 'workflow_state' => 'failed', 'completion' => 50, 'message' => 'Disk space full']
+            ['id' => 123, 'workflow_state' => 'failed', 'completion' => 50, 'message' => 'Disk space full'],
         ];
 
         $this->mockStream->method('getContents')->willReturnOnConsecutiveCalls(
@@ -232,7 +234,7 @@ class ProgressPollingTest extends TestCase
 
         $responses = [
             ['id' => 123, 'workflow_state' => 'running', 'completion' => 50],
-            ['id' => 123, 'workflow_state' => 'failed', 'completion' => 50] // No message field
+            ['id' => 123, 'workflow_state' => 'failed', 'completion' => 50], // No message field
         ];
 
         $this->mockStream->method('getContents')->willReturnOnConsecutiveCalls(

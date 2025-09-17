@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\Sections;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\Sections\Section;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Enrollments\Enrollment;
-use CanvasLMS\Api\Users\User;
+use CanvasLMS\Api\Sections\Section;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 class SectionRelationshipTest extends TestCase
 {
     private HttpClientInterface $mockHttpClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
+
     private Course $mockCourse;
 
     protected function setUp(): void
@@ -70,21 +72,21 @@ class SectionRelationshipTest extends TestCase
                 'user_id' => 100,
                 'section_id' => 456,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
+                'enrollment_state' => 'active',
             ],
             [
                 'id' => 2,
                 'user_id' => 101,
                 'section_id' => 456,
                 'type' => 'TeacherEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($enrollmentsData));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode($enrollmentsData));
 
@@ -114,13 +116,13 @@ class SectionRelationshipTest extends TestCase
 
         // Mock response data
         $enrollmentsData = [
-            ['id' => 1, 'user_id' => 100, 'section_id' => 456]
+            ['id' => 1, 'user_id' => 100, 'section_id' => 456],
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($enrollmentsData));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode($enrollmentsData));
 
@@ -154,21 +156,21 @@ class SectionRelationshipTest extends TestCase
                 'user_id' => 100,
                 'section_id' => 456,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
+                'enrollment_state' => 'active',
             ],
             [
                 'id' => 2,
                 'user_id' => 101,
                 'section_id' => 456,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($enrollmentsData));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode($enrollmentsData));
 
@@ -179,8 +181,8 @@ class SectionRelationshipTest extends TestCase
             ->method('get')
             ->with('sections/456/enrollments', [
                 'query' => [
-                    'type[]' => ['StudentEnrollment']
-                ]
+                    'type[]' => ['StudentEnrollment'],
+                ],
             ])
             ->willReturn($this->mockResponse);
 
@@ -203,7 +205,7 @@ class SectionRelationshipTest extends TestCase
         // Mock empty enrollments response
         $this->mockStream->method('getContents')
             ->willReturn(json_encode([]));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode([]));
 

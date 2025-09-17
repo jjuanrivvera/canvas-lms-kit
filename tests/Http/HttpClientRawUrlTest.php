@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Tests\Http;
 
 use CanvasLMS\Config;
@@ -17,23 +19,26 @@ use Psr\Http\Message\StreamInterface;
 class HttpClientRawUrlTest extends TestCase
 {
     private HttpClient $httpClient;
+
     private ClientInterface $mockGuzzleClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Set up Config
         Config::setBaseUrl('https://canvas.example.com/');
         Config::setApiKey('test-api-key');
-        
+
         // Create mocks
         $this->mockGuzzleClient = $this->createMock(ClientInterface::class);
         $this->mockResponse = $this->createMock(ResponseInterface::class);
         $this->mockStream = $this->createMock(StreamInterface::class);
-        
+
         // Create HttpClient with mock Guzzle client
         $this->httpClient = new HttpClient($this->mockGuzzleClient);
     }
@@ -50,13 +55,13 @@ class HttpClientRawUrlTest extends TestCase
     public function testRawRequestWithAbsoluteUrl(): void
     {
         $absoluteUrl = 'https://canvas.example.com/api/v1/courses?page=2';
-        
+
         $this->mockStream->method('getContents')
             ->willReturn('{"courses": []}');
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockGuzzleClient->expects($this->once())
             ->method('request')
             ->with(
@@ -68,9 +73,9 @@ class HttpClientRawUrlTest extends TestCase
                 })
             )
             ->willReturn($this->mockResponse);
-        
+
         $response = $this->httpClient->rawRequest($absoluteUrl);
-        
+
         $this->assertSame($this->mockResponse, $response);
     }
 
@@ -78,13 +83,13 @@ class HttpClientRawUrlTest extends TestCase
     {
         $relativeUrl = '/api/v1/courses';
         $expectedFullUrl = 'https://canvas.example.com/api/v1/courses';
-        
+
         $this->mockStream->method('getContents')
             ->willReturn('{"courses": []}');
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockGuzzleClient->expects($this->once())
             ->method('request')
             ->with(
@@ -96,24 +101,25 @@ class HttpClientRawUrlTest extends TestCase
                 })
             )
             ->willReturn($this->mockResponse);
-        
+
         $response = $this->httpClient->rawRequest($relativeUrl);
-        
+
         $this->assertSame($this->mockResponse, $response);
     }
 
     public function testRawRequestWithDifferentMethods(): void
     {
         $methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
-        
+
         $this->mockGuzzleClient->expects($this->exactly(count($methods)))
             ->method('request')
-            ->willReturnCallback(function($method, $url, $options) use ($methods) {
+            ->willReturnCallback(function ($method, $url, $options) use ($methods) {
                 $this->assertContains($method, $methods);
                 $this->assertEquals('https://canvas.example.com/api/v1/test', $url);
+
                 return $this->mockResponse;
             });
-        
+
         foreach ($methods as $method) {
             $response = $this->httpClient->rawRequest('/api/v1/test', $method);
             $this->assertSame($this->mockResponse, $response);
@@ -125,9 +131,9 @@ class HttpClientRawUrlTest extends TestCase
         $url = '/api/v1/courses';
         $options = [
             'query' => ['per_page' => 50],
-            'headers' => ['X-Custom-Header' => 'value']
+            'headers' => ['X-Custom-Header' => 'value'],
         ];
-        
+
         $this->mockGuzzleClient->expects($this->once())
             ->method('request')
             ->with(
@@ -142,60 +148,60 @@ class HttpClientRawUrlTest extends TestCase
                 })
             )
             ->willReturn($this->mockResponse);
-        
+
         $response = $this->httpClient->rawRequest($url, 'GET', $options);
-        
+
         $this->assertSame($this->mockResponse, $response);
     }
 
     public function testRawRequestWithInvalidDomainThrowsException(): void
     {
         $invalidUrl = 'https://evil.example.com/api/v1/courses';
-        
+
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('URL domain does not match configured Canvas instance');
-        
+
         $this->httpClient->rawRequest($invalidUrl);
     }
 
     public function testRawRequestWithHttpUrlThrowsExceptionForProduction(): void
     {
         $httpUrl = 'http://canvas.example.com/api/v1/courses';
-        
+
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Only HTTPS URLs are allowed for production Canvas instances');
-        
+
         $this->httpClient->rawRequest($httpUrl);
     }
 
     public function testRawRequestAllowsHttpForLocalhost(): void
     {
         Config::setBaseUrl('http://localhost:3000/');
-        
+
         $httpUrl = 'http://localhost:3000/api/v1/courses';
         $httpClient = new HttpClient($this->mockGuzzleClient);
-        
+
         $this->mockGuzzleClient->expects($this->once())
             ->method('request')
             ->with('GET', $httpUrl, $this->anything())
             ->willReturn($this->mockResponse);
-        
+
         $response = $httpClient->rawRequest($httpUrl);
-        
+
         $this->assertSame($this->mockResponse, $response);
     }
 
     public function testRawRequestAllowsSubdomains(): void
     {
         $subdomainUrl = 'https://test.canvas.example.com/api/v1/courses';
-        
+
         $this->mockGuzzleClient->expects($this->once())
             ->method('request')
             ->with('GET', $subdomainUrl, $this->anything())
             ->willReturn($this->mockResponse);
-        
+
         $response = $this->httpClient->rawRequest($subdomainUrl);
-        
+
         $this->assertSame($this->mockResponse, $response);
     }
 
@@ -203,7 +209,7 @@ class HttpClientRawUrlTest extends TestCase
     {
         $url = '/api/v1/public/courses';
         $options = ['skipAuth' => true];
-        
+
         $this->mockGuzzleClient->expects($this->once())
             ->method('request')
             ->with(
@@ -216,9 +222,9 @@ class HttpClientRawUrlTest extends TestCase
                 })
             )
             ->willReturn($this->mockResponse);
-        
+
         $response = $this->httpClient->rawRequest($url, 'GET', $options);
-        
+
         $this->assertSame($this->mockResponse, $response);
     }
 
@@ -227,10 +233,10 @@ class HttpClientRawUrlTest extends TestCase
         Config::useOAuth();
         Config::setOAuthToken('oauth-token-123');
         Config::setOAuthExpiresAt(time() + 3600);
-        
+
         $url = '/api/v1/courses';
         $httpClient = new HttpClient($this->mockGuzzleClient);
-        
+
         $this->mockGuzzleClient->expects($this->once())
             ->method('request')
             ->with(
@@ -242,36 +248,36 @@ class HttpClientRawUrlTest extends TestCase
                 })
             )
             ->willReturn($this->mockResponse);
-        
+
         $response = $httpClient->rawRequest($url);
-        
+
         $this->assertSame($this->mockResponse, $response);
     }
 
     public function testRawRequestHandlesApiErrors(): void
     {
         $url = '/api/v1/courses/999';
-        
+
         $mockRequest = $this->createMock(RequestInterface::class);
         $mockErrorResponse = $this->createMock(ResponseInterface::class);
         $mockErrorStream = $this->createMock(StreamInterface::class);
-        
+
         $mockErrorStream->method('getContents')
             ->willReturn('{"errors": [{"message": "Course not found"}]}');
-        
+
         $mockErrorResponse->method('getBody')
             ->willReturn($mockErrorStream);
-        
+
         $exception = new RequestException(
             'Not Found',
             $mockRequest,
             $mockErrorResponse
         );
-        
+
         $this->mockGuzzleClient->expects($this->once())
             ->method('request')
             ->willThrowException($exception);
-        
+
         try {
             $this->httpClient->rawRequest($url);
             $this->fail('Expected CanvasApiException was not thrown');
@@ -287,11 +293,11 @@ class HttpClientRawUrlTest extends TestCase
         Config::setContext('test_no_api_key');
         Config::setBaseUrl('https://canvas.example.com/', 'test_no_api_key');
         // No API key set for this context
-        
+
         $httpClient = new HttpClient($this->mockGuzzleClient);
-        
+
         $this->expectException(MissingApiKeyException::class);
-        
+
         $httpClient->rawRequest('/api/v1/courses');
     }
 
@@ -301,11 +307,11 @@ class HttpClientRawUrlTest extends TestCase
         Config::setContext('test_no_base_url');
         Config::setApiKey('test-api-key', 'test_no_base_url');
         // No base URL set for this context
-        
+
         $httpClient = new HttpClient($this->mockGuzzleClient);
-        
+
         $this->expectException(MissingBaseUrlException::class);
-        
+
         $httpClient->rawRequest('/api/v1/courses');
     }
 
@@ -313,14 +319,14 @@ class HttpClientRawUrlTest extends TestCase
     {
         $url = '/api/v1/courses/123/custom_endpoint';
         $expectedUrl = 'https://canvas.example.com/api/v1/courses/123/custom_endpoint';
-        
+
         $this->mockGuzzleClient->expects($this->once())
             ->method('request')
             ->with('GET', $expectedUrl, $this->anything())
             ->willReturn($this->mockResponse);
-        
+
         $response = $this->httpClient->rawRequest($url);
-        
+
         $this->assertSame($this->mockResponse, $response);
     }
 
@@ -328,23 +334,23 @@ class HttpClientRawUrlTest extends TestCase
     {
         $url = '/custom/analytics/endpoint';
         $expectedUrl = 'https://canvas.example.com/custom/analytics/endpoint';
-        
+
         $this->mockGuzzleClient->expects($this->once())
             ->method('request')
             ->with('GET', $expectedUrl, $this->anything())
             ->willReturn($this->mockResponse);
-        
+
         $response = $this->httpClient->rawRequest($url);
-        
+
         $this->assertSame($this->mockResponse, $response);
     }
 
     public function testRawRequestWithInvalidUrlFormat(): void
     {
         $invalidUrl = 'not-a-valid-url://invalid';
-        
+
         $this->expectException(CanvasApiException::class);
-        
+
         $this->httpClient->rawRequest($invalidUrl);
     }
 }

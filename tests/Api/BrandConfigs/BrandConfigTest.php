@@ -37,11 +37,11 @@ class BrandConfigTest extends TestCase
 
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockStream = $this->createMock(StreamInterface::class);
-        
+
         $mockStream->expects($this->once())
             ->method('getContents')
             ->willReturn(json_encode($expectedBrandVariables));
-        
+
         $mockResponse->expects($this->once())
             ->method('getBody')
             ->willReturn($mockStream);
@@ -73,11 +73,11 @@ class BrandConfigTest extends TestCase
 
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockStream = $this->createMock(StreamInterface::class);
-        
+
         $mockStream->expects($this->once())
             ->method('getContents')
             ->willReturn(json_encode($brandVariables));
-        
+
         $mockResponse->expects($this->once())
             ->method('getBody')
             ->willReturn($mockStream);
@@ -105,11 +105,11 @@ class BrandConfigTest extends TestCase
 
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockStream = $this->createMock(StreamInterface::class);
-        
+
         $mockStream->expects($this->once())
             ->method('getContents')
             ->willReturn(json_encode($brandVariables));
-        
+
         $mockResponse->expects($this->once())
             ->method('getBody')
             ->willReturn($mockStream);
@@ -132,11 +132,11 @@ class BrandConfigTest extends TestCase
         // Arrange
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockStream = $this->createMock(StreamInterface::class);
-        
+
         $mockStream->expects($this->once())
             ->method('getContents')
             ->willReturn('invalid json {');
-        
+
         $mockResponse->expects($this->once())
             ->method('getBody')
             ->willReturn($mockStream);
@@ -178,7 +178,7 @@ class BrandConfigTest extends TestCase
     {
         // Arrange
         $originalException = new CanvasApiException('Canvas API error');
-        
+
         $this->mockHttpClient
             ->expects($this->once())
             ->method('get')
@@ -203,23 +203,23 @@ class BrandConfigTest extends TestCase
             // Since BrandConfig uses a static method with internal HttpClient instantiation,
             // we simulate its behavior here for testing purposes
             $response = $this->mockHttpClient->get('/brand_variables');
-            
+
             // HttpClient returns ResponseInterface
             $body = $response->getBody()->getContents();
             $decoded = json_decode($body, true);
-            
+
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new CanvasApiException(
                     'Failed to decode brand variables JSON: ' . json_last_error_msg()
                 );
             }
-            
+
             return $decoded;
         } catch (\Exception $e) {
             if ($e instanceof CanvasApiException) {
                 throw $e;
             }
-            
+
             throw new CanvasApiException(
                 'Failed to retrieve brand variables: ' . $e->getMessage(),
                 0,

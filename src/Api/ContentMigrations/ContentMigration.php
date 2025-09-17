@@ -78,6 +78,7 @@ class ContentMigration extends AbstractBaseApi
 
     /**
      * Attachment api object for the uploaded file (may not be present for all migrations)
+     *
      * @var array<string, mixed>|null
      */
     public ?array $attachment = null;
@@ -109,12 +110,14 @@ class ContentMigration extends AbstractBaseApi
 
     /**
      * File uploading data for pre-processing
+     *
      * @var array<string, mixed>|null
      */
     public ?array $preAttachment = null;
 
     /**
      * Migration settings
+     *
      * @var array<string, mixed>|null
      */
     public ?array $settings = null;
@@ -126,18 +129,21 @@ class ContentMigration extends AbstractBaseApi
 
     /**
      * Error messages (if any)
+     *
      * @var array<string>|null
      */
     public ?array $errors = null;
 
     /**
      * Date shift options (if applicable)
+     *
      * @var array<string, mixed>|null
      */
     public ?array $dateShiftOptions = null;
 
     /**
      * Selection data for selective imports
+     *
      * @var array<string, mixed>|null
      */
     public ?array $selectData = null;
@@ -146,8 +152,10 @@ class ContentMigration extends AbstractBaseApi
      * Get a single content migration by ID (not supported - use findByContext instead)
      *
      * @param int $id Content migration ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -162,8 +170,10 @@ class ContentMigration extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses, groups, users)
      * @param int $contextId Context ID
      * @param int $id Content migration ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function findByContext(string $contextType, int $contextId, int $id): self
     {
@@ -180,14 +190,15 @@ class ContentMigration extends AbstractBaseApi
         return new self($data);
     }
 
-
     /**
      * Get the API endpoint for this resource
+     *
      * @return string
      */
     protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
+
         return sprintf('accounts/%d/content_migrations', $accountId);
     }
 
@@ -197,15 +208,18 @@ class ContentMigration extends AbstractBaseApi
      * @param string $contextType 'accounts', 'courses', 'groups', or 'users'
      * @param int $contextId Account, Course, Group, or User ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<ContentMigration>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<ContentMigration>
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
         $endpoint = sprintf('%s/%d/content_migrations', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
-        return array_map(fn($data) => new self($data), $allData);
+
+        return array_map(fn ($data) => new self($data), $allData);
     }
 
     /**
@@ -214,8 +228,10 @@ class ContentMigration extends AbstractBaseApi
      * @param string $contextType 'accounts', 'courses', 'groups', or 'users'
      * @param int $contextId Account, Course, Group, or User ID
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public static function fetchByContextPaginated(
         string $contextType,
@@ -229,12 +245,15 @@ class ContentMigration extends AbstractBaseApi
      * Create a new content migration in the default account context
      *
      * @param array<string, mixed>|CreateContentMigrationDTO $data Migration data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function create(array|CreateContentMigrationDTO $data): self
     {
         $accountId = Config::getAccountId();
+
         return self::createInContext('accounts', $accountId, $data);
     }
 
@@ -244,8 +263,10 @@ class ContentMigration extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses, groups, users)
      * @param int $contextId Context ID
      * @param array<string, mixed>|CreateContentMigrationDTO $data Migration data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function createInContext(
         string $contextType,
@@ -282,12 +303,15 @@ class ContentMigration extends AbstractBaseApi
      *
      * @param int $id Migration ID
      * @param array<string, mixed>|UpdateContentMigrationDTO $data Update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function update(int $id, array|UpdateContentMigrationDTO $data): self
     {
         $accountId = Config::getAccountId();
+
         return self::updateInContext('accounts', $accountId, $id, $data);
     }
 
@@ -298,8 +322,10 @@ class ContentMigration extends AbstractBaseApi
      * @param int $contextId Context ID
      * @param int $id Migration ID
      * @param array<string, mixed>|UpdateContentMigrationDTO $data Update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function updateInContext(
         string $contextType,
@@ -323,8 +349,9 @@ class ContentMigration extends AbstractBaseApi
     /**
      * Get the Progress object for this migration
      *
-     * @return Progress|null
      * @throws CanvasApiException
+     *
+     * @return Progress|null
      */
     public function getProgress(): ?Progress
     {
@@ -335,6 +362,7 @@ class ContentMigration extends AbstractBaseApi
         // Extract progress ID from URL
         if (preg_match('/progress\/(\d+)/', $this->progressUrl, $matches)) {
             $progressId = (int) $matches[1];
+
             return Progress::find($progressId);
         }
 
@@ -346,8 +374,10 @@ class ContentMigration extends AbstractBaseApi
      *
      * @param int $maxWaitSeconds Maximum time to wait in seconds (default: 300)
      * @param int $intervalSeconds Polling interval in seconds (default: 2)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function waitForCompletion(int $maxWaitSeconds = 300, int $intervalSeconds = 2): self
     {
@@ -384,6 +414,7 @@ class ContentMigration extends AbstractBaseApi
                     if ($progress->message) {
                         $this->errors = [$progress->message];
                     }
+
                     return $this;
                 }
             }
@@ -407,16 +438,19 @@ class ContentMigration extends AbstractBaseApi
     /**
      * Get current completion percentage
      *
-     * @return int|null Percentage (0-100) or null if not available
      * @throws CanvasApiException
+     *
+     * @return int|null Percentage (0-100) or null if not available
      */
     public function getCompletionPercentage(): ?int
     {
         $progress = $this->getProgress();
         if ($progress) {
             $progress->refresh();
+
             return $progress->completion;
         }
+
         return $this->progressPercentage;
     }
 
@@ -427,7 +461,7 @@ class ContentMigration extends AbstractBaseApi
      */
     public function isFinished(): bool
     {
-        return in_array($this->workflowState, [self::STATE_COMPLETED, self::STATE_FAILED]);
+        return in_array($this->workflowState, [self::STATE_COMPLETED, self::STATE_FAILED], true);
     }
 
     /**
@@ -436,8 +470,10 @@ class ContentMigration extends AbstractBaseApi
      * @param string $targetState The state to wait for
      * @param int $maxWaitSeconds Maximum time to wait in seconds (default: 300)
      * @param int $intervalSeconds Polling interval in seconds (default: 2)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function waitForState(string $targetState, int $maxWaitSeconds = 300, int $intervalSeconds = 2): self
     {
@@ -475,8 +511,9 @@ class ContentMigration extends AbstractBaseApi
     /**
      * Refresh the migration data from the API
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function refresh(): self
     {
@@ -526,8 +563,8 @@ class ContentMigration extends AbstractBaseApi
         return in_array($this->workflowState, [
             self::STATE_PRE_PROCESSING,
             self::STATE_PRE_PROCESSED,
-            self::STATE_RUNNING
-        ]);
+            self::STATE_RUNNING,
+        ], true);
     }
 
     /**
@@ -544,8 +581,10 @@ class ContentMigration extends AbstractBaseApi
      * Get migration issues
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<MigrationIssue>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MigrationIssue>
      */
     public function getMigrationIssues(array $params = []): array
     {
@@ -568,8 +607,10 @@ class ContentMigration extends AbstractBaseApi
      * Get selective import data
      *
      * @param string|null $type The type of content to enumerate
-     * @return array<mixed>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<mixed>
      */
     public function getSelectiveData(?string $type = null): array
     {
@@ -598,8 +639,10 @@ class ContentMigration extends AbstractBaseApi
      * Get asset ID mapping (course context only)
      *
      * @param int $courseId Course ID
-     * @return array<string, array<string, string>>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, array<string, string>>
      */
     public static function getAssetIdMapping(int $courseId, int $migrationId): array
     {
@@ -616,8 +659,10 @@ class ContentMigration extends AbstractBaseApi
      *
      * @param string $contextType Context type (accounts, courses, groups, users)
      * @param int $contextId Context ID
-     * @return array<Migrator>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<Migrator>
      */
     public static function getMigrators(string $contextType, int $contextId): array
     {
@@ -627,18 +672,20 @@ class ContentMigration extends AbstractBaseApi
         $response = self::$apiClient->get($endpoint);
         $data = self::parseJsonResponse($response);
 
-        return array_map(fn($item) => new Migrator($item), $data);
+        return array_map(fn ($item) => new Migrator($item), $data);
     }
 
     /**
      * List available migration systems in account context
      *
-     * @return array<Migrator>
      * @throws CanvasApiException
+     *
+     * @return array<Migrator>
      */
     public static function getAccountMigrators(): array
     {
         $accountId = Config::getAccountId();
+
         return self::getMigrators('accounts', $accountId);
     }
 
@@ -648,17 +695,19 @@ class ContentMigration extends AbstractBaseApi
      * @param array<string, mixed> $uploadParams Upload parameters from pre_attachment
      * @param string $filePath Path to the file to upload
      * @param resource|null &$fileResource Reference to store the file resource
-     * @return array<array<string, mixed>> Multipart data array
+     *
      * @throws CanvasApiException
+     *
+     * @return array<array<string, mixed>> Multipart data array
      */
-    private function buildMultipartData(array $uploadParams, string $filePath, &$fileResource): array
+    private function buildMultipartData(array $uploadParams, string $filePath, & $fileResource): array
     {
         $multipartData = [];
         // Add upload parameters
         foreach ($uploadParams as $key => $value) {
             $multipartData[] = [
                 'name' => $key,
-                'contents' => $value
+                'contents' => $value,
             ];
         }
 
@@ -672,7 +721,7 @@ class ContentMigration extends AbstractBaseApi
         $multipartData[] = [
             'name' => 'file',
             'contents' => $fileResource,
-            'filename' => basename($filePath)
+            'filename' => basename($filePath),
         ];
 
         return $multipartData;
@@ -685,8 +734,10 @@ class ContentMigration extends AbstractBaseApi
      * Should be called after create() if the migration has pre_attachment upload data.
      *
      * @param string $filePath Path to the file to upload
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function processFileUpload(string $filePath): self
     {
@@ -702,13 +753,14 @@ class ContentMigration extends AbstractBaseApi
         $uploadParams = $this->preAttachment['upload_params'] ?? [];
 
         $fileResource = null;
+
         try {
             // Build multipart data for upload
             $multipartData = $this->buildMultipartData($uploadParams, $filePath, $fileResource);
 
             self::checkApiClient();
             $uploadResponse = self::$apiClient->post($uploadUrl, [
-                'multipart' => $multipartData
+                'multipart' => $multipartData,
             ]);
 
             // Check for HTTP errors
@@ -761,6 +813,7 @@ class ContentMigration extends AbstractBaseApi
         if ($this->hasFileUploadError()) {
             return $this->preAttachment['message'] ?? 'Unknown upload error';
         }
+
         return null;
     }
 
@@ -770,16 +823,18 @@ class ContentMigration extends AbstractBaseApi
      * @param int $targetCourseId The course to copy content TO
      * @param int $sourceCourseId The course to copy content FROM
      * @param array<string, mixed> $options Additional options
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function createCourseCopy(int $targetCourseId, int $sourceCourseId, array $options = []): self
     {
         $data = array_merge($options, [
             'migration_type' => self::TYPE_COURSE_COPY,
             'settings' => array_merge($options['settings'] ?? [], [
-                'source_course_id' => $sourceCourseId
-            ])
+                'source_course_id' => $sourceCourseId,
+            ]),
         ]);
 
         return self::createInContext('courses', $targetCourseId, $data);
@@ -791,8 +846,10 @@ class ContentMigration extends AbstractBaseApi
      * @param int $courseId The course to import content TO
      * @param string $filePath Path to the .imscc file
      * @param array<string, mixed> $options Additional options
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function importCommonCartridge(int $courseId, string $filePath, array $options = []): self
     {
@@ -809,8 +866,8 @@ class ContentMigration extends AbstractBaseApi
             'migration_type' => self::TYPE_COMMON_CARTRIDGE,
             'pre_attachment' => [
                 'name' => basename($filePath),
-                'size' => $fileSize
-            ]
+                'size' => $fileSize,
+            ],
         ]);
 
         $migration = self::createInContext('courses', $courseId, $data);
@@ -829,8 +886,10 @@ class ContentMigration extends AbstractBaseApi
      * @param int $courseId The course to import content TO
      * @param string $filePath Path to the .zip file
      * @param array<string, mixed> $options Additional options
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function importZipFile(int $courseId, string $filePath, array $options = []): self
     {
@@ -847,8 +906,8 @@ class ContentMigration extends AbstractBaseApi
             'migration_type' => self::TYPE_ZIP_FILE,
             'pre_attachment' => [
                 'name' => basename($filePath),
-                'size' => $fileSize
-            ]
+                'size' => $fileSize,
+            ],
         ]);
 
         $migration = self::createInContext('courses', $courseId, $data);
@@ -868,8 +927,10 @@ class ContentMigration extends AbstractBaseApi
      * @param int $sourceCourseId The course to copy content FROM
      * @param array<string, array<string|int>> $selections Items to copy (e.g., ['assignments' => [1, 2, 3]])
      * @param array<string, mixed> $options Additional options
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function createSelectiveCourseCopy(
         int $targetCourseId,
@@ -880,9 +941,9 @@ class ContentMigration extends AbstractBaseApi
         $data = array_merge($options, [
             'migration_type' => self::TYPE_COURSE_COPY,
             'settings' => array_merge($options['settings'] ?? [], [
-                'source_course_id' => $sourceCourseId
+                'source_course_id' => $sourceCourseId,
             ]),
-            'select' => $selections
+            'select' => $selections,
         ]);
 
         return self::createInContext('courses', $targetCourseId, $data);
@@ -896,8 +957,10 @@ class ContentMigration extends AbstractBaseApi
      * @param string $oldStartDate Original course start date (Y-m-d)
      * @param string $newStartDate New course start date (Y-m-d)
      * @param array<string, mixed> $options Additional options
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function createCourseCopyWithDateShift(
         int $targetCourseId,
@@ -909,13 +972,13 @@ class ContentMigration extends AbstractBaseApi
         $data = array_merge($options, [
             'migration_type' => self::TYPE_COURSE_COPY,
             'settings' => array_merge($options['settings'] ?? [], [
-                'source_course_id' => $sourceCourseId
+                'source_course_id' => $sourceCourseId,
             ]),
             'date_shift_options' => array_merge($options['date_shift_options'] ?? [], [
                 'shift_dates' => true,
                 'old_start_date' => $oldStartDate,
-                'new_start_date' => $newStartDate
-            ])
+                'new_start_date' => $newStartDate,
+            ]),
         ]);
 
         return self::createInContext('courses', $targetCourseId, $data);

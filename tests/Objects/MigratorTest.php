@@ -15,7 +15,7 @@ class MigratorTest extends TestCase
             'type' => 'course_copy_importer',
             'requires_file_upload' => false,
             'name' => 'Course Copy',
-            'required_settings' => ['source_course_id']
+            'required_settings' => ['source_course_id'],
         ];
 
         $migrator = new Migrator($data);
@@ -32,7 +32,7 @@ class MigratorTest extends TestCase
             'type' => 'common_cartridge_importer',
             'requires_file_upload' => true,
             'name' => 'Common Cartridge',
-            'required_settings' => []
+            'required_settings' => [],
         ];
 
         $migrator = new Migrator($data);
@@ -47,7 +47,7 @@ class MigratorTest extends TestCase
     {
         $migrator = new Migrator([
             'type' => 'course_copy_importer',
-            'required_settings' => ['source_course_id', 'import_quizzes']
+            'required_settings' => ['source_course_id', 'import_quizzes'],
         ]);
 
         $this->assertTrue($migrator->requiresSetting('source_course_id'));
@@ -63,13 +63,13 @@ class MigratorTest extends TestCase
     {
         $fileMigrator = new Migrator([
             'type' => 'common_cartridge_importer',
-            'requires_file_upload' => true
+            'requires_file_upload' => true,
         ]);
         $this->assertTrue($fileMigrator->isFileBased());
 
         $nonFileMigrator = new Migrator([
             'type' => 'course_copy_importer',
-            'requires_file_upload' => false
+            'requires_file_upload' => false,
         ]);
         $this->assertFalse($nonFileMigrator->isFileBased());
 
@@ -134,7 +134,7 @@ class MigratorTest extends TestCase
         $data = [
             'type' => 'test_importer',
             'unknown_property' => 'should be ignored',
-            'another_unknown' => 123
+            'another_unknown' => 123,
         ];
 
         $migrator = new Migrator($data);

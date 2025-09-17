@@ -17,7 +17,7 @@ class CreateDeveloperKeyDTOTest extends TestCase
             'iconUrl' => 'https://example.com/icon.png',
             'notes' => 'This is a test key',
             'vendorCode' => 'TEST',
-            'visible' => true
+            'visible' => true,
         ];
 
         $dto = CreateDeveloperKeyDTO::fromArray($data);
@@ -36,7 +36,7 @@ class CreateDeveloperKeyDTOTest extends TestCase
             'redirectUris' => ['https://example.com/callback1', 'https://example.com/callback2'],
             'scopes' => ['url:GET|/api/v1/accounts', 'url:GET|/api/v1/courses'],
             'requireScopes' => true,
-            'allowIncludes' => false
+            'allowIncludes' => false,
         ];
 
         $dto = CreateDeveloperKeyDTO::fromArray($data);
@@ -52,7 +52,7 @@ class CreateDeveloperKeyDTOTest extends TestCase
         $data = [
             'testClusterOnly' => true,
             'autoExpireTokens' => false,
-            'clientCredentialsAudience' => 'external'
+            'clientCredentialsAudience' => 'external',
         ];
 
         $dto = CreateDeveloperKeyDTO::fromArray($data);
@@ -67,7 +67,7 @@ class CreateDeveloperKeyDTOTest extends TestCase
         $dto = new CreateDeveloperKeyDTO([
             'name' => 'API Test Key',
             'email' => 'api@example.com',
-            'visible' => false
+            'visible' => false,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -85,7 +85,7 @@ class CreateDeveloperKeyDTOTest extends TestCase
         $dto = new CreateDeveloperKeyDTO([
             'redirectUris' => ['https://example.com/oauth'],
             'scopes' => ['url:GET|/api/v1/users'],
-            'requireScopes' => true
+            'requireScopes' => true,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -101,7 +101,7 @@ class CreateDeveloperKeyDTOTest extends TestCase
         $dto = new CreateDeveloperKeyDTO([
             'name' => 'Test Key',
             'email' => null,
-            'visible' => null
+            'visible' => null,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -117,7 +117,7 @@ class CreateDeveloperKeyDTOTest extends TestCase
         $dto = new CreateDeveloperKeyDTO([
             'name' => 'Test Key',
             'redirectUris' => [],
-            'scopes' => []
+            'scopes' => [],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -132,7 +132,7 @@ class CreateDeveloperKeyDTOTest extends TestCase
     {
         $dto = new CreateDeveloperKeyDTO([
             'name' => 'Multipart Test',
-            'email' => 'multipart@example.com'
+            'email' => 'multipart@example.com',
         ]);
 
         $multipart = $dto->toMultipartArray();
@@ -141,13 +141,13 @@ class CreateDeveloperKeyDTOTest extends TestCase
         $this->assertCount(2, $multipart);
 
         // Check name field
-        $nameField = array_filter($multipart, fn($field) => $field['name'] === 'developer_key[name]');
+        $nameField = array_filter($multipart, fn ($field) => $field['name'] === 'developer_key[name]');
         $this->assertNotEmpty($nameField);
         $nameField = array_values($nameField)[0];
         $this->assertEquals('Multipart Test', $nameField['contents']);
 
         // Check email field
-        $emailField = array_filter($multipart, fn($field) => $field['name'] === 'developer_key[email]');
+        $emailField = array_filter($multipart, fn ($field) => $field['name'] === 'developer_key[email]');
         $this->assertNotEmpty($emailField);
         $emailField = array_values($emailField)[0];
         $this->assertEquals('multipart@example.com', $emailField['contents']);
@@ -158,7 +158,7 @@ class CreateDeveloperKeyDTOTest extends TestCase
         $dto = new CreateDeveloperKeyDTO([
             'name' => 'Array Test',
             'redirectUris' => ['https://example.com/callback1', 'https://example.com/callback2'],
-            'scopes' => ['url:GET|/api/v1/accounts']
+            'scopes' => ['url:GET|/api/v1/accounts'],
         ]);
 
         $multipart = $dto->toMultipartArray();
@@ -167,11 +167,11 @@ class CreateDeveloperKeyDTOTest extends TestCase
         $this->assertCount(4, $multipart);
 
         // Check redirect URI fields
-        $redirectFields = array_filter($multipart, fn($field) => strpos($field['name'], 'redirect_uris') !== false);
+        $redirectFields = array_filter($multipart, fn ($field) => strpos($field['name'], 'redirect_uris') !== false);
         $this->assertCount(2, $redirectFields);
 
         // Check scope fields
-        $scopeFields = array_filter($multipart, fn($field) => strpos($field['name'], 'scopes') !== false);
+        $scopeFields = array_filter($multipart, fn ($field) => strpos($field['name'], 'scopes') !== false);
         $this->assertCount(1, $scopeFields);
     }
 
@@ -200,21 +200,21 @@ class CreateDeveloperKeyDTOTest extends TestCase
 
         $this->assertEquals([
             'https://example1.com/callback',
-            'https://example2.com/callback'
+            'https://example2.com/callback',
         ], $dto->redirectUris);
     }
 
     public function testAddRedirectUriToExistingArray(): void
     {
         $dto = new CreateDeveloperKeyDTO([
-            'redirectUris' => ['https://existing.com/callback']
+            'redirectUris' => ['https://existing.com/callback'],
         ]);
 
         $dto->addRedirectUri('https://new.com/callback');
 
         $this->assertEquals([
             'https://existing.com/callback',
-            'https://new.com/callback'
+            'https://new.com/callback',
         ], $dto->redirectUris);
     }
 
@@ -227,21 +227,21 @@ class CreateDeveloperKeyDTOTest extends TestCase
 
         $this->assertEquals([
             'url:GET|/api/v1/accounts',
-            'url:GET|/api/v1/courses'
+            'url:GET|/api/v1/courses',
         ], $dto->scopes);
     }
 
     public function testAddScopeToExistingArray(): void
     {
         $dto = new CreateDeveloperKeyDTO([
-            'scopes' => ['url:GET|/api/v1/users']
+            'scopes' => ['url:GET|/api/v1/users'],
         ]);
 
         $dto->addScope('url:GET|/api/v1/accounts');
 
         $this->assertEquals([
             'url:GET|/api/v1/users',
-            'url:GET|/api/v1/accounts'
+            'url:GET|/api/v1/accounts',
         ], $dto->scopes);
     }
 
@@ -288,7 +288,7 @@ class CreateDeveloperKeyDTOTest extends TestCase
             'allowIncludes' => false,
             'testClusterOnly' => true,
             'autoExpireTokens' => false,
-            'clientCredentialsAudience' => 'external'
+            'clientCredentialsAudience' => 'external',
         ]);
 
         $apiArray = $dto->toApiArray();

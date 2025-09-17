@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Api\Progress;
 
-use DateTime;
-use Exception;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Exceptions\CanvasApiException;
-
-use function str_to_snake_case;
+use DateTime;
+use Exception;
 
 /**
  * Progress Class
@@ -122,6 +120,7 @@ class Progress extends AbstractBaseApi
 
     /**
      * Progress constructor.
+     *
      * @param mixed[] $data
      */
     public function __construct(array $data = [])
@@ -138,15 +137,18 @@ class Progress extends AbstractBaseApi
 
     /**
      * Cast a value to the correct type
+     *
      * @param string $key
      * @param mixed $value
-     * @return DateTime|mixed
+     *
      * @throws Exception
+     *
+     * @return DateTime|mixed
      */
     protected function castValue(string $key, mixed $value): mixed
     {
         // Handle DateTime fields
-        if (in_array($key, ['createdAt', 'updatedAt']) && is_string($value)) {
+        if (in_array($key, ['createdAt', 'updatedAt'], true) && is_string($value)) {
             try {
                 return new DateTime($value);
             } catch (\Throwable $e) {
@@ -162,9 +164,12 @@ class Progress extends AbstractBaseApi
 
     /**
      * Find a progress object by ID
+     *
      * @param int $id Progress ID
-     * @return Progress
+     *
      * @throws CanvasApiException
+     *
+     * @return Progress
      */
     public static function find(int $id, array $params = []): Progress
     {
@@ -178,10 +183,13 @@ class Progress extends AbstractBaseApi
 
     /**
      * Find a progress object in LTI context
+     *
      * @param int $courseId Course ID for LTI context
      * @param int $id Progress ID
-     * @return Progress
+     *
      * @throws CanvasApiException
+     *
+     * @return Progress
      */
     public static function findInLtiContext(int $courseId, int $id): Progress
     {
@@ -195,9 +203,12 @@ class Progress extends AbstractBaseApi
 
     /**
      * Cancel a running operation
+     *
      * @param string|null $message Optional message to distinguish the cancellation reason
-     * @return Progress Updated progress object
+     *
      * @throws CanvasApiException
+     *
+     * @return Progress Updated progress object
      */
     public function cancel(?string $message = null): Progress
     {
@@ -213,7 +224,7 @@ class Progress extends AbstractBaseApi
         }
 
         $response = self::$apiClient->post("/progress/{$this->id}/cancel", [
-            'form_params' => $params
+            'form_params' => $params,
         ]);
 
         $data = self::parseJsonResponse($response);
@@ -231,8 +242,10 @@ class Progress extends AbstractBaseApi
 
     /**
      * Refresh the progress object with latest data from API
-     * @return Progress
+     *
      * @throws CanvasApiException
+     *
+     * @return Progress
      */
     public function refresh(): Progress
     {
@@ -342,10 +355,13 @@ class Progress extends AbstractBaseApi
 
     /**
      * Wait for operation to complete with configurable polling
+     *
      * @param int $maxWaitSeconds Maximum time to wait in seconds (default: 300 = 5 minutes)
      * @param int $intervalSeconds Initial polling interval in seconds (default: 2)
-     * @return Progress The completed progress object
+     *
      * @throws CanvasApiException If operation times out or fails
+     *
+     * @return Progress The completed progress object
      */
     public function waitForCompletion(int $maxWaitSeconds = 300, int $intervalSeconds = 2): Progress
     {
@@ -357,6 +373,7 @@ class Progress extends AbstractBaseApi
             if ($this->isFailed()) {
                 throw new CanvasApiException("Operation failed: {$this->message}");
             }
+
             return $this;
         }
 
@@ -368,6 +385,7 @@ class Progress extends AbstractBaseApi
                 if ($this->isFailed()) {
                     throw new CanvasApiException("Operation failed: {$this->message}");
                 }
+
                 return $this;
             }
 
@@ -384,15 +402,19 @@ class Progress extends AbstractBaseApi
 
     /**
      * Static utility to poll a progress until completion
+     *
      * @param int $id Progress ID to poll
      * @param int $maxWaitSeconds Maximum time to wait in seconds (default: 300)
      * @param int $intervalSeconds Initial polling interval in seconds (default: 2)
-     * @return Progress The completed progress object
+     *
      * @throws CanvasApiException
+     *
+     * @return Progress The completed progress object
      */
     public static function pollUntilComplete(int $id, int $maxWaitSeconds = 300, int $intervalSeconds = 2): Progress
     {
         $progress = self::find($id);
+
         return $progress->waitForCompletion($maxWaitSeconds, $intervalSeconds);
     }
 
@@ -590,9 +612,12 @@ class Progress extends AbstractBaseApi
 
     /**
      * Required by ApiInterface - fetch all progress objects (not typically used)
+     *
      * @param mixed[] $params
-     * @return Progress[]
+     *
      * @throws CanvasApiException
+     *
+     * @return Progress[]
      */
     public static function get(array $params = []): array
     {
@@ -603,6 +628,7 @@ class Progress extends AbstractBaseApi
 
     /**
      * Get the API endpoint for this resource
+     *
      * @return string
      */
     protected static function getEndpoint(): string

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Http\Middleware;
 
 /**
@@ -25,6 +27,7 @@ interface MiddlewareInterface
      * Set configuration for the middleware
      *
      * @param array<string, mixed> $config
+     *
      * @return void
      */
     public function configure(array $config): void;

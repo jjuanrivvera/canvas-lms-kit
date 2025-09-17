@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Objects;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Objects\PageRevision;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Objects\PageRevision
@@ -32,7 +34,7 @@ class PageRevisionTest extends TestCase
             'edited_by' => ['id' => 123, 'name' => 'John Doe'],
             'url' => 'old-page-title',
             'title' => 'Old Page Title',
-            'body' => '<p>Old Page Content</p>'
+            'body' => '<p>Old Page Content</p>',
         ];
 
         $revision = new PageRevision($data);
@@ -96,7 +98,7 @@ class PageRevisionTest extends TestCase
             'edited_by' => ['id' => 789, 'name' => 'Test User'],
             'url' => 'test-page',
             'title' => 'Test Page',
-            'body' => '<p>Test Content</p>'
+            'body' => '<p>Test Content</p>',
         ];
 
         $revision = new PageRevision($data);
@@ -117,7 +119,7 @@ class PageRevisionTest extends TestCase
         $data = [
             'revision_id' => 20,
             'updated_at' => '2024-02-01T08:00:00Z',
-            'edited_by' => ['id' => 111]
+            'edited_by' => ['id' => 111],
         ];
 
         $revision = new PageRevision($data);
@@ -132,7 +134,7 @@ class PageRevisionTest extends TestCase
         $revision = new PageRevision([
             'revision_id' => 25,
             'title' => 'Initial Title',
-            'body' => 'Initial Body'
+            'body' => 'Initial Body',
         ]);
 
         $revision->setRevisionId(null);
@@ -152,7 +154,7 @@ class PageRevisionTest extends TestCase
             'updated_at' => '2024-02-05T10:00:00Z',
             'latest' => true,
             'url' => 'page-url',
-            'title' => 'Page Title'
+            'title' => 'Page Title',
             // Note: body is not included
         ];
 

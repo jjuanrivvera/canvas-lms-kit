@@ -15,6 +15,7 @@ use Psr\Http\Message\StreamInterface;
 class CourseReportsTest extends TestCase
 {
     private HttpClientInterface $httpClient;
+
     private Course $course;
 
     protected function setUp(): void
@@ -38,7 +39,7 @@ class CourseReportsTest extends TestCase
     public function testSetCourse(): void
     {
         CourseReports::setCourse($this->course);
-        
+
         $this->assertTrue(CourseReports::checkCourse());
     }
 
@@ -46,7 +47,7 @@ class CourseReportsTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course context is required for course reports operations');
-        
+
         CourseReports::checkCourse();
     }
 
@@ -54,10 +55,10 @@ class CourseReportsTest extends TestCase
     {
         $courseWithoutId = new Course(['name' => 'Test Course']);
         CourseReports::setCourse($courseWithoutId);
-        
+
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course context is required for course reports operations');
-        
+
         CourseReports::checkCourse();
     }
 
@@ -71,7 +72,7 @@ class CourseReportsTest extends TestCase
             'progress' => 25,
             'created_at' => '2024-01-15T10:00:00Z',
             'started_at' => '2024-01-15T10:01:00Z',
-            'parameters' => ['enrollment_term_id' => 789]
+            'parameters' => ['enrollment_term_id' => 789],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -89,7 +90,7 @@ class CourseReportsTest extends TestCase
             ->expects($this->once())
             ->method('post')
             ->with('courses/123/reports/grade_export', [
-                'form_params' => ['enrollment_term_id' => 789]
+                'form_params' => ['enrollment_term_id' => 789],
             ])
             ->willReturn($responseMock);
 
@@ -108,7 +109,7 @@ class CourseReportsTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course context is required for course reports operations');
-        
+
         CourseReports::create('grade_export');
     }
 
@@ -124,7 +125,7 @@ class CourseReportsTest extends TestCase
             'created_at' => '2024-01-15T10:00:00Z',
             'started_at' => '2024-01-15T10:01:00Z',
             'ended_at' => '2024-01-15T10:05:00Z',
-            'attachment' => ['id' => 789, 'filename' => 'grade_export.csv']
+            'attachment' => ['id' => 789, 'filename' => 'grade_export.csv'],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -160,7 +161,7 @@ class CourseReportsTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course context is required for course reports operations');
-        
+
         CourseReports::getReport('grade_export', 456);
     }
 
@@ -168,7 +169,7 @@ class CourseReportsTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course reports cannot be found by ID alone. Use getReport($reportType, $reportId) instead.');
-        
+
         CourseReports::find(123);
     }
 
@@ -182,7 +183,7 @@ class CourseReportsTest extends TestCase
             'progress' => 50,
             'created_at' => '2024-01-15T09:00:00Z',
             'started_at' => '2024-01-15T09:01:00Z',
-            'ended_at' => '2024-01-15T09:03:00Z'
+            'ended_at' => '2024-01-15T09:03:00Z',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -215,7 +216,7 @@ class CourseReportsTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course context is required for course reports operations');
-        
+
         CourseReports::last('student_assignment_data');
     }
 
@@ -259,7 +260,7 @@ class CourseReportsTest extends TestCase
     {
         $report = new CourseReports([
             'status' => 'complete',
-            'file_url' => 'https://canvas.example.com/files/report.csv'
+            'file_url' => 'https://canvas.example.com/files/report.csv',
         ]);
         $this->assertTrue($report->isReady());
     }
@@ -274,7 +275,7 @@ class CourseReportsTest extends TestCase
     {
         $report = new CourseReports([
             'status' => 'running',
-            'file_url' => 'https://canvas.example.com/files/report.csv'
+            'file_url' => 'https://canvas.example.com/files/report.csv',
         ]);
         $this->assertFalse($report->isReady());
     }
@@ -338,7 +339,7 @@ class CourseReportsTest extends TestCase
             'started_at' => '2024-01-15T10:01:00Z',
             'ended_at' => '2024-01-15T10:05:00Z',
             'parameters' => ['term_id' => 789],
-            'progress' => 100
+            'progress' => 100,
         ];
 
         $report = new CourseReports($reportData);
@@ -353,7 +354,7 @@ class CourseReportsTest extends TestCase
             'started_at' => '2024-01-15T10:01:00Z',
             'ended_at' => '2024-01-15T10:05:00Z',
             'parameters' => ['term_id' => 789],
-            'progress' => 100
+            'progress' => 100,
         ];
 
         $this->assertEquals($expected, $array);
@@ -363,17 +364,17 @@ class CourseReportsTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course reports cannot be updated');
-        
+
         CourseReports::update(123, []);
     }
 
     public function testUnsupportedSaveMethod(): void
     {
         $report = new CourseReports(['id' => 123]);
-        
+
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course reports cannot be updated');
-        
+
         $report->save();
     }
 
@@ -381,17 +382,17 @@ class CourseReportsTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course reports cannot be deleted');
-        
+
         CourseReports::delete(123);
     }
 
     public function testUnsupportedDestroyMethod(): void
     {
         $report = new CourseReports(['id' => 123]);
-        
+
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course reports cannot be deleted');
-        
+
         $report->destroy();
     }
 
@@ -399,7 +400,7 @@ class CourseReportsTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Use specific report type methods (last, getReport) instead of get');
-        
+
         CourseReports::get();
     }
 
@@ -411,7 +412,7 @@ class CourseReportsTest extends TestCase
             'file_url' => 'https://canvas.example.com/files/report.csv',
             'created_at' => '2024-01-15T10:00:00Z',
             'started_at' => '2024-01-15T10:01:00Z',
-            'ended_at' => '2024-01-15T10:05:00Z'
+            'ended_at' => '2024-01-15T10:05:00Z',
         ];
 
         $report = new CourseReports($apiResponse);

@@ -4,20 +4,23 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\Modules;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\Modules\Module;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Modules\Module;
 use CanvasLMS\Api\Modules\ModuleItem;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 class ModuleRelationshipTest extends TestCase
 {
     private HttpClientInterface $mockHttpClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
+
     private Course $mockCourse;
 
     protected function setUp(): void
@@ -69,15 +72,15 @@ class ModuleRelationshipTest extends TestCase
                 'module_id' => 456,
                 'title' => 'Item 1',
                 'type' => 'Assignment',
-                'content_id' => 789
+                'content_id' => 789,
             ],
             [
                 'id' => 2,
                 'module_id' => 456,
                 'title' => 'Item 2',
                 'type' => 'Page',
-                'content_id' => 790
-            ]
+                'content_id' => 790,
+            ],
         ];
 
         // Mock paginated response
@@ -110,7 +113,7 @@ class ModuleRelationshipTest extends TestCase
 
         // Mock response data
         $itemsData = [
-            ['id' => 1, 'module_id' => 456, 'title' => 'Item 1']
+            ['id' => 1, 'module_id' => 456, 'title' => 'Item 1'],
         ];
 
         $params = ['include' => ['content_details'], 'per_page' => 50];
@@ -141,21 +144,21 @@ class ModuleRelationshipTest extends TestCase
         $module = new Module([
             'id' => 456,
             'name' => 'Test Module',
-            'prerequisite_module_ids' => [100, 200]
+            'prerequisite_module_ids' => [100, 200],
         ]);
 
         // Mock response data for first prerequisite
         $module1Data = [
             'id' => 100,
             'name' => 'Prerequisite Module 1',
-            'position' => 1
+            'position' => 1,
         ];
 
         // Mock response data for second prerequisite
         $module2Data = [
             'id' => 200,
             'name' => 'Prerequisite Module 2',
-            'position' => 2
+            'position' => 2,
         ];
 
         // Set up mock expectations for both module fetches
@@ -164,6 +167,7 @@ class ModuleRelationshipTest extends TestCase
             ->method('getContents')
             ->willReturnCallback(function () use (&$callCount, $module1Data, $module2Data) {
                 $callCount++;
+
                 return $callCount === 1 ? json_encode($module1Data) : json_encode($module2Data);
             });
 
@@ -176,6 +180,7 @@ class ModuleRelationshipTest extends TestCase
                 if ($endpoint === 'courses/123/modules/100' || $endpoint === 'courses/123/modules/200') {
                     return $this->mockResponse;
                 }
+
                 throw new \Exception('Unexpected endpoint: ' . $endpoint);
             });
 
@@ -212,12 +217,12 @@ class ModuleRelationshipTest extends TestCase
         $module = new Module([
             'id' => 456,
             'name' => 'Test Module',
-            'prerequisite_module_ids' => [100, 200]
+            'prerequisite_module_ids' => [100, 200],
         ]);
 
         // Mock first call to succeed
         $module1Data = ['id' => 100, 'name' => 'Prerequisite Module 1'];
-        
+
         $this->mockStream->expects($this->once())
             ->method('getContents')
             ->willReturn(json_encode($module1Data));
@@ -255,5 +260,4 @@ class ModuleRelationshipTest extends TestCase
         $this->expectExceptionMessage('Module is required');
         $module->items();
     }
-
 }

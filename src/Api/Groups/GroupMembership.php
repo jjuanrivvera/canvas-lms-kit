@@ -8,8 +8,6 @@ use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Users\User;
 use CanvasLMS\Dto\Groups\CreateGroupMembershipDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Group Memberships API
@@ -52,12 +50,14 @@ class GroupMembership extends AbstractBaseApi
 
     /**
      * The user object (when include[]=user)
+     *
      * @var User|null
      */
     public ?User $user = null;
 
     /**
      * The group object (when include[]=group)
+     *
      * @var Group|null
      */
     public ?Group $group = null;
@@ -92,8 +92,10 @@ class GroupMembership extends AbstractBaseApi
      *
      * @param int $id Membership ID
      * @param array<string, mixed> $params Query parameters (must include 'group_id')
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -119,8 +121,10 @@ class GroupMembership extends AbstractBaseApi
      * List group memberships (interface requirement)
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<GroupMembership>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<GroupMembership>
      */
     public static function get(array $params = []): array
     {
@@ -132,8 +136,10 @@ class GroupMembership extends AbstractBaseApi
      *
      * @param int $groupId Group ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<GroupMembership>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<GroupMembership>
      */
     public static function fetchAllForGroup(int $groupId, array $params = []): array
     {
@@ -150,14 +156,14 @@ class GroupMembership extends AbstractBaseApi
         return $memberships;
     }
 
-
-
     /**
      * Get all pages of group memberships
      *
      * @param array<string, mixed> $params Query parameters (must include 'group_id')
-     * @return array<GroupMembership>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<GroupMembership>
      */
     public static function all(array $params = []): array
     {
@@ -178,8 +184,10 @@ class GroupMembership extends AbstractBaseApi
      *
      * @param int $groupId Group ID
      * @param array<string, mixed>|CreateGroupMembershipDTO $data Membership data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function create(int $groupId, array|CreateGroupMembershipDTO $data): self
     {
@@ -202,8 +210,10 @@ class GroupMembership extends AbstractBaseApi
      * @param int $groupId Group ID
      * @param int $membershipId Membership ID
      * @param array<string, mixed> $data Update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function update(int $groupId, int $membershipId, array $data): self
     {
@@ -232,8 +242,10 @@ class GroupMembership extends AbstractBaseApi
      * @param int $groupId Group ID
      * @param int $userId User ID
      * @param array<string, mixed> $data Update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function updateByUserId(int $groupId, int $userId, array $data): self
     {
@@ -261,8 +273,10 @@ class GroupMembership extends AbstractBaseApi
      *
      * @param int $groupId Group ID
      * @param int $membershipId Membership ID
-     * @return void
+     *
      * @throws CanvasApiException
+     *
+     * @return void
      */
     public static function deleteMembership(int $groupId, int $membershipId): void
     {
@@ -274,13 +288,14 @@ class GroupMembership extends AbstractBaseApi
     /**
      * Delete this membership instance
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
         if (!$this->groupId || !$this->id) {
-            throw new CanvasApiException("Cannot delete membership without group ID and membership ID");
+            throw new CanvasApiException('Cannot delete membership without group ID and membership ID');
         }
 
         self::deleteMembership($this->groupId, $this->id);
@@ -292,8 +307,10 @@ class GroupMembership extends AbstractBaseApi
      * Leave a group (for current user)
      *
      * @param int $groupId Group ID
-     * @return void
+     *
      * @throws CanvasApiException
+     *
+     * @return void
      */
     public static function leave(int $groupId): void
     {
@@ -341,8 +358,10 @@ class GroupMembership extends AbstractBaseApi
      *
      * @param int $groupId Group ID
      * @param int $userId User ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function findByUserId(int $groupId, int $userId): self
     {
@@ -355,12 +374,12 @@ class GroupMembership extends AbstractBaseApi
         return new self($data);
     }
 
-
     /**
      * Accept this membership invitation
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function accept(): self
     {
@@ -375,14 +394,16 @@ class GroupMembership extends AbstractBaseApi
                 $this->$key = $value;
             }
         }
+
         return $this;
     }
 
     /**
      * Reject this membership invitation
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function reject(): self
     {
@@ -398,8 +419,9 @@ class GroupMembership extends AbstractBaseApi
     /**
      * Make this member a moderator
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function makeModerator(): self
     {
@@ -414,14 +436,16 @@ class GroupMembership extends AbstractBaseApi
                 $this->$key = $value;
             }
         }
+
         return $this;
     }
 
     /**
      * Remove moderator status
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function removeModerator(): self
     {
@@ -436,6 +460,7 @@ class GroupMembership extends AbstractBaseApi
                 $this->$key = $value;
             }
         }
+
         return $this;
     }
 
@@ -507,6 +532,7 @@ class GroupMembership extends AbstractBaseApi
             self::checkApiClient();
             $this->user = User::find($this->userId);
         }
+
         return $this->user;
     }
 
@@ -538,8 +564,10 @@ class GroupMembership extends AbstractBaseApi
     /**
      * Get the API endpoint for this resource
      * Note: GroupMembership is a nested resource under Group
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {

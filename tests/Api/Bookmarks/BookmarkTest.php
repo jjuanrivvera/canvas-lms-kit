@@ -8,7 +8,6 @@ use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Bookmarks\Bookmark;
 use CanvasLMS\Dto\Bookmarks\CreateBookmarkDTO;
 use CanvasLMS\Dto\Bookmarks\UpdateBookmarkDTO;
-use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
@@ -42,7 +41,7 @@ class BookmarkTest extends TestCase
             'name' => 'My Course Bookmark',
             'url' => '/courses/123',
             'position' => 1,
-            'data' => '{"course_id": 123}'
+            'data' => '{"course_id": 123}',
         ];
 
         $expectedResponse = [
@@ -50,7 +49,7 @@ class BookmarkTest extends TestCase
             'name' => 'My Course Bookmark',
             'url' => '/courses/123',
             'position' => 1,
-            'data' => '{"course_id": 123}'
+            'data' => '{"course_id": 123}',
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -61,19 +60,19 @@ class BookmarkTest extends TestCase
                 $this->callback(function ($data) {
                     $this->assertIsArray($data);
                     $this->assertCount(4, $data);
-                    
+
                     $fields = [];
                     foreach ($data as $field) {
                         $this->assertArrayHasKey('name', $field);
                         $this->assertArrayHasKey('contents', $field);
                         $fields[$field['name']] = $field['contents'];
                     }
-                    
+
                     $this->assertEquals('My Course Bookmark', $fields['bookmark[name]']);
                     $this->assertEquals('/courses/123', $fields['bookmark[url]']);
                     $this->assertEquals('1', $fields['bookmark[position]']);
                     $this->assertEquals('{"course_id": 123}', $fields['bookmark[data]']);
-                    
+
                     return true;
                 })
             )
@@ -101,7 +100,7 @@ class BookmarkTest extends TestCase
             'name' => 'Group Bookmark',
             'url' => '/groups/789',
             'position' => 2,
-            'data' => null
+            'data' => null,
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -127,7 +126,7 @@ class BookmarkTest extends TestCase
             'name' => 'Test Bookmark',
             'url' => '/courses/456',
             'position' => 1,
-            'data' => '{"type": "course"}'
+            'data' => '{"type": "course"}',
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -154,15 +153,15 @@ class BookmarkTest extends TestCase
                 'name' => 'Bookmark 1',
                 'url' => '/courses/1',
                 'position' => 1,
-                'data' => null
+                'data' => null,
             ],
             [
                 'id' => 2,
                 'name' => 'Bookmark 2',
                 'url' => '/groups/2',
                 'position' => 2,
-                'data' => '{"type": "group"}'
-            ]
+                'data' => '{"type": "group"}',
+            ],
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -175,11 +174,11 @@ class BookmarkTest extends TestCase
 
         $this->assertIsArray($bookmarks);
         $this->assertCount(2, $bookmarks);
-        
+
         $this->assertInstanceOf(Bookmark::class, $bookmarks[0]);
         $this->assertEquals(1, $bookmarks[0]->id);
         $this->assertEquals('Bookmark 1', $bookmarks[0]->name);
-        
+
         $this->assertInstanceOf(Bookmark::class, $bookmarks[1]);
         $this->assertEquals(2, $bookmarks[1]->id);
         $this->assertEquals('Bookmark 2', $bookmarks[1]->name);
@@ -189,7 +188,7 @@ class BookmarkTest extends TestCase
     {
         $updateData = [
             'name' => 'Updated Bookmark Name',
-            'position' => 5
+            'position' => 5,
         ];
 
         $expectedResponse = [
@@ -197,7 +196,7 @@ class BookmarkTest extends TestCase
             'name' => 'Updated Bookmark Name',
             'url' => '/courses/456',
             'position' => 5,
-            'data' => null
+            'data' => null,
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -208,15 +207,15 @@ class BookmarkTest extends TestCase
                 $this->callback(function ($data) {
                     $this->assertIsArray($data);
                     $this->assertCount(2, $data);
-                    
+
                     $fields = [];
                     foreach ($data as $field) {
                         $fields[$field['name']] = $field['contents'];
                     }
-                    
+
                     $this->assertEquals('Updated Bookmark Name', $fields['bookmark[name]']);
                     $this->assertEquals('5', $fields['bookmark[position]']);
-                    
+
                     return true;
                 })
             )
@@ -241,7 +240,7 @@ class BookmarkTest extends TestCase
             'name' => 'New Name',
             'url' => '/users/999',
             'position' => 1,
-            'data' => null
+            'data' => null,
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -270,7 +269,7 @@ class BookmarkTest extends TestCase
             'name' => 'New Bookmark',
             'url' => '/courses/789',
             'position' => 3,
-            'data' => null
+            'data' => null,
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -283,11 +282,11 @@ class BookmarkTest extends TestCase
                     foreach ($data as $field) {
                         $fields[$field['name']] = $field['contents'];
                     }
-                    
+
                     $this->assertEquals('New Bookmark', $fields['bookmark[name]']);
                     $this->assertEquals('/courses/789', $fields['bookmark[url]']);
                     $this->assertEquals('3', $fields['bookmark[position]']);
-                    
+
                     return true;
                 })
             )
@@ -311,7 +310,7 @@ class BookmarkTest extends TestCase
             'name' => 'Updated Name',
             'url' => '/new',
             'position' => null,
-            'data' => null
+            'data' => null,
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -324,10 +323,10 @@ class BookmarkTest extends TestCase
                     foreach ($data as $field) {
                         $fields[$field['name']] = $field['contents'];
                     }
-                    
+
                     $this->assertEquals('Updated Name', $fields['bookmark[name]']);
                     $this->assertEquals('/new', $fields['bookmark[url]']);
-                    
+
                     return true;
                 })
             )
@@ -371,21 +370,21 @@ class BookmarkTest extends TestCase
     {
         $firstPageResponse = [
             ['id' => 1, 'name' => 'Bookmark 1'],
-            ['id' => 2, 'name' => 'Bookmark 2']
+            ['id' => 2, 'name' => 'Bookmark 2'],
         ];
 
         $secondPageResponse = [
-            ['id' => 3, 'name' => 'Bookmark 3']
+            ['id' => 3, 'name' => 'Bookmark 3'],
         ];
 
         // Create PaginatedResponse mocks
         $paginatedResponse1 = $this->createMock(PaginatedResponse::class);
         $paginatedResponse1->method('getJsonData')->willReturn($firstPageResponse);
-        
+
         $paginatedResponse2 = $this->createMock(PaginatedResponse::class);
         $paginatedResponse2->method('getJsonData')->willReturn($secondPageResponse);
         $paginatedResponse2->method('getNext')->willReturn(null);
-        
+
         $paginatedResponse1->method('getNext')->willReturn($paginatedResponse2);
 
         $this->httpClientMock->expects($this->once())
@@ -406,7 +405,7 @@ class BookmarkTest extends TestCase
     {
         $bookmarksData = [
             ['id' => 1, 'name' => 'Bookmark 1'],
-            ['id' => 2, 'name' => 'Bookmark 2']
+            ['id' => 2, 'name' => 'Bookmark 2'],
         ];
 
         $paginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -415,13 +414,13 @@ class BookmarkTest extends TestCase
             new PaginationResult(
                 [
                     new Bookmark(['id' => 1, 'name' => 'Bookmark 1']),
-                    new Bookmark(['id' => 2, 'name' => 'Bookmark 2'])
+                    new Bookmark(['id' => 2, 'name' => 'Bookmark 2']),
                 ],
                 [
                     'next' => 'https://canvas.test/api/v1/users/self/bookmarks?page=2',
                     'current' => 'https://canvas.test/api/v1/users/self/bookmarks?page=1',
                     'first' => 'https://canvas.test/api/v1/users/self/bookmarks?page=1',
-                    'last' => 'https://canvas.test/api/v1/users/self/bookmarks?page=5'
+                    'last' => 'https://canvas.test/api/v1/users/self/bookmarks?page=5',
                 ],
                 1,
                 5,
@@ -439,7 +438,7 @@ class BookmarkTest extends TestCase
         $this->assertInstanceOf(PaginationResult::class, $result);
         $this->assertCount(2, $result->getData());
         $this->assertInstanceOf(Bookmark::class, $result->getData()[0]);
-        
+
         $this->assertEquals(1, $result->getCurrentPage());
         $this->assertEquals(5, $result->getTotalPages());
         $this->assertTrue($result->hasMore());

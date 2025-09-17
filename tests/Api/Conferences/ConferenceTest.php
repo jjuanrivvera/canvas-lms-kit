@@ -18,7 +18,9 @@ use Psr\Http\Message\StreamInterface;
 class ConferenceTest extends TestCase
 {
     private $mockHttpClient;
+
     private $mockResponse;
+
     private $mockStream;
 
     protected function setUp(): void
@@ -48,7 +50,7 @@ class ConferenceTest extends TestCase
                     'description' => 'Test description',
                     'duration' => 60,
                     'status' => 'active',
-                    'recordings' => []
+                    'recordings' => [],
                 ],
                 [
                     'id' => 2,
@@ -62,11 +64,11 @@ class ConferenceTest extends TestCase
                             'id' => 101,
                             'title' => 'Recording 1',
                             'duration' => 3600,
-                            'playback_url' => 'https://example.com/recording1'
-                        ]
-                    ]
-                ]
-            ]
+                            'playback_url' => 'https://example.com/recording1',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         $this->mockStream->method('getContents')
@@ -109,9 +111,9 @@ class ConferenceTest extends TestCase
                     'title' => 'Group Conference',
                     'conference_type' => 'BigBlueButton',
                     'context_type' => 'Group',
-                    'context_id' => $groupId
-                ]
-            ]
+                    'context_id' => $groupId,
+                ],
+            ],
         ];
 
         $this->mockStream->method('getContents')
@@ -144,9 +146,9 @@ class ConferenceTest extends TestCase
             'duration' => 120,
             'settings' => [
                 'enable_waiting_room' => true,
-                'enable_recording' => false
+                'enable_recording' => false,
             ],
-            'recordings' => []
+            'recordings' => [],
         ];
 
         $this->mockStream->method('getContents')
@@ -181,15 +183,15 @@ class ConferenceTest extends TestCase
             'duration' => 60,
             'settings' => [
                 'enable_recording' => true,
-                'mute_on_join' => true
-            ]
+                'mute_on_join' => true,
+            ],
         ];
 
         $responseData = array_merge($createData, [
             'id' => 999,
             'status' => 'active',
             'url' => 'https://conference.example.com/999',
-            'join_url' => 'https://conference.example.com/join/999'
+            'join_url' => 'https://conference.example.com/join/999',
         ]);
 
         $this->mockStream->method('getContents')
@@ -223,13 +225,13 @@ class ConferenceTest extends TestCase
         $groupId = 456;
         $createData = [
             'title' => 'Group Conference',
-            'conference_type' => 'Zoom'
+            'conference_type' => 'Zoom',
         ];
 
         $responseData = array_merge($createData, [
             'id' => 888,
             'context_type' => 'Group',
-            'context_id' => $groupId
+            'context_id' => $groupId,
         ]);
 
         $this->mockStream->method('getContents')
@@ -259,10 +261,10 @@ class ConferenceTest extends TestCase
     public function testUpdate(): void
     {
         $conference = new Conference(['id' => 777, 'title' => 'Original Title']);
-        
+
         $updateData = [
             'title' => 'Updated Title',
-            'duration' => 90
+            'duration' => 90,
         ];
 
         $responseData = array_merge(['id' => 777], $updateData);
@@ -272,7 +274,7 @@ class ConferenceTest extends TestCase
 
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockResponse->method('getStatusCode')
             ->willReturn(200);
 
@@ -333,11 +335,11 @@ class ConferenceTest extends TestCase
     public function testJoin(): void
     {
         $conference = new Conference(['id' => 555]);
-        
+
         $joinData = [
             'url' => 'https://conference.example.com/join/555',
             'session_id' => 'abc123',
-            'status' => 'joined'
+            'status' => 'joined',
         ];
 
         $this->mockStream->method('getContents')
@@ -372,22 +374,22 @@ class ConferenceTest extends TestCase
     public function testGetRecordings(): void
     {
         $conference = new Conference(['id' => 444]);
-        
+
         $recordingsData = [
             [
                 'id' => 201,
                 'title' => 'Recording 1',
                 'duration' => 3600,
                 'playback_url' => 'https://example.com/rec1',
-                'created_at' => '2024-01-01T10:00:00Z'
+                'created_at' => '2024-01-01T10:00:00Z',
             ],
             [
                 'id' => 202,
                 'title' => 'Recording 2',
                 'duration' => 1800,
                 'playback_url' => 'https://example.com/rec2',
-                'created_at' => '2024-01-02T14:00:00Z'
-            ]
+                'created_at' => '2024-01-02T14:00:00Z',
+            ],
         ];
 
         $this->mockStream->method('getContents')
@@ -429,7 +431,7 @@ class ConferenceTest extends TestCase
             'started_at' => '2024-01-15T09:00:00Z',
             'ended_at' => '2024-01-15T10:00:00Z',
             'created_at' => '2024-01-10T08:00:00Z',
-            'updated_at' => '2024-01-14T16:00:00Z'
+            'updated_at' => '2024-01-14T16:00:00Z',
         ];
 
         $this->mockStream->method('getContents')

@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Http\Middleware;
 
 use CanvasLMS\Config;
+use CanvasLMS\Http\HttpClient;
+use CanvasLMS\Http\Middleware\LoggingMiddleware;
 use GuzzleHttp\Client;
-use Psr\Log\LoggerInterface;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use CanvasLMS\Http\HttpClient;
 use PHPUnit\Framework\TestCase;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\Exception\RequestException;
-use CanvasLMS\Http\Middleware\LoggingMiddleware;
+use Psr\Log\LoggerInterface;
 
 class LoggingMiddlewareTest extends TestCase
 {
@@ -47,14 +49,14 @@ class LoggingMiddlewareTest extends TestCase
 
         $response = $httpClient->get('/test');
         $this->assertEquals(200, $response->getStatusCode());
-        
+
         // Check request log
         $this->assertEquals('info', $loggedMessages[0]['level']);
         $this->assertStringContainsString('HTTP Request', $loggedMessages[0]['message']);
         $this->assertArrayHasKey('request_id', $loggedMessages[0]['context']);
         $this->assertEquals('GET', $loggedMessages[0]['context']['method']);
         $this->assertStringContainsString('/test', $loggedMessages[0]['context']['uri']);
-        
+
         // Check response log
         $this->assertEquals('info', $loggedMessages[1]['level']);
         $this->assertStringContainsString('HTTP Response', $loggedMessages[1]['message']);
@@ -82,13 +84,13 @@ class LoggingMiddlewareTest extends TestCase
 
         $handlerStack = HandlerStack::create($mock);
         $loggingMiddleware = new LoggingMiddleware($this->loggerMock, [
-            'log_responses' => false // Only log requests for this test
+            'log_responses' => false, // Only log requests for this test
         ]);
         $handlerStack->push($loggingMiddleware(), 'logging');
 
         $client = new Client(['handler' => $handlerStack]);
         $response = $client->request('GET', 'http://example.com', [
-            'headers' => ['Authorization' => 'Bearer secret-token']
+            'headers' => ['Authorization' => 'Bearer secret-token'],
         ]);
     }
 
@@ -117,7 +119,7 @@ class LoggingMiddlewareTest extends TestCase
         } catch (\Exception $e) {
             // Expected exception
         }
-        
+
         // Check that error response is logged at error level
         $this->assertEquals('info', $loggedMessages[0]['level']);
         $this->assertEquals('error', $loggedMessages[1]['level']);
@@ -150,7 +152,7 @@ class LoggingMiddlewareTest extends TestCase
         } catch (\Exception $e) {
             // Expected exception
         }
-        
+
         // Check error log
         $this->assertEquals('error', $loggedMessages[1]['level']);
         $this->assertStringContainsString('HTTP Error', $loggedMessages[1]['message']);
@@ -174,6 +176,7 @@ class LoggingMiddlewareTest extends TestCase
                         return false;
                     }
                     $body = json_decode($context['body'], true);
+
                     return $body['password'] === '***REDACTED***' &&
                            $body['username'] === 'john.doe';
                 })
@@ -181,7 +184,7 @@ class LoggingMiddlewareTest extends TestCase
 
         $handlerStack = HandlerStack::create($mock);
         $loggingMiddleware = new LoggingMiddleware($this->loggerMock, [
-            'log_responses' => false
+            'log_responses' => false,
         ]);
         $handlerStack->push($loggingMiddleware(), 'logging');
 
@@ -189,8 +192,8 @@ class LoggingMiddlewareTest extends TestCase
         $client->request('POST', 'http://example.com', [
             'json' => [
                 'username' => 'john.doe',
-                'password' => 'secret123'
-            ]
+                'password' => 'secret123',
+            ],
         ]);
     }
 
@@ -216,13 +219,13 @@ class LoggingMiddlewareTest extends TestCase
         $handlerStack = HandlerStack::create($mock);
         $loggingMiddleware = new LoggingMiddleware($this->loggerMock, [
             'log_responses' => false,
-            'max_body_length' => 1000
+            'max_body_length' => 1000,
         ]);
         $handlerStack->push($loggingMiddleware(), 'logging');
 
         $client = new Client(['handler' => $handlerStack]);
         $client->request('POST', 'http://example.com', [
-            'body' => $largeBody
+            'body' => $largeBody,
         ]);
     }
 
@@ -231,7 +234,7 @@ class LoggingMiddlewareTest extends TestCase
         $mock = new MockHandler([
             new Response(200, [
                 'X-Rate-Limit-Remaining' => '2950',
-                'X-Request-Cost' => '50'
+                'X-Request-Cost' => '50',
             ]),
         ]);
 
@@ -250,7 +253,7 @@ class LoggingMiddlewareTest extends TestCase
         $httpClient = new HttpClient($client);
 
         $httpClient->get('/test');
-        
+
         // Check Canvas-specific headers are logged
         $this->assertEquals('2950', $loggedMessages[1]['context']['rate_limit_remaining']);
         $this->assertEquals('50', $loggedMessages[1]['context']['request_cost']);
@@ -267,7 +270,7 @@ class LoggingMiddlewareTest extends TestCase
 
         $handlerStack = HandlerStack::create($mock);
         $loggingMiddleware = new LoggingMiddleware($this->loggerMock, [
-            'enabled' => false
+            'enabled' => false,
         ]);
         $handlerStack->push($loggingMiddleware(), 'logging');
 
@@ -288,6 +291,7 @@ class LoggingMiddlewareTest extends TestCase
                 $this->stringContains('HTTP Request'),
                 $this->callback(function ($context) {
                     $body = json_decode($context['body'], true);
+
                     return $body['api_secret'] === '***REDACTED***' &&
                            $body['custom_token'] === '***REDACTED***' &&
                            $body['public_data'] === 'visible';
@@ -297,7 +301,7 @@ class LoggingMiddlewareTest extends TestCase
         $handlerStack = HandlerStack::create($mock);
         $loggingMiddleware = new LoggingMiddleware($this->loggerMock, [
             'log_responses' => false,
-            'sanitize_fields' => ['api_secret', 'custom_token']
+            'sanitize_fields' => ['api_secret', 'custom_token'],
         ]);
         $handlerStack->push($loggingMiddleware(), 'logging');
 
@@ -306,8 +310,8 @@ class LoggingMiddlewareTest extends TestCase
             'json' => [
                 'api_secret' => 'super-secret',
                 'custom_token' => 'token123',
-                'public_data' => 'visible'
-            ]
+                'public_data' => 'visible',
+            ],
         ]);
     }
 }

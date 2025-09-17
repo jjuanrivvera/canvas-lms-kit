@@ -31,6 +31,9 @@ tmp/
 .phpunit.result.cache
 .phpunit.cache
 
+# PHP-CS-Fixer
+.php-cs-fixer.cache
+
 wiki/
 
 canvas-lms-*

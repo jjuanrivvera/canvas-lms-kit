@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Objects;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Objects\GradebookHistoryGrader;
+use PHPUnit\Framework\TestCase;
 
 class GradebookHistoryGraderTest extends TestCase
 {
@@ -14,7 +14,7 @@ class GradebookHistoryGraderTest extends TestCase
         $data = [
             'id' => 456,
             'name' => 'John Teacher',
-            'assignments' => [789, 790, 791]
+            'assignments' => [789, 790, 791],
         ];
 
         $grader = new GradebookHistoryGrader($data);
@@ -38,7 +38,7 @@ class GradebookHistoryGraderTest extends TestCase
         $data = [
             'id' => 123,
             'name' => 'Test Grader',
-            'assignments' => [1, 2, 3]
+            'assignments' => [1, 2, 3],
         ];
 
         $grader = GradebookHistoryGrader::fromArray($data);
@@ -53,7 +53,7 @@ class GradebookHistoryGraderTest extends TestCase
         $grader = new GradebookHistoryGrader([
             'id' => 456,
             'name' => 'John Teacher',
-            'assignments' => [789, 790, 791]
+            'assignments' => [789, 790, 791],
         ]);
 
         $this->assertTrue($grader->workedOnAssignment(789));
@@ -68,7 +68,7 @@ class GradebookHistoryGraderTest extends TestCase
         $grader = new GradebookHistoryGrader([
             'id' => 456,
             'name' => 'John Teacher',
-            'assignments' => [789, 790, 791]
+            'assignments' => [789, 790, 791],
         ]);
 
         $this->assertEquals(3, $grader->getAssignmentCount());
@@ -82,7 +82,7 @@ class GradebookHistoryGraderTest extends TestCase
         $data = [
             'id' => '456',
             'name' => 'John Teacher',
-            'assignments' => ['789', '790', '791']
+            'assignments' => ['789', '790', '791'],
         ];
 
         $grader = new GradebookHistoryGrader($data);

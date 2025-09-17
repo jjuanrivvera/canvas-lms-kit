@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Submissions;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Submissions\CreateSubmissionDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\Submissions\CreateSubmissionDTO
@@ -20,7 +22,7 @@ class CreateSubmissionDTOTest extends TestCase
             'media_comment_id' => 'audio123',
             'media_comment_type' => 'audio',
             'user_id' => 789,
-            'comment' => 'Please review my submission'
+            'comment' => 'Please review my submission',
         ];
 
         $dto = new CreateSubmissionDTO($data);
@@ -91,7 +93,7 @@ class CreateSubmissionDTOTest extends TestCase
     {
         $dto = new CreateSubmissionDTO([
             'submission_type' => 'online_text_entry',
-            'body' => 'Initial content'
+            'body' => 'Initial content',
         ]);
 
         // Set all values to null
@@ -119,7 +121,7 @@ class CreateSubmissionDTOTest extends TestCase
         $dto = new CreateSubmissionDTO([
             'submission_type' => 'online_text_entry',
             'body' => 'My essay content',
-            'comment' => 'Please grade this'
+            'comment' => 'Please grade this',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -134,7 +136,7 @@ class CreateSubmissionDTOTest extends TestCase
     {
         $dto = new CreateSubmissionDTO([
             'submission_type' => 'online_url',
-            'url' => 'https://example.com/project'
+            'url' => 'https://example.com/project',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -148,7 +150,7 @@ class CreateSubmissionDTOTest extends TestCase
     {
         $dto = new CreateSubmissionDTO([
             'submission_type' => 'online_upload',
-            'file_ids' => [123, 456]
+            'file_ids' => [123, 456],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -164,7 +166,7 @@ class CreateSubmissionDTOTest extends TestCase
         $dto = new CreateSubmissionDTO([
             'submission_type' => 'media_recording',
             'media_comment_id' => 'audio123',
-            'media_comment_type' => 'audio'
+            'media_comment_type' => 'audio',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -179,7 +181,7 @@ class CreateSubmissionDTOTest extends TestCase
     {
         $dto = new CreateSubmissionDTO([
             'submission_type' => 'online_text_entry',
-            'body' => 'Content here'
+            'body' => 'Content here',
             // url, file_ids, etc. are null
         ]);
 
@@ -200,7 +202,7 @@ class CreateSubmissionDTOTest extends TestCase
             'submission_type' => 'online_text_entry',
             'body' => 'Essay content',
             'user_id' => 789,
-            'comment' => 'Review please'
+            'comment' => 'Review please',
         ]);
 
         $array = $dto->toArray();
@@ -219,7 +221,7 @@ class CreateSubmissionDTOTest extends TestCase
             'submission_type' => 'online_text_entry',
             'media_comment_id' => 'test123',
             'media_comment_type' => 'audio',
-            'user_id' => 456
+            'user_id' => 456,
         ]);
 
         $apiArray = $dto->toApiArray();

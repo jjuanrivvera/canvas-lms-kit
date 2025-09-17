@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Files;
 
-use GuzzleHttp\Psr7\Response;
-use CanvasLMS\Http\HttpClient;
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Files\File;
 use CanvasLMS\Dto\Files\UploadFileDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Http\HttpClient;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 class FileTest extends TestCase
 {
@@ -35,7 +37,7 @@ class FileTest extends TestCase
             'size' => 1024,
             'content_type' => 'application/pdf',
             'parent_folder_id' => 456,
-            'file' => $tempFile
+            'file' => $tempFile,
         ];
 
         $uploadResponse = [
@@ -43,8 +45,8 @@ class FileTest extends TestCase
             'upload_params' => [
                 'key' => '/files/test-file.pdf',
                 'acl' => 'private',
-                'Content-Type' => 'application/pdf'
-            ]
+                'Content-Type' => 'application/pdf',
+            ],
         ];
 
         $fileResponse = [
@@ -58,7 +60,7 @@ class FileTest extends TestCase
             'created_at' => '2023-01-01T00:00:00Z',
             'updated_at' => '2023-01-01T00:00:00Z',
             'locked' => false,
-            'hidden' => false
+            'hidden' => false,
         ];
 
         // First post is for Canvas API (step 1)
@@ -72,7 +74,7 @@ class FileTest extends TestCase
             ->method('rawRequest')
             ->willReturnCallback(function ($url, $method, $options) use (&$callCount, $fileResponse) {
                 $callCount++;
-                
+
                 if ($callCount === 1) {
                     // First call: POST to upload URL
                     $this->assertEquals('https://upload.example.com', $url);
@@ -82,7 +84,7 @@ class FileTest extends TestCase
                     $this->assertTrue($options['skipAuth']);
                     $this->assertArrayHasKey('skipDomainValidation', $options);
                     $this->assertTrue($options['skipDomainValidation']);
-                    
+
                     return new Response(200, ['Location' => 'https://confirm.example.com'], '');
                 } else {
                     // Second call: GET to confirm URL
@@ -92,7 +94,7 @@ class FileTest extends TestCase
                     $this->assertTrue($options['skipAuth']);
                     $this->assertArrayHasKey('skipDomainValidation', $options);
                     $this->assertTrue($options['skipDomainValidation']);
-                    
+
                     return new Response(200, [], json_encode($fileResponse));
                 }
             });
@@ -123,14 +125,14 @@ class FileTest extends TestCase
         $fileDto = new UploadFileDTO([
             'name' => 'user-file.txt',
             'size' => 512,
-            'file' => $tempFile
+            'file' => $tempFile,
         ]);
 
         $uploadResponse = [
             'upload_url' => 'https://upload.example.com',
             'upload_params' => [
-                'key' => '/users/123/files/user-file.txt'
-            ]
+                'key' => '/users/123/files/user-file.txt',
+            ],
         ];
 
         $fileResponse = [
@@ -143,7 +145,7 @@ class FileTest extends TestCase
             'created_at' => '2023-01-01T00:00:00Z',
             'updated_at' => '2023-01-01T00:00:00Z',
             'locked' => false,
-            'hidden' => false
+            'hidden' => false,
         ];
 
         // First post is for Canvas API (step 1)
@@ -155,13 +157,13 @@ class FileTest extends TestCase
         $this->httpClientMock->expects($this->once())
             ->method('rawRequest')
             ->with(
-                'https://upload.example.com', 
-                'POST', 
+                'https://upload.example.com',
+                'POST',
                 $this->callback(function ($options) {
-                    return isset($options['multipart']) && 
-                           isset($options['skipAuth']) && 
+                    return isset($options['multipart']) &&
+                           isset($options['skipAuth']) &&
                            $options['skipAuth'] === true &&
-                           isset($options['skipDomainValidation']) && 
+                           isset($options['skipDomainValidation']) &&
                            $options['skipDomainValidation'] === true;
                 })
             )
@@ -191,14 +193,14 @@ class FileTest extends TestCase
         $fileData = [
             'name' => 'group-file.docx',
             'size' => 2048,
-            'file' => $tempFile
+            'file' => $tempFile,
         ];
 
         $uploadResponse = [
             'upload_url' => 'https://upload.example.com',
             'upload_params' => [
-                'key' => '/groups/456/files/group-file.docx'
-            ]
+                'key' => '/groups/456/files/group-file.docx',
+            ],
         ];
 
         $fileResponse = [
@@ -211,7 +213,7 @@ class FileTest extends TestCase
             'created_at' => '2023-01-01T00:00:00Z',
             'updated_at' => '2023-01-01T00:00:00Z',
             'locked' => false,
-            'hidden' => false
+            'hidden' => false,
         ];
 
         // First call: POST to Canvas API to get upload URL
@@ -231,18 +233,18 @@ class FileTest extends TestCase
             ->method('rawRequest')
             ->willReturnCallback(function ($url, $method, $options) use (&$callCount, $fileResponse) {
                 $callCount++;
-                
+
                 if ($callCount === 1) {
                     // First call: POST to upload URL
                     $this->assertEquals('https://upload.example.com', $url);
                     $this->assertEquals('POST', $method);
-                    
+
                     return new Response(200, ['Location' => 'https://confirm.example.com'], '');
                 } else {
                     // Second call: GET to confirm URL
                     $this->assertEquals('https://confirm.example.com', $url);
                     $this->assertEquals('GET', $method);
-                    
+
                     return new Response(200, [], json_encode($fileResponse));
                 }
             });
@@ -271,14 +273,14 @@ class FileTest extends TestCase
         $fileData = [
             'name' => 'submission.pdf',
             'size' => 4096,
-            'file' => $tempFile
+            'file' => $tempFile,
         ];
 
         $uploadResponse = [
             'upload_url' => 'https://upload.example.com',
             'upload_params' => [
-                'key' => '/courses/123/assignments/456/submissions/self/files/submission.pdf'
-            ]
+                'key' => '/courses/123/assignments/456/submissions/self/files/submission.pdf',
+            ],
         ];
 
         $fileResponse = [
@@ -291,7 +293,7 @@ class FileTest extends TestCase
             'created_at' => '2023-01-01T00:00:00Z',
             'updated_at' => '2023-01-01T00:00:00Z',
             'locked' => false,
-            'hidden' => false
+            'hidden' => false,
         ];
 
         // First call: POST to Canvas API to get upload URL
@@ -311,18 +313,18 @@ class FileTest extends TestCase
             ->method('rawRequest')
             ->willReturnCallback(function ($url, $method, $options) use (&$callCount, $fileResponse) {
                 $callCount++;
-                
+
                 if ($callCount === 1) {
                     // First call: POST to upload URL
                     $this->assertEquals('https://upload.example.com', $url);
                     $this->assertEquals('POST', $method);
-                    
+
                     return new Response(200, ['Location' => 'https://confirm.example.com'], '');
                 } else {
                     // Second call: GET to confirm URL
                     $this->assertEquals('https://confirm.example.com', $url);
                     $this->assertEquals('GET', $method);
-                    
+
                     return new Response(200, [], json_encode($fileResponse));
                 }
             });
@@ -355,7 +357,7 @@ class FileTest extends TestCase
             'created_at' => '2023-01-01T00:00:00Z',
             'updated_at' => '2023-01-01T00:00:00Z',
             'locked' => false,
-            'hidden' => false
+            'hidden' => false,
         ];
 
         $this->httpClientMock->expects($this->once())
@@ -386,13 +388,13 @@ class FileTest extends TestCase
             'created_at' => '2023-01-01T00:00:00Z',
             'updated_at' => '2023-01-01T00:00:00Z',
             'locked' => false,
-            'hidden' => false
+            'hidden' => false,
         ];
 
         $file = new File($fileData);
 
         $fileResponseWithUrl = array_merge($fileData, [
-            'url' => 'https://example.com/download/download-file.pdf'
+            'url' => 'https://example.com/download/download-file.pdf',
         ]);
 
         $this->httpClientMock->expects($this->once())
@@ -420,7 +422,7 @@ class FileTest extends TestCase
             'created_at' => '2023-01-01T00:00:00Z',
             'updated_at' => '2023-01-01T00:00:00Z',
             'locked' => false,
-            'hidden' => false
+            'hidden' => false,
         ];
 
         $file = new File($fileData);
@@ -450,7 +452,7 @@ class FileTest extends TestCase
             'created_at' => '2023-01-01T00:00:00Z',
             'updated_at' => '2023-01-01T00:00:00Z',
             'locked' => false,
-            'hidden' => false
+            'hidden' => false,
         ];
 
         $file = new File($fileData);
@@ -481,11 +483,11 @@ class FileTest extends TestCase
 
         $fileData = [
             'name' => 'invalid-response.txt',
-            'file' => $tempFile
+            'file' => $tempFile,
         ];
 
         $invalidResponse = [
-            'error' => 'Invalid request'
+            'error' => 'Invalid request',
         ];
 
         $this->httpClientMock->expects($this->once())
@@ -516,7 +518,7 @@ class FileTest extends TestCase
                 'created_at' => '2023-01-01T00:00:00Z',
                 'updated_at' => '2023-01-01T00:00:00Z',
                 'locked' => false,
-                'hidden' => false
+                'hidden' => false,
             ],
             [
                 'id' => 124,
@@ -528,8 +530,8 @@ class FileTest extends TestCase
                 'created_at' => '2023-01-01T00:00:00Z',
                 'updated_at' => '2023-01-01T00:00:00Z',
                 'locked' => false,
-                'hidden' => false
-            ]
+                'hidden' => false,
+            ],
         ];
 
         $this->httpClientMock->expects($this->once())
@@ -565,7 +567,7 @@ class FileTest extends TestCase
             'created_at' => '2023-01-01T00:00:00Z',
             'updated_at' => '2023-01-01T00:00:00Z',
             'locked' => true,
-            'hidden' => true
+            'hidden' => true,
         ];
 
         $file = new File($fileData);
@@ -627,7 +629,7 @@ class FileTest extends TestCase
             'name' => 's3-file.pdf',
             'size' => 4096,
             'content_type' => 'application/pdf',
-            'file' => $tempFile
+            'file' => $tempFile,
         ];
 
         // Step 1: Canvas returns S3 upload URL and parameters
@@ -640,8 +642,8 @@ class FileTest extends TestCase
                 'signature' => 'abc123signature',
                 'AWSAccessKeyId' => 'AKIAIOSFODNN7EXAMPLE',
                 'Content-Type' => 'application/pdf',
-                'success_action_redirect' => 'https://canvas.example.com/api/v1/files/789/create_success'
-            ]
+                'success_action_redirect' => 'https://canvas.example.com/api/v1/files/789/create_success',
+            ],
         ];
 
         // Step 3: S3 redirects to Canvas API after upload
@@ -657,7 +659,7 @@ class FileTest extends TestCase
             'updated_at' => '2024-01-01T00:00:00Z',
             'url' => 'https://canvas-files.s3.amazonaws.com/files/789/s3-file.pdf',
             'locked' => false,
-            'hidden' => false
+            'hidden' => false,
         ];
 
         // Expect Canvas API call (Step 1)
@@ -677,7 +679,7 @@ class FileTest extends TestCase
             ->method('rawRequest')
             ->willReturnCallback(function ($url, $method, $options) use (&$callCount, $fileResponse) {
                 $callCount++;
-                
+
                 if ($callCount === 1) {
                     // First call: POST to S3
                     $this->assertEquals('https://canvas-files.s3.amazonaws.com/upload', $url);
@@ -688,7 +690,7 @@ class FileTest extends TestCase
                     $this->assertTrue($options['skipAuth']);
                     $this->assertArrayHasKey('skipDomainValidation', $options);
                     $this->assertTrue($options['skipDomainValidation']);
-                    
+
                     return new Response(303, ['Location' => 'https://canvas.example.com/api/v1/files/789/create_success'], '');
                 } else {
                     // Second call: GET to Canvas redirect URL
@@ -699,7 +701,7 @@ class FileTest extends TestCase
                     $this->assertTrue($options['skipAuth']);
                     $this->assertArrayHasKey('skipDomainValidation', $options);
                     $this->assertTrue($options['skipDomainValidation']);
-                    
+
                     return new Response(200, [], json_encode($fileResponse));
                 }
             });

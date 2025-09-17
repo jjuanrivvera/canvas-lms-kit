@@ -4,28 +4,29 @@ declare(strict_types=1);
 
 namespace Tests\Api\Progress;
 
-use PHPUnit\Framework\TestCase;
+use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Progress\Progress;
+use CanvasLMS\Config;
+use CanvasLMS\Interfaces\HttpClientInterface;
+use DateTime;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use CanvasLMS\Api\Progress\Progress;
-use CanvasLMS\Api\Courses\Course;
-use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Config;
-use DateTime;
 
 class ProgressIntegrationTest extends TestCase
 {
     private HttpClientInterface|MockObject $mockHttpClient;
+
     private ResponseInterface|MockObject $mockResponse;
+
     private StreamInterface|MockObject $mockStream;
 
     protected function setUp(): void
     {
         // Set up test configuration
         Config::setAccountId(1);
-        
+
         $this->mockHttpClient = $this->createMock(HttpClientInterface::class);
         $this->mockResponse = $this->createMock(ResponseInterface::class);
         $this->mockStream = $this->createMock(StreamInterface::class);
@@ -51,7 +52,7 @@ class ProgressIntegrationTest extends TestCase
             'workflow_state' => 'queued',
             'completion' => 0,
             'tag' => 'course_batch_update',
-            'url' => '/api/v1/progress/456'
+            'url' => '/api/v1/progress/456',
         ];
 
         // Mock Course::batchUpdate call
@@ -94,7 +95,7 @@ class ProgressIntegrationTest extends TestCase
     {
         // Test the complete lifecycle: queued -> running -> completed
         $progressId = 789;
-        
+
         $lifecycleResponses = [
             // Initial find
             ['id' => $progressId, 'workflow_state' => 'queued', 'completion' => 0, 'tag' => 'content_migration'],
@@ -102,7 +103,7 @@ class ProgressIntegrationTest extends TestCase
             ['id' => $progressId, 'workflow_state' => 'running', 'completion' => 25, 'message' => 'Processing files...'],
             ['id' => $progressId, 'workflow_state' => 'running', 'completion' => 50, 'message' => 'Importing content...'],
             ['id' => $progressId, 'workflow_state' => 'running', 'completion' => 75, 'message' => 'Finalizing...'],
-            ['id' => $progressId, 'workflow_state' => 'completed', 'completion' => 100, 'results' => ['imported_items' => 42]]
+            ['id' => $progressId, 'workflow_state' => 'completed', 'completion' => 100, 'results' => ['imported_items' => 42]],
         ];
 
         $this->mockStream->method('getContents')->willReturnOnConsecutiveCalls(
@@ -118,7 +119,7 @@ class ProgressIntegrationTest extends TestCase
 
         // Wait for completion
         $finalProgress = $progress->waitForCompletion(10, 1);
-        
+
         $this->assertTrue($finalProgress->isCompleted());
         $this->assertTrue($finalProgress->isSuccessful());
         $this->assertFalse($finalProgress->isInProgress());
@@ -130,13 +131,13 @@ class ProgressIntegrationTest extends TestCase
     public function testProgressCancellationWorkflow(): void
     {
         $progressId = 999;
-        
+
         // Mock initial running state
         $runningResponse = [
             'id' => $progressId,
             'workflow_state' => 'running',
             'completion' => 30,
-            'tag' => 'bulk_operation'
+            'tag' => 'bulk_operation',
         ];
 
         // Mock cancellation response
@@ -145,7 +146,7 @@ class ProgressIntegrationTest extends TestCase
             'workflow_state' => 'failed',
             'completion' => 30,
             'message' => 'Operation cancelled by user',
-            'tag' => 'bulk_operation'
+            'tag' => 'bulk_operation',
         ];
 
         $this->mockStream->method('getContents')->willReturnOnConsecutiveCalls(
@@ -166,7 +167,7 @@ class ProgressIntegrationTest extends TestCase
 
         // Cancel it
         $cancelledProgress = $progress->cancel('User requested cancellation');
-        
+
         $this->assertSame($progress, $cancelledProgress);
         $this->assertTrue($cancelledProgress->isFailed());
         $this->assertFalse($cancelledProgress->isSuccessful());
@@ -186,7 +187,7 @@ class ProgressIntegrationTest extends TestCase
             'workflow_state' => 'completed',
             'completion' => 100,
             'tag' => 'lti_grade_passback',
-            'results' => ['grades_updated' => 25]
+            'results' => ['grades_updated' => 25],
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($ltiResponse));
@@ -220,7 +221,7 @@ class ProgressIntegrationTest extends TestCase
             'created_at' => $earlier->format('c'),
             'updated_at' => $now->format('c'),
             'tag' => 'file_upload',
-            'message' => 'Upload completed successfully'
+            'message' => 'Upload completed successfully',
         ];
 
         $progress = new Progress($progressData);
@@ -239,23 +240,23 @@ class ProgressIntegrationTest extends TestCase
             // Queued operation
             [
                 'data' => ['workflow_state' => 'queued', 'completion' => 0, 'message' => 'Waiting for processing slot'],
-                'expected' => 'Waiting to start - Waiting for processing slot'
+                'expected' => 'Waiting to start - Waiting for processing slot',
             ],
             // Running with progress
             [
                 'data' => ['workflow_state' => 'running', 'completion' => 45, 'message' => 'Importing assignments'],
-                'expected' => 'In progress (45%) - Importing assignments'
+                'expected' => 'In progress (45%) - Importing assignments',
             ],
             // Completed successfully
             [
                 'data' => ['workflow_state' => 'completed', 'completion' => 100],
-                'expected' => 'Completed successfully'
+                'expected' => 'Completed successfully',
             ],
             // Failed with error
             [
                 'data' => ['workflow_state' => 'failed', 'completion' => 65, 'message' => 'Insufficient storage space'],
-                'expected' => 'Failed - Insufficient storage space'
-            ]
+                'expected' => 'Failed - Insufficient storage space',
+            ],
         ];
 
         foreach ($scenarios as $scenario) {
@@ -294,11 +295,11 @@ class ProgressIntegrationTest extends TestCase
                 'failed_items' => 3,
                 'warnings' => [
                     'File size exceeded for 2 items',
-                    'Invalid date format in 1 item'
-                ]
+                    'Invalid date format in 1 item',
+                ],
             ],
             'processing_time' => '00:05:32',
-            'final_status' => 'completed_with_warnings'
+            'final_status' => 'completed_with_warnings',
         ];
 
         $progress = new Progress([
@@ -306,12 +307,12 @@ class ProgressIntegrationTest extends TestCase
             'workflow_state' => 'completed',
             'completion' => 100,
             'results' => $complexResults,
-            'tag' => 'content_migration'
+            'tag' => 'content_migration',
         ]);
 
         $this->assertTrue($progress->isCompleted());
         $this->assertEquals($complexResults, $progress->getResults());
-        
+
         // Verify deep array access
         $this->assertEquals(150, $progress->getResults()['migration_summary']['total_items']);
         $this->assertCount(2, $progress->getResults()['migration_summary']['warnings']);
@@ -320,14 +321,14 @@ class ProgressIntegrationTest extends TestCase
     public function testStaticPollingUtilityIntegration(): void
     {
         $progressId = 666;
-        
+
         $pollingResponses = [
             // Initial find
             ['id' => $progressId, 'workflow_state' => 'queued', 'completion' => 0],
             // Polling sequence
             ['id' => $progressId, 'workflow_state' => 'running', 'completion' => 33],
             ['id' => $progressId, 'workflow_state' => 'running', 'completion' => 66],
-            ['id' => $progressId, 'workflow_state' => 'completed', 'completion' => 100, 'results' => ['final' => 'data']]
+            ['id' => $progressId, 'workflow_state' => 'completed', 'completion' => 100, 'results' => ['final' => 'data']],
         ];
 
         $this->mockStream->method('getContents')->willReturnOnConsecutiveCalls(

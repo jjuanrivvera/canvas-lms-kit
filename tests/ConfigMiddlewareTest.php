@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Tests;
 
 use CanvasLMS\Config;
@@ -34,7 +36,7 @@ class ConfigMiddlewareTest extends TestCase
         ];
 
         Config::setMiddleware($middlewareConfig);
-        
+
         $retrieved = Config::getMiddleware();
         $this->assertEquals($middlewareConfig, $retrieved);
     }

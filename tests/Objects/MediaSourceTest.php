@@ -26,7 +26,7 @@ class MediaSourceTest extends TestCase
             'bitrate' => '2500',
             'size' => '10485760',
             'isOriginal' => '1',
-            'fileExt' => 'mp4'
+            'fileExt' => 'mp4',
         ];
 
         $source = new MediaSource($data);
@@ -67,7 +67,7 @@ class MediaSourceTest extends TestCase
     {
         $data = [
             'content_type' => 'video/webm',
-            'file_ext' => 'webm'
+            'file_ext' => 'webm',
         ];
 
         $source = new MediaSource($data);
@@ -90,7 +90,7 @@ class MediaSourceTest extends TestCase
             'bitrate' => '1500',
             'size' => '5242880',
             'isOriginal' => '0',
-            'fileExt' => 'webm'
+            'fileExt' => 'webm',
         ]);
 
         $array = $source->toArray();
@@ -116,7 +116,7 @@ class MediaSourceTest extends TestCase
             'height' => '1080',
             'width' => '1920',
             'content_type' => 'video/mp4',
-            'url' => 'https://example.com/hd.mp4'
+            'url' => 'https://example.com/hd.mp4',
         ]);
 
         $array = $source->toArray();
@@ -126,7 +126,7 @@ class MediaSourceTest extends TestCase
         $this->assertEquals('1920', $array['width']);
         $this->assertEquals('video/mp4', $array['content_type']);
         $this->assertEquals('https://example.com/hd.mp4', $array['url']);
-        
+
         // Should not include null values
         $this->assertArrayNotHasKey('containerFormat', $array);
         $this->assertArrayNotHasKey('bitrate', $array);
@@ -157,7 +157,7 @@ class MediaSourceTest extends TestCase
             'height' => '360',
             'width' => null,
             'content_type' => 'video/flv',
-            'url' => null
+            'url' => null,
         ];
 
         $source = new MediaSource($data);
@@ -176,7 +176,7 @@ class MediaSourceTest extends TestCase
         $data = [
             'height' => '240',
             'unknown_property' => 'should be ignored',
-            'another_unknown' => 456
+            'another_unknown' => 456,
         ];
 
         $source = new MediaSource($data);
@@ -196,7 +196,7 @@ class MediaSourceTest extends TestCase
             ['content_type' => 'video/webm', 'fileExt' => 'webm', 'containerFormat' => 'webm'],
             ['content_type' => 'video/x-flv', 'fileExt' => 'flv', 'containerFormat' => 'flash video'],
             ['content_type' => 'video/ogg', 'fileExt' => 'ogv', 'containerFormat' => 'ogg'],
-            ['content_type' => 'video/quicktime', 'fileExt' => 'mov', 'containerFormat' => 'quicktime']
+            ['content_type' => 'video/quicktime', 'fileExt' => 'mov', 'containerFormat' => 'quicktime'],
         ];
 
         foreach ($formats as $format) {
@@ -216,7 +216,7 @@ class MediaSourceTest extends TestCase
             ['content_type' => 'audio/mp3', 'fileExt' => 'mp3'],
             ['content_type' => 'audio/mpeg', 'fileExt' => 'mp3'],
             ['content_type' => 'audio/ogg', 'fileExt' => 'ogg'],
-            ['content_type' => 'audio/wav', 'fileExt' => 'wav']
+            ['content_type' => 'audio/wav', 'fileExt' => 'wav'],
         ];
 
         foreach ($formats as $format) {
@@ -252,7 +252,7 @@ class MediaSourceTest extends TestCase
             ['height' => '720', 'width' => '1280'],  // 720p HD
             ['height' => '1080', 'width' => '1920'], // 1080p Full HD
             ['height' => '1440', 'width' => '2560'], // 1440p 2K
-            ['height' => '2160', 'width' => '3840']  // 2160p 4K
+            ['height' => '2160', 'width' => '3840'],  // 2160p 4K
         ];
 
         foreach ($resolutions as $resolution) {

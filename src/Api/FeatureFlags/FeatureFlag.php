@@ -19,6 +19,7 @@ use CanvasLMS\Interfaces\HttpClientInterface;
  * Instead, it implements custom methods specific to feature flag operations.
  *
  * @package CanvasLMS\Api\FeatureFlags
+ *
  * @see https://canvas.instructure.com/doc/api/feature_flags.html
  */
 class FeatureFlag
@@ -140,6 +141,7 @@ class FeatureFlag
      * Validate that the context type is supported
      *
      * @param string $contextType The context type to validate
+     *
      * @throws \InvalidArgumentException If the context type is invalid
      */
     private static function validateContextType(string $contextType): void
@@ -160,6 +162,7 @@ class FeatureFlag
      * Normalize the context type from plural to singular
      *
      * @param string $contextType The plural context type
+     *
      * @return string The singular context type
      */
     private static function normalizeContextType(string $contextType): string
@@ -167,7 +170,7 @@ class FeatureFlag
         $mapping = [
             'accounts' => 'account',
             'courses' => 'course',
-            'users' => 'user'
+            'users' => 'user',
         ];
 
         return $mapping[$contextType] ?? $contextType;
@@ -177,12 +180,15 @@ class FeatureFlag
      * List features for the default account context
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<int, self> Array of FeatureFlag objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, self> Array of FeatureFlag objects
      */
     public static function get(array $params = []): array
     {
         $accountId = Config::getAccountId();
+
         return self::fetchByContext('accounts', $accountId, $params);
     }
 
@@ -192,8 +198,10 @@ class FeatureFlag
      * @param string $contextType The context type (accounts, courses, users)
      * @param int $contextId The context ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<int, self> Array of FeatureFlag objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, self> Array of FeatureFlag objects
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
@@ -219,12 +227,15 @@ class FeatureFlag
      * Get a specific feature flag for the default account context
      *
      * @param string $featureName The symbolic name of the feature
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(string $featureName): self
     {
         $accountId = Config::getAccountId();
+
         return self::findByContext('accounts', $accountId, $featureName);
     }
 
@@ -234,8 +245,10 @@ class FeatureFlag
      * @param string $contextType The context type (accounts, courses, users)
      * @param int $contextId The context ID
      * @param string $featureName The symbolic name of the feature
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function findByContext(string $contextType, int $contextId, string $featureName): self
     {
@@ -258,12 +271,15 @@ class FeatureFlag
      *
      * @param string $featureName The symbolic name of the feature
      * @param array<string, mixed>|UpdateFeatureFlagDTO $data The update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function update(string $featureName, array|UpdateFeatureFlagDTO $data): self
     {
         $accountId = Config::getAccountId();
+
         return self::updateByContext('accounts', $accountId, $featureName, $data);
     }
 
@@ -274,8 +290,10 @@ class FeatureFlag
      * @param int $contextId The context ID
      * @param string $featureName The symbolic name of the feature
      * @param array<string, mixed>|UpdateFeatureFlagDTO $data The update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function updateByContext(
         string $contextType,
@@ -291,7 +309,7 @@ class FeatureFlag
 
         $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, $featureName);
         $response = self::$apiClient->put($endpoint, [
-            'multipart' => $data->toMultipart()
+            'multipart' => $data->toMultipart(),
         ]);
         $featureData = self::parseJsonResponse($response);
 
@@ -307,12 +325,15 @@ class FeatureFlag
      * Remove a feature flag for the default account context
      *
      * @param string $featureName The symbolic name of the feature
-     * @return bool
+     *
      * @throws CanvasApiException
+     *
+     * @return bool
      */
     public static function delete(string $featureName): bool
     {
         $accountId = Config::getAccountId();
+
         return self::deleteByContext('accounts', $accountId, $featureName);
     }
 
@@ -322,8 +343,10 @@ class FeatureFlag
      * @param string $contextType The context type (accounts, courses, users)
      * @param int $contextId The context ID
      * @param string $featureName The symbolic name of the feature
-     * @return bool
+     *
      * @throws CanvasApiException
+     *
+     * @return bool
      */
     public static function deleteByContext(string $contextType, int $contextId, string $featureName): bool
     {
@@ -333,11 +356,13 @@ class FeatureFlag
 
         try {
             self::$apiClient->delete($endpoint);
+
             return true;
         } catch (CanvasApiException $e) {
             if ($e->getCode() === 404) {
                 return false;
             }
+
             throw $e;
         }
     }
@@ -347,8 +372,10 @@ class FeatureFlag
      *
      * @param string $featureName The symbolic name of the feature
      * @param string $state The state to set (off, allowed, on)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function setFeatureState(string $featureName, string $state): self
     {
@@ -362,8 +389,10 @@ class FeatureFlag
      * @param int $contextId The context ID
      * @param string $featureName The symbolic name of the feature
      * @param string $state The state to set (off, allowed, on)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function setFeatureStateByContext(
         string $contextType,
@@ -372,6 +401,7 @@ class FeatureFlag
         string $state
     ): self {
         self::validateContextType($contextType);
+
         return self::updateByContext($contextType, $contextId, $featureName, ['state' => $state]);
     }
 
@@ -379,8 +409,10 @@ class FeatureFlag
      * Enable a feature for the default account context
      *
      * @param string $featureName The symbolic name of the feature
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function enable(string $featureName): self
     {
@@ -393,8 +425,10 @@ class FeatureFlag
      * @param string $contextType The context type (accounts, courses, users)
      * @param int $contextId The context ID
      * @param string $featureName The symbolic name of the feature
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function enableByContext(string $contextType, int $contextId, string $featureName): self
     {
@@ -405,8 +439,10 @@ class FeatureFlag
      * Disable a feature for the default account context
      *
      * @param string $featureName The symbolic name of the feature
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function disable(string $featureName): self
     {
@@ -419,8 +455,10 @@ class FeatureFlag
      * @param string $contextType The context type (accounts, courses, users)
      * @param int $contextId The context ID
      * @param string $featureName The symbolic name of the feature
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function disableByContext(string $contextType, int $contextId, string $featureName): self
     {
@@ -431,8 +469,10 @@ class FeatureFlag
      * Allow a feature to be toggled for the default account context
      *
      * @param string $featureName The symbolic name of the feature
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function allow(string $featureName): self
     {
@@ -445,8 +485,10 @@ class FeatureFlag
      * @param string $contextType The context type (accounts, courses, users)
      * @param int $contextId The context ID
      * @param string $featureName The symbolic name of the feature
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function allowByContext(string $contextType, int $contextId, string $featureName): self
     {
@@ -463,6 +505,7 @@ class FeatureFlag
         if (isset($this->featureFlag['state']) && is_string($this->featureFlag['state'])) {
             return $this->featureFlag['state'] === 'on';
         }
+
         return $this->state === 'on';
     }
 
@@ -476,6 +519,7 @@ class FeatureFlag
         if (isset($this->featureFlag['state']) && is_string($this->featureFlag['state'])) {
             return $this->featureFlag['state'] === 'off';
         }
+
         return $this->state === 'off';
     }
 
@@ -489,6 +533,7 @@ class FeatureFlag
         if (isset($this->featureFlag['state']) && is_string($this->featureFlag['state'])) {
             return $this->featureFlag['state'] === 'allowed';
         }
+
         return $this->state === 'allowed';
     }
 
@@ -502,6 +547,7 @@ class FeatureFlag
         if (isset($this->featureFlag['locked']) && is_bool($this->featureFlag['locked'])) {
             return $this->featureFlag['locked'] === true;
         }
+
         return $this->locked === true;
     }
 
@@ -515,6 +561,7 @@ class FeatureFlag
         if (isset($this->featureFlag['hidden']) && is_bool($this->featureFlag['hidden'])) {
             return $this->featureFlag['hidden'] === true;
         }
+
         return $this->hidden === true;
     }
 
@@ -542,8 +589,10 @@ class FeatureFlag
      * Parse JSON response from HTTP response
      *
      * @param \Psr\Http\Message\ResponseInterface $response The HTTP response
-     * @return array<string, mixed> The parsed JSON data
+     *
      * @throws CanvasApiException If JSON parsing fails
+     *
+     * @return array<string, mixed> The parsed JSON data
      */
     protected static function parseJsonResponse(\Psr\Http\Message\ResponseInterface $response): array
     {

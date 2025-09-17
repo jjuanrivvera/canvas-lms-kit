@@ -6,12 +6,8 @@ namespace CanvasLMS\Tests\Api\Groups;
 
 use CanvasLMS\Api\Groups\Group;
 use CanvasLMS\Api\Groups\GroupMembership;
-use CanvasLMS\Dto\Groups\CreateGroupDTO;
-use CanvasLMS\Dto\Groups\UpdateGroupDTO;
-use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -19,17 +15,19 @@ use Psr\Http\Message\StreamInterface;
 class GroupTest extends TestCase
 {
     private HttpClientInterface $mockHttpClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->mockHttpClient = $this->createMock(HttpClientInterface::class);
         $this->mockResponse = $this->createMock(ResponseInterface::class);
         $this->mockStream = $this->createMock(StreamInterface::class);
-        
+
         Group::setApiClient($this->mockHttpClient);
         \CanvasLMS\Config::setAccountId(1);
     }
@@ -56,7 +54,7 @@ class GroupTest extends TestCase
             'has_submission' => true,
             'context_name' => 'Test Course',
             'users' => [['id' => 1, 'name' => 'User 1']],
-            'non_collaborative' => false
+            'non_collaborative' => false,
         ];
 
         $group = new Group($data);
@@ -78,15 +76,15 @@ class GroupTest extends TestCase
         $groupData = [
             'id' => 123,
             'name' => 'Test Group',
-            'description' => 'Test Description'
+            'description' => 'Test Description',
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($groupData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('get')
             ->with('groups/123')
@@ -103,12 +101,12 @@ class GroupTest extends TestCase
     {
         $groupsData = [
             ['id' => 1, 'name' => 'Group 1'],
-            ['id' => 2, 'name' => 'Group 2']
+            ['id' => 2, 'name' => 'Group 2'],
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($groupsData));
         $this->mockResponse->method('getBody')->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('get')
             ->with('accounts/1/groups', ['query' => []])
@@ -125,7 +123,7 @@ class GroupTest extends TestCase
     public function testPaginate(): void
     {
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('getPaginated')
             ->with('accounts/1/groups', ['query' => []])
@@ -142,17 +140,17 @@ class GroupTest extends TestCase
             'name' => 'New Group',
             'description' => 'New Description',
             'is_public' => true,
-            'join_level' => 'parent_context_auto_join'
+            'join_level' => 'parent_context_auto_join',
         ];
 
         $responseData = array_merge($createData, ['id' => 123]);
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('post')
             ->with($this->stringContains('groups'), $this->callback(function ($options) {
@@ -171,17 +169,17 @@ class GroupTest extends TestCase
     {
         $updateData = [
             'name' => 'Updated Group',
-            'description' => 'Updated Description'
+            'description' => 'Updated Description',
         ];
 
         $responseData = array_merge($updateData, ['id' => 123]);
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('put')
             ->with('groups/123', $this->callback(function ($options) {
@@ -198,7 +196,7 @@ class GroupTest extends TestCase
     public function testDelete(): void
     {
         $group = new Group(['id' => 123]);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('delete')
             ->with('groups/123')
@@ -212,18 +210,18 @@ class GroupTest extends TestCase
     public function testSave(): void
     {
         $group = new Group(['name' => 'Test Group']);
-        
+
         $responseData = [
             'id' => 123,
-            'name' => 'Test Group'
+            'name' => 'Test Group',
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('post')
             ->willReturn($this->mockResponse);
@@ -237,16 +235,16 @@ class GroupTest extends TestCase
     public function testMembers(): void
     {
         $group = new Group(['id' => 123]);
-        
+
         $membersData = [
             ['id' => 1, 'name' => 'User 1'],
-            ['id' => 2, 'name' => 'User 2']
+            ['id' => 2, 'name' => 'User 2'],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->method('all')
             ->willReturn($membersData);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('getPaginated')
             ->with('groups/123/users', ['query' => []])
@@ -261,18 +259,18 @@ class GroupTest extends TestCase
     public function testActivityStream(): void
     {
         $group = new Group(['id' => 123]);
-        
+
         $activityData = [
             ['id' => 1, 'type' => 'Discussion'],
-            ['id' => 2, 'type' => 'Announcement']
+            ['id' => 2, 'type' => 'Announcement'],
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($activityData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('get')
             ->with('groups/123/activity_stream')
@@ -287,15 +285,15 @@ class GroupTest extends TestCase
     public function testActivityStreamSummary(): void
     {
         $group = new Group(['id' => 123]);
-        
+
         $summaryData = ['unread_count' => 5];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($summaryData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('get')
             ->with('groups/123/activity_stream/summary')
@@ -310,18 +308,18 @@ class GroupTest extends TestCase
     public function testPermissions(): void
     {
         $group = new Group(['id' => 123]);
-        
+
         $permissionsData = [
             'create_discussion_topic' => true,
-            'create_announcement' => false
+            'create_announcement' => false,
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($permissionsData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('get')
             ->with('groups/123/permissions')
@@ -337,20 +335,20 @@ class GroupTest extends TestCase
     public function testCreateMembership(): void
     {
         $group = new Group(['id' => 123]);
-        
+
         $membershipData = [
             'id' => 456,
             'group_id' => 123,
             'user_id' => 789,
-            'workflow_state' => 'accepted'
+            'workflow_state' => 'accepted',
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($membershipData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('post')
             ->with('groups/123/memberships', $this->anything())
@@ -365,17 +363,17 @@ class GroupTest extends TestCase
     public function testMemberships(): void
     {
         $group = new Group(['id' => 123]);
-        
+
         $membershipsData = [
             ['id' => 1, 'user_id' => 100],
-            ['id' => 2, 'user_id' => 200]
+            ['id' => 2, 'user_id' => 200],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
             ->method('all')
             ->willReturn($membershipsData);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('getPaginated')
             ->with('groups/123/memberships', ['query' => []])
@@ -391,11 +389,11 @@ class GroupTest extends TestCase
     public function testInvite(): void
     {
         $group = new Group(['id' => 123]);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('post')
             ->with('groups/123/invite', $this->callback(function ($options) {
-                return isset($options['multipart']) && 
+                return isset($options['multipart']) &&
                        is_array($options['multipart']) &&
                        count($options['multipart']) === 1 &&
                        $options['multipart'][0]['name'] === 'invitees[]' &&
@@ -411,7 +409,7 @@ class GroupTest extends TestCase
     public function testInviteWithInvalidEmail(): void
     {
         $group = new Group(['id' => 123]);
-        
+
         $this->expectException(\CanvasLMS\Exceptions\CanvasApiException::class);
         $this->expectExceptionMessage('Invalid email address: not-an-email');
 
@@ -421,28 +419,28 @@ class GroupTest extends TestCase
     public function testRemoveUser(): void
     {
         $group = new Group(['id' => 123]);
-        
+
         // Mock finding the membership
         $membershipData = [
             [
                 'id' => 456,
                 'user_id' => 789,
                 'group_id' => 123,
-                'workflow_state' => 'accepted'
-            ]
+                'workflow_state' => 'accepted',
+            ],
         ];
-        
+
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
             ->method('all')
             ->willReturn($membershipData);
-        
+
         // Mock fetching memberships
         $this->mockHttpClient->expects($this->once())
             ->method('getPaginated')
             ->with('groups/123/memberships', ['query' => ['filter_states[]' => 'accepted']])
             ->willReturn($mockPaginatedResponse);
-        
+
         // Mock deleting the membership
         $this->mockHttpClient->expects($this->once())
             ->method('delete')
@@ -458,13 +456,13 @@ class GroupTest extends TestCase
     {
         $groupsData = [
             ['id' => 1, 'name' => 'Course Group 1'],
-            ['id' => 2, 'name' => 'Course Group 2']
+            ['id' => 2, 'name' => 'Course Group 2'],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->method('all')
             ->willReturn($groupsData);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('getPaginated')
             ->with('courses/456/groups', ['query' => []])
@@ -481,13 +479,13 @@ class GroupTest extends TestCase
     {
         $groupsData = [
             ['id' => 1, 'name' => 'User Group 1'],
-            ['id' => 2, 'name' => 'User Group 2']
+            ['id' => 2, 'name' => 'User Group 2'],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->method('all')
             ->willReturn($groupsData);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('getPaginated')
             ->with('users/123/groups', ['query' => []])
@@ -499,20 +497,19 @@ class GroupTest extends TestCase
         $this->assertCount(2, $groups);
     }
 
-
     public function testGettersAndSetters(): void
     {
         $group = new Group([]);
-        
+
         $group->contextName = 'New Context';
         $this->assertEquals('New Context', $group->contextName);
-        
+
         $group->users = [['id' => 1], ['id' => 2]];
         $this->assertCount(2, $group->users);
-        
+
         $group->nonCollaborative = true;
         $this->assertTrue($group->nonCollaborative);
-        
+
         $group->followedByUser = true;
         $this->assertTrue($group->followedByUser);
     }

@@ -20,10 +20,10 @@ class AnalyticsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->httpClient = $this->createMock(HttpClientInterface::class);
         Analytics::setHttpClient($this->httpClient);
-        
+
         // Set default config values
         Config::setAccountId(1);
     }
@@ -51,7 +51,7 @@ class AnalyticsTest extends TestCase
         $expectedResponse = [
             'by_date' => [
                 '2012-01-24' => 1240,
-                '2012-01-27' => 912
+                '2012-01-27' => 912,
             ],
             'by_category' => [
                 'announcements' => 54,
@@ -66,8 +66,8 @@ class AnalyticsTest extends TestCase
                 'modules' => 71,
                 'other' => 412,
                 'pages' => 105,
-                'quizzes' => 356
-            ]
+                'quizzes' => 356,
+            ],
         ];
 
         $this->httpClient->expects($this->once())
@@ -88,7 +88,7 @@ class AnalyticsTest extends TestCase
     {
         $expectedResponse = [
             'by_date' => ['2012-01-24' => 100],
-            'by_category' => ['assignments' => 50]
+            'by_category' => ['assignments' => 50],
         ];
 
         $this->httpClient->expects($this->once())
@@ -114,7 +114,7 @@ class AnalyticsTest extends TestCase
             '97' => 116,
             '98' => 85,
             '99' => 63,
-            '100' => 190
+            '100' => 190,
         ];
 
         $this->httpClient->expects($this->once())
@@ -139,7 +139,7 @@ class AnalyticsTest extends TestCase
             'discussion_topics' => 77,
             'media_objects' => 219,
             'attachments' => 1268,
-            'assignments' => 290
+            'assignments' => 290,
         ];
 
         $this->httpClient->expects($this->once())
@@ -167,9 +167,9 @@ class AnalyticsTest extends TestCase
                     'discussion_topics' => 77,
                     'media_objects' => 219,
                     'attachments' => 1268,
-                    'assignments' => 290
-                ]
-            ]
+                    'assignments' => 290,
+                ],
+            ],
         ];
 
         $this->httpClient->expects($this->once())
@@ -195,13 +195,13 @@ class AnalyticsTest extends TestCase
             [
                 'date' => '2012-01-24',
                 'participations' => 3,
-                'views' => 10
+                'views' => 10,
             ],
             [
                 'date' => '2012-01-25',
                 'participations' => 5,
-                'views' => 15
-            ]
+                'views' => 15,
+            ],
         ];
 
         $this->httpClient->expects($this->once())
@@ -235,9 +235,9 @@ class AnalyticsTest extends TestCase
                 'tardiness_breakdown' => [
                     'on_time' => 0.75,
                     'missing' => 0.1,
-                    'late' => 0.15
-                ]
-            ]
+                    'late' => 0.15,
+                ],
+            ],
         ];
 
         $this->httpClient->expects($this->once())
@@ -257,7 +257,7 @@ class AnalyticsTest extends TestCase
     public function testFetchCourseAssignmentsAsync(): void
     {
         $expectedResponse = [
-            'progress_url' => 'https://canvas.example.com/api/v1/progress/123'
+            'progress_url' => 'https://canvas.example.com/api/v1/progress/123',
         ];
 
         $this->httpClient->expects($this->once())
@@ -287,9 +287,9 @@ class AnalyticsTest extends TestCase
                     'on_time' => 3,
                     'late' => 0,
                     'missing' => 2,
-                    'floating' => 0
-                ]
-            ]
+                    'floating' => 0,
+                ],
+            ],
         ];
 
         $this->httpClient->expects($this->once())
@@ -315,18 +315,18 @@ class AnalyticsTest extends TestCase
             'page_views' => [
                 '2012-01-24T13:00:00-00:00' => 19,
                 '2012-01-24T14:00:00-00:00' => 13,
-                '2012-01-27T09:00:00-00:00' => 23
+                '2012-01-27T09:00:00-00:00' => 23,
             ],
             'participations' => [
                 [
                     'created_at' => '2012-01-21T22:00:00-06:00',
-                    'url' => 'https://canvas.example.com/path/to/canvas'
+                    'url' => 'https://canvas.example.com/path/to/canvas',
                 ],
                 [
                     'created_at' => '2012-01-27T22:00:00-06:00',
-                    'url' => 'https://canvas.example.com/path/to/canvas'
-                ]
-            ]
+                    'url' => 'https://canvas.example.com/path/to/canvas',
+                ],
+            ],
         ];
 
         $this->httpClient->expects($this->once())
@@ -362,9 +362,9 @@ class AnalyticsTest extends TestCase
                 'submission' => [
                     'posted_at' => '2012-01-23T20:00:00-07:00',
                     'submitted_at' => '2012-01-22T22:00:00-07:00',
-                    'score' => 10
-                ]
-            ]
+                    'score' => 10,
+                ],
+            ],
         ];
 
         $this->httpClient->expects($this->once())
@@ -385,11 +385,11 @@ class AnalyticsTest extends TestCase
         $expectedResponse = [
             '2012-01-24' => [
                 'instructorMessages' => 1,
-                'studentMessages' => 2
+                'studentMessages' => 2,
             ],
             '2012-01-27' => [
-                'studentMessages' => 1
-            ]
+                'studentMessages' => 1,
+            ],
         ];
 
         $this->httpClient->expects($this->once())
@@ -413,7 +413,7 @@ class AnalyticsTest extends TestCase
     {
         $expectedResponse = [
             'by_date' => ['2012-01-24' => 500],
-            'by_category' => ['assignments' => 100]
+            'by_category' => ['assignments' => 100],
         ];
 
         $this->httpClient->expects($this->once())

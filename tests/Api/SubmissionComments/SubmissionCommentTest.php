@@ -1,18 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\SubmissionComments;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\SubmissionComments\SubmissionComment;
-use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Assignments\Assignment;
-use CanvasLMS\Dto\SubmissionComments\CreateSubmissionCommentDTO;
+use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\SubmissionComments\SubmissionComment;
 use CanvasLMS\Dto\SubmissionComments\UpdateSubmissionCommentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use Exception;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use Exception;
 
 /**
  * @covers \CanvasLMS\Api\SubmissionComments\SubmissionComment
@@ -20,8 +21,11 @@ use Exception;
 class SubmissionCommentTest extends TestCase
 {
     private HttpClientInterface $httpClientMock;
+
     private Course $course;
+
     private Assignment $assignment;
+
     private int $userId;
 
     protected function setUp(): void
@@ -40,15 +44,15 @@ class SubmissionCommentTest extends TestCase
     protected function tearDown(): void
     {
         $reflection = new \ReflectionClass(SubmissionComment::class);
-        
+
         $courseProperty = $reflection->getProperty('course');
         $courseProperty->setAccessible(true);
         $courseProperty->setValue(null, null);
-        
+
         $assignmentProperty = $reflection->getProperty('assignment');
         $assignmentProperty->setAccessible(true);
         $assignmentProperty->setValue(null, null);
-        
+
         $userIdProperty = $reflection->getProperty('userId');
         $userIdProperty->setAccessible(true);
         $userIdProperty->setValue(null, 0);
@@ -106,7 +110,7 @@ class SubmissionCommentTest extends TestCase
             'comment' => 'Great work on this assignment!',
             'created_at' => '2024-01-15T10:30:00Z',
             'edited_at' => null,
-            'media_comment' => null
+            'media_comment' => null,
         ];
 
         $comment = new SubmissionComment($data);
@@ -142,7 +146,7 @@ class SubmissionCommentTest extends TestCase
         $comment->setEditedAt('2024-01-15T11:30:00Z');
         $this->assertEquals('2024-01-15T11:30:00Z', $comment->getEditedAt());
 
-        $author = (object)['id' => 456, 'display_name' => 'John Doe'];
+        $author = (object) ['id' => 456, 'display_name' => 'John Doe'];
         $comment->setAuthor($author);
         $this->assertEquals($author, $comment->getAuthor());
 
@@ -155,7 +159,7 @@ class SubmissionCommentTest extends TestCase
     {
         $commentId = 37;
         $updateData = [
-            'text_comment' => 'Updated comment text'
+            'text_comment' => 'Updated comment text',
         ];
 
         $responseData = [
@@ -164,7 +168,7 @@ class SubmissionCommentTest extends TestCase
             'author_name' => 'Teacher Name',
             'comment' => 'Updated comment text',
             'created_at' => '2024-01-15T10:30:00Z',
-            'edited_at' => '2024-01-15T11:45:00Z'
+            'edited_at' => '2024-01-15T11:45:00Z',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -194,7 +198,7 @@ class SubmissionCommentTest extends TestCase
     {
         $commentId = 37;
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => 'DTO updated comment'
+            'text_comment' => 'DTO updated comment',
         ]);
 
         $responseData = [
@@ -203,7 +207,7 @@ class SubmissionCommentTest extends TestCase
             'author_name' => 'Teacher Name',
             'comment' => 'DTO updated comment',
             'created_at' => '2024-01-15T10:30:00Z',
-            'edited_at' => '2024-01-15T12:00:00Z'
+            'edited_at' => '2024-01-15T12:00:00Z',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -261,16 +265,16 @@ class SubmissionCommentTest extends TestCase
             'name' => 'feedback.pdf',
             'size' => 1024000,
             'content_type' => 'application/pdf',
-            'parent_folder_path' => '/submission_comments'
+            'parent_folder_path' => '/submission_comments',
         ];
 
         $responseData = [
             'upload_url' => 'https://canvas.example.com/upload',
             'upload_params' => [
                 'key' => 'submission_comment_files/123/feedback.pdf',
-                'acl' => 'private'
+                'acl' => 'private',
             ],
-            'file_param' => 'file'
+            'file_param' => 'file',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -301,7 +305,7 @@ class SubmissionCommentTest extends TestCase
         $commentData = [
             'id' => 37,
             'author_id' => 134,
-            'comment' => 'Original comment'
+            'comment' => 'Original comment',
         ];
 
         $comment = new SubmissionComment($commentData);
@@ -313,7 +317,7 @@ class SubmissionCommentTest extends TestCase
             'author_name' => 'Teacher Name',
             'comment' => 'Modified comment text',
             'created_at' => '2024-01-15T10:30:00Z',
-            'edited_at' => '2024-01-15T13:15:00Z'
+            'edited_at' => '2024-01-15T13:15:00Z',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -352,7 +356,7 @@ class SubmissionCommentTest extends TestCase
     {
         $commentData = [
             'id' => 37,
-            'comment' => 'Test comment'
+            'comment' => 'Test comment',
         ];
 
         $comment = new SubmissionComment($commentData);

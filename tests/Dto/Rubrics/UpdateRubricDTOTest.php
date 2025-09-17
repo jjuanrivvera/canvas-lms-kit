@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Rubrics;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Rubrics\UpdateRubricDTO;
+use PHPUnit\Framework\TestCase;
 
 class UpdateRubricDTOTest extends TestCase
 {
@@ -58,14 +60,14 @@ class UpdateRubricDTOTest extends TestCase
                     [
                         'id' => 'existing_rating_1',
                         'description' => 'Outstanding',
-                        'points' => 25
+                        'points' => 25,
                     ],
                     [
                         'description' => 'New Rating',
-                        'points' => 20
-                    ]
-                ]
-            ]
+                        'points' => 20,
+                    ],
+                ],
+            ],
         ];
 
         $result = $dto->toApiArray();
@@ -73,39 +75,39 @@ class UpdateRubricDTOTest extends TestCase
         // Check criterion updates
         $this->assertContains([
             'name' => 'rubric[criteria][existing_criterion_1][description]',
-            'contents' => 'Updated Content Knowledge'
+            'contents' => 'Updated Content Knowledge',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][existing_criterion_1][long_description]',
-            'contents' => 'Updated understanding description'
+            'contents' => 'Updated understanding description',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][existing_criterion_1][points]',
-            'contents' => '25'
+            'contents' => '25',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][existing_criterion_1][criterion_use_range]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
 
         // Check rating updates
         $this->assertContains([
             'name' => 'rubric[criteria][existing_criterion_1][ratings][existing_rating_1][description]',
-            'contents' => 'Outstanding'
+            'contents' => 'Outstanding',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][existing_criterion_1][ratings][existing_rating_1][points]',
-            'contents' => '25'
+            'contents' => '25',
         ], $result);
 
         // New rating uses index
         $this->assertContains([
             'name' => 'rubric[criteria][existing_criterion_1][ratings][1][description]',
-            'contents' => 'New Rating'
+            'contents' => 'New Rating',
         ], $result);
     }
 
@@ -122,7 +124,7 @@ class UpdateRubricDTOTest extends TestCase
 
         $this->assertContains([
             'name' => 'rubric_association_id',
-            'contents' => '456'
+            'contents' => '456',
         ], $result);
     }
 
@@ -137,7 +139,7 @@ class UpdateRubricDTOTest extends TestCase
             'useForGrading' => false,
             'hideScoreTotal' => true,
             'hidePoints' => false,
-            'purpose' => 'bookmark'
+            'purpose' => 'bookmark',
         ];
 
         $result = $dto->toApiArray();
@@ -145,22 +147,22 @@ class UpdateRubricDTOTest extends TestCase
         // Check association fields
         $this->assertContains([
             'name' => 'rubric_association[use_for_grading]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_score_total]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_points]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[purpose]',
-            'contents' => 'bookmark'
+            'contents' => 'bookmark',
         ], $result);
     }
 
@@ -193,7 +195,7 @@ class UpdateRubricDTOTest extends TestCase
             'title' => 'Initial Update Title',
             'freeFormCriterionComments' => true,
             'skipUpdatingPointsPossible' => false,
-            'hideScoreTotal' => true
+            'hideScoreTotal' => true,
         ];
 
         $dto = new UpdateRubricDTO($data);
@@ -213,9 +215,9 @@ class UpdateRubricDTOTest extends TestCase
         $dto->criteria = [
             [
                 'id' => 'criterion_to_update',
-                'points' => 30
+                'points' => 30,
                 // Only updating points, not description or ratings
-            ]
+            ],
         ];
 
         $result = $dto->toApiArray();
@@ -228,7 +230,7 @@ class UpdateRubricDTOTest extends TestCase
         $this->assertCount(1, $criteriaEntries);
         $this->assertContains([
             'name' => 'rubric[criteria][criterion_to_update][points]',
-            'contents' => '30'
+            'contents' => '30',
         ], $result);
     }
 
@@ -242,7 +244,7 @@ class UpdateRubricDTOTest extends TestCase
             'useForGrading' => true,
             'hideScoreTotal' => null,
             'hidePoints' => false,
-            'purpose' => null
+            'purpose' => null,
         ];
 
         $result = $dto->toApiArray();
@@ -256,12 +258,12 @@ class UpdateRubricDTOTest extends TestCase
 
         $this->assertContains([
             'name' => 'rubric_association[use_for_grading]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_points]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
 
         // Null values should not be included
@@ -280,7 +282,7 @@ class UpdateRubricDTOTest extends TestCase
         $dto->association = [
             'useForGrading' => true,
             'hideScoreTotal' => false,
-            'hideOutcomeResults' => true
+            'hideOutcomeResults' => true,
         ];
 
         $result = $dto->toApiArray();
@@ -288,17 +290,17 @@ class UpdateRubricDTOTest extends TestCase
         // Check snake_case conversion
         $this->assertContains([
             'name' => 'rubric_association[use_for_grading]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_score_total]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_outcome_results]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
     }
 }

@@ -13,6 +13,7 @@ namespace CanvasLMS\Objects;
 class SubmissionHistory
 {
     public ?int $submissionId = null;
+
     /** @var array<SubmissionVersion> */
     public array $versions = [];
 
@@ -27,7 +28,7 @@ class SubmissionHistory
 
         if (isset($data['versions']) && is_array($data['versions'])) {
             $this->versions = array_map(
-                fn($versionData) => new SubmissionVersion($versionData),
+                fn ($versionData) => new SubmissionVersion($versionData),
                 $data['versions']
             );
         }
@@ -37,6 +38,7 @@ class SubmissionHistory
      * Create a SubmissionHistory from an array.
      *
      * @param array<string, mixed> $data
+     *
      * @return self
      */
     public static function fromArray(array $data): self
@@ -87,6 +89,7 @@ class SubmissionHistory
      * Find a version by its ID.
      *
      * @param int $versionId
+     *
      * @return SubmissionVersion|null
      */
     public function findVersion(int $versionId): ?SubmissionVersion
@@ -96,6 +99,7 @@ class SubmissionHistory
                 return $version;
             }
         }
+
         return null;
     }
 
@@ -108,7 +112,7 @@ class SubmissionHistory
     {
         return array_filter(
             $this->versions,
-            fn($version) => $version->hasGradeChange()
+            fn ($version) => $version->hasGradeChange()
         );
     }
 
@@ -125,6 +129,7 @@ class SubmissionHistory
                 $graderIds[] = $version->graderId;
             }
         }
+
         return array_unique($graderIds);
     }
 }

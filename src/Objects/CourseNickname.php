@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Objects;
 
 /**
@@ -27,6 +29,7 @@ class CourseNickname
 
     /**
      * Constructor
+     *
      * @param array<string, mixed> $data
      */
     public function __construct(array $data = [])
@@ -41,6 +44,7 @@ class CourseNickname
 
     /**
      * Check if nickname is different from original course name
+     *
      * @return bool
      */
     public function isCustomized(): bool
@@ -50,6 +54,7 @@ class CourseNickname
 
     /**
      * Get display name (nickname or original name)
+     *
      * @return string
      */
     public function getDisplayName(): string
@@ -59,6 +64,7 @@ class CourseNickname
 
     /**
      * Get original course name
+     *
      * @return string|null
      */
     public function getOriginalName(): ?string
@@ -68,6 +74,7 @@ class CourseNickname
 
     /**
      * Convert to array
+     *
      * @return array<string, mixed>
      */
     public function toArray(): array

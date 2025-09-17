@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Rubrics;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Rubrics\UpdateRubricAssociationDTO;
+use PHPUnit\Framework\TestCase;
 
 class UpdateRubricAssociationDTOTest extends TestCase
 {
@@ -59,7 +61,7 @@ class UpdateRubricAssociationDTOTest extends TestCase
             ['name' => 'rubric_association[hide_score_total]', 'contents' => '0'],
             ['name' => 'rubric_association[hide_points]', 'contents' => '1'],
             ['name' => 'rubric_association[hide_outcome_results]', 'contents' => '0'],
-            ['name' => 'rubric_association[bookmarked]', 'contents' => '1']
+            ['name' => 'rubric_association[bookmarked]', 'contents' => '1'],
         ];
 
         foreach ($expectedFields as $expected) {
@@ -97,7 +99,7 @@ class UpdateRubricAssociationDTOTest extends TestCase
             'hide_score_total' => true,
             'hide_points' => false,
             'hide_outcome_results' => true,
-            'bookmarked' => false
+            'bookmarked' => false,
         ];
 
         $dto = new UpdateRubricAssociationDTO($data);
@@ -219,22 +221,22 @@ class UpdateRubricAssociationDTOTest extends TestCase
         // Check included fields
         $this->assertContains([
             'name' => 'rubric_association[use_for_grading]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[purpose]',
-            'contents' => 'bookmark'
+            'contents' => 'bookmark',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_points]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[bookmarked]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
 
         // Ensure null fields are not included

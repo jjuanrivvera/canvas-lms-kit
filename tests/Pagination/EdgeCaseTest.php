@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Tests\Pagination;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Enrollments\Enrollment;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Interfaces\HttpClientInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
 use CanvasLMS\Config;
+use CanvasLMS\Interfaces\HttpClientInterface;
+use CanvasLMS\Pagination\PaginatedResponse;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * Edge Case Tests for Pagination
@@ -49,9 +51,9 @@ class EdgeCaseTest extends TestCase
             for ($i = 0; $i < $itemsPerPage; $i++) {
                 $items[] = [
                     'id' => ($page - 1) * $itemsPerPage + $i + 1,
-                    'name' => "Course " . (($page - 1) * $itemsPerPage + $i + 1),
-                    'course_code' => "COURSE" . (($page - 1) * $itemsPerPage + $i + 1),
-                    'workflow_state' => 'available'
+                    'name' => 'Course ' . (($page - 1) * $itemsPerPage + $i + 1),
+                    'course_code' => 'COURSE' . (($page - 1) * $itemsPerPage + $i + 1),
+                    'workflow_state' => 'available',
                 ];
             }
 
@@ -72,8 +74,9 @@ class EdgeCaseTest extends TestCase
         // Set up expectations for getPaginated and subsequent get calls
         $this->mockHttpClient->expects($this->exactly($totalPages - 1))
             ->method('get')
-            ->willReturnCallback(function($path) use ($responses) {
+            ->willReturnCallback(function ($path) use ($responses) {
                 static $callCount = 1; // Start from index 1 since first response is used in getPaginated
+
                 return $responses[$callCount++];
             });
 
@@ -108,7 +111,7 @@ class EdgeCaseTest extends TestCase
         // First response - successful
         $firstPageData = [
             ['id' => 1, 'name' => 'Course 1'],
-            ['id' => 2, 'name' => 'Course 2']
+            ['id' => 2, 'name' => 'Course 2'],
         ];
 
         $linkHeader = '<https://canvas.example.com/api/v1/courses?page=2>; rel="next", ' .
@@ -159,7 +162,7 @@ class EdgeCaseTest extends TestCase
         // First page - successful
         $firstPageData = [
             ['id' => 1, 'name' => 'Module 1'],
-            ['id' => 2, 'name' => 'Module 2']
+            ['id' => 2, 'name' => 'Module 2'],
         ];
 
         $linkHeader = '<https://canvas.example.com/api/v1/courses/1/modules?page=2>; rel="next"';
@@ -230,8 +233,9 @@ class EdgeCaseTest extends TestCase
         // Set up expectations - getPaginated will be called for each page
         $this->mockHttpClient->expects($this->exactly($totalPages))
             ->method('getPaginated')
-            ->willReturnCallback(function($path, $options) use ($responses) {
+            ->willReturnCallback(function ($path, $options) use ($responses) {
                 $page = $options['query']['page'] ?? 1;
+
                 return new PaginatedResponse($responses[$page], $this->mockHttpClient);
             });
 

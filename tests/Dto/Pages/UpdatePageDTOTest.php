@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Pages;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Pages\UpdatePageDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\Pages\UpdatePageDTO
@@ -32,7 +34,7 @@ class UpdatePageDTOTest extends TestCase
             'front_page' => true,
             'editing_roles' => 'students',
             'notify_of_update' => false,
-            'publish_at' => '2024-02-15T12:00:00Z'
+            'publish_at' => '2024-02-15T12:00:00Z',
         ];
 
         $dto = new UpdatePageDTO($data);
@@ -80,7 +82,7 @@ class UpdatePageDTOTest extends TestCase
             'published' => true,
             'front_page' => false,
             'editing_roles' => 'public',
-            'notify_of_update' => true
+            'notify_of_update' => true,
         ];
 
         $dto = new UpdatePageDTO($data);
@@ -101,7 +103,7 @@ class UpdatePageDTOTest extends TestCase
             'title' => 'Updated Page',
             'body' => '<p>Updated content</p>',
             'published' => true,
-            'editing_roles' => 'teachers'
+            'editing_roles' => 'teachers',
         ];
 
         $dto = new UpdatePageDTO($data);
@@ -124,7 +126,7 @@ class UpdatePageDTOTest extends TestCase
             'body' => null,
             'published' => null,
             'front_page' => null,
-            'editing_roles' => null
+            'editing_roles' => null,
         ];
 
         $dto = new UpdatePageDTO($data);
@@ -143,7 +145,7 @@ class UpdatePageDTOTest extends TestCase
         $dto = new UpdatePageDTO([
             'published' => false,
             'front_page' => true,
-            'notify_of_update' => false
+            'notify_of_update' => false,
         ]);
 
         $result = $dto->toApiArray();
@@ -161,27 +163,27 @@ class UpdatePageDTOTest extends TestCase
     public function testApiPropertyName(): void
     {
         $dto = new UpdatePageDTO([]);
-        
+
         $reflection = new \ReflectionClass($dto);
         $property = $reflection->getProperty('apiPropertyName');
         $property->setAccessible(true);
-        
+
         $this->assertEquals('wiki_page', $property->getValue($dto));
     }
 
     public function testPartialUpdate(): void
     {
         $dto = new UpdatePageDTO([
-            'body' => '<p>Only updating the body</p>'
+            'body' => '<p>Only updating the body</p>',
         ]);
 
         $this->assertNull($dto->getTitle());
         $this->assertEquals('<p>Only updating the body</p>', $dto->getBody());
         $this->assertNull($dto->getPublished());
-        
+
         $result = $dto->toApiArray();
         $resultKeys = array_column($result, 'name');
-        
+
         $this->assertContains('wiki_page[body]', $resultKeys);
         $this->assertNotContains('wiki_page[title]', $resultKeys);
         $this->assertNotContains('wiki_page[published]', $resultKeys);
@@ -190,7 +192,7 @@ class UpdatePageDTOTest extends TestCase
     public function testEditingRolesValues(): void
     {
         $validRoles = ['teachers', 'students', 'members', 'public'];
-        
+
         foreach ($validRoles as $role) {
             $dto = new UpdatePageDTO(['editing_roles' => $role]);
             $this->assertEquals($role, $dto->getEditingRoles());
@@ -201,7 +203,7 @@ class UpdatePageDTOTest extends TestCase
     {
         $dto = new UpdatePageDTO([]);
         $result = $dto->toApiArray();
-        
+
         $this->assertIsArray($result);
         $this->assertEmpty($result);
     }

@@ -8,8 +8,6 @@ use CanvasLMS\Api\GroupCategories\GroupCategory;
 use CanvasLMS\Api\Groups\Group;
 use CanvasLMS\Api\Users\User;
 use CanvasLMS\Dto\GroupCategories\CreateGroupCategoryDTO;
-use CanvasLMS\Dto\GroupCategories\UpdateGroupCategoryDTO;
-use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
 use PHPUnit\Framework\TestCase;
@@ -19,17 +17,19 @@ use Psr\Http\Message\StreamInterface;
 class GroupCategoryTest extends TestCase
 {
     private HttpClientInterface $mockHttpClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->mockHttpClient = $this->createMock(HttpClientInterface::class);
         $this->mockResponse = $this->createMock(ResponseInterface::class);
         $this->mockStream = $this->createMock(StreamInterface::class);
-        
+
         GroupCategory::setApiClient($this->mockHttpClient);
         \CanvasLMS\Config::setAccountId(1);
     }
@@ -49,7 +49,7 @@ class GroupCategoryTest extends TestCase
             'sis_group_category_id' => 'SIS123',
             'sis_import_id' => 999,
             'progress' => ['completion' => 50],
-            'non_collaborative' => false
+            'non_collaborative' => false,
         ];
 
         $category = new GroupCategory($data);
@@ -74,15 +74,15 @@ class GroupCategoryTest extends TestCase
         $categoryData = [
             'id' => 123,
             'name' => 'Test Category',
-            'role' => 'communities'
+            'role' => 'communities',
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($categoryData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('get')
             ->with('group_categories/123')
@@ -99,15 +99,15 @@ class GroupCategoryTest extends TestCase
     {
         $categoriesData = [
             ['id' => 1, 'name' => 'Category 1'],
-            ['id' => 2, 'name' => 'Category 2']
+            ['id' => 2, 'name' => 'Category 2'],
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($categoriesData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('get')
             ->with('accounts/1/group_categories', ['query' => []])
@@ -125,12 +125,12 @@ class GroupCategoryTest extends TestCase
     {
         $categoriesData = [
             ['id' => 1, 'name' => 'Account Category 1'],
-            ['id' => 2, 'name' => 'Account Category 2']
+            ['id' => 2, 'name' => 'Account Category 2'],
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($categoriesData));
         $this->mockResponse->method('getBody')->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('get')
             ->with('accounts/1/group_categories', ['query' => []])
@@ -149,17 +149,17 @@ class GroupCategoryTest extends TestCase
         $createData = [
             'name' => 'New Category',
             'self_signup' => 'enabled',
-            'group_limit' => 5
+            'group_limit' => 5,
         ];
 
         $responseData = array_merge($createData, ['id' => 123]);
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('post')
             ->with('accounts/1/group_categories', $this->callback(function ($options) {
@@ -184,15 +184,15 @@ class GroupCategoryTest extends TestCase
             'id' => 123,
             'name' => 'DTO Category',
             'self_signup' => 'restricted',
-            'group_limit' => 3
+            'group_limit' => 3,
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('post')
             ->willReturn($this->mockResponse);
@@ -207,17 +207,17 @@ class GroupCategoryTest extends TestCase
     {
         $updateData = [
             'name' => 'Updated Category',
-            'self_signup' => 'disabled'
+            'self_signup' => 'disabled',
         ];
 
         $responseData = array_merge($updateData, ['id' => 123]);
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('put')
             ->with('group_categories/123', $this->callback(function ($options) {
@@ -235,7 +235,7 @@ class GroupCategoryTest extends TestCase
     public function testDelete(): void
     {
         $category = new GroupCategory(['id' => 123]);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('delete')
             ->with('group_categories/123')
@@ -249,18 +249,18 @@ class GroupCategoryTest extends TestCase
     public function testSave(): void
     {
         $category = new GroupCategory(['name' => 'Test Category']);
-        
+
         $responseData = [
             'id' => 123,
-            'name' => 'Test Category'
+            'name' => 'Test Category',
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('post')
             ->willReturn($this->mockResponse);
@@ -274,17 +274,17 @@ class GroupCategoryTest extends TestCase
     public function testGroups(): void
     {
         $category = new GroupCategory(['id' => 123]);
-        
+
         $groupsData = [
             ['id' => 1, 'name' => 'Group 1'],
-            ['id' => 2, 'name' => 'Group 2']
+            ['id' => 2, 'name' => 'Group 2'],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
             ->method('all')
             ->willReturn($groupsData);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('getPaginated')
             ->with('group_categories/123/groups', ['query' => []])
@@ -300,9 +300,9 @@ class GroupCategoryTest extends TestCase
     public function testGroupsPaginated(): void
     {
         $category = new GroupCategory(['id' => 123]);
-        
+
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('getPaginated')
             ->with('group_categories/123/groups', ['query' => []])
@@ -316,18 +316,18 @@ class GroupCategoryTest extends TestCase
     public function testUsers(): void
     {
         $category = new GroupCategory(['id' => 123]);
-        
+
         $usersData = [
             ['id' => 1, 'name' => 'User 1'],
-            ['id' => 2, 'name' => 'User 2']
+            ['id' => 2, 'name' => 'User 2'],
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($usersData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('get')
             ->with('group_categories/123/users', ['query' => ['unassigned' => true]])
@@ -343,19 +343,19 @@ class GroupCategoryTest extends TestCase
     public function testAssignUnassignedMembers(): void
     {
         $category = new GroupCategory(['id' => 123]);
-        
+
         $progressData = [
             'id' => 456,
             'workflow_state' => 'running',
-            'completion' => 0
+            'completion' => 0,
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($progressData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('post')
             ->with('group_categories/123/assign_unassigned_members', [])
@@ -372,18 +372,18 @@ class GroupCategoryTest extends TestCase
     public function testAssignUnassignedMembersSync(): void
     {
         $category = new GroupCategory(['id' => 123]);
-        
+
         $groupsData = [
             ['id' => 1, 'name' => 'Group 1'],
-            ['id' => 2, 'name' => 'Group 2']
+            ['id' => 2, 'name' => 'Group 2'],
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($groupsData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('post')
             ->with('group_categories/123/assign_unassigned_members', ['multipart' => [['name' => 'sync', 'contents' => 'true']]])
@@ -399,18 +399,18 @@ class GroupCategoryTest extends TestCase
     public function testExport(): void
     {
         $category = new GroupCategory(['id' => 123]);
-        
+
         $exportData = [
             ['group_name' => 'Group 1', 'user_name' => 'User 1'],
-            ['group_name' => 'Group 2', 'user_name' => 'User 2']
+            ['group_name' => 'Group 2', 'user_name' => 'User 2'],
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($exportData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('get')
             ->with('group_categories/123/export')
@@ -424,7 +424,6 @@ class GroupCategoryTest extends TestCase
         $this->assertEquals('User 1', $export[0]['user_name']);
     }
 
-
     public function testToDtoArray(): void
     {
         $category = new GroupCategory([
@@ -434,7 +433,7 @@ class GroupCategoryTest extends TestCase
             'auto_leader' => 'first',
             'group_limit' => 5,
             'context_type' => 'Course',
-            'context_id' => 456
+            'context_id' => 456,
         ]);
 
         $array = $category->toDtoArray();
@@ -452,16 +451,16 @@ class GroupCategoryTest extends TestCase
     public function testGettersAndSetters(): void
     {
         $category = new GroupCategory([]);
-        
+
         $category->name = 'New Name';
         $this->assertEquals('New Name', $category->name);
-        
+
         $category->selfSignup = 'enabled';
         $this->assertEquals('enabled', $category->selfSignup);
-        
+
         $category->groupLimit = 10;
         $this->assertEquals(10, $category->groupLimit);
-        
+
         $category->autoLeader = 'random';
         $this->assertEquals('random', $category->autoLeader);
     }

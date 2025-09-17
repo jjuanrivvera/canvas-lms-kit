@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Rubrics;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Rubrics\CreateRubricDTO;
+use PHPUnit\Framework\TestCase;
 
 class CreateRubricDTOTest extends TestCase
 {
@@ -54,23 +56,23 @@ class CreateRubricDTOTest extends TestCase
                         'id' => 'rating_1',
                         'description' => 'Excellent',
                         'long_description' => 'Exceeds expectations',
-                        'points' => 20
+                        'points' => 20,
                     ],
                     [
                         'id' => 'rating_2',
                         'description' => 'Good',
-                        'points' => 15
-                    ]
-                ]
+                        'points' => 15,
+                    ],
+                ],
             ],
             [
                 'description' => 'Writing Style',
                 'points' => 10,
                 'ratings' => [
                     ['description' => 'Clear', 'points' => 10],
-                    ['description' => 'Adequate', 'points' => 7]
-                ]
-            ]
+                    ['description' => 'Adequate', 'points' => 7],
+                ],
+            ],
         ];
 
         $result = $dto->toApiArray();
@@ -83,49 +85,49 @@ class CreateRubricDTOTest extends TestCase
         // Check first criterion
         $this->assertContains([
             'name' => 'rubric[criteria][criterion_1][description]',
-            'contents' => 'Content Knowledge'
+            'contents' => 'Content Knowledge',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][criterion_1][long_description]',
-            'contents' => 'Demonstrates understanding of subject matter'
+            'contents' => 'Demonstrates understanding of subject matter',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][criterion_1][points]',
-            'contents' => '20'
+            'contents' => '20',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][criterion_1][criterion_use_range]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
 
         // Check first criterion ratings
         $this->assertContains([
             'name' => 'rubric[criteria][criterion_1][ratings][rating_1][description]',
-            'contents' => 'Excellent'
+            'contents' => 'Excellent',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][criterion_1][ratings][rating_1][long_description]',
-            'contents' => 'Exceeds expectations'
+            'contents' => 'Exceeds expectations',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][criterion_1][ratings][rating_1][points]',
-            'contents' => '20'
+            'contents' => '20',
         ], $result);
 
         // Check second criterion (uses index as key when no ID provided)
         $this->assertContains([
             'name' => 'rubric[criteria][1][description]',
-            'contents' => 'Writing Style'
+            'contents' => 'Writing Style',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][1][points]',
-            'contents' => '10'
+            'contents' => '10',
         ], $result);
     }
 
@@ -142,7 +144,7 @@ class CreateRubricDTOTest extends TestCase
 
         $this->assertContains([
             'name' => 'rubric_association_id',
-            'contents' => '123'
+            'contents' => '123',
         ], $result);
     }
 
@@ -158,7 +160,7 @@ class CreateRubricDTOTest extends TestCase
             'associationType' => 'Assignment',
             'useForGrading' => true,
             'hideScoreTotal' => false,
-            'hidePoints' => true
+            'hidePoints' => true,
         ];
 
         $result = $dto->toApiArray();
@@ -166,27 +168,27 @@ class CreateRubricDTOTest extends TestCase
         // Check association fields
         $this->assertContains([
             'name' => 'rubric_association[association_id]',
-            'contents' => '456'
+            'contents' => '456',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[association_type]',
-            'contents' => 'Assignment'
+            'contents' => 'Assignment',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[use_for_grading]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_score_total]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_points]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
     }
 
@@ -230,7 +232,7 @@ class CreateRubricDTOTest extends TestCase
         $data = [
             'title' => 'Initial Rubric',
             'freeFormCriterionComments' => true,
-            'hideScoreTotal' => false
+            'hideScoreTotal' => false,
         ];
 
         $dto = new CreateRubricDTO($data);
@@ -249,7 +251,7 @@ class CreateRubricDTOTest extends TestCase
         $dto->criteria = [
             ['description' => 'First', 'points' => 5],
             ['description' => 'Second', 'points' => 10],
-            ['description' => 'Third', 'points' => 15]
+            ['description' => 'Third', 'points' => 15],
         ];
 
         $result = $dto->toApiArray();
@@ -257,17 +259,17 @@ class CreateRubricDTOTest extends TestCase
         // Check that indices are used as keys
         $this->assertContains([
             'name' => 'rubric[criteria][0][description]',
-            'contents' => 'First'
+            'contents' => 'First',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][1][description]',
-            'contents' => 'Second'
+            'contents' => 'Second',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][2][description]',
-            'contents' => 'Third'
+            'contents' => 'Third',
         ], $result);
     }
 
@@ -284,9 +286,9 @@ class CreateRubricDTOTest extends TestCase
                 'ratings' => [
                     ['description' => 'High', 'points' => 3],
                     ['description' => 'Medium', 'points' => 2],
-                    ['description' => 'Low', 'points' => 1]
-                ]
-            ]
+                    ['description' => 'Low', 'points' => 1],
+                ],
+            ],
         ];
 
         $result = $dto->toApiArray();
@@ -294,17 +296,17 @@ class CreateRubricDTOTest extends TestCase
         // Check that indices are used as keys for ratings
         $this->assertContains([
             'name' => 'rubric[criteria][criterion_1][ratings][0][description]',
-            'contents' => 'High'
+            'contents' => 'High',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][criterion_1][ratings][1][description]',
-            'contents' => 'Medium'
+            'contents' => 'Medium',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric[criteria][criterion_1][ratings][2][description]',
-            'contents' => 'Low'
+            'contents' => 'Low',
         ], $result);
     }
 
@@ -318,29 +320,29 @@ class CreateRubricDTOTest extends TestCase
             'useForGrading' => false,
             'hideScoreTotal' => true,
             'hidePoints' => false,
-            'hideOutcomeResults' => true
+            'hideOutcomeResults' => true,
         ];
 
         $result = $dto->toApiArray();
 
         $this->assertContains([
             'name' => 'rubric_association[use_for_grading]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_score_total]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_points]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_outcome_results]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
     }
 }

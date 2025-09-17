@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\Api\Modules;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Modules\ModuleAssignmentOverride;
+use PHPUnit\Framework\TestCase;
 
 class ModuleAssignmentOverrideTest extends TestCase
 {
     public function testConstructorWithEmptyData(): void
     {
         $override = new ModuleAssignmentOverride();
-        
+
         // Properties should not be initialized when no data is provided
         $this->assertFalse(property_exists($override, 'id') && isset($override->id));
     }
@@ -25,10 +25,10 @@ class ModuleAssignmentOverrideTest extends TestCase
             'title' => 'Section Override',
             'students' => [
                 ['id' => 1, 'name' => 'Student 1'],
-                ['id' => 2, 'name' => 'Student 2']
+                ['id' => 2, 'name' => 'Student 2'],
             ],
             'course_section' => ['id' => 789, 'name' => 'Section A'],
-            'group' => null
+            'group' => null,
         ];
 
         $override = new ModuleAssignmentOverride($data);
@@ -46,7 +46,7 @@ class ModuleAssignmentOverrideTest extends TestCase
         $data = [
             'id' => 123,
             'context_module_id' => 456,
-            'course_section' => ['id' => 789]
+            'course_section' => ['id' => 789],
         ];
 
         $override = new ModuleAssignmentOverride($data);
@@ -87,7 +87,7 @@ class ModuleAssignmentOverrideTest extends TestCase
         $override = new ModuleAssignmentOverride([
             'students' => [['id' => 1]],
             'course_section' => ['id' => 2],
-            'group' => ['id' => 3]
+            'group' => ['id' => 3],
         ]);
 
         $override->setStudents(null);
@@ -108,10 +108,10 @@ class ModuleAssignmentOverrideTest extends TestCase
             'title' => 'Section 1 Override',
             'course_section' => [
                 'id' => 789,
-                'name' => 'Section 1'
+                'name' => 'Section 1',
             ],
             'students' => null,
-            'group' => null
+            'group' => null,
         ];
 
         $override = new ModuleAssignmentOverride($data);
@@ -132,10 +132,10 @@ class ModuleAssignmentOverrideTest extends TestCase
             'students' => [
                 ['id' => 100, 'name' => 'Alice'],
                 ['id' => 101, 'name' => 'Bob'],
-                ['id' => 102, 'name' => 'Charlie']
+                ['id' => 102, 'name' => 'Charlie'],
             ],
             'course_section' => null,
-            'group' => null
+            'group' => null,
         ];
 
         $override = new ModuleAssignmentOverride($data);
@@ -156,10 +156,10 @@ class ModuleAssignmentOverrideTest extends TestCase
             'title' => 'Group Project Team',
             'group' => [
                 'id' => 200,
-                'name' => 'Team Alpha'
+                'name' => 'Team Alpha',
             ],
             'students' => null,
-            'course_section' => null
+            'course_section' => null,
         ];
 
         $override = new ModuleAssignmentOverride($data);
@@ -178,14 +178,14 @@ class ModuleAssignmentOverrideTest extends TestCase
             'id' => 123,
             'unknown_property' => 'should be ignored',
             'another_unknown' => 'also ignored',
-            'title' => 'Valid Override'
+            'title' => 'Valid Override',
         ];
 
         $override = new ModuleAssignmentOverride($data);
 
         $this->assertEquals(123, $override->getId());
         $this->assertEquals('Valid Override', $override->getTitle());
-        
+
         // Verify unknown properties were not set
         $this->assertFalse(property_exists($override, 'unknownProperty'));
         $this->assertFalse(property_exists($override, 'anotherUnknown'));
@@ -198,7 +198,7 @@ class ModuleAssignmentOverrideTest extends TestCase
             0 => 'ignored',
             'id' => 123,
             1 => 'also ignored',
-            'title' => 'Test Override'
+            'title' => 'Test Override',
         ];
 
         $override = new ModuleAssignmentOverride($data);

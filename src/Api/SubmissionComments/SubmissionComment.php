@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Api\SubmissionComments;
 
-use Exception;
 use CanvasLMS\Api\AbstractBaseApi;
-use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Assignments\Assignment;
-use CanvasLMS\Dto\SubmissionComments\CreateSubmissionCommentDTO;
+use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Dto\SubmissionComments\UpdateSubmissionCommentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use Exception;
 
 /**
  * Canvas LMS Submission Comments API
@@ -56,18 +55,21 @@ class SubmissionComment extends AbstractBaseApi
 {
     /**
      * Course context (required)
+     *
      * @var Course
      */
     protected static ?Course $course = null;
 
     /**
      * Assignment context (required)
+     *
      * @var Assignment
      */
     protected static ?Assignment $assignment = null;
 
     /**
      * User ID context (required) - the user whose submission this comment belongs to
+     *
      * @var int
      */
     protected static ?int $userId = null;
@@ -104,12 +106,14 @@ class SubmissionComment extends AbstractBaseApi
 
     /**
      * Author user object (contains display information)
+     *
      * @var object|null
      */
     public ?object $author = null;
 
     /**
      * Media comment data (audio/video comment information)
+     *
      * @var array<mixed>|null
      */
     public ?array $mediaComment = null;
@@ -140,6 +144,7 @@ class SubmissionComment extends AbstractBaseApi
 
     /**
      * Check if course context is set
+     *
      * @throws Exception
      */
     public static function checkCourse(): bool
@@ -150,11 +155,13 @@ class SubmissionComment extends AbstractBaseApi
                 'Use SubmissionComment::setCourse($course)'
             );
         }
+
         return true;
     }
 
     /**
      * Check if assignment context is set
+     *
      * @throws Exception
      */
     public static function checkAssignment(): bool
@@ -165,11 +172,13 @@ class SubmissionComment extends AbstractBaseApi
                 'Use SubmissionComment::setAssignment($assignment)'
             );
         }
+
         return true;
     }
 
     /**
      * Check if user ID context is set
+     *
      * @throws Exception
      */
     public static function checkUserId(): bool
@@ -180,11 +189,13 @@ class SubmissionComment extends AbstractBaseApi
                 'Use SubmissionComment::setUserId($userId)'
             );
         }
+
         return true;
     }
 
     /**
      * Check if all contexts are set
+     *
      * @throws Exception
      */
     public static function checkContexts(): bool
@@ -192,6 +203,7 @@ class SubmissionComment extends AbstractBaseApi
         self::checkCourse();
         self::checkAssignment();
         self::checkUserId();
+
         return true;
     }
 
@@ -213,7 +225,9 @@ class SubmissionComment extends AbstractBaseApi
 
     /**
      * Update an existing submission comment
+     *
      * @param array<string, mixed>|UpdateSubmissionCommentDTO $data
+     *
      * @throws CanvasApiException
      * @throws Exception
      */
@@ -233,7 +247,7 @@ class SubmissionComment extends AbstractBaseApi
         );
 
         $response = self::$apiClient->request('PUT', $endpoint, [
-            'multipart' => $dto->toApiArray()
+            'multipart' => $dto->toApiArray(),
         ]);
 
         $commentData = self::parseJsonResponse($response);
@@ -243,9 +257,11 @@ class SubmissionComment extends AbstractBaseApi
 
     /**
      * Delete a submission comment
-     * @return self
+     *
      * @throws CanvasApiException
      * @throws Exception
+     *
+     * @return self
      */
     public static function delete(int $commentId): self
     {
@@ -260,12 +276,14 @@ class SubmissionComment extends AbstractBaseApi
             $commentId
         );
         self::$apiClient->delete($endpoint);
+
         return new self([]);
     }
 
     /**
      * Find a submission comment by ID (required by ApiInterface)
      * Note: Canvas API doesn't provide a direct endpoint for individual comment retrieval
+     *
      * @throws Exception
      */
     public static function find(int $id, array $params = []): self
@@ -278,9 +296,12 @@ class SubmissionComment extends AbstractBaseApi
     /**
      * Fetch all submission comments (required by ApiInterface)
      * Note: Canvas API doesn't provide a direct endpoint for listing comments independently
+     *
      * @param array<string, mixed> $params
-     * @return array<self>
+     *
      * @throws Exception
+     *
+     * @return array<self>
      */
     public static function get(array $params = []): array
     {
@@ -291,10 +312,13 @@ class SubmissionComment extends AbstractBaseApi
 
     /**
      * Upload a file to attach to a submission comment
+     *
      * @param array<string, mixed> $fileData File upload data
-     * @return array<string, mixed> File upload response
+     *
      * @throws CanvasApiException
      * @throws Exception
+     *
+     * @return array<string, mixed> File upload response
      */
     public static function uploadFile(array $fileData): array
     {
@@ -309,7 +333,7 @@ class SubmissionComment extends AbstractBaseApi
         );
 
         $response = self::$apiClient->request('POST', $endpoint, [
-            'json' => $fileData
+            'json' => $fileData,
         ]);
 
         return self::parseJsonResponse($response);
@@ -317,8 +341,10 @@ class SubmissionComment extends AbstractBaseApi
 
     /**
      * Save the comment (update only)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -341,7 +367,7 @@ class SubmissionComment extends AbstractBaseApi
         );
 
         $response = self::$apiClient->request('PUT', $endpoint, [
-            'multipart' => $dto->toApiArray()
+            'multipart' => $dto->toApiArray(),
         ]);
 
         $commentData = self::parseJsonResponse($response);
@@ -448,8 +474,10 @@ class SubmissionComment extends AbstractBaseApi
     /**
      * Get the API endpoint for this resource
      * Note: SubmissionComment is a nested resource under Submission
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {

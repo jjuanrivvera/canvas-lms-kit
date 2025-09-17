@@ -13,6 +13,7 @@ namespace CanvasLMS\Objects;
 class GradebookHistoryDay
 {
     public ?string $date = null;
+
     /** @var array<GradebookHistoryGrader> */
     public array $graders = [];
 
@@ -27,7 +28,7 @@ class GradebookHistoryDay
 
         if (isset($data['graders']) && is_array($data['graders'])) {
             $this->graders = array_map(
-                fn($graderData) => new GradebookHistoryGrader($graderData),
+                fn ($graderData) => new GradebookHistoryGrader($graderData),
                 $data['graders']
             );
         }
@@ -37,6 +38,7 @@ class GradebookHistoryDay
      * Create a GradebookHistoryDay from an array.
      *
      * @param array<string, mixed> $data
+     *
      * @return self
      */
     public static function fromArray(array $data): self
@@ -55,6 +57,7 @@ class GradebookHistoryDay
         foreach ($this->graders as $grader) {
             $assignmentIds = array_merge($assignmentIds, $grader->assignments);
         }
+
         return array_unique($assignmentIds);
     }
 
@@ -62,6 +65,7 @@ class GradebookHistoryDay
      * Find a grader by ID.
      *
      * @param int $graderId
+     *
      * @return GradebookHistoryGrader|null
      */
     public function findGrader(int $graderId): ?GradebookHistoryGrader
@@ -71,6 +75,7 @@ class GradebookHistoryDay
                 return $grader;
             }
         }
+
         return null;
     }
 

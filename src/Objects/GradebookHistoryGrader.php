@@ -13,7 +13,9 @@ namespace CanvasLMS\Objects;
 class GradebookHistoryGrader
 {
     public ?int $id = null;
+
     public ?string $name = null;
+
     /** @var array<int> */
     public array $assignments = [];
 
@@ -35,6 +37,7 @@ class GradebookHistoryGrader
      * Create a GradebookHistoryGrader from an array.
      *
      * @param array<string, mixed> $data
+     *
      * @return self
      */
     public static function fromArray(array $data): self
@@ -46,6 +49,7 @@ class GradebookHistoryGrader
      * Check if the grader worked on a specific assignment.
      *
      * @param int $assignmentId
+     *
      * @return bool
      */
     public function workedOnAssignment(int $assignmentId): bool

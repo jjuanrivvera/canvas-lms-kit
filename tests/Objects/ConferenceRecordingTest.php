@@ -31,7 +31,7 @@ class ConferenceRecordingTest extends TestCase
             'title' => 'Test Recording',
             'duration' => 3600,
             'playback_url' => 'https://example.com/recording/123',
-            'recording_id' => 'REC-123-ABC'
+            'recording_id' => 'REC-123-ABC',
         ];
 
         $recording = new ConferenceRecording($data);
@@ -49,7 +49,7 @@ class ConferenceRecordingTest extends TestCase
             'id' => 456,
             'title' => 'Recording with Dates',
             'created_at' => '2024-01-15T10:30:00Z',
-            'updated_at' => '2024-01-16T14:45:00Z'
+            'updated_at' => '2024-01-16T14:45:00Z',
         ];
 
         $recording = new ConferenceRecording($data);
@@ -72,18 +72,18 @@ class ConferenceRecordingTest extends TestCase
                 [
                     'format' => 'video',
                     'url' => 'https://example.com/video/789',
-                    'length' => 3600
+                    'length' => 3600,
                 ],
                 [
                     'format' => 'audio',
                     'url' => 'https://example.com/audio/789',
-                    'length' => 3600
+                    'length' => 3600,
                 ],
                 [
                     'format' => 'transcript',
-                    'url' => 'https://example.com/transcript/789'
-                ]
-            ]
+                    'url' => 'https://example.com/transcript/789',
+                ],
+            ],
         ];
 
         $recording = new ConferenceRecording($data);
@@ -101,14 +101,14 @@ class ConferenceRecordingTest extends TestCase
             'id' => 999,
             'title' => 'Recording with Extra Data',
             'unknown_field' => 'should be ignored',
-            'another_unknown' => 12345
+            'another_unknown' => 12345,
         ];
 
         $recording = new ConferenceRecording($data);
 
         $this->assertEquals(999, $recording->id);
         $this->assertEquals('Recording with Extra Data', $recording->title);
-        
+
         $reflection = new \ReflectionObject($recording);
         $this->assertFalse($reflection->hasProperty('unknown_field'));
         $this->assertFalse($reflection->hasProperty('another_unknown'));
@@ -120,7 +120,7 @@ class ConferenceRecordingTest extends TestCase
             'id' => 111,
             'title' => 'Recording without dates',
             'created_at' => null,
-            'updated_at' => null
+            'updated_at' => null,
         ];
 
         $recording = new ConferenceRecording($data);
@@ -140,8 +140,8 @@ class ConferenceRecordingTest extends TestCase
             'playback_url' => 'https://example.com/play/222',
             'recording_id' => 'REC-222-XYZ',
             'playback_formats' => [
-                ['format' => 'presentation', 'url' => 'https://example.com/pres/222']
-            ]
+                ['format' => 'presentation', 'url' => 'https://example.com/pres/222'],
+            ],
         ];
 
         $recording = new ConferenceRecording($data);
@@ -162,7 +162,7 @@ class ConferenceRecordingTest extends TestCase
             'id' => 333,
             'title' => 'Recording with various date formats',
             'created_at' => '2024-03-15 16:30:45',
-            'updated_at' => '2024-03-16T08:15:30+02:00'
+            'updated_at' => '2024-03-16T08:15:30+02:00',
         ];
 
         $recording = new ConferenceRecording($data);
@@ -182,7 +182,7 @@ class ConferenceRecordingTest extends TestCase
             'duration' => 5400,
             'playback_url' => 'https://example.com/444',
             'playback_formats' => ['format1', 'format2'],
-            'recording_id' => '12345'
+            'recording_id' => '12345',
         ];
 
         $recording = new ConferenceRecording($data);

@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Submissions;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Submissions\UpdateSubmissionDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\Submissions\UpdateSubmissionDTO
@@ -17,7 +19,7 @@ class UpdateSubmissionDTOTest extends TestCase
             'excuse' => false,
             'rubric_assessment' => [
                 'criterion_1' => ['points' => 8, 'comments' => 'Good work'],
-                'criterion_2' => ['points' => 9, 'comments' => 'Excellent']
+                'criterion_2' => ['points' => 9, 'comments' => 'Excellent'],
             ],
             'comment' => 'Great improvement since last submission',
             'group_comment' => true,
@@ -25,7 +27,7 @@ class UpdateSubmissionDTOTest extends TestCase
             'media_comment_type' => 'audio',
             'extra_attempts' => 2,
             'late' => false,
-            'points_deducted' => 0.0
+            'points_deducted' => 0.0,
         ];
 
         $dto = new UpdateSubmissionDTO($data);
@@ -34,7 +36,7 @@ class UpdateSubmissionDTOTest extends TestCase
         $this->assertFalse($dto->getExcuse());
         $this->assertEquals([
             'criterion_1' => ['points' => 8, 'comments' => 'Good work'],
-            'criterion_2' => ['points' => 9, 'comments' => 'Excellent']
+            'criterion_2' => ['points' => 9, 'comments' => 'Excellent'],
         ], $dto->getRubricAssessment());
         $this->assertEquals('Great improvement since last submission', $dto->getComment());
         $this->assertTrue($dto->getGroupComment());
@@ -75,7 +77,7 @@ class UpdateSubmissionDTOTest extends TestCase
 
         // Test rubric assessment
         $rubricAssessment = [
-            'criterion_1' => ['points' => 10, 'comments' => 'Perfect']
+            'criterion_1' => ['points' => 10, 'comments' => 'Perfect'],
         ];
         $dto->setRubricAssessment($rubricAssessment);
         $this->assertEquals($rubricAssessment, $dto->getRubricAssessment());
@@ -113,7 +115,7 @@ class UpdateSubmissionDTOTest extends TestCase
     {
         $dto = new UpdateSubmissionDTO([
             'posted_grade' => '80',
-            'comment' => 'Initial comment'
+            'comment' => 'Initial comment',
         ]);
 
         // Set all values to null
@@ -144,7 +146,7 @@ class UpdateSubmissionDTOTest extends TestCase
     {
         $dto = new UpdateSubmissionDTO([
             'posted_grade' => '88',
-            'comment' => 'Good work with minor improvements needed'
+            'comment' => 'Good work with minor improvements needed',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -158,7 +160,7 @@ class UpdateSubmissionDTOTest extends TestCase
     {
         $dto = new UpdateSubmissionDTO([
             'excuse' => true,
-            'comment' => 'Excused due to illness'
+            'comment' => 'Excused due to illness',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -174,8 +176,8 @@ class UpdateSubmissionDTOTest extends TestCase
             'posted_grade' => '90',
             'rubric_assessment' => [
                 'criterion_1' => ['points' => 9, 'comments' => 'Excellent analysis'],
-                'criterion_2' => ['points' => 8, 'comments' => 'Good structure']
-            ]
+                'criterion_2' => ['points' => 8, 'comments' => 'Good structure'],
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -200,7 +202,7 @@ class UpdateSubmissionDTOTest extends TestCase
             'posted_grade' => '87',
             'media_comment_id' => 'audio_feedback_123',
             'media_comment_type' => 'audio',
-            'comment' => 'See audio feedback for detailed comments'
+            'comment' => 'See audio feedback for detailed comments',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -218,7 +220,7 @@ class UpdateSubmissionDTOTest extends TestCase
             'posted_grade' => '80',
             'late' => true,
             'points_deducted' => 10.0,
-            'comment' => 'Grade reduced due to late submission'
+            'comment' => 'Grade reduced due to late submission',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -234,7 +236,7 @@ class UpdateSubmissionDTOTest extends TestCase
     {
         $dto = new UpdateSubmissionDTO([
             'posted_grade' => '85',
-            'comment' => 'Good work'
+            'comment' => 'Good work',
             // All other fields are null
         ]);
 
@@ -256,7 +258,7 @@ class UpdateSubmissionDTOTest extends TestCase
             'posted_grade' => '90',
             'excuse' => false,
             'comment' => 'Excellent work',
-            'extra_attempts' => 1
+            'extra_attempts' => 1,
         ]);
 
         $array = $dto->toArray();
@@ -277,7 +279,7 @@ class UpdateSubmissionDTOTest extends TestCase
             'media_comment_type' => 'video',
             'group_comment' => true,
             'extra_attempts' => 2,
-            'points_deducted' => 5.0
+            'points_deducted' => 5.0,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -297,7 +299,7 @@ class UpdateSubmissionDTOTest extends TestCase
         $dto = new UpdateSubmissionDTO([
             'excuse' => true,
             'group_comment' => false,
-            'late' => true
+            'late' => true,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -311,7 +313,7 @@ class UpdateSubmissionDTOTest extends TestCase
     {
         $dto = new UpdateSubmissionDTO([
             'extra_attempts' => 3,
-            'points_deducted' => 12.5
+            'points_deducted' => 12.5,
         ]);
 
         $apiArray = $dto->toApiArray();

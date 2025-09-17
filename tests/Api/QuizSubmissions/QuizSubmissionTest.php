@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Api\QuizSubmissions;
 
-use GuzzleHttp\Psr7\Response;
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Courses\Course;
-use CanvasLMS\Api\Quizzes\Quiz;
 use CanvasLMS\Api\QuizSubmissions\QuizSubmission;
+use CanvasLMS\Api\Quizzes\Quiz;
 use CanvasLMS\Dto\QuizSubmissions\CreateQuizSubmissionDTO;
 use CanvasLMS\Dto\QuizSubmissions\UpdateQuizSubmissionDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Api\QuizSubmissions\QuizSubmission
@@ -22,7 +22,9 @@ use CanvasLMS\Pagination\PaginationResult;
 class QuizSubmissionTest extends TestCase
 {
     private HttpClientInterface $httpClient;
+
     private Course $course;
+
     private Quiz $quiz;
 
     protected function setUp(): void
@@ -49,10 +51,10 @@ class QuizSubmissionTest extends TestCase
             'id' => 789,
             'quiz_id' => 456,
             'user_id' => 123,
-            'workflow_state' => 'complete'
+            'workflow_state' => 'complete',
         ];
         $response = new Response(200, [], json_encode($responseData));
-        
+
         $this->httpClient->expects($this->once())
             ->method('get')
             ->with('courses/999/quizzes/456/submissions/789')
@@ -71,10 +73,10 @@ class QuizSubmissionTest extends TestCase
             'id' => 789,
             'quiz_id' => 999,
             'user_id' => 123,
-            'workflow_state' => 'complete'
+            'workflow_state' => 'complete',
         ];
         $response = new Response(200, [], json_encode($responseData));
-        
+
         $this->httpClient->expects($this->once())
             ->method('get')
             ->with('courses/123/quizzes/999/submissions/789')
@@ -108,7 +110,7 @@ class QuizSubmissionTest extends TestCase
             'manually_unlocked' => false,
             'has_seen_results' => true,
             'overdue_and_needs_submission' => false,
-            'validation_token' => 'abc123'
+            'validation_token' => 'abc123',
         ];
 
         $submission = new QuizSubmission($data);
@@ -219,10 +221,10 @@ class QuizSubmissionTest extends TestCase
             'quiz_id' => 456,
             'user_id' => 123,
             'workflow_state' => 'complete',
-            'score' => 95.0
+            'score' => 95.0,
         ];
         $response = new Response(200, [], json_encode($expectedData));
-        
+
         $this->httpClient->expects($this->once())
             ->method('get')
             ->with('courses/123/quizzes/456/submissions/789')
@@ -246,12 +248,12 @@ class QuizSubmissionTest extends TestCase
                     'id' => 789,
                     'quiz_id' => 456,
                     'user_id' => 123,
-                    'workflow_state' => 'complete'
-                ]
-            ]
+                    'workflow_state' => 'complete',
+                ],
+            ],
         ];
         $response = new Response(200, [], json_encode($expectedData));
-        
+
         $this->httpClient->expects($this->once())
             ->method('get')
             ->with('courses/123/quizzes/456/submissions/789')
@@ -271,12 +273,12 @@ class QuizSubmissionTest extends TestCase
                     'id' => 789,
                     'quiz_id' => 456,
                     'user_id' => 123,
-                    'workflow_state' => 'complete'
-                ]
-            ]
+                    'workflow_state' => 'complete',
+                ],
+            ],
         ];
         $response = new Response(200, [], json_encode($expectedData));
-        
+
         $this->httpClient->expects($this->once())
             ->method('get')
             ->with('courses/123/quizzes/456/submission')
@@ -321,18 +323,18 @@ class QuizSubmissionTest extends TestCase
                     'id' => 789,
                     'quiz_id' => 456,
                     'user_id' => 123,
-                    'workflow_state' => 'complete'
+                    'workflow_state' => 'complete',
                 ],
                 [
                     'id' => 790,
                     'quiz_id' => 456,
                     'user_id' => 124,
-                    'workflow_state' => 'pending_review'
-                ]
-            ]
+                    'workflow_state' => 'pending_review',
+                ],
+            ],
         ];
         $response = new Response(200, [], json_encode($expectedData));
-        
+
         $this->httpClient->expects($this->once())
             ->method('get')
             ->with('courses/123/quizzes/456/submissions', ['query' => []])
@@ -353,7 +355,7 @@ class QuizSubmissionTest extends TestCase
         $params = ['include' => ['user', 'quiz']];
         $responseData = ['quiz_submissions' => []];
         $response = new Response(200, [], json_encode($responseData));
-        
+
         $this->httpClient->expects($this->once())
             ->method('get')
             ->with('courses/123/quizzes/456/submissions', ['query' => $params])
@@ -369,9 +371,9 @@ class QuizSubmissionTest extends TestCase
             ->method('getJsonData')
             ->willReturn([
                 ['id' => 1, 'quiz_id' => 456, 'user_id' => 789],
-                ['id' => 2, 'quiz_id' => 456, 'user_id' => 790]
+                ['id' => 2, 'quiz_id' => 456, 'user_id' => 790],
             ]);
-        
+
         $paginatedResponse->expects($this->once())
             ->method('toPaginationResult')
             ->with($this->isType('array'))
@@ -391,7 +393,7 @@ class QuizSubmissionTest extends TestCase
     {
         $submissionData = [
             'access_code' => 'secret123',
-            'preview' => false
+            'preview' => false,
         ];
 
         $expectedResponse = [
@@ -400,15 +402,15 @@ class QuizSubmissionTest extends TestCase
                     'id' => 789,
                     'quiz_id' => 456,
                     'user_id' => 123,
-                    'workflow_state' => 'untaken'
-                ]
-            ]
+                    'workflow_state' => 'untaken',
+                ],
+            ],
         ];
         $response = new Response(200, [], json_encode($expectedResponse));
-        
+
         $expectedRequestData = [
             ['name' => 'access_code', 'contents' => 'secret123'],
-            ['name' => 'preview', 'contents' => false]
+            ['name' => 'preview', 'contents' => false],
         ];
 
         $this->httpClient->expects($this->once())
@@ -427,17 +429,17 @@ class QuizSubmissionTest extends TestCase
     {
         $dto = new CreateQuizSubmissionDTO([
             'access_code' => 'secret123',
-            'preview' => false
+            'preview' => false,
         ]);
 
         $expectedResponse = [
             'id' => 789,
             'quiz_id' => 456,
             'user_id' => 123,
-            'workflow_state' => 'untaken'
+            'workflow_state' => 'untaken',
         ];
         $response = new Response(200, [], json_encode($expectedResponse));
-        
+
         $this->httpClient->expects($this->once())
             ->method('post')
             ->with('courses/123/quizzes/456/submissions', $this->isType('array'))
@@ -457,10 +459,10 @@ class QuizSubmissionTest extends TestCase
             'id' => 789,
             'quiz_id' => 456,
             'user_id' => 123,
-            'workflow_state' => 'untaken'
+            'workflow_state' => 'untaken',
         ];
         $response = new Response(200, [], json_encode($expectedResponse));
-        
+
         $this->httpClient->expects($this->once())
             ->method('post')
             ->with('courses/123/quizzes/456/submissions', $this->isType('array'))
@@ -477,8 +479,8 @@ class QuizSubmissionTest extends TestCase
         $updateData = [
             'fudge_points' => 2.5,
             'quiz_submissions' => [
-                ['attempt' => 1, 'fudge_points' => 2.5]
-            ]
+                ['attempt' => 1, 'fudge_points' => 2.5],
+            ],
         ];
 
         $expectedResponse = [
@@ -488,12 +490,12 @@ class QuizSubmissionTest extends TestCase
                     'quiz_id' => 456,
                     'user_id' => 123,
                     'score' => 87.5,
-                    'fudge_points' => 2.5
-                ]
-            ]
+                    'fudge_points' => 2.5,
+                ],
+            ],
         ];
         $response = new Response(200, [], json_encode($expectedResponse));
-        
+
         $this->httpClient->expects($this->once())
             ->method('put')
             ->with('courses/123/quizzes/456/submissions/789', $this->isType('array'))
@@ -511,17 +513,17 @@ class QuizSubmissionTest extends TestCase
     {
         $dto = new UpdateQuizSubmissionDTO([
             'attempt' => 1,
-            'fudge_points' => 2.5
+            'fudge_points' => 2.5,
         ]);
 
         $expectedResponse = [
             'id' => 789,
             'quiz_id' => 456,
             'user_id' => 123,
-            'score' => 87.5
+            'score' => 87.5,
         ];
         $response = new Response(200, [], json_encode($expectedResponse));
-        
+
         $this->httpClient->expects($this->once())
             ->method('put')
             ->with('courses/123/quizzes/456/submissions/789', $this->isType('array'))
@@ -538,7 +540,7 @@ class QuizSubmissionTest extends TestCase
         $submission = new QuizSubmission([
             'id' => 789,
             'validation_token' => 'abc123',
-            'attempt' => 1
+            'attempt' => 1,
         ]);
 
         $expectedResponse = [
@@ -547,12 +549,12 @@ class QuizSubmissionTest extends TestCase
                     'id' => 789,
                     'workflow_state' => 'complete',
                     'finished_at' => '2024-01-01T13:00:00Z',
-                    'score' => 85.0
-                ]
-            ]
+                    'score' => 85.0,
+                ],
+            ],
         ];
         $response = new Response(200, [], json_encode($expectedResponse));
-        
+
         $this->httpClient->expects($this->once())
             ->method('post')
             ->with('courses/123/quizzes/456/submissions/789/complete', $this->isType('array'))
@@ -593,7 +595,7 @@ class QuizSubmissionTest extends TestCase
     {
         $submission = new QuizSubmission([
             'id' => 789,
-            'fudge_points' => 5.0
+            'fudge_points' => 5.0,
         ]);
 
         $expectedResponse = [
@@ -601,10 +603,10 @@ class QuizSubmissionTest extends TestCase
             'quiz_id' => 456,
             'user_id' => 123,
             'score' => 90.0,
-            'fudge_points' => 5.0
+            'fudge_points' => 5.0,
         ];
         $response = new Response(200, [], json_encode($expectedResponse));
-        
+
         $this->httpClient->expects($this->once())
             ->method('put')
             ->with('courses/123/quizzes/456/submissions/789', $this->isType('array'))
@@ -742,7 +744,7 @@ class QuizSubmissionTest extends TestCase
             'quiz_id' => 456,
             'user_id' => 123,
             'workflow_state' => 'complete',
-            'score' => 85.0
+            'score' => 85.0,
         ];
 
         $submission = new QuizSubmission($data);
@@ -763,7 +765,7 @@ class QuizSubmissionTest extends TestCase
             'quiz_id' => 456,
             'user_id' => 123,
             'workflow_state' => 'complete',
-            'score' => 85.0
+            'score' => 85.0,
         ];
 
         $submission = new QuizSubmission($data);

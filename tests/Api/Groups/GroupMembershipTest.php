@@ -17,17 +17,19 @@ use Psr\Http\Message\StreamInterface;
 class GroupMembershipTest extends TestCase
 {
     private HttpClientInterface $mockHttpClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->mockHttpClient = $this->createMock(HttpClientInterface::class);
         $this->mockResponse = $this->createMock(ResponseInterface::class);
         $this->mockStream = $this->createMock(StreamInterface::class);
-        
+
         GroupMembership::setApiClient($this->mockHttpClient);
         User::setApiClient($this->mockHttpClient);
     }
@@ -41,7 +43,7 @@ class GroupMembershipTest extends TestCase
             'workflow_state' => 'accepted',
             'moderator' => true,
             'just_created' => false,
-            'sis_import_id' => 999
+            'sis_import_id' => 999,
         ];
 
         $membership = new GroupMembership($data);
@@ -61,15 +63,15 @@ class GroupMembershipTest extends TestCase
             'id' => 123,
             'group_id' => 456,
             'user_id' => 789,
-            'workflow_state' => 'accepted'
+            'workflow_state' => 'accepted',
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($membershipData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('get')
             ->with('groups/456/memberships/123')
@@ -86,7 +88,7 @@ class GroupMembershipTest extends TestCase
     {
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Group ID is required. Use fetchAllForGroup($groupId, $params) instead.');
-        
+
         GroupMembership::get();
     }
 
@@ -94,14 +96,14 @@ class GroupMembershipTest extends TestCase
     {
         $membershipsData = [
             ['id' => 1, 'user_id' => 100, 'workflow_state' => 'accepted'],
-            ['id' => 2, 'user_id' => 200, 'workflow_state' => 'invited']
+            ['id' => 2, 'user_id' => 200, 'workflow_state' => 'invited'],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
             ->method('all')
             ->willReturn($membershipsData);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('getPaginated')
             ->with('groups/456/memberships', ['query' => []])
@@ -117,24 +119,24 @@ class GroupMembershipTest extends TestCase
     public function testCreate(): void
     {
         $createData = ['user_id' => 789];
-        
+
         $responseData = [
             'id' => 123,
             'group_id' => 456,
             'user_id' => 789,
-            'workflow_state' => 'accepted'
+            'workflow_state' => 'accepted',
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('post')
             ->with('groups/456/memberships', $this->callback(function ($options) {
-                return isset($options['multipart']) && 
+                return isset($options['multipart']) &&
                        is_array($options['multipart']) &&
                        $options['multipart'][0]['name'] === 'user_id' &&
                        $options['multipart'][0]['contents'] === '789';
@@ -151,20 +153,20 @@ class GroupMembershipTest extends TestCase
     public function testCreateWithDTO(): void
     {
         $dto = new CreateGroupMembershipDTO(['user_id' => 789]);
-        
+
         $responseData = [
             'id' => 123,
             'group_id' => 456,
             'user_id' => 789,
-            'workflow_state' => 'accepted'
+            'workflow_state' => 'accepted',
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('post')
             ->willReturn($this->mockResponse);
@@ -178,21 +180,21 @@ class GroupMembershipTest extends TestCase
     public function testUpdate(): void
     {
         $updateData = ['workflow_state' => 'accepted', 'moderator' => true];
-        
+
         $responseData = [
             'id' => 123,
             'group_id' => 456,
             'user_id' => 789,
             'workflow_state' => 'accepted',
-            'moderator' => true
+            'moderator' => true,
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('put')
             ->with('groups/456/memberships/123', $this->callback(function ($options) {
@@ -219,31 +221,31 @@ class GroupMembershipTest extends TestCase
         // No assertion needed as deleteMembership() returns void
     }
 
-
     public function testAccept(): void
     {
         $membership = new GroupMembership([
             'id' => 123,
             'group_id' => 456,
-            'workflow_state' => 'invited'
+            'workflow_state' => 'invited',
         ]);
-        
+
         $responseData = [
             'id' => 123,
             'group_id' => 456,
-            'workflow_state' => 'accepted'
+            'workflow_state' => 'accepted',
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('put')
             ->with('groups/456/memberships/123', $this->callback(function ($options) {
                 $multipart = $options['multipart'];
+
                 return $multipart[0]['name'] === 'workflow_state' &&
                        $multipart[0]['contents'] === 'accepted';
             }))
@@ -261,9 +263,9 @@ class GroupMembershipTest extends TestCase
         $membership = new GroupMembership([
             'id' => 123,
             'group_id' => 456,
-            'workflow_state' => 'invited'
+            'workflow_state' => 'invited',
         ]);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('delete')
             ->with('groups/456/memberships/123')
@@ -280,25 +282,26 @@ class GroupMembershipTest extends TestCase
         $membership = new GroupMembership([
             'id' => 123,
             'group_id' => 456,
-            'moderator' => false
+            'moderator' => false,
         ]);
-        
+
         $responseData = [
             'id' => 123,
             'group_id' => 456,
-            'moderator' => true
+            'moderator' => true,
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('put')
             ->with('groups/456/memberships/123', $this->callback(function ($options) {
                 $multipart = $options['multipart'];
+
                 return $multipart[0]['name'] === 'moderator' &&
                        $multipart[0]['contents'] === 'true';
             }))
@@ -316,25 +319,26 @@ class GroupMembershipTest extends TestCase
         $membership = new GroupMembership([
             'id' => 123,
             'group_id' => 456,
-            'moderator' => true
+            'moderator' => true,
         ]);
-        
+
         $responseData = [
             'id' => 123,
             'group_id' => 456,
-            'moderator' => false
+            'moderator' => false,
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($responseData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('put')
             ->with('groups/456/memberships/123', $this->callback(function ($options) {
                 $multipart = $options['multipart'];
+
                 return $multipart[0]['name'] === 'moderator' &&
                        $multipart[0]['contents'] === 'false';
             }))
@@ -363,15 +367,15 @@ class GroupMembershipTest extends TestCase
     {
         $userData = [
             'id' => 789,
-            'name' => 'Test User'
+            'name' => 'Test User',
         ];
-        
+
         $membership = new GroupMembership([
             'id' => 123,
             'user_id' => 789,
-            'user' => $userData
+            'user' => $userData,
         ]);
-        
+
         $user = $membership->getUser();
 
         $this->assertInstanceOf(User::class, $user);
@@ -383,25 +387,25 @@ class GroupMembershipTest extends TestCase
     {
         $membership = new GroupMembership([
             'id' => 123,
-            'user_id' => 789
+            'user_id' => 789,
         ]);
-        
+
         $userData = [
             'id' => 789,
-            'name' => 'API User'
+            'name' => 'API User',
         ];
 
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($userData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
-        
+
         $this->mockHttpClient->expects($this->once())
             ->method('get')
             ->with('/users/789')
             ->willReturn($this->mockResponse);
-        
+
         $user = $membership->getUser();
 
         $this->assertInstanceOf(User::class, $user);
@@ -412,10 +416,9 @@ class GroupMembershipTest extends TestCase
     public function testGetUserReturnsNullWithoutUserId(): void
     {
         $membership = new GroupMembership(['id' => 123]);
-        
+
         $user = $membership->getUser();
 
         $this->assertNull($user);
     }
-
 }

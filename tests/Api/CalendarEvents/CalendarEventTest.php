@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\CalendarEvents;
 
-use DateTime;
-use GuzzleHttp\Psr7\Response;
-use CanvasLMS\Http\HttpClient;
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
-use CanvasLMS\Dto\CalendarEvents\UpdateCalendarEventDTO;
 use CanvasLMS\Dto\CalendarEvents\CreateReservationDTO;
+use CanvasLMS\Dto\CalendarEvents\UpdateCalendarEventDTO;
+use CanvasLMS\Http\HttpClient;
+use DateTime;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 class CalendarEventTest extends TestCase
 {
@@ -30,12 +32,13 @@ class CalendarEventTest extends TestCase
     {
         $this->httpClientMock = $this->createMock(HttpClient::class);
         CalendarEvent::setApiClient($this->httpClientMock);
-        
+
         $this->calendarEvent = new CalendarEvent([]);
     }
 
     /**
      * Calendar event data provider
+     *
      * @return array
      */
     public static function calendarEventDataProvider(): array
@@ -56,16 +59,19 @@ class CalendarEventTest extends TestCase
                     'start_at' => '2024-01-15T10:00:00Z',
                     'end_at' => '2024-01-15T11:00:00Z',
                     'context_code' => 'course_123',
-                ]
+                ],
             ],
         ];
     }
 
     /**
      * Test the create calendar event method
+     *
      * @dataProvider calendarEventDataProvider
+     *
      * @param array $eventData
      * @param array $expectedResult
+     *
      * @return void
      */
     public function testCreateCalendarEvent(array $eventData, array $expectedResult): void
@@ -85,9 +91,12 @@ class CalendarEventTest extends TestCase
 
     /**
      * Test the create calendar event method with DTO
+     *
      * @dataProvider calendarEventDataProvider
+     *
      * @param array $eventData
      * @param array $expectedResult
+     *
      * @return void
      */
     public function testCreateCalendarEventWithDto(array $eventData, array $expectedResult): void
@@ -116,6 +125,7 @@ class CalendarEventTest extends TestCase
 
     /**
      * Test the find calendar event method
+     *
      * @return void
      */
     public function testFindCalendarEvent(): void
@@ -135,6 +145,7 @@ class CalendarEventTest extends TestCase
 
     /**
      * Test the update calendar event method
+     *
      * @return void
      */
     public function testUpdateCalendarEvent(): void
@@ -157,6 +168,7 @@ class CalendarEventTest extends TestCase
 
     /**
      * Test the save calendar event method
+     *
      * @return void
      */
     public function testSaveCalendarEvent(): void
@@ -180,6 +192,7 @@ class CalendarEventTest extends TestCase
 
     /**
      * Test the delete calendar event method
+     *
      * @return void
      */
     public function testDeleteCalendarEvent(): void
@@ -201,6 +214,7 @@ class CalendarEventTest extends TestCase
 
     /**
      * Test the reserve calendar event method
+     *
      * @return void
      */
     public function testReserveCalendarEvent(): void
@@ -209,7 +223,7 @@ class CalendarEventTest extends TestCase
 
         $reservationData = new CreateReservationDTO([
             'participantId' => 456,
-            'comments' => 'Test reservation'
+            'comments' => 'Test reservation',
         ]);
 
         $response = new Response(200, [], json_encode(['id' => 1, 'reserved' => true]));
@@ -233,6 +247,7 @@ class CalendarEventTest extends TestCase
 
     /**
      * Test the update series method
+     *
      * @return void
      */
     public function testUpdateSeries(): void
@@ -240,7 +255,7 @@ class CalendarEventTest extends TestCase
         $this->calendarEvent->id = 1;
 
         $updateData = new UpdateCalendarEventDTO([
-            'title' => 'Updated Series Event'
+            'title' => 'Updated Series Event',
         ]);
 
         $response = new Response(200, [], json_encode(['id' => 1, 'title' => 'Updated Series Event']));
@@ -258,6 +273,7 @@ class CalendarEventTest extends TestCase
 
     /**
      * Test the delete series method
+     *
      * @return void
      */
     public function testDeleteSeries(): void
@@ -272,7 +288,7 @@ class CalendarEventTest extends TestCase
             ->with(
                 $this->stringContains('calendar_events/1'),
                 $this->callback(function ($options) {
-                    return isset($options['query']['which']) && 
+                    return isset($options['query']['which']) &&
                            $options['query']['which'] === 'following';
                 })
             )
@@ -285,6 +301,7 @@ class CalendarEventTest extends TestCase
 
     /**
      * Test DateTime casting
+     *
      * @return void
      */
     public function testDateTimeCasting(): void
@@ -302,30 +319,32 @@ class CalendarEventTest extends TestCase
 
     /**
      * Test parse context code method
+     *
      * @return void
      */
     public function testParseContextCode(): void
     {
         $result = CalendarEvent::parseContextCode('course_123');
-        
+
         $this->assertEquals('course', $result['type']);
         $this->assertEquals('123', $result['id']);
 
         $result = CalendarEvent::parseContextCode('user_456');
-        
+
         $this->assertEquals('user', $result['type']);
         $this->assertEquals('456', $result['id']);
     }
 
     /**
      * Test the update calendar event method uses multipart format
+     *
      * @return void
      */
     public function testUpdateCalendarEventUsesMultipartFormat(): void
     {
         $updateData = [
             'title' => 'Updated Event',
-            'description' => 'Updated Description'
+            'description' => 'Updated Description',
         ];
 
         $response = new Response(200, [], json_encode(['id' => 123, 'title' => 'Updated Event']));
@@ -351,6 +370,7 @@ class CalendarEventTest extends TestCase
 
     /**
      * Test the saveEnabledAccountCalendars method uses multipart format
+     *
      * @return void
      */
     public function testSaveEnabledAccountCalendarsUsesMultipartFormat(): void
@@ -369,9 +389,9 @@ class CalendarEventTest extends TestCase
                     if (!isset($subject['multipart'])) {
                         return false;
                     }
-                    
+
                     $multipart = $subject['multipart'];
-                    
+
                     // Check account IDs are properly formatted
                     $accountIdCount = 0;
                     foreach ($multipart as $part) {
@@ -379,7 +399,7 @@ class CalendarEventTest extends TestCase
                             $accountIdCount++;
                         }
                     }
-                    
+
                     return $accountIdCount === count($accountIds);
                 })
             )
@@ -392,6 +412,7 @@ class CalendarEventTest extends TestCase
 
     /**
      * Test the saveEnabledAccountCalendars with markAsSeen option
+     *
      * @return void
      */
     public function testSaveEnabledAccountCalendarsWithMarkAsSeen(): void
@@ -410,9 +431,9 @@ class CalendarEventTest extends TestCase
                     if (!isset($subject['multipart'])) {
                         return false;
                     }
-                    
+
                     $multipart = $subject['multipart'];
-                    
+
                     // Check mark_feature_as_seen is included
                     $hasMarkAsSeen = false;
                     foreach ($multipart as $part) {
@@ -421,7 +442,7 @@ class CalendarEventTest extends TestCase
                             break;
                         }
                     }
-                    
+
                     return $hasMarkAsSeen;
                 })
             )

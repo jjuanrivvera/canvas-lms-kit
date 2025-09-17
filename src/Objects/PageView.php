@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Objects;
 
 use DateTime;
@@ -85,6 +87,7 @@ class PageView
 
     /**
      * Constructor
+     *
      * @param array<string, mixed> $data
      */
     public function __construct(array $data = [])
@@ -99,6 +102,7 @@ class PageView
 
     /**
      * Get created timestamp as DateTime
+     *
      * @return DateTimeInterface|null
      */
     public function getCreatedAtDate(): ?DateTimeInterface
@@ -108,6 +112,7 @@ class PageView
 
     /**
      * Get interaction time in a human-readable format
+     *
      * @return string|null
      */
     public function getHumanReadableInteractionTime(): ?string
@@ -130,6 +135,7 @@ class PageView
             if ($remainingSeconds > 0) {
                 $result .= ', ' . $remainingSeconds . ' second' . ($remainingSeconds === 1 ? '' : 's');
             }
+
             return $result;
         }
 
@@ -146,6 +152,7 @@ class PageView
 
     /**
      * Check if this page view has context information
+     *
      * @return bool
      */
     public function hasContext(): bool
@@ -155,6 +162,7 @@ class PageView
 
     /**
      * Check if this page view has asset information
+     *
      * @return bool
      */
     public function hasAsset(): bool
@@ -164,6 +172,7 @@ class PageView
 
     /**
      * Check if this was a meaningful interaction (spent time on page)
+     *
      * @return bool
      */
     public function hadMeaningfulInteraction(): bool
@@ -173,6 +182,7 @@ class PageView
 
     /**
      * Convert to array
+     *
      * @return array<string, mixed>
      */
     public function toArray(): array

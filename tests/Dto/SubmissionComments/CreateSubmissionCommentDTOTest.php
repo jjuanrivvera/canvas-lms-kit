@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\SubmissionComments;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\SubmissionComments\CreateSubmissionCommentDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\SubmissionComments\CreateSubmissionCommentDTO
@@ -17,7 +19,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
             'group_comment' => true,
             'media_comment_id' => 'audio123',
             'media_comment_type' => 'audio',
-            'file_ids' => [123, 456]
+            'file_ids' => [123, 456],
         ];
 
         $dto = new CreateSubmissionCommentDTO($data);
@@ -70,7 +72,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
     {
         $dto = new CreateSubmissionCommentDTO([
             'text_comment' => 'Initial comment',
-            'group_comment' => true
+            'group_comment' => true,
         ]);
 
         // Set all values to null
@@ -90,7 +92,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
     public function testToApiArrayForTextComment(): void
     {
         $dto = new CreateSubmissionCommentDTO([
-            'text_comment' => 'Excellent analysis of the topic!'
+            'text_comment' => 'Excellent analysis of the topic!',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -103,7 +105,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
     {
         $dto = new CreateSubmissionCommentDTO([
             'text_comment' => 'Good teamwork everyone',
-            'group_comment' => true
+            'group_comment' => true,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -118,7 +120,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
         $dto = new CreateSubmissionCommentDTO([
             'media_comment_id' => 'audio_feedback_789',
             'media_comment_type' => 'audio',
-            'text_comment' => 'Please listen to my audio feedback'
+            'text_comment' => 'Please listen to my audio feedback',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -133,7 +135,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
     {
         $dto = new CreateSubmissionCommentDTO([
             'text_comment' => 'See attached files for detailed feedback',
-            'file_ids' => [123, 456, 789]
+            'file_ids' => [123, 456, 789],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -148,7 +150,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
     public function testToApiArrayExcludesNullValues(): void
     {
         $dto = new CreateSubmissionCommentDTO([
-            'text_comment' => 'Only text comment provided'
+            'text_comment' => 'Only text comment provided',
             // All other fields are null
         ]);
 
@@ -168,7 +170,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
         $dto = new CreateSubmissionCommentDTO([
             'text_comment' => 'Great work!',
             'group_comment' => false,
-            'file_ids' => [123, 456]
+            'file_ids' => [123, 456],
         ]);
 
         $array = $dto->toArray();
@@ -187,7 +189,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
             'group_comment' => true,
             'media_comment_id' => 'media123',
             'media_comment_type' => 'video',
-            'file_ids' => [123]
+            'file_ids' => [123],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -205,7 +207,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
     {
         $dto = new CreateSubmissionCommentDTO([
             'text_comment' => 'Boolean test',
-            'group_comment' => false
+            'group_comment' => false,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -219,7 +221,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
         // Test audio
         $audioDto = new CreateSubmissionCommentDTO([
             'media_comment_id' => 'audio123',
-            'media_comment_type' => 'audio'
+            'media_comment_type' => 'audio',
         ]);
 
         $audioArray = $audioDto->toApiArray();
@@ -228,7 +230,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
         // Test video
         $videoDto = new CreateSubmissionCommentDTO([
             'media_comment_id' => 'video456',
-            'media_comment_type' => 'video'
+            'media_comment_type' => 'video',
         ]);
 
         $videoArray = $videoDto->toApiArray();
@@ -239,7 +241,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
     {
         $dto = new CreateSubmissionCommentDTO([
             'text_comment' => 'No files attached',
-            'file_ids' => []
+            'file_ids' => [],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -254,7 +256,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
     {
         $dto = new CreateSubmissionCommentDTO([
             'text_comment' => 'Single file attached',
-            'file_ids' => [999]
+            'file_ids' => [999],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -270,7 +272,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
             'group_comment' => true,
             'media_comment_id' => 'detailed_feedback_123',
             'media_comment_type' => 'audio',
-            'file_ids' => [111, 222, 333]
+            'file_ids' => [111, 222, 333],
         ]);
 
         $apiArray = $dto->toApiArray();

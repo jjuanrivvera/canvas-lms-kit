@@ -13,27 +13,49 @@ namespace CanvasLMS\Objects;
 class SubmissionVersion
 {
     public ?int $assignmentId = null;
+
     public ?string $assignmentName = null;
+
     public ?string $body = null;
+
     public ?string $currentGrade = null;
+
     public ?string $currentGradedAt = null;
+
     public ?string $currentGrader = null;
+
     public ?bool $gradeMatchesCurrentSubmission = null;
+
     public ?string $gradedAt = null;
+
     public ?string $grader = null;
+
     public ?int $graderId = null;
+
     public ?int $id = null;
+
     public ?string $newGrade = null;
+
     public ?string $newGradedAt = null;
+
     public ?string $newGrader = null;
+
     public ?string $previousGrade = null;
+
     public ?string $previousGradedAt = null;
+
     public ?string $previousGrader = null;
+
     public ?float $score = null;
+
     public ?string $userName = null;
+
     public ?string $submissionType = null;
+
     public ?string $url = null;
+
     public ?int $userId = null;
+
     public ?string $workflowState = null;
 
     /**
@@ -72,6 +94,7 @@ class SubmissionVersion
      * Create a SubmissionVersion from an array.
      *
      * @param array<string, mixed> $data
+     *
      * @return self
      */
     public static function fromArray(array $data): self

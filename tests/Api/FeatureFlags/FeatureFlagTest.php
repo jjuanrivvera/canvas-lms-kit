@@ -16,6 +16,7 @@ use Psr\Http\Message\StreamInterface;
 class FeatureFlagTest extends TestCase
 {
     private HttpClientInterface $mockClient;
+
     private int $accountId = 1;
 
     protected function setUp(): void
@@ -30,10 +31,10 @@ class FeatureFlagTest extends TestCase
     {
         $mockStream = $this->createMock(StreamInterface::class);
         $mockStream->method('getContents')->willReturn($body);
-        
+
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockResponse->method('getBody')->willReturn($mockStream);
-        
+
         return $mockResponse;
     }
 
@@ -48,9 +49,9 @@ class FeatureFlagTest extends TestCase
                     'context_type' => 'Account',
                     'context_id' => 1,
                     'feature' => 'new_gradebook',
-                    'state' => 'allowed'
-                ]
-            ]
+                    'state' => 'allowed',
+                ],
+            ],
         ];
 
         $mockResponse = $this->createMockResponse(json_encode($expectedData));
@@ -82,9 +83,9 @@ class FeatureFlagTest extends TestCase
                     'context_type' => 'Course',
                     'context_id' => $courseId,
                     'feature' => 'anonymous_grading',
-                    'state' => 'on'
-                ]
-            ]
+                    'state' => 'on',
+                ],
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -113,9 +114,9 @@ class FeatureFlagTest extends TestCase
                     'context_type' => 'User',
                     'context_id' => $userId,
                     'feature' => 'student_planner',
-                    'state' => 'allowed'
-                ]
-            ]
+                    'state' => 'allowed',
+                ],
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -144,8 +145,8 @@ class FeatureFlagTest extends TestCase
                 'feature' => 'new_gradebook',
                 'state' => 'allowed',
                 'locked' => false,
-                'hidden' => false
-            ]
+                'hidden' => false,
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -175,8 +176,8 @@ class FeatureFlagTest extends TestCase
                 'feature' => 'anonymous_grading',
                 'state' => 'on',
                 'locked' => true,
-                'hidden' => false
-            ]
+                'hidden' => false,
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -201,8 +202,8 @@ class FeatureFlagTest extends TestCase
             'feature_flag' => [
                 'state' => 'on',
                 'locked' => true,
-                'hidden' => false
-            ]
+                'hidden' => false,
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -210,10 +211,10 @@ class FeatureFlagTest extends TestCase
             ->with('accounts/1/features/flags/new_gradebook', $this->callback(function ($options) {
                 $multipart = $options['multipart'];
                 $this->assertCount(2, $multipart);
-                
+
                 $stateFound = false;
                 $lockedFound = false;
-                
+
                 foreach ($multipart as $part) {
                     if ($part['name'] === 'state' && $part['contents'] === 'on') {
                         $stateFound = true;
@@ -222,14 +223,14 @@ class FeatureFlagTest extends TestCase
                         $lockedFound = true;
                     }
                 }
-                
+
                 return $stateFound && $lockedFound;
             }))
             ->willReturn($this->createMockResponse(json_encode($expectedData)));
 
         $feature = FeatureFlag::update('new_gradebook', [
             'state' => 'on',
-            'locked' => true
+            'locked' => true,
         ]);
 
         $this->assertEquals('new_gradebook', $feature->feature);
@@ -245,8 +246,8 @@ class FeatureFlagTest extends TestCase
             'feature_flag' => [
                 'state' => 'allowed',
                 'locked' => false,
-                'hidden' => true
-            ]
+                'hidden' => true,
+            ],
         ];
 
         $dto = new UpdateFeatureFlagDTO();
@@ -259,19 +260,19 @@ class FeatureFlagTest extends TestCase
             ->with('accounts/1/features/flags/anonymous_grading', $this->callback(function ($options) {
                 $multipart = $options['multipart'];
                 $this->assertCount(3, $multipart);
-                
+
                 $checks = [
                     'state' => 'allowed',
                     'locked' => 'false',
-                    'hidden' => 'true'
+                    'hidden' => 'true',
                 ];
-                
+
                 foreach ($multipart as $part) {
                     if (isset($checks[$part['name']])) {
                         $this->assertEquals($checks[$part['name']], $part['contents']);
                     }
                 }
-                
+
                 return true;
             }))
             ->willReturn($this->createMockResponse(json_encode($expectedData)));
@@ -291,8 +292,8 @@ class FeatureFlagTest extends TestCase
             'feature' => 'new_gradebook',
             'feature_flag' => [
                 'state' => 'off',
-                'locked' => true
-            ]
+                'locked' => true,
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -302,7 +303,7 @@ class FeatureFlagTest extends TestCase
 
         $feature = FeatureFlag::updateByContext('courses', $courseId, 'new_gradebook', [
             'state' => 'off',
-            'locked' => true
+            'locked' => true,
         ]);
 
         $this->assertEquals('new_gradebook', $feature->feature);
@@ -338,7 +339,7 @@ class FeatureFlagTest extends TestCase
     public function testDeleteByContext(): void
     {
         $courseId = 123;
-        
+
         $this->mockClient->expects($this->once())
             ->method('delete')
             ->with('courses/123/features/flags/anonymous_grading');
@@ -353,16 +354,17 @@ class FeatureFlagTest extends TestCase
         $expectedData = [
             'feature' => 'new_gradebook',
             'feature_flag' => [
-                'state' => 'on'
-            ]
+                'state' => 'on',
+            ],
         ];
 
         $this->mockClient->expects($this->once())
             ->method('put')
             ->with('accounts/1/features/flags/new_gradebook', $this->callback(function ($options) {
                 $multipart = $options['multipart'];
-                return count($multipart) === 1 
-                    && $multipart[0]['name'] === 'state' 
+
+                return count($multipart) === 1
+                    && $multipart[0]['name'] === 'state'
                     && $multipart[0]['contents'] === 'on';
             }))
             ->willReturn($this->createMockResponse(json_encode($expectedData)));
@@ -377,8 +379,8 @@ class FeatureFlagTest extends TestCase
         $expectedData = [
             'feature' => 'new_gradebook',
             'feature_flag' => [
-                'state' => 'on'
-            ]
+                'state' => 'on',
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -395,8 +397,8 @@ class FeatureFlagTest extends TestCase
         $expectedData = [
             'feature' => 'new_gradebook',
             'feature_flag' => [
-                'state' => 'off'
-            ]
+                'state' => 'off',
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -413,8 +415,8 @@ class FeatureFlagTest extends TestCase
         $expectedData = [
             'feature' => 'new_gradebook',
             'feature_flag' => [
-                'state' => 'allowed'
-            ]
+                'state' => 'allowed',
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -495,7 +497,7 @@ class FeatureFlagTest extends TestCase
         $courseId = 123;
         $expectedData = [
             'feature' => 'new_gradebook',
-            'feature_flag' => ['state' => 'on']
+            'feature_flag' => ['state' => 'on'],
         ];
 
         $this->mockClient->expects($this->once())
@@ -515,7 +517,7 @@ class FeatureFlagTest extends TestCase
         $userId = 456;
         $expectedData = [
             'feature' => 'student_planner',
-            'feature_flag' => ['state' => 'off']
+            'feature_flag' => ['state' => 'off'],
         ];
 
         $this->mockClient->expects($this->once())
@@ -535,7 +537,7 @@ class FeatureFlagTest extends TestCase
         $courseId = 789;
         $expectedData = [
             'feature' => 'anonymous_grading',
-            'feature_flag' => ['state' => 'allowed']
+            'feature_flag' => ['state' => 'allowed'],
         ];
 
         $this->mockClient->expects($this->once())
@@ -563,7 +565,7 @@ class FeatureFlagTest extends TestCase
         $courseId = 123;
         $expectedData = [
             'feature' => 'test_feature',
-            'feature_flag' => ['state' => 'on']
+            'feature_flag' => ['state' => 'on'],
         ];
 
         $mockResponse = $this->createMockResponse(json_encode($expectedData));
@@ -583,18 +585,18 @@ class FeatureFlagTest extends TestCase
     public function testNullSafetyInStateChecking(): void
     {
         $feature = new FeatureFlag();
-        
+
         // Test with non-string state in feature_flag
         $feature->featureFlag = ['state' => 123]; // Invalid type
         $feature->state = 'on';
-        
+
         // Should fall back to direct state since nested is not a string
         $this->assertTrue($feature->isEnabled());
-        
+
         // Test with missing state in feature_flag
         $feature->featureFlag = ['other' => 'value'];
         $feature->state = 'off';
-        
+
         // Should use direct state
         $this->assertTrue($feature->isDisabled());
     }
@@ -602,26 +604,26 @@ class FeatureFlagTest extends TestCase
     public function testHydratePropertiesWithPrecedence(): void
     {
         $feature = new FeatureFlag();
-        
+
         // Set direct state first
         $feature->state = 'on';
         $feature->locked = true;
-        
+
         $data = [
             'state' => 'on',  // Top level
             'locked' => true,
             'feature_flag' => [
                 'state' => 'off',  // Nested - should not override
-                'locked' => false
-            ]
+                'locked' => false,
+            ],
         ];
-        
+
         // Use reflection to call protected method
         $reflection = new \ReflectionClass(FeatureFlag::class);
         $method = $reflection->getMethod('hydrateProperties');
         $method->setAccessible(true);
         $method->invoke(null, $feature, $data);
-        
+
         // Top level values should be preserved
         $this->assertEquals('on', $feature->state);
         $this->assertTrue($feature->locked);

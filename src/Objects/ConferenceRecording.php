@@ -16,13 +16,20 @@ use DateTime;
 class ConferenceRecording
 {
     public ?int $id = null;
+
     public ?string $title = null;
+
     public ?int $duration = null;
+
     public ?DateTime $createdAt = null;
+
     public ?string $playbackUrl = null;
+
     /** @var array<mixed>|null */
     public ?array $playbackFormats = null;
+
     public ?string $recordingId = null;
+
     public ?DateTime $updatedAt = null;
 
     /**
@@ -37,7 +44,7 @@ class ConferenceRecording
             $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
 
             if (property_exists($this, $camelKey)) {
-                if (in_array($key, ['created_at', 'updated_at']) && !empty($value)) {
+                if (in_array($key, ['created_at', 'updated_at'], true) && !empty($value)) {
                     $this->$camelKey = new DateTime($value);
                 } else {
                     $this->$camelKey = $value;

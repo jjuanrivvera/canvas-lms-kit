@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Objects;
 
 use DateTime;
@@ -69,6 +71,7 @@ abstract class ActivityStreamItem
 
     /**
      * Constructor
+     *
      * @param array<string, mixed> $data
      */
     public function __construct(array $data = [])
@@ -83,7 +86,9 @@ abstract class ActivityStreamItem
 
     /**
      * Create an activity stream item from data based on type
+     *
      * @param array<string, mixed> $data
+     *
      * @return ActivityStreamItem
      */
     public static function createFromData(array $data): ActivityStreamItem
@@ -105,6 +110,7 @@ abstract class ActivityStreamItem
 
     /**
      * Get created at as DateTime
+     *
      * @return DateTimeInterface|null
      */
     public function getCreatedAtDate(): ?DateTimeInterface
@@ -114,6 +120,7 @@ abstract class ActivityStreamItem
 
     /**
      * Get updated at as DateTime
+     *
      * @return DateTimeInterface|null
      */
     public function getUpdatedAtDate(): ?DateTimeInterface
@@ -123,6 +130,7 @@ abstract class ActivityStreamItem
 
     /**
      * Check if the item is read
+     *
      * @return bool
      */
     public function isRead(): bool
@@ -132,6 +140,7 @@ abstract class ActivityStreamItem
 
     /**
      * Check if this is a course item
+     *
      * @return bool
      */
     public function isCourseItem(): bool
@@ -141,6 +150,7 @@ abstract class ActivityStreamItem
 
     /**
      * Check if this is a group item
+     *
      * @return bool
      */
     public function isGroupItem(): bool
@@ -150,6 +160,7 @@ abstract class ActivityStreamItem
 
     /**
      * Convert to array
+     *
      * @return array<string, mixed>
      */
     public function toArray(): array

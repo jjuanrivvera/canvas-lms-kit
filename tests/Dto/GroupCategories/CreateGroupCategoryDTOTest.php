@@ -12,7 +12,7 @@ class CreateGroupCategoryDTOTest extends TestCase
     public function testConstructorWithEmptyData(): void
     {
         $dto = new CreateGroupCategoryDTO([]);
-        
+
         $this->assertNull($dto->name);
         $this->assertNull($dto->selfSignup);
         $this->assertNull($dto->autoLeader);
@@ -31,7 +31,7 @@ class CreateGroupCategoryDTOTest extends TestCase
             'group_limit' => 5,
             'sis_group_category_id' => 'SIS123',
             'create_group_count' => 3,
-            'split_group_count' => 'request'
+            'split_group_count' => 'request',
         ];
 
         $dto = new CreateGroupCategoryDTO($data);
@@ -80,7 +80,7 @@ class CreateGroupCategoryDTOTest extends TestCase
             'group_limit' => 5,
             'sis_group_category_id' => 'SIS123',
             'create_group_count' => 3,
-            'split_group_count' => 'request'
+            'split_group_count' => 'request',
         ];
 
         $dto = new CreateGroupCategoryDTO($data);
@@ -93,7 +93,7 @@ class CreateGroupCategoryDTOTest extends TestCase
             'groupLimit' => 5,
             'sisGroupCategoryId' => 'SIS123',
             'createGroupCount' => 3,
-            'splitGroupCount' => 'request'
+            'splitGroupCount' => 'request',
         ];
 
         $this->assertEquals($expected, $array);
@@ -108,7 +108,7 @@ class CreateGroupCategoryDTOTest extends TestCase
             'group_limit' => 5,
             'sis_group_category_id' => 'SIS123',
             'create_group_count' => 3,
-            'split_group_count' => 'request'
+            'split_group_count' => 'request',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -117,19 +117,19 @@ class CreateGroupCategoryDTOTest extends TestCase
         $this->assertCount(7, $apiArray);
 
         // Check multipart format
-        $nameField = array_filter($apiArray, fn($field) => $field['name'] === 'name');
+        $nameField = array_filter($apiArray, fn ($field) => $field['name'] === 'name');
         $this->assertCount(1, $nameField);
         $this->assertEquals('Test Category', reset($nameField)['contents']);
 
-        $selfSignupField = array_filter($apiArray, fn($field) => $field['name'] === 'self_signup');
+        $selfSignupField = array_filter($apiArray, fn ($field) => $field['name'] === 'self_signup');
         $this->assertCount(1, $selfSignupField);
         $this->assertEquals('enabled', reset($selfSignupField)['contents']);
 
-        $autoLeaderField = array_filter($apiArray, fn($field) => $field['name'] === 'auto_leader');
+        $autoLeaderField = array_filter($apiArray, fn ($field) => $field['name'] === 'auto_leader');
         $this->assertCount(1, $autoLeaderField);
         $this->assertEquals('random', reset($autoLeaderField)['contents']);
 
-        $groupLimitField = array_filter($apiArray, fn($field) => $field['name'] === 'group_limit');
+        $groupLimitField = array_filter($apiArray, fn ($field) => $field['name'] === 'group_limit');
         $this->assertCount(1, $groupLimitField);
         $this->assertEquals('5', reset($groupLimitField)['contents']);
     }
@@ -146,11 +146,10 @@ class CreateGroupCategoryDTOTest extends TestCase
         $this->assertEquals('Test Category', $apiArray[0]['contents']);
     }
 
-
     public function testSelfSignupValues(): void
     {
         $validValues = ['enabled', 'restricted', null];
-        
+
         foreach ($validValues as $value) {
             $dto = new CreateGroupCategoryDTO(['self_signup' => $value]);
             $this->assertEquals($value, $dto->selfSignup);
@@ -160,7 +159,7 @@ class CreateGroupCategoryDTOTest extends TestCase
     public function testAutoLeaderValues(): void
     {
         $validValues = ['first', 'random', null];
-        
+
         foreach ($validValues as $value) {
             $dto = new CreateGroupCategoryDTO(['auto_leader' => $value]);
             $this->assertEquals($value, $dto->autoLeader);
@@ -171,15 +170,15 @@ class CreateGroupCategoryDTOTest extends TestCase
     {
         $dto = new CreateGroupCategoryDTO([
             'group_limit' => '10',
-            'create_group_count' => '5'
+            'create_group_count' => '5',
         ]);
 
         $apiArray = $dto->toApiArray();
 
-        $groupLimitField = array_filter($apiArray, fn($field) => $field['name'] === 'group_limit');
+        $groupLimitField = array_filter($apiArray, fn ($field) => $field['name'] === 'group_limit');
         $this->assertEquals('10', reset($groupLimitField)['contents']);
 
-        $createGroupCountField = array_filter($apiArray, fn($field) => $field['name'] === 'create_group_count');
+        $createGroupCountField = array_filter($apiArray, fn ($field) => $field['name'] === 'create_group_count');
         $this->assertEquals('5', reset($createGroupCountField)['contents']);
     }
 
@@ -191,13 +190,13 @@ class CreateGroupCategoryDTOTest extends TestCase
             'group_limit' => 5,
             'sis_group_category_id' => 'SIS123',
             'create_group_count' => 3,
-            'split_group_count' => 'request'
+            'split_group_count' => 'request',
         ]);
 
         $apiArray = $dto->toApiArray();
-        
+
         $fieldNames = array_column($apiArray, 'name');
-        
+
         $this->assertContains('self_signup', $fieldNames);
         $this->assertContains('auto_leader', $fieldNames);
         $this->assertContains('group_limit', $fieldNames);

@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Api\CalendarEvents;
 
-use DateTime;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Config;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
-use CanvasLMS\Dto\CalendarEvents\UpdateCalendarEventDTO;
 use CanvasLMS\Dto\CalendarEvents\CreateReservationDTO;
+use CanvasLMS\Dto\CalendarEvents\UpdateCalendarEventDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use DateTime;
 
 /**
  * CalendarEvent Class
@@ -74,42 +76,49 @@ class CalendarEvent extends AbstractBaseApi
 {
     /**
      * The ID of the calendar event
+     *
      * @var int|null
      */
     public ?int $id = null;
 
     /**
      * The title of the calendar event
+     *
      * @var string|null
      */
     public ?string $title = null;
 
     /**
      * The start timestamp of the event
+     *
      * @var DateTime|null
      */
     public ?DateTime $startAt = null;
 
     /**
      * The end timestamp of the event
+     *
      * @var DateTime|null
      */
     public ?DateTime $endAt = null;
 
     /**
      * The HTML description of the event
+     *
      * @var string|null
      */
     public ?string $description = null;
 
     /**
      * The location name of the event
+     *
      * @var string|null
      */
     public ?string $locationName = null;
 
     /**
      * The address where the event is taking place
+     *
      * @var string|null
      */
     public ?string $locationAddress = null;
@@ -117,6 +126,7 @@ class CalendarEvent extends AbstractBaseApi
     /**
      * The context code of the calendar this event belongs to
      * Format: {type}_{id} (e.g., course_123, user_456, group_789, account_1)
+     *
      * @var string|null
      */
     public ?string $contextCode = null;
@@ -124,18 +134,21 @@ class CalendarEvent extends AbstractBaseApi
     /**
      * If specified, indicates which calendar this event should be displayed on
      * (e.g., a section-level event would have the course's context code here)
+     *
      * @var string|null
      */
     public ?string $effectiveContextCode = null;
 
     /**
      * The context name of the calendar this event belongs to
+     *
      * @var string|null
      */
     public ?string $contextName = null;
 
     /**
      * A comma-separated list of all calendar contexts this event is part of
+     *
      * @var string|null
      */
     public ?string $allContextCodes = null;
@@ -143,6 +156,7 @@ class CalendarEvent extends AbstractBaseApi
     /**
      * Current state of the event ('active', 'locked' or 'deleted')
      * 'locked' indicates that start_at/end_at cannot be changed
+     *
      * @var string|null
      */
     public ?string $workflowState = null;
@@ -150,6 +164,7 @@ class CalendarEvent extends AbstractBaseApi
     /**
      * Whether this event should be displayed on the calendar
      * Only true for course-level events with section-level child events
+     *
      * @var bool|null
      */
     public ?bool $hidden = null;
@@ -157,12 +172,14 @@ class CalendarEvent extends AbstractBaseApi
     /**
      * If this is a reservation, the id will indicate the time slot it is for
      * If this is a section-level event, this will be the course-level parent event
+     *
      * @var int|null
      */
     public ?int $parentEventId = null;
 
     /**
      * The number of child_events
+     *
      * @var int|null
      */
     public ?int $childEventsCount = null;
@@ -170,150 +187,175 @@ class CalendarEvent extends AbstractBaseApi
     /**
      * If this is a time slot, this will be a list of any reservations
      * If this is a course-level event, this will be a list of section-level events
+     *
      * @var array<int, array<string, mixed>>|null
      */
     public ?array $childEvents = null;
 
     /**
      * URL for this calendar event (to update, delete, etc.)
+     *
      * @var string|null
      */
     public ?string $url = null;
 
     /**
      * URL for a user to view this event
+     *
      * @var string|null
      */
     public ?string $htmlUrl = null;
 
     /**
      * The date of this event (YYYY-MM-DD format)
+     *
      * @var string|null
      */
     public ?string $allDayDate = null;
 
     /**
      * Boolean indicating whether this is an all-day event (midnight to midnight)
+     *
      * @var bool|null
      */
     public ?bool $allDay = null;
 
     /**
      * When the calendar event was created
+     *
      * @var DateTime|null
      */
     public ?DateTime $createdAt = null;
 
     /**
      * When the calendar event was last updated
+     *
      * @var DateTime|null
      */
     public ?DateTime $updatedAt = null;
 
     /**
      * The id of the appointment group
+     *
      * @var int|null
      */
     public ?int $appointmentGroupId = null;
 
     /**
      * The API URL of the appointment group
+     *
      * @var string|null
      */
     public ?string $appointmentGroupUrl = null;
 
     /**
      * If the event is a reservation, whether it is the current user's reservation
+     *
      * @var bool|null
      */
     public ?bool $ownReservation = null;
 
     /**
      * If the event is a time slot, the API URL for reserving it
+     *
      * @var string|null
      */
     public ?string $reserveUrl = null;
 
     /**
      * If the event is a time slot, whether the user has already made a reservation
+     *
      * @var bool|null
      */
     public ?bool $reserved = null;
 
     /**
      * The type of participant to sign up for a slot: 'User' or 'Group'
+     *
      * @var string|null
      */
     public ?string $participantType = null;
 
     /**
      * If the event is a time slot, this is the participant limit
+     *
      * @var int|null
      */
     public ?int $participantsPerAppointment = null;
 
     /**
      * If the event is a time slot with a limit, how many slots are available
+     *
      * @var int|null
      */
     public ?int $availableSlots = null;
 
     /**
      * If the event is a user-level reservation, contains the user participant
+     *
      * @var array<string, mixed>|null
      */
     public ?array $user = null;
 
     /**
      * If the event is a group-level reservation, contains the group participant
+     *
      * @var array<string, mixed>|null
      */
     public ?array $group = null;
 
     /**
      * Boolean indicating whether this has important dates
+     *
      * @var bool|null
      */
     public ?bool $importantDates = null;
 
     /**
      * Identifies the recurring event series this event may belong to
+     *
      * @var string|null
      */
     public ?string $seriesUuid = null;
 
     /**
      * An iCalendar RRULE for defining how events in a recurring event series repeat
+     *
      * @var string|null
      */
     public ?string $rrule = null;
 
     /**
      * Boolean indicating if this is the first event in the series of recurring events
+     *
      * @var bool|null
      */
     public ?bool $seriesHead = null;
 
     /**
      * A natural language expression of how events occur in the series
+     *
      * @var string|null
      */
     public ?string $seriesNaturalLanguage = null;
 
     /**
      * Boolean indicating whether this has blackout date
+     *
      * @var bool|null
      */
     public ?bool $blackoutDate = null;
 
     /**
      * Context type extracted from context code
+     *
      * @var string|null
      */
     protected ?string $contextType = null;
 
     /**
      * Context ID extracted from context code
+     *
      * @var int|null
      */
     protected ?int $contextId = null;
@@ -330,6 +372,7 @@ class CalendarEvent extends AbstractBaseApi
             $this->contextType = $parsed['type'];
             $this->contextId = $parsed['id'];
         }
+
         return $this->contextType;
     }
 
@@ -345,6 +388,7 @@ class CalendarEvent extends AbstractBaseApi
             $this->contextType = $parsed['type'];
             $this->contextId = $parsed['id'];
         }
+
         return $this->contextId;
     }
 
@@ -369,8 +413,10 @@ class CalendarEvent extends AbstractBaseApi
      * Create a new calendar event
      *
      * @param array<string, mixed>|CreateCalendarEventDTO $data The event data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function create(array|CreateCalendarEventDTO $data): self
     {
@@ -381,6 +427,7 @@ class CalendarEvent extends AbstractBaseApi
         self::checkApiClient();
         $response = self::$apiClient->post('calendar_events', ['multipart' => $data->toApiArray()]);
         $responseData = self::parseJsonResponse($response);
+
         return new self($responseData);
     }
 
@@ -389,8 +436,10 @@ class CalendarEvent extends AbstractBaseApi
      *
      * @param int $id The calendar event ID
      * @param array<string, mixed> $params Query parameters
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -398,6 +447,7 @@ class CalendarEvent extends AbstractBaseApi
         $endpoint = sprintf('calendar_events/%d', $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
+
         return new self($data);
     }
 
@@ -407,8 +457,10 @@ class CalendarEvent extends AbstractBaseApi
      * @param int $id The calendar event ID
      * @param array<string, mixed>|UpdateCalendarEventDTO $updateData The update data
      * @param array<string, mixed> $params Additional parameters (e.g., 'which' for series)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function update(int $id, array|UpdateCalendarEventDTO $updateData, array $params = []): self
     {
@@ -427,20 +479,22 @@ class CalendarEvent extends AbstractBaseApi
 
         if (!empty($params)) {
             foreach ($params as $key => $value) {
-                if (!in_array($key, $allowedParams)) {
+                if (!in_array($key, $allowedParams, true)) {
                     $allowed = implode(', ', $allowedParams);
+
                     throw new CanvasApiException("Invalid parameter '$key'. Allowed parameters: $allowed");
                 }
 
                 $data[] = [
                     'name' => $key,
-                    'contents' => (string)$value
+                    'contents' => (string) $value,
                 ];
             }
         }
 
         $response = self::$apiClient->put($endpoint, ['multipart' => $data]);
         $responseData = self::parseJsonResponse($response);
+
         return new self($responseData);
     }
 
@@ -448,13 +502,15 @@ class CalendarEvent extends AbstractBaseApi
      * Delete a calendar event
      *
      * @param array<string, mixed> $params Parameters like 'cancel_reason', 'which'
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(array $params = []): self
     {
         if (!$this->id) {
-            throw new CanvasApiException("Cannot delete calendar event without ID");
+            throw new CanvasApiException('Cannot delete calendar event without ID');
         }
 
         self::checkApiClient();
@@ -466,6 +522,7 @@ class CalendarEvent extends AbstractBaseApi
         }
 
         self::$apiClient->delete($endpoint, $queryParams);
+
         return $this;
     }
 
@@ -473,8 +530,10 @@ class CalendarEvent extends AbstractBaseApi
      * List calendar events
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<int, self>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, self>
      */
     public static function get(array $params = []): array
     {
@@ -497,15 +556,16 @@ class CalendarEvent extends AbstractBaseApi
         }, $data);
     }
 
-
     /**
      * Fetch calendar events by context
      *
      * @param string $contextType Context type ('account', 'course', 'user', 'group')
      * @param int $contextId Context ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<int, self>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, self>
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
@@ -525,8 +585,9 @@ class CalendarEvent extends AbstractBaseApi
     /**
      * Save the calendar event (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -537,7 +598,7 @@ class CalendarEvent extends AbstractBaseApi
             // Map properties to DTO data
             $properties = [
                 'contextCode', 'title', 'description', 'startAt', 'endAt',
-                'locationName', 'locationAddress', 'allDay', 'blackoutDate'
+                'locationName', 'locationAddress', 'allDay', 'blackoutDate',
             ];
 
             foreach ($properties as $property) {
@@ -562,13 +623,13 @@ class CalendarEvent extends AbstractBaseApi
 
             // Context code is required for creation
             if (!$this->contextCode) {
-                throw new CanvasApiException("Context code is required to create a calendar event");
+                throw new CanvasApiException('Context code is required to create a calendar event');
             }
 
             // Map properties to DTO
             $properties = [
                 'contextCode', 'title', 'description', 'startAt', 'endAt',
-                'locationName', 'locationAddress', 'allDay', 'rrule', 'blackoutDate'
+                'locationName', 'locationAddress', 'allDay', 'rrule', 'blackoutDate',
             ];
 
             foreach ($properties as $property) {
@@ -596,8 +657,10 @@ class CalendarEvent extends AbstractBaseApi
      * Reserve a time slot
      *
      * @param array<string, mixed>|CreateReservationDTO $data Reservation data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function reserve(array|CreateReservationDTO $data): self
     {
@@ -606,7 +669,7 @@ class CalendarEvent extends AbstractBaseApi
         }
 
         if (!$this->id) {
-            throw new CanvasApiException("Cannot reserve without event ID");
+            throw new CanvasApiException('Cannot reserve without event ID');
         }
 
         return self::reserveSlot($this->id, $data, $data->participantId);
@@ -618,8 +681,10 @@ class CalendarEvent extends AbstractBaseApi
      * @param int $eventId The calendar event ID
      * @param array<string, mixed>|CreateReservationDTO $data Reservation data
      * @param int|null $participantId Optional participant ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function reserveSlot(int $eventId, array|CreateReservationDTO $data, ?int $participantId = null): self
     {
@@ -635,6 +700,7 @@ class CalendarEvent extends AbstractBaseApi
 
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
         $responseData = self::parseJsonResponse($response);
+
         return new self($responseData);
     }
 
@@ -643,8 +709,10 @@ class CalendarEvent extends AbstractBaseApi
      *
      * @param array<int> $accountIds Array of account IDs
      * @param bool $markAsSeen Whether to mark the feature as seen
-     * @return array<string, mixed>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed>
      */
     public static function saveEnabledAccountCalendars(array $accountIds, bool $markAsSeen = false): array
     {
@@ -654,18 +722,19 @@ class CalendarEvent extends AbstractBaseApi
         if ($markAsSeen) {
             $data[] = [
                 'name' => 'mark_feature_as_seen',
-                'contents' => '1'
+                'contents' => '1',
             ];
         }
 
         foreach ($accountIds as $index => $accountId) {
             $data[] = [
                 'name' => "enabled_account_calendars[$index]",
-                'contents' => (string)$accountId
+                'contents' => (string) $accountId,
             ];
         }
 
         $response = self::$apiClient->post('calendar_events/save_enabled_account_calendars', ['multipart' => $data]);
+
         return self::parseJsonResponse($response);
     }
 
@@ -673,8 +742,10 @@ class CalendarEvent extends AbstractBaseApi
      * Get next available appointment
      *
      * @param array<int> $appointmentGroupIds Optional array of appointment group IDs to search
-     * @return self|null
+     *
      * @throws CanvasApiException
+     *
+     * @return self|null
      */
     public static function getNextAvailableAppointment(array $appointmentGroupIds = []): ?self
     {
@@ -701,16 +772,18 @@ class CalendarEvent extends AbstractBaseApi
      *
      * @param array<string, mixed>|UpdateCalendarEventDTO $updateData Update data
      * @param string $which Which events to update: 'one', 'all', 'following'
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function updateSeries(array|UpdateCalendarEventDTO $updateData, string $which = 'one'): self
     {
         if (!$this->id) {
-            throw new CanvasApiException("Cannot update series without event ID");
+            throw new CanvasApiException('Cannot update series without event ID');
         }
 
-        if (!in_array($which, ['one', 'all', 'following'])) {
+        if (!in_array($which, ['one', 'all', 'following'], true)) {
             throw new CanvasApiException("Invalid 'which' parameter. Must be 'one', 'all', or 'following'");
         }
 
@@ -722,12 +795,14 @@ class CalendarEvent extends AbstractBaseApi
      *
      * @param string $which Which events to delete: 'one', 'all', 'following'
      * @param string|null $cancelReason Optional reason for cancellation
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function deleteSeries(string $which = 'one', ?string $cancelReason = null): self
     {
-        if (!in_array($which, ['one', 'all', 'following'])) {
+        if (!in_array($which, ['one', 'all', 'following'], true)) {
             throw new CanvasApiException("Invalid 'which' parameter. Must be 'one', 'all', or 'following'");
         }
 
@@ -743,8 +818,10 @@ class CalendarEvent extends AbstractBaseApi
      * Parse a context code into type and ID
      *
      * @param string $contextCode Context code (e.g., 'course_123')
-     * @return array{type: string, id: int}
+     *
      * @throws CanvasApiException
+     *
+     * @return array{type: string, id: int}
      */
     public static function parseContextCode(string $contextCode): array
     {
@@ -755,7 +832,7 @@ class CalendarEvent extends AbstractBaseApi
 
         return [
             'type' => $parts[0],
-            'id' => (int)$parts[1]
+            'id' => (int) $parts[1],
         ];
     }
 
@@ -764,13 +841,14 @@ class CalendarEvent extends AbstractBaseApi
      *
      * @param string $key Property name
      * @param mixed $value Value to cast
+     *
      * @return mixed
      */
     protected function castValue(string $key, mixed $value): mixed
     {
         $dateTimeFields = ['startAt', 'endAt', 'createdAt', 'updatedAt'];
 
-        if (in_array($key, $dateTimeFields) && is_string($value) && !empty($value)) {
+        if (in_array($key, $dateTimeFields, true) && is_string($value) && !empty($value)) {
             try {
                 return new DateTime($value);
             } catch (\Exception $e) {
@@ -782,7 +860,7 @@ class CalendarEvent extends AbstractBaseApi
                         'field' => $key,
                         'value' => $value,
                         'error' => $e->getMessage(),
-                        'class' => self::class
+                        'class' => self::class,
                     ]
                 );
 
@@ -809,8 +887,10 @@ class CalendarEvent extends AbstractBaseApi
      * Get paginated calendar events
      *
      * @param array<string, mixed> $params Query parameters
-     * @return \CanvasLMS\Pagination\PaginationResult
+     *
      * @throws CanvasApiException
+     *
+     * @return \CanvasLMS\Pagination\PaginationResult
      */
     public static function paginate(array $params = []): \CanvasLMS\Pagination\PaginationResult
     {
@@ -840,8 +920,10 @@ class CalendarEvent extends AbstractBaseApi
      * Get all calendar events from all pages
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<int, self>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, self>
      */
     public static function all(array $params = []): array
     {
@@ -866,6 +948,7 @@ class CalendarEvent extends AbstractBaseApi
 
     /**
      * Get the API endpoint for this resource
+     *
      * @return string
      */
     protected static function getEndpoint(): string

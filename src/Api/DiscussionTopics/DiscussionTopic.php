@@ -11,7 +11,6 @@ use CanvasLMS\Api\Users\User;
 use CanvasLMS\Dto\DiscussionTopics\CreateDiscussionTopicDTO;
 use CanvasLMS\Dto\DiscussionTopics\UpdateDiscussionTopicDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
 
 /**
@@ -134,6 +133,7 @@ class DiscussionTopic extends AbstractBaseApi
 
     /**
      * Discussion topic author information
+     *
      * @var array<string, mixed>|null
      */
     public ?array $author = null;
@@ -235,6 +235,7 @@ class DiscussionTopic extends AbstractBaseApi
 
     /**
      * Information about why the topic is locked
+     *
      * @var array<string, mixed>|null
      */
     public ?array $lockInfo = null;
@@ -251,12 +252,14 @@ class DiscussionTopic extends AbstractBaseApi
 
     /**
      * Child topics (for threaded discussions)
+     *
      * @var array<mixed>|null
      */
     public ?array $topicChildren = null;
 
     /**
      * Group-specific child topics
+     *
      * @var array<mixed>|null
      */
     public ?array $groupTopicChildren = null;
@@ -273,12 +276,14 @@ class DiscussionTopic extends AbstractBaseApi
 
     /**
      * Array of file attachments
+     *
      * @var array<mixed>|null
      */
     public ?array $attachments = null;
 
     /**
      * User permissions for the topic
+     *
      * @var array<string, mixed>|null
      */
     public ?array $permissions = null;
@@ -337,6 +342,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set the course context for discussion topic operations
      *
      * @param Course $course The course to operate on
+     *
      * @return void
      */
     public static function setCourse(Course $course): void
@@ -347,14 +353,16 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Check if course context is set
      *
-     * @return bool
      * @throws CanvasApiException If course is not set
+     *
+     * @return bool
      */
     public static function checkCourse(): bool
     {
         if (!isset(self::$course) || !isset(self::$course->id)) {
             throw new CanvasApiException('Course is required');
         }
+
         return true;
     }
 
@@ -372,6 +380,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set discussion topic ID
      *
      * @param int|null $id
+     *
      * @return void
      */
     public function setId(?int $id): void
@@ -393,6 +402,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set discussion topic title
      *
      * @param string|null $title
+     *
      * @return void
      */
     public function setTitle(?string $title): void
@@ -414,6 +424,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set discussion topic message
      *
      * @param string|null $message
+     *
      * @return void
      */
     public function setMessage(?string $message): void
@@ -435,6 +446,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set HTML URL
      *
      * @param string|null $htmlUrl
+     *
      * @return void
      */
     public function setHtmlUrl(?string $htmlUrl): void
@@ -456,6 +468,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set posted at timestamp
      *
      * @param string|null $postedAt
+     *
      * @return void
      */
     public function setPostedAt(?string $postedAt): void
@@ -477,6 +490,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set discussion type
      *
      * @param string|null $discussionType
+     *
      * @return void
      */
     public function setDiscussionType(?string $discussionType): void
@@ -498,6 +512,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set require initial post status
      *
      * @param bool|null $requireInitialPost
+     *
      * @return void
      */
     public function setRequireInitialPost(?bool $requireInitialPost): void
@@ -519,6 +534,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set locked status
      *
      * @param bool|null $locked
+     *
      * @return void
      */
     public function setLocked(?bool $locked): void
@@ -540,6 +556,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set pinned status
      *
      * @param bool|null $pinned
+     *
      * @return void
      */
     public function setPinned(?bool $pinned): void
@@ -561,6 +578,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set course ID
      *
      * @param int|null $courseId
+     *
      * @return void
      */
     public function setCourseId(?int $courseId): void
@@ -582,6 +600,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set user ID
      *
      * @param int|null $userId
+     *
      * @return void
      */
     public function setUserId(?int $userId): void
@@ -603,6 +622,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set author information
      *
      * @param array<string, mixed>|null $author
+     *
      * @return void
      */
     public function setAuthor(?array $author): void
@@ -624,6 +644,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set published status
      *
      * @param bool|null $published
+     *
      * @return void
      */
     public function setPublished(?bool $published): void
@@ -645,6 +666,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set workflow state
      *
      * @param string|null $workflowState
+     *
      * @return void
      */
     public function setWorkflowState(?string $workflowState): void
@@ -666,6 +688,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set read only status
      *
      * @param bool|null $readOnly
+     *
      * @return void
      */
     public function setReadOnly(?bool $readOnly): void
@@ -687,6 +710,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set assignment ID
      *
      * @param int|null $assignmentId
+     *
      * @return void
      */
     public function setAssignmentId(?int $assignmentId): void
@@ -708,6 +732,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set points possible
      *
      * @param float|null $pointsPossible
+     *
      * @return void
      */
     public function setPointsPossible(?float $pointsPossible): void
@@ -729,6 +754,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set grading type
      *
      * @param string|null $gradingType
+     *
      * @return void
      */
     public function setGradingType(?string $gradingType): void
@@ -750,6 +776,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set allow rating status
      *
      * @param bool|null $allowRating
+     *
      * @return void
      */
     public function setAllowRating(?bool $allowRating): void
@@ -771,6 +798,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set only graders can rate status
      *
      * @param bool|null $onlyGradersCanRate
+     *
      * @return void
      */
     public function setOnlyGradersCanRate(?bool $onlyGradersCanRate): void
@@ -792,6 +820,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set group topic status
      *
      * @param bool|null $groupTopic
+     *
      * @return void
      */
     public function setGroupTopic(?bool $groupTopic): void
@@ -813,6 +842,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set group category ID
      *
      * @param int|null $groupCategoryId
+     *
      * @return void
      */
     public function setGroupCategoryId(?int $groupCategoryId): void
@@ -834,6 +864,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set created at timestamp
      *
      * @param string|null $createdAt
+     *
      * @return void
      */
     public function setCreatedAt(?string $createdAt): void
@@ -855,6 +886,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set updated at timestamp
      *
      * @param string|null $updatedAt
+     *
      * @return void
      */
     public function setUpdatedAt(?string $updatedAt): void
@@ -876,6 +908,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set last reply at timestamp
      *
      * @param string|null $lastReplyAt
+     *
      * @return void
      */
     public function setLastReplyAt(?string $lastReplyAt): void
@@ -897,6 +930,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set user can see posts status
      *
      * @param bool|null $userCanSeePosts
+     *
      * @return void
      */
     public function setUserCanSeePosts(?bool $userCanSeePosts): void
@@ -918,6 +952,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set discussion subentry count
      *
      * @param int|null $discussionSubentryCount
+     *
      * @return void
      */
     public function setDiscussionSubentryCount(?int $discussionSubentryCount): void
@@ -939,6 +974,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set read state
      *
      * @param string|null $readState
+     *
      * @return void
      */
     public function setReadState(?string $readState): void
@@ -960,6 +996,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set unread count
      *
      * @param int|null $unreadCount
+     *
      * @return void
      */
     public function setUnreadCount(?int $unreadCount): void
@@ -981,6 +1018,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set subscribed status
      *
      * @param bool|null $subscribed
+     *
      * @return void
      */
     public function setSubscribed(?bool $subscribed): void
@@ -1002,6 +1040,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set subscription hold status
      *
      * @param string|null $subscriptionHold
+     *
      * @return void
      */
     public function setSubscriptionHold(?string $subscriptionHold): void
@@ -1023,6 +1062,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set delayed post at timestamp
      *
      * @param string|null $delayedPostAt
+     *
      * @return void
      */
     public function setDelayedPostAt(?string $delayedPostAt): void
@@ -1044,6 +1084,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set locked for user status
      *
      * @param bool|null $lockedForUser
+     *
      * @return void
      */
     public function setLockedForUser(?bool $lockedForUser): void
@@ -1065,6 +1106,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set lock info
      *
      * @param array<string, mixed>|null $lockInfo
+     *
      * @return void
      */
     public function setLockInfo(?array $lockInfo): void
@@ -1086,6 +1128,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set lock explanation
      *
      * @param string|null $lockExplanation
+     *
      * @return void
      */
     public function setLockExplanation(?string $lockExplanation): void
@@ -1107,6 +1150,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set user name
      *
      * @param string|null $userName
+     *
      * @return void
      */
     public function setUserName(?string $userName): void
@@ -1128,6 +1172,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set topic children
      *
      * @param array<mixed>|null $topicChildren
+     *
      * @return void
      */
     public function setTopicChildren(?array $topicChildren): void
@@ -1149,6 +1194,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set group topic children
      *
      * @param array<mixed>|null $groupTopicChildren
+     *
      * @return void
      */
     public function setGroupTopicChildren(?array $groupTopicChildren): void
@@ -1170,6 +1216,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set root topic ID
      *
      * @param int|null $rootTopicId
+     *
      * @return void
      */
     public function setRootTopicId(?int $rootTopicId): void
@@ -1191,6 +1238,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set podcast URL
      *
      * @param string|null $podcastUrl
+     *
      * @return void
      */
     public function setPodcastUrl(?string $podcastUrl): void
@@ -1212,6 +1260,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set attachments
      *
      * @param array<mixed>|null $attachments
+     *
      * @return void
      */
     public function setAttachments(?array $attachments): void
@@ -1233,6 +1282,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set permissions
      *
      * @param array<string, mixed>|null $permissions
+     *
      * @return void
      */
     public function setPermissions(?array $permissions): void
@@ -1254,6 +1304,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set sort by rating status
      *
      * @param bool|null $sortByRating
+     *
      * @return void
      */
     public function setSortByRating(?bool $sortByRating): void
@@ -1275,6 +1326,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set is announcement status
      *
      * @param bool|null $isAnnouncement
+     *
      * @return void
      */
     public function setIsAnnouncement(?bool $isAnnouncement): void
@@ -1296,6 +1348,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set sort order
      *
      * @param string|null $sortOrder
+     *
      * @return void
      */
     public function setSortOrder(?string $sortOrder): void
@@ -1317,6 +1370,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set sort order locked status
      *
      * @param bool|null $sortOrderLocked
+     *
      * @return void
      */
     public function setSortOrderLocked(?bool $sortOrderLocked): void
@@ -1338,6 +1392,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set expand status
      *
      * @param bool|null $expand
+     *
      * @return void
      */
     public function setExpand(?bool $expand): void
@@ -1359,6 +1414,7 @@ class DiscussionTopic extends AbstractBaseApi
      * Set expand locked status
      *
      * @param bool|null $expandLocked
+     *
      * @return void
      */
     public function setExpandLocked(?bool $expandLocked): void
@@ -1446,7 +1502,7 @@ class DiscussionTopic extends AbstractBaseApi
             'allow_rating' => $this->allowRating,
             'only_graders_can_rate' => $this->onlyGradersCanRate,
             'group_category_id' => $this->groupCategoryId,
-        ], fn($value) => $value !== null);
+        ], fn ($value) => $value !== null);
     }
 
     /**
@@ -1454,8 +1510,10 @@ class DiscussionTopic extends AbstractBaseApi
      *
      * @param int $id Discussion topic ID
      * @param array<string, mixed> $params Optional query parameters
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -1473,8 +1531,10 @@ class DiscussionTopic extends AbstractBaseApi
      * Fetch all discussion topics for the course
      *
      * @param array<string, mixed> $params Optional parameters
-     * @return array<DiscussionTopic> Array of DiscussionTopic objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<DiscussionTopic> Array of DiscussionTopic objects
      */
     public static function get(array $params = []): array
     {
@@ -1497,8 +1557,10 @@ class DiscussionTopic extends AbstractBaseApi
      * Get paginated discussion topics
      *
      * @param array<string, mixed> $params Optional parameters
-     * @return PaginationResult
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginationResult
      */
     public static function paginate(array $params = []): PaginationResult
     {
@@ -1515,8 +1577,10 @@ class DiscussionTopic extends AbstractBaseApi
      * Create a new discussion topic
      *
      * @param array<string, mixed>|CreateDiscussionTopicDTO $data Discussion topic data
-     * @return self Created DiscussionTopic object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Created DiscussionTopic object
      */
     public static function create(array|CreateDiscussionTopicDTO $data): self
     {
@@ -1539,8 +1603,10 @@ class DiscussionTopic extends AbstractBaseApi
      *
      * @param int $id Discussion topic ID
      * @param array<string, mixed>|UpdateDiscussionTopicDTO $data Discussion topic data
-     * @return self Updated DiscussionTopic object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Updated DiscussionTopic object
      */
     public static function update(int $id, array|UpdateDiscussionTopicDTO $data): self
     {
@@ -1561,8 +1627,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Save the current discussion topic (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -1619,8 +1686,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Delete the discussion topic
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
@@ -1640,8 +1708,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Lock the discussion topic
      *
-     * @return bool True if locking was successful, false otherwise
      * @throws CanvasApiException
+     *
+     * @return bool True if locking was successful, false otherwise
      */
     public function lock(): bool
     {
@@ -1652,6 +1721,7 @@ class DiscussionTopic extends AbstractBaseApi
         try {
             $updatedDiscussion = self::update($this->id, ['locked' => true]);
             $this->populate($updatedDiscussion->toArray());
+
             return true;
         } catch (CanvasApiException) {
             return false;
@@ -1661,8 +1731,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Unlock the discussion topic
      *
-     * @return bool True if unlocking was successful, false otherwise
      * @throws CanvasApiException
+     *
+     * @return bool True if unlocking was successful, false otherwise
      */
     public function unlock(): bool
     {
@@ -1673,6 +1744,7 @@ class DiscussionTopic extends AbstractBaseApi
         try {
             $updatedDiscussion = self::update($this->id, ['locked' => false]);
             $this->populate($updatedDiscussion->toArray());
+
             return true;
         } catch (CanvasApiException) {
             return false;
@@ -1682,8 +1754,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Pin the discussion topic
      *
-     * @return bool True if pinning was successful, false otherwise
      * @throws CanvasApiException
+     *
+     * @return bool True if pinning was successful, false otherwise
      */
     public function pin(): bool
     {
@@ -1694,6 +1767,7 @@ class DiscussionTopic extends AbstractBaseApi
         try {
             $updatedDiscussion = self::update($this->id, ['pinned' => true]);
             $this->populate($updatedDiscussion->toArray());
+
             return true;
         } catch (CanvasApiException) {
             return false;
@@ -1703,8 +1777,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Unpin the discussion topic
      *
-     * @return bool True if unpinning was successful, false otherwise
      * @throws CanvasApiException
+     *
+     * @return bool True if unpinning was successful, false otherwise
      */
     public function unpin(): bool
     {
@@ -1715,6 +1790,7 @@ class DiscussionTopic extends AbstractBaseApi
         try {
             $updatedDiscussion = self::update($this->id, ['pinned' => false]);
             $this->populate($updatedDiscussion->toArray());
+
             return true;
         } catch (CanvasApiException) {
             return false;
@@ -1724,8 +1800,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Mark discussion topic as read
      *
-     * @return bool True if marking as read was successful, false otherwise
      * @throws CanvasApiException
+     *
+     * @return bool True if marking as read was successful, false otherwise
      */
     public function markAsRead(): bool
     {
@@ -1742,6 +1819,7 @@ class DiscussionTopic extends AbstractBaseApi
 
             $this->readState = 'read';
             $this->unreadCount = 0;
+
             return true;
         } catch (CanvasApiException) {
             return false;
@@ -1751,8 +1829,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Mark discussion topic as unread
      *
-     * @return bool True if marking as unread was successful, false otherwise
      * @throws CanvasApiException
+     *
+     * @return bool True if marking as unread was successful, false otherwise
      */
     public function markAsUnread(): bool
     {
@@ -1768,6 +1847,7 @@ class DiscussionTopic extends AbstractBaseApi
             self::$apiClient->delete($endpoint);
 
             $this->readState = 'unread';
+
             return true;
         } catch (CanvasApiException) {
             return false;
@@ -1777,8 +1857,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Subscribe to discussion topic notifications
      *
-     * @return bool True if subscription was successful, false otherwise
      * @throws CanvasApiException
+     *
+     * @return bool True if subscription was successful, false otherwise
      */
     public function subscribe(): bool
     {
@@ -1794,6 +1875,7 @@ class DiscussionTopic extends AbstractBaseApi
             self::$apiClient->put($endpoint);
 
             $this->subscribed = true;
+
             return true;
         } catch (CanvasApiException) {
             return false;
@@ -1803,8 +1885,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Unsubscribe from discussion topic notifications
      *
-     * @return bool True if unsubscription was successful, false otherwise
      * @throws CanvasApiException
+     *
+     * @return bool True if unsubscription was successful, false otherwise
      */
     public function unsubscribe(): bool
     {
@@ -1820,6 +1903,7 @@ class DiscussionTopic extends AbstractBaseApi
             self::$apiClient->delete($endpoint);
 
             $this->subscribed = false;
+
             return true;
         } catch (CanvasApiException) {
             return false;
@@ -1829,8 +1913,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Mark all discussion topics in course as read
      *
-     * @return bool True if marking all as read was successful, false otherwise
      * @throws CanvasApiException
+     *
+     * @return bool True if marking all as read was successful, false otherwise
      */
     public static function markAllAsRead(): bool
     {
@@ -1850,8 +1935,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Mark all discussion topics in course as unread
      *
-     * @return bool True if marking all as unread was successful, false otherwise
      * @throws CanvasApiException
+     *
+     * @return bool True if marking all as unread was successful, false otherwise
      */
     public static function markAllAsUnread(): bool
     {
@@ -1897,8 +1983,9 @@ class DiscussionTopic extends AbstractBaseApi
      * }
      * ```
      *
-     * @return User|null
      * @throws CanvasApiException
+     *
+     * @return User|null
      */
     public function author(): ?User
     {
@@ -1909,7 +1996,7 @@ class DiscussionTopic extends AbstractBaseApi
         try {
             return User::find($this->userId);
         } catch (\Exception $e) {
-            throw new CanvasApiException("Could not load discussion topic author: " . $e->getMessage());
+            throw new CanvasApiException('Could not load discussion topic author: ' . $e->getMessage());
         }
     }
 
@@ -1933,8 +2020,9 @@ class DiscussionTopic extends AbstractBaseApi
      * }
      * ```
      *
-     * @return Assignment|null
      * @throws CanvasApiException
+     *
+     * @return Assignment|null
      */
     public function assignment(): ?Assignment
     {
@@ -1946,20 +2034,24 @@ class DiscussionTopic extends AbstractBaseApi
             if (isset(self::$course)) {
                 Assignment::setCourse(self::$course);
             }
+
             return Assignment::find($this->assignmentId);
         } catch (\Exception $e) {
-            throw new CanvasApiException("Could not load associated assignment: " . $e->getMessage());
+            throw new CanvasApiException('Could not load associated assignment: ' . $e->getMessage());
         }
     }
 
     /**
      * Get the API endpoint for this resource
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
+
         return sprintf('courses/%d/discussion_topics', self::$course->getId());
     }
 }

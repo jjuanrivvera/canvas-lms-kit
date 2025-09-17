@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Logins;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Logins\PasswordResetDTO;
+use PHPUnit\Framework\TestCase;
 
 class PasswordResetDTOTest extends TestCase
 {
@@ -16,7 +18,7 @@ class PasswordResetDTOTest extends TestCase
         $apiArray = $dto->toApiArray();
 
         $expected = [
-            ['name' => 'pseudonym_session[unique_id_forgot]', 'contents' => 'user@example.com']
+            ['name' => 'pseudonym_session[unique_id_forgot]', 'contents' => 'user@example.com'],
         ];
 
         $this->assertEquals($expected, $apiArray);
@@ -70,7 +72,7 @@ class PasswordResetDTOTest extends TestCase
             'user@example.com',
             'test.user@domain.org',
             'user+tag@example.co.uk',
-            'user123@test-domain.com'
+            'user123@test-domain.com',
         ];
 
         foreach ($validEmails as $email) {
@@ -78,7 +80,7 @@ class PasswordResetDTOTest extends TestCase
             $apiArray = $dto->toApiArray();
 
             $expected = [
-                ['name' => 'pseudonym_session[unique_id_forgot]', 'contents' => $email]
+                ['name' => 'pseudonym_session[unique_id_forgot]', 'contents' => $email],
             ];
 
             $this->assertEquals($expected, $apiArray);
@@ -97,7 +99,7 @@ class PasswordResetDTOTest extends TestCase
             'user..user@domain.com',
             'user@domain',
             'user@.com',
-            'user name@domain.com'
+            'user name@domain.com',
         ];
 
         foreach ($invalidEmails as $email) {
@@ -132,7 +134,7 @@ class PasswordResetDTOTest extends TestCase
     public function testConstructorWithData(): void
     {
         $dto = new PasswordResetDTO(['email' => 'constructor@example.com']);
-        
+
         $this->assertEquals('constructor@example.com', $dto->getEmail());
     }
 
@@ -142,7 +144,7 @@ class PasswordResetDTOTest extends TestCase
     public function testConstructorWithoutData(): void
     {
         $dto = new PasswordResetDTO([]);
-        
+
         $this->assertNull($dto->getEmail());
     }
 
@@ -155,7 +157,7 @@ class PasswordResetDTOTest extends TestCase
         $apiArray = $dto->toApiArray();
 
         $expected = [
-            ['name' => 'pseudonym_session[unique_id_forgot]', 'contents' => 'User@EXAMPLE.COM']
+            ['name' => 'pseudonym_session[unique_id_forgot]', 'contents' => 'User@EXAMPLE.COM'],
         ];
 
         $this->assertEquals($expected, $apiArray);
@@ -171,7 +173,7 @@ class PasswordResetDTOTest extends TestCase
         $internationalEmails = [
             'user@domain.co.uk',
             'test@example.org',
-            'user@sub.domain.com'
+            'user@sub.domain.com',
         ];
 
         foreach ($internationalEmails as $email) {
@@ -179,7 +181,7 @@ class PasswordResetDTOTest extends TestCase
             $apiArray = $dto->toApiArray();
 
             $expected = [
-                ['name' => 'pseudonym_session[unique_id_forgot]', 'contents' => $email]
+                ['name' => 'pseudonym_session[unique_id_forgot]', 'contents' => $email],
             ];
 
             $this->assertEquals($expected, $apiArray);

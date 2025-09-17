@@ -25,7 +25,7 @@ class CreateOutcomeGroupDTOTest extends TestCase
             'title' => 'Mathematics Standards',
             'description' => 'Learning outcomes for mathematics curriculum',
             'vendorGuid' => 'math-standards-2024',
-            'parentOutcomeGroupId' => 123
+            'parentOutcomeGroupId' => 123,
         ];
 
         $dto = new CreateOutcomeGroupDTO($data);
@@ -41,7 +41,7 @@ class CreateOutcomeGroupDTOTest extends TestCase
         $data = [
             'title' => 'Snake Case Group',
             'vendor_guid' => 'snake-case-guid',
-            'parent_outcome_group_id' => 456
+            'parent_outcome_group_id' => 456,
         ];
 
         $dto = new CreateOutcomeGroupDTO($data);
@@ -60,8 +60,8 @@ class CreateOutcomeGroupDTOTest extends TestCase
         $expected = [
             [
                 'name' => 'title',
-                'contents' => 'Basic Group'
-            ]
+                'contents' => 'Basic Group',
+            ],
         ];
 
         $this->assertEquals($expected, $result);
@@ -73,7 +73,7 @@ class CreateOutcomeGroupDTOTest extends TestCase
             'title' => 'Complete Group',
             'description' => 'A complete group with all fields',
             'vendorGuid' => 'complete-group-001',
-            'parentOutcomeGroupId' => 789
+            'parentOutcomeGroupId' => 789,
         ]);
 
         $result = $dto->toArray();
@@ -99,7 +99,7 @@ class CreateOutcomeGroupDTOTest extends TestCase
         $dto = new CreateOutcomeGroupDTO([
             'title' => 'Group with nulls',
             'description' => null,
-            'vendorGuid' => null
+            'vendorGuid' => null,
         ]);
 
         $result = $dto->toArray();
@@ -141,7 +141,7 @@ class CreateOutcomeGroupDTOTest extends TestCase
 
         $result = $dto->toArray();
         $this->assertCount(2, $result);
-        
+
         $fields = array_column($result, 'name');
         $this->assertContains('title', $fields);
         $this->assertContains('description', $fields);
@@ -158,7 +158,7 @@ class CreateOutcomeGroupDTOTest extends TestCase
 
         $result = $dto->toArray();
         $this->assertCount(2, $result);
-        
+
         $fields = array_column($result, 'name');
         $this->assertContains('title', $fields);
         $this->assertContains('parent_outcome_group_id', $fields);
@@ -178,7 +178,7 @@ class CreateOutcomeGroupDTOTest extends TestCase
 
         $result = $dto->toArray();
         $this->assertCount(2, $result);
-        
+
         $fields = array_column($result, 'name');
         $this->assertContains('title', $fields);
         $this->assertContains('vendor_guid', $fields);
@@ -212,7 +212,7 @@ class CreateOutcomeGroupDTOTest extends TestCase
     {
         $dto = new CreateOutcomeGroupDTO([
             'description' => 'Has description',
-            'vendorGuid' => 'has-guid'
+            'vendorGuid' => 'has-guid',
         ]);
 
         $this->assertFalse($dto->validate());
@@ -221,7 +221,7 @@ class CreateOutcomeGroupDTOTest extends TestCase
     public function testNumericCasting(): void
     {
         $dto = new CreateOutcomeGroupDTO([
-            'parentOutcomeGroupId' => '789'  // String should be cast to int
+            'parentOutcomeGroupId' => '789',  // String should be cast to int
         ]);
 
         $this->assertSame(789, $dto->parentOutcomeGroupId);
@@ -282,7 +282,7 @@ class CreateOutcomeGroupDTOTest extends TestCase
         $apiResult = $dto->toApiArray();
         $this->assertIsArray($apiResult);
         $this->assertNotEmpty($apiResult);
-        
+
         // Check that API fields are properly formatted with outcome_group[] prefix
         $apiFields = array_column($apiResult, 'name');
         $this->assertContains('outcome_group[title]', $apiFields);
@@ -325,12 +325,12 @@ class CreateOutcomeGroupDTOTest extends TestCase
     {
         $dto = new CreateOutcomeGroupDTO([
             'title' => 'Child Group',
-            'parentOutcomeGroupId' => 999
+            'parentOutcomeGroupId' => 999,
         ]);
 
         $result = $dto->toArray();
 
-        $parentField = array_filter($result, fn($item) => $item['name'] === 'parent_outcome_group_id');
+        $parentField = array_filter($result, fn ($item) => $item['name'] === 'parent_outcome_group_id');
         $parentValue = array_values($parentField)[0]['contents'];
 
         $this->assertIsString($parentValue);

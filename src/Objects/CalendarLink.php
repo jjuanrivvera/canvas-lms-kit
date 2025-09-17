@@ -21,6 +21,7 @@ class CalendarLink
 
     /**
      * Constructor
+     *
      * @param mixed[] $data
      */
     public function __construct(array $data = [])
@@ -56,6 +57,7 @@ class CalendarLink
 
     /**
      * Convert to array
+     *
      * @return mixed[]
      */
     public function toArray(): array

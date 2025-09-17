@@ -13,7 +13,6 @@ use CanvasLMS\Dto\GroupCategories\CreateGroupCategoryDTO;
 use CanvasLMS\Dto\GroupCategories\UpdateGroupCategoryDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Group Categories API
@@ -94,6 +93,7 @@ class GroupCategory extends AbstractBaseApi
 
     /**
      * Progress object for async operations
+     *
      * @var array<string, mixed>|null
      */
     public ?array $progress = null;
@@ -107,8 +107,10 @@ class GroupCategory extends AbstractBaseApi
      * Get a single group category by ID
      *
      * @param int $id Group Category ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -140,8 +142,9 @@ class GroupCategory extends AbstractBaseApi
     /**
      * Get the endpoint for this resource.
      *
-     * @return string
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
@@ -150,19 +153,18 @@ class GroupCategory extends AbstractBaseApi
         }
 
         $accountId = Config::getAccountId();
+
         return sprintf('accounts/%d/group_categories', $accountId);
     }
-
-
-
-
 
     /**
      * Create a new group category in the current account
      *
      * @param array<string, mixed>|CreateGroupCategoryDTO $data Group category data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function create(array|CreateGroupCategoryDTO $data): self
     {
@@ -185,8 +187,10 @@ class GroupCategory extends AbstractBaseApi
      *
      * @param int $id Group Category ID
      * @param array<string, mixed>|UpdateGroupCategoryDTO $data Update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function update(int $id, array|UpdateGroupCategoryDTO $data): self
     {
@@ -206,8 +210,9 @@ class GroupCategory extends AbstractBaseApi
     /**
      * Save the group category (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -220,14 +225,16 @@ class GroupCategory extends AbstractBaseApi
             $created = self::create($dto);
             $this->populate(get_object_vars($created));
         }
+
         return $this;
     }
 
     /**
      * Delete the group category
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
@@ -238,6 +245,7 @@ class GroupCategory extends AbstractBaseApi
         self::checkApiClient();
         $endpoint = sprintf('group_categories/%d', $this->id);
         self::$apiClient->delete($endpoint);
+
         return $this;
     }
 
@@ -245,8 +253,10 @@ class GroupCategory extends AbstractBaseApi
      * List groups in this category
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<Group>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<Group>
      */
     public function groups(array $params = []): array
     {
@@ -260,15 +270,17 @@ class GroupCategory extends AbstractBaseApi
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
 
-        return array_map(fn($data) => new Group($data), $allData);
+        return array_map(fn ($data) => new Group($data), $allData);
     }
 
     /**
      * Get paginated groups in this category
      *
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public function groupsPaginated(array $params = []): PaginatedResponse
     {
@@ -283,8 +295,10 @@ class GroupCategory extends AbstractBaseApi
      * List users in this category
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<User>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<User>
      */
     public function users(array $params = []): array
     {
@@ -298,15 +312,17 @@ class GroupCategory extends AbstractBaseApi
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $usersData = self::parseJsonResponse($response);
 
-        return array_map(fn($data) => new User($data), $usersData);
+        return array_map(fn ($data) => new User($data), $usersData);
     }
 
     /**
      * Get paginated users in this category
      *
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public function usersPaginated(array $params = []): PaginatedResponse
     {
@@ -321,8 +337,10 @@ class GroupCategory extends AbstractBaseApi
      * Assign unassigned members to groups
      *
      * @param bool $sync Whether to perform synchronously (default: false)
-     * @return array<Group>|array<mixed> Groups if sync=true, progress object if async
+     *
      * @throws CanvasApiException
+     *
+     * @return array<Group>|array<mixed> Groups if sync=true, progress object if async
      */
     public function assignUnassignedMembers(bool $sync = false): array
     {
@@ -346,7 +364,7 @@ class GroupCategory extends AbstractBaseApi
 
         // If sync=true, we get groups back. Otherwise, we get a progress object
         if ($sync && isset($data[0]['id']) && isset($data[0]['name'])) {
-            return array_map(fn($groupData) => new Group($groupData), $data);
+            return array_map(fn ($groupData) => new Group($groupData), $data);
         }
 
         return $data;
@@ -355,8 +373,9 @@ class GroupCategory extends AbstractBaseApi
     /**
      * Export groups and users in this category
      *
-     * @return array<mixed>
      * @throws CanvasApiException
+     *
+     * @return array<mixed>
      */
     public function export(): array
     {
@@ -386,7 +405,7 @@ class GroupCategory extends AbstractBaseApi
             'group_limit' => $this->groupLimit,
             'sis_group_category_id' => $this->sisGroupCategoryId,
             'non_collaborative' => $this->nonCollaborative,
-        ], fn($value) => $value !== null);
+        ], fn ($value) => $value !== null);
     }
 
     // Getter and setter methods
