@@ -157,7 +157,7 @@ class OutcomeGroup extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/outcome_groups/%d', $contextType, $contextId, $id);
         $response = self::$apiClient->get($endpoint);
-        return new self(json_decode($response->getBody()->getContents(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -171,7 +171,7 @@ class OutcomeGroup extends AbstractBaseApi
     {
         $endpoint = sprintf('global/outcome_groups/%d', $id);
         $response = self::$apiClient->get($endpoint);
-        return new self(json_decode($response->getBody()->getContents(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -186,7 +186,7 @@ class OutcomeGroup extends AbstractBaseApi
     {
         $endpoint = sprintf('%s/%d/root_outcome_group', $contextType, $contextId);
         $response = self::$apiClient->get($endpoint);
-        return new self(json_decode($response->getBody()->getContents(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -198,7 +198,7 @@ class OutcomeGroup extends AbstractBaseApi
     public static function getGlobalRootGroup(): self
     {
         $response = self::$apiClient->get('global/root_outcome_group');
-        return new self(json_decode($response->getBody()->getContents(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -241,7 +241,7 @@ class OutcomeGroup extends AbstractBaseApi
             'multipart' => $data->toApiArray()
         ]);
 
-        return new self(json_decode($response->getBody()->getContents(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -271,7 +271,7 @@ class OutcomeGroup extends AbstractBaseApi
             'multipart' => $data->toApiArray()
         ]);
 
-        return new self(json_decode($response->getBody()->getContents(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -302,7 +302,7 @@ class OutcomeGroup extends AbstractBaseApi
             'multipart' => $data->toApiArray()
         ]);
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Update current instance with response data
         foreach ($responseData as $key => $value) {
@@ -426,7 +426,7 @@ class OutcomeGroup extends AbstractBaseApi
 
         $response = self::$apiClient->put($endpoint, $options);
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Canvas returns an OutcomeLink object
         return new OutcomeLink($responseData);
@@ -460,7 +460,7 @@ class OutcomeGroup extends AbstractBaseApi
             'multipart' => $data->toApiArray()
         ]);
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Canvas returns an OutcomeLink object
         return new OutcomeLink($responseData);
@@ -525,7 +525,7 @@ class OutcomeGroup extends AbstractBaseApi
             'multipart' => $multipartData
         ]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**

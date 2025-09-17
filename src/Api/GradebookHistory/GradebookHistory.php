@@ -143,7 +143,7 @@ class GradebookHistory extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseBody = json_decode($response->getBody()->getContents(), true);
+        $responseBody = self::parseJsonResponse($response);
 
         if (!is_array($responseBody)) {
             return [];
@@ -178,7 +178,7 @@ class GradebookHistory extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseBody = json_decode($response->getBody()->getContents(), true);
+        $responseBody = self::parseJsonResponse($response);
 
         if (!is_array($responseBody)) {
             return [];
@@ -220,7 +220,7 @@ class GradebookHistory extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseBody = json_decode($response->getBody()->getContents(), true);
+        $responseBody = self::parseJsonResponse($response);
 
         if (!is_array($responseBody)) {
             return [];
@@ -253,7 +253,7 @@ class GradebookHistory extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseBody = json_decode($response->getBody()->getContents(), true);
+        $responseBody = self::parseJsonResponse($response);
 
         if (!is_array($responseBody)) {
             return [];
@@ -311,7 +311,7 @@ class GradebookHistory extends AbstractBaseApi
 
         do {
             $response = self::$apiClient->get($nextUrl, $nextParams);
-            $responseBody = json_decode($response->getBody()->getContents(), true);
+            $responseBody = self::parseJsonResponse($response);
 
             if (is_array($responseBody)) {
                 foreach ($responseBody as $versionData) {

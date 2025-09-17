@@ -125,7 +125,7 @@ class Conference extends AbstractBaseApi
             ['query' => $params]
         );
 
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
         $conferences = [];
 
         foreach ($data['conferences'] ?? [] as $conferenceData) {
@@ -153,7 +153,7 @@ class Conference extends AbstractBaseApi
             ['query' => $params]
         );
 
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
         $conferences = [];
 
         foreach ($data['conferences'] ?? [] as $conferenceData) {
@@ -176,7 +176,7 @@ class Conference extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get(sprintf('conferences/%d', $id));
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         $conference = new self($data);
         $conference->processRecordings($data);
@@ -206,7 +206,7 @@ class Conference extends AbstractBaseApi
             ]
         );
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
         $conference = new self($responseData);
         $conference->processRecordings($responseData);
 
@@ -235,7 +235,7 @@ class Conference extends AbstractBaseApi
             ]
         );
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
         $conference = new self($responseData);
         $conference->processRecordings($responseData);
 
@@ -268,7 +268,7 @@ class Conference extends AbstractBaseApi
         );
 
         if ($response->getStatusCode() === 200) {
-            $responseData = json_decode($response->getBody()->getContents(), true);
+            $responseData = self::parseJsonResponse($response);
 
             // Update current instance with response data - use same logic as constructor
             $dateFields = ['started_at', 'ended_at', 'created_at', 'updated_at'];
@@ -336,7 +336,7 @@ class Conference extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->post(sprintf('conferences/%d/join', $this->id));
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -353,7 +353,7 @@ class Conference extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get(sprintf('conferences/%d/recording', $this->id));
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         $recordings = [];
         foreach ($data as $recordingData) {

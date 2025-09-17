@@ -1276,7 +1276,7 @@ class Assignment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/assignments/%d', self::$course->id, $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $assignmentData = json_decode($response->getBody()->getContents(), true);
+        $assignmentData = self::parseJsonResponse($response);
 
         return new self($assignmentData);
     }
@@ -1299,7 +1299,7 @@ class Assignment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/assignments', self::$course->id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $assignmentData = json_decode($response->getBody()->getContents(), true);
+        $assignmentData = self::parseJsonResponse($response);
 
         return new self($assignmentData);
     }
@@ -1323,7 +1323,7 @@ class Assignment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/assignments/%d', self::$course->id, $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $assignmentData = json_decode($response->getBody()->getContents(), true);
+        $assignmentData = self::parseJsonResponse($response);
 
         return new self($assignmentData);
     }
@@ -1436,7 +1436,7 @@ class Assignment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/assignments/%d/duplicate', self::$course->id, $id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $options]);
-        $assignmentData = json_decode($response->getBody()->getContents(), true);
+        $assignmentData = self::parseJsonResponse($response);
 
         return new self($assignmentData);
     }
@@ -1483,7 +1483,7 @@ class Assignment extends AbstractBaseApi
         try {
             $endpoint = sprintf('courses/%d/assignments/%d/submissions/%d', self::$course->id, $this->id, $userId);
             $response = self::$apiClient->get($endpoint);
-            $submissionData = json_decode($response->getBody()->getContents(), true);
+            $submissionData = self::parseJsonResponse($response);
 
             return new Submission($submissionData);
         } catch (CanvasApiException $e) {
@@ -1553,7 +1553,7 @@ class Assignment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/assignments/%d/overrides', self::$course->id, $this->id);
         $response = self::$apiClient->get($endpoint);
-        $overridesData = json_decode($response->getBody()->getContents(), true);
+        $overridesData = self::parseJsonResponse($response);
 
         // Return raw override data for now, could create Override objects in future
         return $overridesData;
@@ -1585,7 +1585,7 @@ class Assignment extends AbstractBaseApi
                 ]
             ]);
 
-            $associations = json_decode($response->getBody()->getContents(), true);
+            $associations = self::parseJsonResponse($response);
 
             // Find the association for this assignment
             foreach ($associations as $assocData) {

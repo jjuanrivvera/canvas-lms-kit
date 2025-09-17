@@ -130,7 +130,7 @@ class Admin extends AbstractBaseApi
             'multipart' => $data->toApiArray()
         ]);
 
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         $admin = new self($responseData);
         $admin->accountId = $accountId;
         return $admin;
@@ -185,7 +185,7 @@ class Admin extends AbstractBaseApi
 
         $endpoint = sprintf('accounts/%d/admins', $accountId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($item) use ($accountId) {
             $admin = new self($item);
@@ -281,7 +281,7 @@ class Admin extends AbstractBaseApi
         $endpoint = sprintf('accounts/%d/admins/%d', $this->accountId, $this->id);
         $response = self::$apiClient->delete($endpoint);
 
-        json_decode($response->getBody(), true);
+        self::parseJsonResponse($response);
         return $this;
     }
 
@@ -305,7 +305,7 @@ class Admin extends AbstractBaseApi
         $endpoint = sprintf('accounts/%d/admins/self/roles', $accountId);
         $response = self::$apiClient->get($endpoint);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**

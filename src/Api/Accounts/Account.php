@@ -183,7 +183,7 @@ class Account extends AbstractBaseApi
             'multipart' => $data->toApiArray()
         ]);
 
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         return new self($responseData);
     }
 
@@ -201,7 +201,7 @@ class Account extends AbstractBaseApi
 
         $endpoint = sprintf('accounts/%s', $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -228,7 +228,7 @@ class Account extends AbstractBaseApi
 
         $endpoint = 'manageable_accounts';
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new self($item);
@@ -248,7 +248,7 @@ class Account extends AbstractBaseApi
 
         $endpoint = 'course_creation_accounts';
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new self($item);
@@ -272,7 +272,7 @@ class Account extends AbstractBaseApi
 
         $endpoint = sprintf('accounts/%d/sub_accounts', $accountId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new self($item);
@@ -292,7 +292,7 @@ class Account extends AbstractBaseApi
 
         $endpoint = 'course_accounts';
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new self($item);
@@ -336,7 +336,7 @@ class Account extends AbstractBaseApi
             'multipart' => $data->toApiArray()
         ]);
 
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         return new self($responseData);
     }
 
@@ -383,7 +383,7 @@ class Account extends AbstractBaseApi
         $endpoint = sprintf('accounts/%d/sub_accounts/%d', $this->parentAccountId, $this->id);
         $response = self::$apiClient->delete($endpoint);
 
-        json_decode($response->getBody(), true);
+        self::parseJsonResponse($response);
         return $this;
     }
 
@@ -402,7 +402,7 @@ class Account extends AbstractBaseApi
 
         $endpoint = sprintf('accounts/%d/sub_accounts', $this->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new self($item);
@@ -449,7 +449,7 @@ class Account extends AbstractBaseApi
         $endpoint = sprintf('accounts/%d/settings', $this->id);
         $response = self::$apiClient->get($endpoint);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -472,7 +472,7 @@ class Account extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        json_decode($response->getBody(), true);
+        self::parseJsonResponse($response);
 
         // Refresh settings
         $this->settings = $this->getSettings();
@@ -502,7 +502,7 @@ class Account extends AbstractBaseApi
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -521,7 +521,7 @@ class Account extends AbstractBaseApi
 
         try {
             $response = self::$apiClient->get($endpoint);
-            return json_decode($response->getBody(), true);
+            return self::parseJsonResponse($response);
         } catch (CanvasApiException $e) {
             if ($e->getCode() === 404) {
                 return null;
@@ -546,7 +546,7 @@ class Account extends AbstractBaseApi
 
         try {
             $response = self::$apiClient->get($endpoint);
-            return json_decode($response->getBody(), true);
+            return self::parseJsonResponse($response);
         } catch (CanvasApiException $e) {
             if ($e->getCode() === 404) {
                 return null;
@@ -570,7 +570,7 @@ class Account extends AbstractBaseApi
 
         $endpoint = sprintf('accounts/%d/courses', $this->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Convert to Course objects
         return array_map(function ($courseData) {
@@ -695,7 +695,7 @@ class Account extends AbstractBaseApi
 
         $endpoint = sprintf('accounts/%d/rubrics', $this->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($rubricData) {
             return new Rubric($rubricData);
@@ -724,7 +724,7 @@ class Account extends AbstractBaseApi
 
         $endpoint = sprintf('accounts/%d/rubrics', $this->id);
         $response = self::$apiClient->post($endpoint, $data->toApiArray());
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Handle non-standard response format
         if (isset($responseData['rubric'])) {
@@ -757,7 +757,7 @@ class Account extends AbstractBaseApi
 
         $endpoint = sprintf('accounts/%d/rubrics/%d', $this->id, $rubricId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new Rubric($data);
     }

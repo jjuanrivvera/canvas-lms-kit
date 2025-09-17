@@ -110,7 +110,7 @@ class GroupMembership extends AbstractBaseApi
 
         $endpoint = sprintf('groups/%d/memberships/%d', $groupId, $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -191,7 +191,7 @@ class GroupMembership extends AbstractBaseApi
 
         $endpoint = sprintf('groups/%d/memberships', $groupId);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $membershipData = json_decode($response->getBody()->getContents(), true);
+        $membershipData = self::parseJsonResponse($response);
 
         return new self($membershipData);
     }
@@ -221,7 +221,7 @@ class GroupMembership extends AbstractBaseApi
         }
 
         $response = self::$apiClient->put($endpoint, ['multipart' => $multipart]);
-        $membershipData = json_decode($response->getBody()->getContents(), true);
+        $membershipData = self::parseJsonResponse($response);
 
         return new self($membershipData);
     }
@@ -251,7 +251,7 @@ class GroupMembership extends AbstractBaseApi
         }
 
         $response = self::$apiClient->put($endpoint, ['multipart' => $multipart]);
-        $membershipData = json_decode($response->getBody()->getContents(), true);
+        $membershipData = self::parseJsonResponse($response);
 
         return new self($membershipData);
     }
@@ -350,7 +350,7 @@ class GroupMembership extends AbstractBaseApi
 
         $endpoint = sprintf('groups/%d/users/%d', $groupId, $userId);
         $response = self::$apiClient->get($endpoint);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }

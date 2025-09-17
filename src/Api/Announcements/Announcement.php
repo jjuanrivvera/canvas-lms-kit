@@ -86,7 +86,7 @@ class Announcement extends DiscussionTopic
 
         $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $announcementsData = json_decode($response->getBody()->getContents(), true);
+        $announcementsData = self::parseJsonResponse($response);
 
         $announcements = [];
         foreach ($announcementsData as $announcementData) {
@@ -181,7 +181,7 @@ class Announcement extends DiscussionTopic
 
         $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $announcementData = json_decode($response->getBody()->getContents(), true);
+        $announcementData = self::parseJsonResponse($response);
 
         return new self($announcementData);
     }
@@ -209,7 +209,7 @@ class Announcement extends DiscussionTopic
 
         $endpoint = sprintf('courses/%d/discussion_topics/%d', self::$course->id, $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $announcementData = json_decode($response->getBody()->getContents(), true);
+        $announcementData = self::parseJsonResponse($response);
 
         return new self($announcementData);
     }
@@ -258,7 +258,7 @@ class Announcement extends DiscussionTopic
 
         $endpoint = 'announcements';
         $response = self::$apiClient->get($endpoint, ['query' => $queryParams]);
-        $announcementsData = json_decode($response->getBody()->getContents(), true);
+        $announcementsData = self::parseJsonResponse($response);
 
         $announcements = [];
         foreach ($announcementsData as $announcementData) {

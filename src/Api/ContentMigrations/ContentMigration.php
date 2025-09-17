@@ -171,7 +171,7 @@ class ContentMigration extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/content_migrations/%d', $contextType, $contextId, $id);
         $response = self::$apiClient->get($endpoint);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         if (!is_array($data)) {
             throw new CanvasApiException('Invalid response data from API');
@@ -260,7 +260,7 @@ class ContentMigration extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/content_migrations', $contextType, $contextId);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $migrationData = json_decode($response->getBody()->getContents(), true);
+        $migrationData = self::parseJsonResponse($response);
 
         $migration = new self($migrationData);
 
@@ -315,7 +315,7 @@ class ContentMigration extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/content_migrations/%d', $contextType, $contextId, $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $migrationData = json_decode($response->getBody()->getContents(), true);
+        $migrationData = self::parseJsonResponse($response);
 
         return new self($migrationData);
     }
@@ -588,7 +588,7 @@ class ContentMigration extends AbstractBaseApi
             $params = $type ? ['type' => $type] : [];
             $response = self::$apiClient->get($endpoint, ['query' => $params]);
 
-            return json_decode($response->getBody()->getContents(), true);
+            return self::parseJsonResponse($response);
         }
 
         throw new CanvasApiException('Unable to determine context from migration issues URL');
@@ -608,7 +608,7 @@ class ContentMigration extends AbstractBaseApi
         $endpoint = sprintf('courses/%d/content_migrations/%d/asset_id_mapping', $courseId, $migrationId);
         $response = self::$apiClient->get($endpoint);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -625,7 +625,7 @@ class ContentMigration extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/content_migrations/migrators', $contextType, $contextId);
         $response = self::$apiClient->get($endpoint);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return array_map(fn($item) => new Migrator($item), $data);
     }

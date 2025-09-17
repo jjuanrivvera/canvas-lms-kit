@@ -323,7 +323,7 @@ class Module extends AbstractBaseApi
             'multipart' => $data->toApiArray()
         ]);
 
-        $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $moduleData = self::parseJsonResponse($response);
 
         return new self($moduleData);
     }
@@ -354,7 +354,7 @@ class Module extends AbstractBaseApi
             'multipart' => $data->toApiArray()
         ]);
 
-        $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $moduleData = self::parseJsonResponse($response);
 
         return new self($moduleData);
     }
@@ -375,7 +375,7 @@ class Module extends AbstractBaseApi
             'query' => $params
         ]);
 
-        $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $moduleData = self::parseJsonResponse($response);
 
         return new self($moduleData);
     }
@@ -402,7 +402,7 @@ class Module extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $moduleData = self::parseJsonResponse($response);
         $this->populate($moduleData);
 
         return $this;
@@ -675,7 +675,7 @@ class Module extends AbstractBaseApi
         self::checkCourse();
 
         $response = self::$apiClient->put(sprintf('courses/%d/modules/%d/relock', self::$course->id, $this->id));
-        $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $moduleData = self::parseJsonResponse($response);
         $this->populate($moduleData);
         return $this;
     }
@@ -774,7 +774,7 @@ class Module extends AbstractBaseApi
             ['query' => $params]
         );
 
-        $overridesData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $overridesData = self::parseJsonResponse($response);
 
         $overrides = [];
         foreach ($overridesData as $overrideData) {

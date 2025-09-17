@@ -647,7 +647,7 @@ class QuizSubmission extends AbstractBaseApi
             $id
         );
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         $data = $responseData['quiz_submissions'][0] ?? $responseData;
 
@@ -673,7 +673,7 @@ class QuizSubmission extends AbstractBaseApi
                 self::$quiz->getId()
             );
             $response = self::$apiClient->get($endpoint);
-            $responseData = json_decode($response->getBody()->getContents(), true);
+            $responseData = self::parseJsonResponse($response);
 
             $data = $responseData['quiz_submissions'][0] ?? $responseData;
 
@@ -706,7 +706,7 @@ class QuizSubmission extends AbstractBaseApi
             self::$quiz->getId()
         );
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         $submissions = [];
         foreach ($responseData['quiz_submissions'] as $submissionData) {
@@ -806,7 +806,7 @@ class QuizSubmission extends AbstractBaseApi
             self::$quiz->getId()
         );
         $response = self::$apiClient->post($endpoint, ['multipart' => $requestData]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         $submissionData = $responseData['quiz_submissions'][0] ?? $responseData;
 
@@ -861,7 +861,7 @@ class QuizSubmission extends AbstractBaseApi
             $id
         );
         $response = self::$apiClient->put($endpoint, ['multipart' => $requestData]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         $submissionData = $responseData['quiz_submissions'][0] ?? $responseData;
 
@@ -905,7 +905,7 @@ class QuizSubmission extends AbstractBaseApi
             $this->id
         );
         $response = self::$apiClient->post($endpoint, ['multipart' => $requestData]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         $submissionData = $responseData['quiz_submissions'][0] ?? $responseData;
 

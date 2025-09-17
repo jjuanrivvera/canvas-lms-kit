@@ -300,7 +300,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get('/users/self');
-        return new self(json_decode($response->getBody()->getContents(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -331,7 +331,7 @@ class User extends AbstractBaseApi
         $response = self::$apiClient->post('/accounts/' . Config::getAccountId() . '/users', [
             'multipart' => $dto->toApiArray()
         ]);
-        return new self(json_decode($response->getBody(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -345,7 +345,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get("/users/{$id}");
-        return new self(json_decode($response->getBody()->getContents(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -378,7 +378,7 @@ class User extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        return new self(json_decode($response->getBody(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -412,7 +412,7 @@ class User extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        $updatedUserData = json_decode($response->getBody(), true);
+        $updatedUserData = self::parseJsonResponse($response);
         $this->populate($updatedUserData);
 
         return $this;
@@ -431,7 +431,7 @@ class User extends AbstractBaseApi
         try {
             $response = self::$apiClient->put("/users/{$this->id}/merge_into/{$destinationUserId}");
 
-            $this->populate(json_decode($response->getBody(), true));
+            $this->populate(self::parseJsonResponse($response));
         } catch (CanvasApiException $e) {
             return false;
         }
@@ -957,7 +957,7 @@ class User extends AbstractBaseApi
             'query' => $params
         ]);
 
-        $items = json_decode($response->getBody(), true);
+        $items = self::parseJsonResponse($response);
         $activityItems = [];
 
         foreach ($items as $item) {
@@ -988,7 +988,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->get("/users/{$userId}/activity_stream/summary");
 
-        $summaries = json_decode($response->getBody(), true);
+        $summaries = self::parseJsonResponse($response);
 
         return array_map(function ($summary) {
             return new ActivityStreamSummary($summary);
@@ -1064,7 +1064,7 @@ class User extends AbstractBaseApi
             'query' => $params
         ]);
 
-        $items = json_decode($response->getBody(), true);
+        $items = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new TodoItem($item);
@@ -1101,7 +1101,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->get("/users/{$userId}/upcoming_events");
 
-        $events = json_decode($response->getBody(), true);
+        $events = self::parseJsonResponse($response);
 
         return array_map(function ($event) {
             return new UpcomingEvent($event);
@@ -1138,7 +1138,7 @@ class User extends AbstractBaseApi
             'query' => $params
         ]);
 
-        $assignments = json_decode($response->getBody(), true);
+        $assignments = self::parseJsonResponse($response);
 
         return array_map(function ($assignment) {
             return new Assignment($assignment);
@@ -1191,7 +1191,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->get("/users/{$userId}/profile");
 
-        $profileData = json_decode($response->getBody(), true);
+        $profileData = self::parseJsonResponse($response);
 
         return new Profile($profileData);
     }
@@ -1212,7 +1212,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->get("/users/{$userId}/avatars");
 
-        $avatars = json_decode($response->getBody(), true);
+        $avatars = self::parseJsonResponse($response);
 
         return array_map(function ($avatar) {
             return new Avatar($avatar);
@@ -1254,7 +1254,7 @@ class User extends AbstractBaseApi
             ]
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1286,7 +1286,7 @@ class User extends AbstractBaseApi
             'query' => ['ns' => $namespace]
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1341,7 +1341,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->get("/users/{$userId}/course_nicknames");
 
-        $nicknames = json_decode($response->getBody(), true);
+        $nicknames = self::parseJsonResponse($response);
 
         return array_map(function ($nickname) {
             return new CourseNickname($nickname);
@@ -1365,7 +1365,7 @@ class User extends AbstractBaseApi
 
         try {
             $response = self::$apiClient->get("/users/{$userId}/course_nicknames/{$courseId}");
-            $nicknameData = json_decode($response->getBody(), true);
+            $nicknameData = self::parseJsonResponse($response);
             return new CourseNickname($nicknameData);
         } catch (CanvasApiException $e) {
             // Return null if no nickname is set (404 response)
@@ -1397,7 +1397,7 @@ class User extends AbstractBaseApi
             ]
         ]);
 
-        $nicknameData = json_decode($response->getBody(), true);
+        $nicknameData = self::parseJsonResponse($response);
         return new CourseNickname($nicknameData);
     }
 
@@ -1468,7 +1468,7 @@ class User extends AbstractBaseApi
             'form_params' => $userData
         ]);
 
-        $newUserData = json_decode($response->getBody(), true);
+        $newUserData = self::parseJsonResponse($response);
         return new self($newUserData);
     }
 
@@ -1490,7 +1490,7 @@ class User extends AbstractBaseApi
         }
 
         $response = self::$apiClient->post("/users/{$this->id}/split");
-        $splitUsers = json_decode($response->getBody(), true);
+        $splitUsers = self::parseJsonResponse($response);
 
         return array_map(function ($userData) {
             return new self($userData);
@@ -1548,7 +1548,7 @@ class User extends AbstractBaseApi
             'query' => $params
         ]);
 
-        $pageViews = json_decode($response->getBody(), true);
+        $pageViews = self::parseJsonResponse($response);
 
         return array_map(function ($pageView) {
             return new PageView($pageView);
@@ -1574,7 +1574,7 @@ class User extends AbstractBaseApi
 
         $response = self::$apiClient->get("/users/{$this->id}/pandata_events_token");
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1594,7 +1594,7 @@ class User extends AbstractBaseApi
 
         $endpoint = sprintf('users/%d/calendar_events', $this->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new CalendarEvent($item);

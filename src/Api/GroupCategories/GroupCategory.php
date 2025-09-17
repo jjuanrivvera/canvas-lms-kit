@@ -116,7 +116,7 @@ class GroupCategory extends AbstractBaseApi
 
         $endpoint = sprintf('group_categories/%d', $id);
         $response = self::$apiClient->get($endpoint);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -175,7 +175,7 @@ class GroupCategory extends AbstractBaseApi
         $accountId = Config::getAccountId();
         $endpoint = sprintf('accounts/%d/group_categories', $accountId);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $categoryData = json_decode($response->getBody()->getContents(), true);
+        $categoryData = self::parseJsonResponse($response);
 
         return new self($categoryData);
     }
@@ -198,7 +198,7 @@ class GroupCategory extends AbstractBaseApi
 
         $endpoint = sprintf('group_categories/%d', $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $categoryData = json_decode($response->getBody()->getContents(), true);
+        $categoryData = self::parseJsonResponse($response);
 
         return new self($categoryData);
     }
@@ -296,7 +296,7 @@ class GroupCategory extends AbstractBaseApi
 
         $endpoint = sprintf('group_categories/%d/users', $this->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $usersData = json_decode($response->getBody()->getContents(), true);
+        $usersData = self::parseJsonResponse($response);
 
         return array_map(fn($data) => new User($data), $usersData);
     }
@@ -342,7 +342,7 @@ class GroupCategory extends AbstractBaseApi
         $params = empty($multipart) ? [] : ['multipart' => $multipart];
 
         $response = self::$apiClient->post($endpoint, $params);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         // If sync=true, we get groups back. Otherwise, we get a progress object
         if ($sync && isset($data[0]['id']) && isset($data[0]['name'])) {
@@ -369,7 +369,7 @@ class GroupCategory extends AbstractBaseApi
         $endpoint = sprintf('group_categories/%d/export', $this->id);
         $response = self::$apiClient->get($endpoint);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**

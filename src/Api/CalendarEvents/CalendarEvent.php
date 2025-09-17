@@ -380,7 +380,7 @@ class CalendarEvent extends AbstractBaseApi
 
         self::checkApiClient();
         $response = self::$apiClient->post('calendar_events', ['multipart' => $data->toApiArray()]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         return new self($responseData);
     }
 
@@ -397,7 +397,7 @@ class CalendarEvent extends AbstractBaseApi
         self::checkApiClient();
         $endpoint = sprintf('calendar_events/%d', $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
         return new self($data);
     }
 
@@ -440,7 +440,7 @@ class CalendarEvent extends AbstractBaseApi
         }
 
         $response = self::$apiClient->put($endpoint, ['multipart' => $data]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         return new self($responseData);
     }
 
@@ -490,7 +490,7 @@ class CalendarEvent extends AbstractBaseApi
         }
 
         $response = self::$apiClient->get('calendar_events', ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new self($item);
@@ -515,7 +515,7 @@ class CalendarEvent extends AbstractBaseApi
 
         self::checkApiClient();
         $response = self::$apiClient->get('calendar_events', ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new self($item);
@@ -634,7 +634,7 @@ class CalendarEvent extends AbstractBaseApi
             : sprintf('calendar_events/%d/reservations', $eventId);
 
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         return new self($responseData);
     }
 
@@ -666,7 +666,7 @@ class CalendarEvent extends AbstractBaseApi
         }
 
         $response = self::$apiClient->post('calendar_events/save_enabled_account_calendars', ['multipart' => $data]);
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -686,7 +686,7 @@ class CalendarEvent extends AbstractBaseApi
         }
 
         $response = self::$apiClient->get('appointment_groups/next_appointment', ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         if (empty($data)) {
             return null;

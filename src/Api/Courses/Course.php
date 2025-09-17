@@ -517,7 +517,7 @@ class Course extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        $courseData = json_decode($response->getBody(), true);
+        $courseData = self::parseJsonResponse($response);
 
         return new self($courseData);
     }
@@ -552,7 +552,7 @@ class Course extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        $courseData = json_decode($response->getBody(), true);
+        $courseData = self::parseJsonResponse($response);
 
         return new self($courseData);
     }
@@ -569,7 +569,7 @@ class Course extends AbstractBaseApi
 
         $response = self::$apiClient->get("/courses/{$id}");
 
-        $courseData = json_decode($response->getBody(), true);
+        $courseData = self::parseJsonResponse($response);
 
         return new self($courseData);
     }
@@ -590,7 +590,7 @@ class Course extends AbstractBaseApi
             'query' => $params
         ]);
 
-        $courses = json_decode($response->getBody(), true);
+        $courses = self::parseJsonResponse($response);
 
         return array_map(function ($course) {
             return new self($course);
@@ -631,7 +631,7 @@ class Course extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        $updatedCourseData = json_decode($response->getBody(), true);
+        $updatedCourseData = self::parseJsonResponse($response);
         $this->populate($updatedCourseData);
 
         return $this;
@@ -778,7 +778,7 @@ class Course extends AbstractBaseApi
 
         $response = self::$apiClient->post("/courses/{$this->id}/reset_content");
 
-        $courseData = json_decode($response->getBody(), true);
+        $courseData = self::parseJsonResponse($response);
 
         $this->populate($courseData);
 
@@ -796,7 +796,7 @@ class Course extends AbstractBaseApi
 
         $response = self::$apiClient->get("/courses/{$courseId}/settings");
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -814,7 +814,7 @@ class Course extends AbstractBaseApi
             'form_params' => $settings
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -833,7 +833,7 @@ class Course extends AbstractBaseApi
 
         $response = self::$apiClient->get("/courses/{$this->id}/users/{$userId}/progress");
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -851,7 +851,7 @@ class Course extends AbstractBaseApi
 
         $response = self::$apiClient->get("/courses/{$this->id}/bulk_user_progress");
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -872,7 +872,7 @@ class Course extends AbstractBaseApi
             'query' => $params
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -893,7 +893,7 @@ class Course extends AbstractBaseApi
             'query' => ['permissions' => $permissions]
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -914,7 +914,7 @@ class Course extends AbstractBaseApi
             'query' => $params
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -932,7 +932,7 @@ class Course extends AbstractBaseApi
 
         $response = self::$apiClient->get("/courses/{$this->id}/activity_stream/summary");
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -950,7 +950,7 @@ class Course extends AbstractBaseApi
 
         $response = self::$apiClient->get("/courses/{$this->id}/todo");
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -968,7 +968,7 @@ class Course extends AbstractBaseApi
 
         $response = self::$apiClient->get("/courses/{$this->id}/student_view_student");
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -989,7 +989,7 @@ class Course extends AbstractBaseApi
             'form_params' => ['html' => $html]
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1020,7 +1020,7 @@ class Course extends AbstractBaseApi
             ]
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1041,7 +1041,7 @@ class Course extends AbstractBaseApi
             'query' => $params
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1063,7 +1063,7 @@ class Course extends AbstractBaseApi
             'query' => $params
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1085,7 +1085,7 @@ class Course extends AbstractBaseApi
             'query' => $params
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1103,7 +1103,7 @@ class Course extends AbstractBaseApi
 
         $response = self::$apiClient->get("/courses/{$this->id}/recent_students");
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1124,7 +1124,7 @@ class Course extends AbstractBaseApi
             'query' => ['search_term' => $searchTerm]
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
 
@@ -1147,7 +1147,7 @@ class Course extends AbstractBaseApi
             'form_params' => $fileParams
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
 
@@ -1166,7 +1166,7 @@ class Course extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->post("/courses/{$this->id}/dismiss_migration_limitation_message");
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1340,7 +1340,7 @@ class Course extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get("/courses/{$this->id}/course_copy/{$copyId}");
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1366,7 +1366,7 @@ class Course extends AbstractBaseApi
             'form_params' => $params
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     // Relationship Method Aliases
@@ -3137,7 +3137,7 @@ class Course extends AbstractBaseApi
             'query' => $params
         ]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -3258,7 +3258,7 @@ class Course extends AbstractBaseApi
         }
 
         $response = self::$apiClient->post($endpoint, $data);
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -3277,7 +3277,7 @@ class Course extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/calendar_events/timetable', $this->id);
         $response = self::$apiClient->get($endpoint);
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -3322,7 +3322,7 @@ class Course extends AbstractBaseApi
         }
 
         $response = self::$apiClient->post($endpoint, $data);
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -3350,7 +3350,7 @@ class Course extends AbstractBaseApi
             'query' => $params
         ]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**

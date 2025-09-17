@@ -1064,7 +1064,7 @@ class ExternalTool extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/external_tools/%d', $contextType, $contextId, $id);
         $response = self::$apiClient->get($endpoint);
-        $toolData = json_decode($response->getBody()->getContents(), true);
+        $toolData = self::parseJsonResponse($response);
 
         $tool = new self($toolData);
         // Set context information
@@ -1216,7 +1216,7 @@ class ExternalTool extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/external_tools', $contextType, $contextId);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $toolData = json_decode($response->getBody()->getContents(), true);
+        $toolData = self::parseJsonResponse($response);
 
         $tool = new self($toolData);
         // Set context information
@@ -1264,7 +1264,7 @@ class ExternalTool extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/external_tools/%d', $contextType, $contextId, $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $toolData = json_decode($response->getBody()->getContents(), true);
+        $toolData = self::parseJsonResponse($response);
 
         $tool = new self($toolData);
         // Set context information
@@ -1306,7 +1306,7 @@ class ExternalTool extends AbstractBaseApi
         $endpoint = sprintf('%s/%d/external_tools/sessionless_launch', $contextType, $contextId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**

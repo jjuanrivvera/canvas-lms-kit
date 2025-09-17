@@ -216,7 +216,7 @@ class Rubric extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/rubrics', $contextType, $contextId);
         $response = self::$apiClient->post($endpoint, $data->toApiArray());
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Handle non-standard response format
         if (isset($responseData['rubric'])) {
@@ -265,7 +265,7 @@ class Rubric extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/rubrics/%d', $contextType, $contextId, $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -308,7 +308,7 @@ class Rubric extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/rubrics/%d', $contextType, $contextId, $id);
         $response = self::$apiClient->put($endpoint, $data->toApiArray());
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Handle non-standard response format
         if (isset($responseData['rubric'])) {
@@ -464,7 +464,7 @@ class Rubric extends AbstractBaseApi
         $endpoint = sprintf('%ss/%d/rubrics/%d/used_locations', $this->contextType, $this->contextId, $this->id);
         $response = self::$apiClient->get($endpoint);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -508,7 +508,7 @@ class Rubric extends AbstractBaseApi
         ];
 
         $response = self::$apiClient->post($endpoint, $multipart);
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -560,6 +560,6 @@ class Rubric extends AbstractBaseApi
         }
 
         $response = self::$apiClient->get($endpoint);
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 }

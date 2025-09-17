@@ -225,7 +225,7 @@ class RubricAssociation extends AbstractBaseApi
 
         $endpoint = self::getResourceEndpoint();
         $response = self::$apiClient->post($endpoint, $data->toApiArray());
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -248,7 +248,7 @@ class RubricAssociation extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d', self::getResourceEndpoint(), $id);
         $response = self::$apiClient->put($endpoint, $data->toApiArray());
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -272,7 +272,7 @@ class RubricAssociation extends AbstractBaseApi
         $endpoint = sprintf('%s/%d', self::getResourceEndpoint(), $this->id);
         $response = self::$apiClient->delete($endpoint);
 
-        json_decode($response->getBody(), true);
+        self::parseJsonResponse($response);
         return $this;
     }
 

@@ -171,9 +171,9 @@ class Progress extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get("/progress/{$id}");
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
-        return new self($data ?? []);
+        return new self($data);
     }
 
     /**
@@ -188,9 +188,9 @@ class Progress extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get("/lti/courses/{$courseId}/progress/{$id}");
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
-        return new self($data ?? []);
+        return new self($data);
     }
 
     /**
@@ -216,7 +216,7 @@ class Progress extends AbstractBaseApi
             'form_params' => $params
         ]);
 
-        $data = json_decode($response->getBody()->getContents(), true) ?? [];
+        $data = self::parseJsonResponse($response);
 
         // Update current instance with new data
         foreach ($data as $key => $value) {

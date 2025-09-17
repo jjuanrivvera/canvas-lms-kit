@@ -328,7 +328,7 @@ class File extends AbstractBaseApi
             'multipart' => $dto->toApiArray()
         ]);
 
-        $uploadData = json_decode($response->getBody(), true);
+        $uploadData = self::parseJsonResponse($response);
         $logger->debug('File Upload: Step 1 complete - Received upload URL and parameters');
 
         // Step 2: Upload file data
@@ -438,7 +438,7 @@ class File extends AbstractBaseApi
 
         $response = self::$apiClient->get("/files/{$id}");
 
-        $fileData = json_decode($response->getBody(), true);
+        $fileData = self::parseJsonResponse($response);
 
         return new self($fileData);
     }
@@ -602,7 +602,7 @@ class File extends AbstractBaseApi
 
         $response = self::$apiClient->get("/files/{$this->id}");
 
-        $fileData = json_decode($response->getBody(), true);
+        $fileData = self::parseJsonResponse($response);
 
         return $fileData['url'] ?? '';
     }

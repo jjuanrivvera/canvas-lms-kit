@@ -74,7 +74,7 @@ class Outcome extends AbstractBaseApi
         self::checkApiClient();
         $endpoint = self::getEndpoint();
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return array_map(fn(array $item) => new static($item), $data);
     }
@@ -146,7 +146,7 @@ class Outcome extends AbstractBaseApi
     public static function find(int $id, array $params = []): self
     {
         $response = self::$apiClient->get(sprintf('outcomes/%d', $id));
-        return new self(json_decode($response->getBody()->getContents(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -194,7 +194,7 @@ class Outcome extends AbstractBaseApi
             'multipart' => $data->toApiArray()
         ]);
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         if (isset($responseData['outcome'])) {
             return new self($responseData['outcome']);
@@ -224,7 +224,7 @@ class Outcome extends AbstractBaseApi
             'multipart' => $data->toApiArray()
         ]);
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Update current instance with response data
         foreach ($responseData as $key => $value) {
@@ -322,7 +322,7 @@ class Outcome extends AbstractBaseApi
             'query' => $params
         ]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -435,7 +435,7 @@ class Outcome extends AbstractBaseApi
             ]
         ]);
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         if (isset($responseData['outcome'])) {
             return new self($responseData['outcome']);

@@ -109,7 +109,7 @@ class Conversation extends AbstractBaseApi
         $response = self::$apiClient->get(self::$endpoint, $params);
 
         $conversations = [];
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         // Handle the case where include_all_conversation_ids is true
         if (isset($data['conversations'])) {
@@ -146,7 +146,7 @@ class Conversation extends AbstractBaseApi
         }
 
         $response = self::$apiClient->get(self::$endpoint . '/' . $id, $params);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -166,7 +166,7 @@ class Conversation extends AbstractBaseApi
         }
 
         $response = self::$apiClient->post(self::$endpoint, ['multipart' => $data->toApiArray()]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Handle async mode where response might be empty
         if (empty($responseData)) {
@@ -210,7 +210,7 @@ class Conversation extends AbstractBaseApi
             }
             $response = self::$apiClient->put(self::$endpoint . '/' . $this->id, ['multipart' => $updateData]);
         }
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         $this->populate($responseData);
         return $this;
@@ -248,7 +248,7 @@ class Conversation extends AbstractBaseApi
             ['multipart' => $data->toApiArray()]
         );
 
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         $this->populate($responseData);
 
         return $this;
@@ -273,7 +273,7 @@ class Conversation extends AbstractBaseApi
             ['multipart' => $data->toApiArray()]
         );
 
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         $this->populate($responseData);
 
         return $this;
@@ -300,7 +300,7 @@ class Conversation extends AbstractBaseApi
             ['multipart' => $data]
         );
 
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         $this->populate($responseData);
 
         return $this;
@@ -331,7 +331,7 @@ class Conversation extends AbstractBaseApi
 
         $response = self::$apiClient->put(self::$endpoint, ['multipart' => $updateData]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -358,7 +358,7 @@ class Conversation extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get(self::$endpoint . '/unread_count');
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return $data['unread_count'] ?? 0;
     }
@@ -374,7 +374,7 @@ class Conversation extends AbstractBaseApi
 
         $response = self::$apiClient->get(self::$endpoint . '/batches');
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**

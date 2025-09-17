@@ -115,7 +115,7 @@ class CourseReports extends AbstractBaseApi
             'form_params' => $parameters
         ]);
 
-        $reportData = json_decode($response->getBody()->getContents(), true);
+        $reportData = self::parseJsonResponse($response);
 
         return new self($reportData);
     }
@@ -152,7 +152,7 @@ class CourseReports extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get($endpoint);
-        $reportData = json_decode($response->getBody()->getContents(), true);
+        $reportData = self::parseJsonResponse($response);
 
         return new self($reportData);
     }
@@ -173,7 +173,7 @@ class CourseReports extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get($endpoint);
-        $reportData = json_decode($response->getBody()->getContents(), true);
+        $reportData = self::parseJsonResponse($response);
 
         return new self($reportData);
     }
