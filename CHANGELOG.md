@@ -25,6 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Prevents runtime errors when processing Submission objects
   - Ensures type safety for all date and non-date fields
 
+- **Applied Configured Timeout to HTTP Client** (#136)
+  - Fixed bug where `Config::getTimeout()` was never applied to Guzzle HTTP client
+  - Added both `timeout` (total timeout) and `connect_timeout` (connection timeout) to client configuration
+  - Default timeout set to 30 seconds when not configured
+  - Connect timeout calculated as `min(10, timeout/3)` for optimal performance
+  - Maintains backward compatibility for users providing pre-configured clients
+  - Added comprehensive unit tests for timeout configuration
+  - Prevents HTTP requests from hanging indefinitely
+
 ## [1.5.2] - 2025-09-15
 
 ### Fixed

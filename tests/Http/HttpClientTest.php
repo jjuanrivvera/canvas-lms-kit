@@ -384,4 +384,129 @@ class HttpClientTest extends TestCase
         // Assert the URL DOES have /api/v1/ prefix (it's not an OAuth2 endpoint)
         $this->assertEquals('https://canvas.instructure.com/api/v1/login/session_token', $actualUri);
     }
+
+    /**
+     * Test that timeout configuration is applied when creating new client
+     */
+    public function testTimeoutConfigurationAppliedToNewClient()
+    {
+        // Set a custom timeout
+        Config::setTimeout(45);
+
+        // Create HttpClient without providing a Guzzle client
+        // This will trigger the creation of a new client with timeout configuration
+        $httpClient = new HttpClient(null, $this->loggerMock);
+
+        // Use reflection to access the private client property
+        $reflection = new \ReflectionClass($httpClient);
+        $clientProperty = $reflection->getProperty('client');
+        $clientProperty->setAccessible(true);
+        $client = $clientProperty->getValue($httpClient);
+
+        // Get the client configuration
+        $clientConfig = $client->getConfig();
+
+        // Assert that timeout values are set correctly
+        $this->assertEquals(45, $clientConfig['timeout']);
+        $this->assertEquals(10, $clientConfig['connect_timeout']); // min(10, 45/3) = 10
+
+        // Reset timeout to default
+        Config::setTimeout(30);
+    }
+
+    /**
+     * Test default timeout when Config::getTimeout() returns null
+     */
+    public function testDefaultTimeoutWhenNotConfigured()
+    {
+        // Clear any previously set timeout
+        Config::resetContext('default');
+        Config::setAppKey('fake-api-key');
+        Config::setBaseUrl('https://canvas.instructure.com/api/v1');
+
+        // Create HttpClient without providing a Guzzle client
+        $httpClient = new HttpClient(null, $this->loggerMock);
+
+        // Use reflection to access the private client property
+        $reflection = new \ReflectionClass($httpClient);
+        $clientProperty = $reflection->getProperty('client');
+        $clientProperty->setAccessible(true);
+        $client = $clientProperty->getValue($httpClient);
+
+        // Get the client configuration
+        $clientConfig = $client->getConfig();
+
+        // Assert that default timeout values are used (30 seconds)
+        $this->assertEquals(30, $clientConfig['timeout']);
+        $this->assertEquals(10, $clientConfig['connect_timeout']); // min(10, 30/3) = 10
+    }
+
+    /**
+     * Test that timeout is not modified when client is provided (backward compatibility)
+     */
+    public function testTimeoutNotModifiedWhenClientProvided()
+    {
+        // Set a custom timeout in Config
+        Config::setTimeout(60);
+
+        // Create a Guzzle client with different timeout values
+        $providedClient = new Client([
+            'timeout' => 15,
+            'connect_timeout' => 5
+        ]);
+
+        // Create HttpClient with the provided client
+        $httpClient = new HttpClient($providedClient, $this->loggerMock);
+
+        // Use reflection to access the private client property
+        $reflection = new \ReflectionClass($httpClient);
+        $clientProperty = $reflection->getProperty('client');
+        $clientProperty->setAccessible(true);
+        $client = $clientProperty->getValue($httpClient);
+
+        // Assert that the client is the same as provided (not modified)
+        $this->assertSame($providedClient, $client);
+
+        // Verify the original timeout values are preserved
+        $clientConfig = $client->getConfig();
+        $this->assertEquals(15, $clientConfig['timeout']);
+        $this->assertEquals(5, $clientConfig['connect_timeout']);
+
+        // Reset timeout to default
+        Config::setTimeout(30);
+    }
+
+    /**
+     * Test connect_timeout calculation with various timeout values
+     */
+    public function testConnectTimeoutCalculation()
+    {
+        $testCases = [
+            15 => 5,   // 15/3 = 5 (less than 10, so use 5)
+            30 => 10,  // 30/3 = 10 (equals 10, so use 10)
+            60 => 10,  // 60/3 = 20 (greater than 10, so cap at 10)
+            120 => 10, // 120/3 = 40 (greater than 10, so cap at 10)
+            9 => 3,    // 9/3 = 3 (less than 10, so use 3)
+        ];
+
+        foreach ($testCases as $timeout => $expectedConnectTimeout) {
+            Config::setTimeout($timeout);
+
+            $httpClient = new HttpClient(null, $this->loggerMock);
+
+            $reflection = new \ReflectionClass($httpClient);
+            $clientProperty = $reflection->getProperty('client');
+            $clientProperty->setAccessible(true);
+            $client = $clientProperty->getValue($httpClient);
+
+            $clientConfig = $client->getConfig();
+
+            $this->assertEquals($timeout, $clientConfig['timeout'], "Failed for timeout: $timeout");
+            $this->assertEquals($expectedConnectTimeout, $clientConfig['connect_timeout'],
+                "Failed connect_timeout calculation for timeout: $timeout");
+        }
+
+        // Reset timeout to default
+        Config::setTimeout(30);
+    }
 }

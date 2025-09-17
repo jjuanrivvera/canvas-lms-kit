@@ -75,7 +75,15 @@ class HttpClient implements HttpClientInterface
         if ($client !== null) {
             $this->client = $client;
         } else {
-            $this->client = new \GuzzleHttp\Client(['handler' => $this->handlerStack]);
+            // Apply timeout configuration from Config
+            $timeout = Config::getTimeout() ?? 30;  // Default to 30 seconds
+            $connectTimeout = min(10, (int)($timeout / 3));  // Cap at 10s, max 1/3 of total timeout
+
+            $this->client = new \GuzzleHttp\Client([
+                'handler' => $this->handlerStack,
+                'timeout' => $timeout,
+                'connect_timeout' => $connectTimeout
+            ]);
         }
     }
 
