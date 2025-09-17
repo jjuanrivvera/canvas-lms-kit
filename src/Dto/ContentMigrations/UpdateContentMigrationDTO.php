@@ -135,7 +135,7 @@ class UpdateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
      * @param array<int, array<string, mixed>> &$result
      * @param string $prefix
      */
-    private function processCopyParameters(array $data, array & $result, string $prefix): void
+    private function processCopyParameters(array $data, array &$result, string $prefix): void
     {
         foreach ($data as $key => $value) {
             if (is_array($value)) {

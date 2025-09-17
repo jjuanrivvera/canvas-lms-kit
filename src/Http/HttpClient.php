@@ -345,7 +345,7 @@ class HttpClient implements HttpClientInterface
      *
      * @return mixed[]
      */
-    private function prepareDefaultOptions(string & $url, array $options): array
+    private function prepareDefaultOptions(string &$url, array $options): array
     {
         // Check if this is an OAuth2-specific endpoint that shouldn't have /api/v1/ added
         // Only OAuth2 token endpoints should bypass the API prefix
@@ -485,7 +485,7 @@ class HttpClient implements HttpClientInterface
      *
      * @return mixed[]
      */
-    private function prepareRawRequestOptions(string & $url, array $options): array
+    private function prepareRawRequestOptions(string &$url, array $options): array
     {
         // Detect if URL is absolute (contains scheme) or relative
         $isAbsoluteUrl = filter_var($url, FILTER_VALIDATE_URL) !== false;

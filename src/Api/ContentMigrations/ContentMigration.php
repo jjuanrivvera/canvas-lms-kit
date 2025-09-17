@@ -700,7 +700,7 @@ class ContentMigration extends AbstractBaseApi
      *
      * @return array<array<string, mixed>> Multipart data array
      */
-    private function buildMultipartData(array $uploadParams, string $filePath, & $fileResource): array
+    private function buildMultipartData(array $uploadParams, string $filePath, &$fileResource): array
     {
         $multipartData = [];
         // Add upload parameters
