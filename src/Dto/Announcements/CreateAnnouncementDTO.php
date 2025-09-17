@@ -47,6 +47,7 @@ class CreateAnnouncementDTO extends CreateDiscussionTopicDTO
      * Set delayed post date for scheduled announcements
      *
      * @param string|null $delayedPostAt ISO 8601 formatted datetime
+     *
      * @return void
      */
     public function setDelayedPostAt(?string $delayedPostAt): void
@@ -64,11 +65,13 @@ class CreateAnnouncementDTO extends CreateDiscussionTopicDTO
      * This prevents students from commenting on the announcement
      *
      * @param bool $lockComments Whether to lock comments
+     *
      * @return self
      */
     public function lockComments(bool $lockComments = true): self
     {
         $this->lockComment = $lockComments;
+
         return $this;
     }
 
@@ -77,11 +80,13 @@ class CreateAnnouncementDTO extends CreateDiscussionTopicDTO
      * Allows announcements to be sent to specific course sections only
      *
      * @param array<int> $sectionIds Array of section IDs
+     *
      * @return self
      */
     public function setSections(array $sectionIds): self
     {
         $this->specificSections = $sectionIds;
+
         return $this;
     }
 }

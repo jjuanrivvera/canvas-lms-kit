@@ -87,7 +87,7 @@ class UpdateBookmarkDTOTest extends TestCase
             'name' => 'Updated via Array',
             'url' => '/groups/123',
             'position' => 7,
-            'data' => '{"group_id": 123}'
+            'data' => '{"group_id": 123}',
         ];
 
         $dto = UpdateBookmarkDTO::fromArray($data);
@@ -103,7 +103,7 @@ class UpdateBookmarkDTOTest extends TestCase
     {
         $data = [
             'url' => '/users/555',
-            'position' => 2
+            'position' => 2,
         ];
 
         $dto = UpdateBookmarkDTO::fromArray($data);
@@ -146,7 +146,7 @@ class UpdateBookmarkDTOTest extends TestCase
             'position' => 5,
             'id' => 999,
             'created_at' => '2024-01-01',
-            'invalid_field' => 'ignored'
+            'invalid_field' => 'ignored',
         ];
 
         $dto = UpdateBookmarkDTO::fromArray($data);

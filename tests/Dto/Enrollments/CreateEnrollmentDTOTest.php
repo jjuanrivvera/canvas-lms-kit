@@ -26,7 +26,7 @@ class CreateEnrollmentDTOTest extends TestCase
             'userEmail' => 'test@example.com',
             'userFirstName' => 'John',
             'userLastName' => 'Doe',
-            'userSisId' => 'sisuser123'
+            'userSisId' => 'sisuser123',
         ];
 
         $dto = new CreateEnrollmentDTO($data);
@@ -102,7 +102,7 @@ class CreateEnrollmentDTOTest extends TestCase
             'roleId' => '789',
             'notify' => true,
             'startAt' => '2023-01-01T00:00:00Z',
-            'sisUserId' => 'user123'
+            'sisUserId' => 'user123',
         ];
 
         $dto = new CreateEnrollmentDTO($data);
@@ -125,7 +125,7 @@ class CreateEnrollmentDTOTest extends TestCase
             'type' => 'StudentEnrollment',
             'enrollmentState' => 'active',
             'courseSectionId' => '456',
-            'notify' => true
+            'notify' => true,
         ];
 
         $dto = new CreateEnrollmentDTO($data);
@@ -167,7 +167,7 @@ class CreateEnrollmentDTOTest extends TestCase
         // Test with boolean true
         $dto1 = new CreateEnrollmentDTO([
             'limitPrivilegesToCourseSection' => true,
-            'notify' => true
+            'notify' => true,
         ]);
 
         $this->assertTrue($dto1->isLimitPrivilegesToCourseSection());
@@ -176,7 +176,7 @@ class CreateEnrollmentDTOTest extends TestCase
         // Test with boolean false
         $dto2 = new CreateEnrollmentDTO([
             'limitPrivilegesToCourseSection' => false,
-            'notify' => false
+            'notify' => false,
         ]);
 
         $this->assertFalse($dto2->isLimitPrivilegesToCourseSection());
@@ -189,7 +189,7 @@ class CreateEnrollmentDTOTest extends TestCase
             'userEmail' => 'newuser@example.com',
             'userFirstName' => 'New',
             'userLastName' => 'User',
-            'userSisId' => 'newuser123'
+            'userSisId' => 'newuser123',
         ]);
 
         $this->assertEquals('newuser@example.com', $dto->getUserEmail());
@@ -201,7 +201,7 @@ class CreateEnrollmentDTOTest extends TestCase
     public function testSISIntegrationFields(): void
     {
         $dto = new CreateEnrollmentDTO([
-            'sisUserId' => 'sis_user_123'
+            'sisUserId' => 'sis_user_123',
         ]);
 
         $this->assertEquals('sis_user_123', $dto->getSisUserId());
@@ -214,7 +214,7 @@ class CreateEnrollmentDTOTest extends TestCase
 
         $dto = new CreateEnrollmentDTO([
             'startAt' => $startDate,
-            'endAt' => $endDate
+            'endAt' => $endDate,
         ]);
 
         $this->assertEquals($startDate, $dto->getStartAt());

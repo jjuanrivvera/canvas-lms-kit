@@ -20,7 +20,7 @@ class UpdateMediaTracksDTOTest extends TestCase
     {
         $tracks = [
             ['locale' => 'en', 'content' => 'English content', 'kind' => 'subtitles'],
-            ['locale' => 'es', 'content' => 'Spanish content', 'kind' => 'captions']
+            ['locale' => 'es', 'content' => 'Spanish content', 'kind' => 'captions'],
         ];
 
         $dto = new UpdateMediaTracksDTO($tracks);
@@ -47,7 +47,7 @@ class UpdateMediaTracksDTOTest extends TestCase
     {
         $tracks = [
             ['locale' => 'en'],
-            ['locale' => 'fr']
+            ['locale' => 'fr'],
         ];
 
         $dto = new UpdateMediaTracksDTO($tracks);
@@ -64,7 +64,7 @@ class UpdateMediaTracksDTOTest extends TestCase
         $this->expectExceptionMessage('Track at index 0 must have a locale');
 
         new UpdateMediaTracksDTO([
-            ['content' => 'Some content', 'kind' => 'subtitles']
+            ['content' => 'Some content', 'kind' => 'subtitles'],
         ]);
     }
 
@@ -77,7 +77,7 @@ class UpdateMediaTracksDTOTest extends TestCase
         $this->expectExceptionMessage('Track at index 0 must have a locale');
 
         new UpdateMediaTracksDTO([
-            ['locale' => '', 'content' => 'Content']
+            ['locale' => '', 'content' => 'Content'],
         ]);
     }
 
@@ -90,7 +90,7 @@ class UpdateMediaTracksDTOTest extends TestCase
         $this->expectExceptionMessage('Track at index 0 has invalid kind');
 
         new UpdateMediaTracksDTO([
-            ['locale' => 'en', 'kind' => 'invalid_kind']
+            ['locale' => 'en', 'kind' => 'invalid_kind'],
         ]);
     }
 
@@ -103,7 +103,7 @@ class UpdateMediaTracksDTOTest extends TestCase
 
         foreach ($validKinds as $kind) {
             $dto = new UpdateMediaTracksDTO([
-                ['locale' => 'en', 'kind' => $kind]
+                ['locale' => 'en', 'kind' => $kind],
             ]);
 
             $this->assertEquals($kind, $dto->tracks[0]['kind']);
@@ -119,7 +119,7 @@ class UpdateMediaTracksDTOTest extends TestCase
         $this->expectExceptionMessage('Track at index 0 has empty content');
 
         new UpdateMediaTracksDTO([
-            ['locale' => 'en', 'content' => '']
+            ['locale' => 'en', 'content' => ''],
         ]);
     }
 
@@ -132,7 +132,7 @@ class UpdateMediaTracksDTOTest extends TestCase
         $this->expectExceptionMessage('Track at index 0 has empty content');
 
         new UpdateMediaTracksDTO([
-            ['locale' => 'en', 'content' => '   ']
+            ['locale' => 'en', 'content' => '   '],
         ]);
     }
 
@@ -151,12 +151,12 @@ class UpdateMediaTracksDTOTest extends TestCase
             'en-US',
             'es-MX',
             'fr-CA',
-            'pt-BR'
+            'pt-BR',
         ];
 
         foreach ($validLocales as $locale) {
             $dto = new UpdateMediaTracksDTO([
-                ['locale' => $locale]
+                ['locale' => $locale],
             ]);
 
             $this->assertEquals($locale, $dto->tracks[0]['locale']);
@@ -183,7 +183,7 @@ class UpdateMediaTracksDTOTest extends TestCase
             $this->expectExceptionMessage('invalid locale format');
 
             new UpdateMediaTracksDTO([
-                ['locale' => $locale]
+                ['locale' => $locale],
             ]);
         }
     }
@@ -207,8 +207,8 @@ class UpdateMediaTracksDTOTest extends TestCase
         $data = [
             'tracks' => [
                 ['locale' => 'en', 'content' => 'English'],
-                ['locale' => 'es', 'content' => 'Spanish']
-            ]
+                ['locale' => 'es', 'content' => 'Spanish'],
+            ],
         ];
 
         $dto = UpdateMediaTracksDTO::fromArray($data);
@@ -225,7 +225,7 @@ class UpdateMediaTracksDTOTest extends TestCase
     {
         $data = [
             ['locale' => 'fr', 'content' => 'French'],
-            ['locale' => 'de', 'content' => 'German']
+            ['locale' => 'de', 'content' => 'German'],
         ];
 
         $dto = UpdateMediaTracksDTO::fromArray($data);
@@ -274,7 +274,7 @@ class UpdateMediaTracksDTOTest extends TestCase
     {
         $dto = new UpdateMediaTracksDTO([
             ['locale' => 'en'],
-            ['locale' => 'es']
+            ['locale' => 'es'],
         ]);
 
         $this->assertCount(2, $dto->tracks);
@@ -310,7 +310,7 @@ class UpdateMediaTracksDTOTest extends TestCase
     {
         $tracks = [
             ['locale' => 'en', 'content' => 'Test'],
-            ['locale' => 'es']
+            ['locale' => 'es'],
         ];
 
         $dto = new UpdateMediaTracksDTO($tracks);
@@ -329,7 +329,7 @@ class UpdateMediaTracksDTOTest extends TestCase
         $webvttContent = "WEBVTT\n\n1\n00:00:00.000 --> 00:00:05.000\nHello World\n\n2\n00:00:05.000 --> 00:00:10.000\nThis is a test";
 
         $dto = new UpdateMediaTracksDTO([
-            ['locale' => 'en', 'content' => $webvttContent, 'kind' => 'captions']
+            ['locale' => 'en', 'content' => $webvttContent, 'kind' => 'captions'],
         ]);
 
         $this->assertEquals($webvttContent, $dto->tracks[0]['content']);

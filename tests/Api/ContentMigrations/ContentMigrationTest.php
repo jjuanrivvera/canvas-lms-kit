@@ -8,8 +8,6 @@ use CanvasLMS\Api\ContentMigrations\ContentMigration;
 use CanvasLMS\Api\ContentMigrations\MigrationIssue;
 use CanvasLMS\Api\Progress\Progress;
 use CanvasLMS\Config;
-use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
-use CanvasLMS\Dto\ContentMigrations\UpdateContentMigrationDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Objects\Migrator;
@@ -20,7 +18,9 @@ use Psr\Http\Message\StreamInterface;
 class ContentMigrationTest extends TestCase
 {
     private HttpClientInterface $mockClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
 
     protected function setUp(): void
@@ -41,7 +41,7 @@ class ContentMigrationTest extends TestCase
             'id' => 123,
             'migration_type' => 'course_copy_importer',
             'workflow_state' => 'completed',
-            'progress_url' => 'https://canvas.test/api/v1/progress/456'
+            'progress_url' => 'https://canvas.test/api/v1/progress/456',
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($migrationData));
@@ -65,12 +65,12 @@ class ContentMigrationTest extends TestCase
     {
         $migrationsData = [
             ['id' => 1, 'migration_type' => 'course_copy_importer'],
-            ['id' => 2, 'migration_type' => 'zip_file_importer']
+            ['id' => 2, 'migration_type' => 'zip_file_importer'],
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($migrationsData));
         $this->mockResponse->method('getBody')->willReturn($this->mockStream);
-        
+
         $this->mockClient->method('get')
             ->with('accounts/1/content_migrations', ['query' => []])
             ->willReturn($this->mockResponse);
@@ -87,7 +87,7 @@ class ContentMigrationTest extends TestCase
             'id' => 789,
             'migration_type' => 'course_copy_importer',
             'workflow_state' => 'pre_processing',
-            'settings' => ['source_course_id' => 456]
+            'settings' => ['source_course_id' => 456],
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
@@ -108,8 +108,8 @@ class ContentMigrationTest extends TestCase
             'migration_type' => 'common_cartridge_importer',
             'workflow_state' => 'pre_processing',
             'pre_attachment' => [
-                'message' => 'file exceeded quota'
-            ]
+                'message' => 'file exceeded quota',
+            ],
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
@@ -121,7 +121,7 @@ class ContentMigrationTest extends TestCase
 
         ContentMigration::createInContext('courses', 123, [
             'migration_type' => 'common_cartridge_importer',
-            'pre_attachment' => ['name' => 'test.imscc', 'size' => 12345]
+            'pre_attachment' => ['name' => 'test.imscc', 'size' => 12345],
         ]);
     }
 
@@ -135,10 +135,10 @@ class ContentMigrationTest extends TestCase
                 'upload_url' => 'https://s3.amazonaws.com/upload',
                 'upload_params' => [
                     'key' => 'uploads/123',
-                    'acl' => 'private'
-                ]
+                    'acl' => 'private',
+                ],
             ],
-            'migration_issues_url' => 'https://canvas.test/api/v1/courses/456/content_migrations/123/migration_issues'
+            'migration_issues_url' => 'https://canvas.test/api/v1/courses/456/content_migrations/123/migration_issues',
         ]);
 
         // Mock file upload response
@@ -151,7 +151,7 @@ class ContentMigrationTest extends TestCase
             'workflow_state' => 'running',
             'migration_type' => 'common_cartridge_importer',
             'pre_attachment' => $migration->getPreAttachment(),
-            'migration_issues_url' => $migration->getMigrationIssuesUrl()
+            'migration_issues_url' => $migration->getMigrationIssuesUrl(),
         ];
         $refreshStream = $this->createMock(StreamInterface::class);
         $refreshStream->method('getContents')->willReturn(json_encode($refreshData));
@@ -180,13 +180,13 @@ class ContentMigrationTest extends TestCase
     {
         $migration = new ContentMigration([
             'id' => 123,
-            'progress_url' => 'https://canvas.test/api/v1/progress/456'
+            'progress_url' => 'https://canvas.test/api/v1/progress/456',
         ]);
 
         $progressData = [
             'id' => 456,
             'workflow_state' => 'running',
-            'completion' => 75
+            'completion' => 75,
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($progressData));
@@ -206,7 +206,7 @@ class ContentMigrationTest extends TestCase
         $migration = new ContentMigration([
             'id' => 123,
             'workflow_state' => 'completed',
-            'migration_issues_url' => 'https://canvas.test/api/v1/courses/456/content_migrations/123/migration_issues'
+            'migration_issues_url' => 'https://canvas.test/api/v1/courses/456/content_migrations/123/migration_issues',
         ]);
 
         // waitForCompletion should return immediately if already completed
@@ -219,17 +219,17 @@ class ContentMigrationTest extends TestCase
     {
         $migration = new ContentMigration([
             'id' => 123,
-            'migration_issues_url' => 'https://canvas.test/api/v1/courses/456/content_migrations/123/migration_issues'
+            'migration_issues_url' => 'https://canvas.test/api/v1/courses/456/content_migrations/123/migration_issues',
         ]);
 
         $issuesData = [
             ['id' => 1, 'issue_type' => 'warning', 'description' => 'Some warning'],
-            ['id' => 2, 'issue_type' => 'error', 'description' => 'Some error']
+            ['id' => 2, 'issue_type' => 'error', 'description' => 'Some error'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->method('all')->willReturn($issuesData);
-        
+
         $this->mockClient->method('getPaginated')
             ->with('courses/456/content_migrations/123/migration_issues', ['query' => []])
             ->willReturn($mockPaginatedResponse);
@@ -245,7 +245,7 @@ class ContentMigrationTest extends TestCase
     {
         $migration = new ContentMigration([
             'id' => 123,
-            'migration_issues_url' => 'https://canvas.test/api/v1/courses/456/content_migrations/123/migration_issues'
+            'migration_issues_url' => 'https://canvas.test/api/v1/courses/456/content_migrations/123/migration_issues',
         ]);
 
         $selectiveData = [
@@ -253,8 +253,8 @@ class ContentMigrationTest extends TestCase
                 'type' => 'assignments',
                 'property' => 'copy[all_assignments]',
                 'title' => 'Assignments',
-                'count' => 5
-            ]
+                'count' => 5,
+            ],
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($selectiveData));
@@ -271,7 +271,7 @@ class ContentMigrationTest extends TestCase
     {
         $mappingData = [
             'assignments' => ['13' => '740', '14' => '741'],
-            'discussion_topics' => ['15' => '743']
+            'discussion_topics' => ['15' => '743'],
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($mappingData));
@@ -291,13 +291,13 @@ class ContentMigrationTest extends TestCase
                 'type' => 'course_copy_importer',
                 'requires_file_upload' => false,
                 'name' => 'Course Copy',
-                'required_settings' => ['source_course_id']
+                'required_settings' => ['source_course_id'],
             ],
             [
                 'type' => 'common_cartridge_importer',
                 'requires_file_upload' => true,
-                'name' => 'Common Cartridge 1.x Package'
-            ]
+                'name' => 'Common Cartridge 1.x Package',
+            ],
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($migratorsData));
@@ -335,8 +335,8 @@ class ContentMigrationTest extends TestCase
         $migration = new ContentMigration([
             'workflow_state' => 'pre_processing',
             'pre_attachment' => [
-                'upload_url' => 'https://s3.amazonaws.com/upload'
-            ]
+                'upload_url' => 'https://s3.amazonaws.com/upload',
+            ],
         ]);
 
         $this->assertTrue($migration->isFileUploadPending());
@@ -345,8 +345,8 @@ class ContentMigrationTest extends TestCase
 
         $migration = new ContentMigration([
             'pre_attachment' => [
-                'message' => 'quota exceeded'
-            ]
+                'message' => 'quota exceeded',
+            ],
         ]);
 
         $this->assertFalse($migration->isFileUploadPending());
@@ -362,14 +362,14 @@ class ContentMigrationTest extends TestCase
             'workflow_state' => 'pre_processing',
             'pre_attachment' => [
                 'upload_url' => 'https://s3.amazonaws.com/upload',
-                'upload_params' => ['key' => 'value']
+                'upload_params' => ['key' => 'value'],
             ],
-            'migration_issues_url' => 'https://canvas.test/api/v1/courses/456/content_migrations/123/migration_issues'
+            'migration_issues_url' => 'https://canvas.test/api/v1/courses/456/content_migrations/123/migration_issues',
         ];
 
         $uploadedResponse = [
             'id' => 123,
-            'workflow_state' => 'running'
+            'workflow_state' => 'running',
         ];
 
         // Create temp file

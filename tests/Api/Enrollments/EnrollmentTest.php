@@ -11,14 +11,13 @@ use CanvasLMS\Dto\Enrollments\CreateEnrollmentDTO;
 use CanvasLMS\Dto\Enrollments\UpdateEnrollmentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 
 class EnrollmentTest extends TestCase
 {
     private HttpClientInterface $httpClientMock;
+
     private Course $course;
 
     protected function setUp(): void
@@ -63,7 +62,7 @@ class EnrollmentTest extends TestCase
             'sis_section_id' => 'section123',
             'sis_user_id' => 'user123',
             'enrollment_term_id' => 1,
-            'grading_period_id' => 2
+            'grading_period_id' => 2,
         ];
 
         $enrollment = new Enrollment($data);
@@ -113,14 +112,14 @@ class EnrollmentTest extends TestCase
         $reflection = new \ReflectionClass(Enrollment::class);
         $courseProperty = $reflection->getProperty('course');
         $courseProperty->setAccessible(true);
-        
+
         // Create a course with no ID to trigger the exception
         $courseWithoutId = new Course([]);
         $courseProperty->setValue(null, $courseWithoutId);
 
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course is required for enrollment operations');
-        
+
         Enrollment::checkCourse();
     }
 
@@ -131,7 +130,7 @@ class EnrollmentTest extends TestCase
             'user_id' => 100,
             'course_id' => 123,
             'type' => 'StudentEnrollment',
-            'enrollment_state' => 'active'
+            'enrollment_state' => 'active',
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -157,15 +156,15 @@ class EnrollmentTest extends TestCase
                 'user_id' => 100,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
+                'enrollment_state' => 'active',
             ],
             [
                 'id' => 2,
                 'user_id' => 200,
                 'course_id' => 123,
                 'type' => 'TeacherEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -190,7 +189,7 @@ class EnrollmentTest extends TestCase
         $params = [
             'type[]' => ['StudentEnrollment'],
             'state[]' => ['active'],
-            'user_id' => 100
+            'user_id' => 100,
         ];
 
         $responseBody = json_encode([
@@ -199,8 +198,8 @@ class EnrollmentTest extends TestCase
                 'user_id' => 100,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -222,7 +221,7 @@ class EnrollmentTest extends TestCase
         $createData = [
             'userId' => '100',
             'type' => 'StudentEnrollment',
-            'enrollmentState' => 'active'
+            'enrollmentState' => 'active',
         ];
 
         $responseBody = json_encode([
@@ -230,7 +229,7 @@ class EnrollmentTest extends TestCase
             'user_id' => 100,
             'course_id' => 123,
             'type' => 'StudentEnrollment',
-            'enrollment_state' => 'active'
+            'enrollment_state' => 'active',
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -252,7 +251,7 @@ class EnrollmentTest extends TestCase
         $dto = new CreateEnrollmentDTO([
             'userId' => '100',
             'type' => 'StudentEnrollment',
-            'enrollmentState' => 'active'
+            'enrollmentState' => 'active',
         ]);
 
         $responseBody = json_encode([
@@ -260,7 +259,7 @@ class EnrollmentTest extends TestCase
             'user_id' => 100,
             'course_id' => 123,
             'type' => 'StudentEnrollment',
-            'enrollment_state' => 'active'
+            'enrollment_state' => 'active',
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -279,7 +278,7 @@ class EnrollmentTest extends TestCase
     public function testUpdate(): void
     {
         $updateData = [
-            'enrollmentState' => 'completed'
+            'enrollmentState' => 'completed',
         ];
 
         $responseBody = json_encode([
@@ -287,7 +286,7 @@ class EnrollmentTest extends TestCase
             'user_id' => 100,
             'course_id' => 123,
             'type' => 'StudentEnrollment',
-            'enrollment_state' => 'completed'
+            'enrollment_state' => 'completed',
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -306,7 +305,7 @@ class EnrollmentTest extends TestCase
     public function testUpdateWithDTO(): void
     {
         $dto = new UpdateEnrollmentDTO([
-            'enrollmentState' => 'completed'
+            'enrollmentState' => 'completed',
         ]);
 
         $responseBody = json_encode([
@@ -314,7 +313,7 @@ class EnrollmentTest extends TestCase
             'user_id' => 100,
             'course_id' => 123,
             'type' => 'StudentEnrollment',
-            'enrollment_state' => 'completed'
+            'enrollment_state' => 'completed',
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -337,7 +336,7 @@ class EnrollmentTest extends TestCase
             'user_id' => 100,
             'course_id' => 123,
             'type' => 'StudentEnrollment',
-            'enrollment_state' => 'active'
+            'enrollment_state' => 'active',
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -360,7 +359,7 @@ class EnrollmentTest extends TestCase
             'user_id' => 100,
             'course_id' => 123,
             'type' => 'StudentEnrollment',
-            'enrollment_state' => 'rejected'
+            'enrollment_state' => 'rejected',
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -383,7 +382,7 @@ class EnrollmentTest extends TestCase
             'user_id' => 100,
             'course_id' => 123,
             'type' => 'StudentEnrollment',
-            'enrollment_state' => 'active'
+            'enrollment_state' => 'active',
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -408,8 +407,8 @@ class EnrollmentTest extends TestCase
                 'course_id' => 123,
                 'section_id' => 456,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -434,8 +433,8 @@ class EnrollmentTest extends TestCase
                 'user_id' => 100,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -457,7 +456,7 @@ class EnrollmentTest extends TestCase
         $enrollment = new Enrollment([
             'userId' => 100,
             'type' => 'StudentEnrollment',
-            'enrollmentState' => 'active'
+            'enrollmentState' => 'active',
         ]);
 
         $responseBody = json_encode([
@@ -465,7 +464,7 @@ class EnrollmentTest extends TestCase
             'user_id' => 100,
             'course_id' => 123,
             'type' => 'StudentEnrollment',
-            'enrollment_state' => 'active'
+            'enrollment_state' => 'active',
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -487,7 +486,7 @@ class EnrollmentTest extends TestCase
             'id' => 1,
             'userId' => 100,
             'type' => 'StudentEnrollment',
-            'enrollmentState' => 'completed'
+            'enrollmentState' => 'completed',
         ]);
 
         $responseBody = json_encode([
@@ -495,7 +494,7 @@ class EnrollmentTest extends TestCase
             'user_id' => 100,
             'course_id' => 123,
             'type' => 'StudentEnrollment',
-            'enrollment_state' => 'completed'
+            'enrollment_state' => 'completed',
         ]);
 
         $response = new Response(200, [], $responseBody);
@@ -515,7 +514,7 @@ class EnrollmentTest extends TestCase
     {
         $enrollment = new Enrollment([
             'userId' => 100,
-            'type' => 'InvalidEnrollment'
+            'type' => 'InvalidEnrollment',
         ]);
 
         $this->expectException(CanvasApiException::class);
@@ -529,7 +528,7 @@ class EnrollmentTest extends TestCase
         $enrollment = new Enrollment([
             'userId' => 100,
             'type' => 'StudentEnrollment',
-            'enrollmentState' => 'invalid_state'
+            'enrollmentState' => 'invalid_state',
         ]);
 
         $this->expectException(CanvasApiException::class);
@@ -581,7 +580,7 @@ class EnrollmentTest extends TestCase
             'user_id' => 100,
             'course_id' => 123,
             'type' => 'StudentEnrollment',
-            'enrollment_state' => 'active'
+            'enrollment_state' => 'active',
         ];
 
         $enrollment = new Enrollment($data);
@@ -646,13 +645,13 @@ class EnrollmentTest extends TestCase
         $userData = [
             'id' => 100,
             'name' => 'John Doe',
-            'email' => 'john@example.com'
+            'email' => 'john@example.com',
         ];
 
         $enrollment = new Enrollment([
             'id' => 1,
             'userId' => 100,
-            'user' => $userData
+            'user' => $userData,
         ]);
 
         $user = $enrollment->user();
@@ -668,13 +667,13 @@ class EnrollmentTest extends TestCase
         $enrollment = new Enrollment([
             'id' => 1,
             'userId' => 100,
-            'user' => null // No embedded data
+            'user' => null, // No embedded data
         ]);
 
         $userResponseBody = json_encode([
             'id' => 100,
             'name' => 'Jane Smith',
-            'email' => 'jane@example.com'
+            'email' => 'jane@example.com',
         ]);
 
         $response = new Response(200, [], $userResponseBody);
@@ -705,7 +704,7 @@ class EnrollmentTest extends TestCase
         $enrollment = new Enrollment([
             'id' => 1,
             'userId' => 999,
-            'user' => null
+            'user' => null,
         ]);
 
         $this->httpClientMock
@@ -727,7 +726,7 @@ class EnrollmentTest extends TestCase
 
         $enrollment = new Enrollment([
             'id' => 1,
-            'courseId' => 123
+            'courseId' => 123,
         ]);
 
         $retrievedCourse = $enrollment->course();
@@ -745,12 +744,12 @@ class EnrollmentTest extends TestCase
 
         $enrollment = new Enrollment([
             'id' => 1,
-            'courseId' => 789 // Different from static context
+            'courseId' => 789, // Different from static context
         ]);
 
         $courseResponseBody = json_encode([
             'id' => 789,
-            'name' => 'API Course'
+            'name' => 'API Course',
         ]);
 
         $response = new Response(200, [], $courseResponseBody);
@@ -780,7 +779,7 @@ class EnrollmentTest extends TestCase
     {
         $enrollment = new Enrollment([
             'id' => 1,
-            'courseId' => 999
+            'courseId' => 999,
         ]);
 
         $this->httpClientMock
@@ -845,7 +844,7 @@ class EnrollmentTest extends TestCase
     {
         $enrollmentInvited = new Enrollment(['enrollmentState' => Enrollment::STATE_INVITED]);
         $enrollmentCreationPending = new Enrollment(['enrollmentState' => Enrollment::STATE_CREATION_PENDING]);
-        
+
         $this->assertTrue($enrollmentInvited->isPending());
         $this->assertTrue($enrollmentCreationPending->isPending());
         $this->assertFalse($enrollmentInvited->isActive());
@@ -912,7 +911,7 @@ class EnrollmentTest extends TestCase
             'user_id' => 456,
             'course_id' => 789,
             'type' => 'StudentEnrollment',
-            'user' => $userData
+            'user' => $userData,
         ];
 
         $enrollment = new Enrollment($enrollmentData);
@@ -931,7 +930,7 @@ class EnrollmentTest extends TestCase
             'id' => 123,
             'user_id' => 456,
             'course_id' => 789,
-            'type' => 'StudentEnrollment'
+            'type' => 'StudentEnrollment',
         ];
 
         $courseData = ['id' => 789, 'name' => 'Test Course'];

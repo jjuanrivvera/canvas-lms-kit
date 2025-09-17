@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace CanvasLMS\Api\MediaObjects;
 
 use CanvasLMS\Api\AbstractBaseApi;
-use CanvasLMS\Config;
 use CanvasLMS\Dto\MediaObjects\UpdateMediaObjectDTO;
 use CanvasLMS\Dto\MediaObjects\UpdateMediaTracksDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Objects\MediaTrack;
 use CanvasLMS\Objects\MediaSource;
+use CanvasLMS\Objects\MediaTrack;
 
 /**
  * MediaObject API
@@ -48,12 +47,14 @@ class MediaObject extends AbstractBaseApi
 
     /**
      * Array of MediaTrack objects associated with this media
+     *
      * @var array<MediaTrack>|null
      */
     public ?array $mediaTracks = null;
 
     /**
      * Array of MediaSource objects with different encodings
+     *
      * @var array<MediaSource>|null
      */
     public ?array $mediaSources = null;
@@ -70,7 +71,7 @@ class MediaObject extends AbstractBaseApi
         // Parse media tracks if present
         if (isset($data['media_tracks']) && is_array($data['media_tracks'])) {
             $this->mediaTracks = array_map(
-                fn($track) => new MediaTrack($track),
+                fn ($track) => new MediaTrack($track),
                 $data['media_tracks']
             );
         }
@@ -78,7 +79,7 @@ class MediaObject extends AbstractBaseApi
         // Parse media sources if present
         if (isset($data['media_sources']) && is_array($data['media_sources'])) {
             $this->mediaSources = array_map(
-                fn($source) => new MediaSource($source),
+                fn ($source) => new MediaSource($source),
                 $data['media_sources']
             );
         }
@@ -88,8 +89,10 @@ class MediaObject extends AbstractBaseApi
      * Fetch all media objects (global context)
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<MediaObject> Array of MediaObject instances
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MediaObject> Array of MediaObject instances
      */
     public static function get(array $params = []): array
     {
@@ -97,7 +100,7 @@ class MediaObject extends AbstractBaseApi
         $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
-            return array_map(fn($item) => new self($item), $data['media_objects']);
+            return array_map(fn ($item) => new self($item), $data['media_objects']);
         }
 
         return [];
@@ -107,8 +110,10 @@ class MediaObject extends AbstractBaseApi
      * Fetch all media attachments (global context)
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<MediaObject> Array of MediaObject instances
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MediaObject> Array of MediaObject instances
      */
     public static function fetchAttachments(array $params = []): array
     {
@@ -116,7 +121,7 @@ class MediaObject extends AbstractBaseApi
         $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
-            return array_map(fn($item) => new self($item), $data['media_objects']);
+            return array_map(fn ($item) => new self($item), $data['media_objects']);
         }
 
         return [];
@@ -127,8 +132,10 @@ class MediaObject extends AbstractBaseApi
      *
      * @param int $courseId The course ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<MediaObject> Array of MediaObject instances
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MediaObject> Array of MediaObject instances
      */
     public static function fetchByCourse(int $courseId, array $params = []): array
     {
@@ -136,7 +143,7 @@ class MediaObject extends AbstractBaseApi
         $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
-            return array_map(fn($item) => new self($item), $data['media_objects']);
+            return array_map(fn ($item) => new self($item), $data['media_objects']);
         }
 
         return [];
@@ -147,8 +154,10 @@ class MediaObject extends AbstractBaseApi
      *
      * @param int $courseId The course ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<MediaObject> Array of MediaObject instances
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MediaObject> Array of MediaObject instances
      */
     public static function fetchAttachmentsByCourse(int $courseId, array $params = []): array
     {
@@ -156,7 +165,7 @@ class MediaObject extends AbstractBaseApi
         $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
-            return array_map(fn($item) => new self($item), $data['media_objects']);
+            return array_map(fn ($item) => new self($item), $data['media_objects']);
         }
 
         return [];
@@ -167,8 +176,10 @@ class MediaObject extends AbstractBaseApi
      *
      * @param int $groupId The group ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<MediaObject> Array of MediaObject instances
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MediaObject> Array of MediaObject instances
      */
     public static function fetchByGroup(int $groupId, array $params = []): array
     {
@@ -176,7 +187,7 @@ class MediaObject extends AbstractBaseApi
         $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
-            return array_map(fn($item) => new self($item), $data['media_objects']);
+            return array_map(fn ($item) => new self($item), $data['media_objects']);
         }
 
         return [];
@@ -187,8 +198,10 @@ class MediaObject extends AbstractBaseApi
      *
      * @param int $groupId The group ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<MediaObject> Array of MediaObject instances
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MediaObject> Array of MediaObject instances
      */
     public static function fetchAttachmentsByGroup(int $groupId, array $params = []): array
     {
@@ -196,7 +209,7 @@ class MediaObject extends AbstractBaseApi
         $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
-            return array_map(fn($item) => new self($item), $data['media_objects']);
+            return array_map(fn ($item) => new self($item), $data['media_objects']);
         }
 
         return [];
@@ -207,8 +220,10 @@ class MediaObject extends AbstractBaseApi
      * Note: Canvas API doesn't support direct media object retrieval
      *
      * @param int $id The media object ID (not used - Canvas doesn't support this)
-     * @return self
+     *
      * @throws CanvasApiException Always throws as Canvas doesn't support this operation
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -219,8 +234,10 @@ class MediaObject extends AbstractBaseApi
      * Update the media object
      *
      * @param array<string, mixed>|UpdateMediaObjectDTO $data Update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function update(array|UpdateMediaObjectDTO $data): self
     {
@@ -255,8 +272,10 @@ class MediaObject extends AbstractBaseApi
      *
      * @param int $attachmentId The attachment ID
      * @param array<string, mixed>|UpdateMediaObjectDTO $data Update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function updateByAttachment(int $attachmentId, array|UpdateMediaObjectDTO $data): self
     {
@@ -286,8 +305,10 @@ class MediaObject extends AbstractBaseApi
      * Get media tracks for this media object
      *
      * @param array<string, mixed> $params Query parameters (include[] options)
-     * @return array<MediaTrack> Array of MediaTrack objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MediaTrack> Array of MediaTrack objects
      */
     public function getTracks(array $params = []): array
     {
@@ -302,7 +323,7 @@ class MediaObject extends AbstractBaseApi
 
         $data = self::parseJsonResponse($response);
 
-        return array_map(fn($track) => new MediaTrack($track), $data);
+        return array_map(fn ($track) => new MediaTrack($track), $data);
     }
 
     /**
@@ -310,8 +331,10 @@ class MediaObject extends AbstractBaseApi
      *
      * @param int $attachmentId The attachment ID
      * @param array<string, mixed> $params Query parameters (include[] options)
-     * @return array<MediaTrack> Array of MediaTrack objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MediaTrack> Array of MediaTrack objects
      */
     public function getTracksByAttachment(int $attachmentId, array $params = []): array
     {
@@ -322,7 +345,7 @@ class MediaObject extends AbstractBaseApi
 
         $data = self::parseJsonResponse($response);
 
-        return array_map(fn($track) => new MediaTrack($track), $data);
+        return array_map(fn ($track) => new MediaTrack($track), $data);
     }
 
     /**
@@ -330,8 +353,10 @@ class MediaObject extends AbstractBaseApi
      *
      * @param array<array<string, mixed>>|UpdateMediaTracksDTO $tracks Track data
      * @param array<string, mixed> $params Query parameters (include[] options)
-     * @return array<MediaTrack> Array of MediaTrack objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MediaTrack> Array of MediaTrack objects
      */
     public function updateTracks(array|UpdateMediaTracksDTO $tracks, array $params = []): array
     {
@@ -348,14 +373,14 @@ class MediaObject extends AbstractBaseApi
             "/media_objects/{$this->mediaId}/media_tracks",
             [
                 'json' => $tracks->toArray(),
-                'query' => $params
+                'query' => $params,
             ]
         );
 
         $data = self::parseJsonResponse($response);
 
         // Update current instance's tracks
-        $this->mediaTracks = array_map(fn($track) => new MediaTrack($track), $data);
+        $this->mediaTracks = array_map(fn ($track) => new MediaTrack($track), $data);
 
         return $this->mediaTracks;
     }
@@ -366,8 +391,10 @@ class MediaObject extends AbstractBaseApi
      * @param int $attachmentId The attachment ID
      * @param array<array<string, mixed>>|UpdateMediaTracksDTO $tracks Track data
      * @param array<string, mixed> $params Query parameters (include[] options)
-     * @return array<MediaTrack> Array of MediaTrack objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MediaTrack> Array of MediaTrack objects
      */
     public function updateTracksByAttachment(
         int $attachmentId,
@@ -383,13 +410,13 @@ class MediaObject extends AbstractBaseApi
             "/media_attachments/{$attachmentId}/media_tracks",
             [
                 'json' => $tracks->toArray(),
-                'query' => $params
+                'query' => $params,
             ]
         );
 
         $data = self::parseJsonResponse($response);
 
-        return array_map(fn($track) => new MediaTrack($track), $data);
+        return array_map(fn ($track) => new MediaTrack($track), $data);
     }
 
     /**
@@ -409,27 +436,28 @@ class MediaObject extends AbstractBaseApi
 
         if ($this->mediaTracks !== null) {
             $data['media_tracks'] = array_map(
-                fn($track) => $track->toArray(),
+                fn ($track) => $track->toArray(),
                 $this->mediaTracks
             );
         }
 
         if ($this->mediaSources !== null) {
             $data['media_sources'] = array_map(
-                fn($source) => $source->toArray(),
+                fn ($source) => $source->toArray(),
                 $this->mediaSources
             );
         }
 
-        return array_filter($data, fn($value) => !is_null($value));
+        return array_filter($data, fn ($value) => !is_null($value));
     }
 
     /**
      * Get the endpoint for this API resource
      * MediaObjects don't have a single endpoint, so this throws an exception
      *
-     * @return string
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {

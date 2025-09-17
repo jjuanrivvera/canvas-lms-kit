@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Objects;
 
-use CanvasLMS\Api\Outcomes\Outcome;
 use CanvasLMS\Api\OutcomeGroups\OutcomeGroup;
+use CanvasLMS\Api\Outcomes\Outcome;
 
 /**
  * OutcomeLink represents the relationship between an outcome and a group.
@@ -16,11 +16,17 @@ use CanvasLMS\Api\OutcomeGroups\OutcomeGroup;
 class OutcomeLink
 {
     public ?string $url = null;
+
     public ?int $contextId = null;
+
     public ?string $contextType = null;
+
     public ?OutcomeGroup $outcomeGroup = null;
+
     public ?Outcome $outcome = null;
+
     public ?bool $assessed = null;
+
     public ?bool $canUnlink = null;
 
     /**

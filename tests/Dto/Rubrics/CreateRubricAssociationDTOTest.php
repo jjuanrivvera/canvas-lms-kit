@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Rubrics;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Rubrics\CreateRubricAssociationDTO;
+use PHPUnit\Framework\TestCase;
 
 class CreateRubricAssociationDTOTest extends TestCase
 {
@@ -76,7 +78,7 @@ class CreateRubricAssociationDTOTest extends TestCase
             ['name' => 'rubric_association[hide_score_total]', 'contents' => '1'],
             ['name' => 'rubric_association[hide_points]', 'contents' => '0'],
             ['name' => 'rubric_association[hide_outcome_results]', 'contents' => '1'],
-            ['name' => 'rubric_association[bookmarked]', 'contents' => '1']
+            ['name' => 'rubric_association[bookmarked]', 'contents' => '1'],
         ];
 
         foreach ($expectedFields as $expected) {
@@ -139,7 +141,7 @@ class CreateRubricAssociationDTOTest extends TestCase
             'hide_score_total' => false,
             'hide_points' => true,
             'hide_outcome_results' => false,
-            'bookmarked' => false
+            'bookmarked' => false,
         ];
 
         $dto = new CreateRubricAssociationDTO($data);
@@ -185,27 +187,27 @@ class CreateRubricAssociationDTOTest extends TestCase
         // Check boolean to string conversion
         $this->assertContains([
             'name' => 'rubric_association[use_for_grading]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_score_total]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_points]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[hide_outcome_results]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_association[bookmarked]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
     }
 
@@ -225,7 +227,7 @@ class CreateRubricAssociationDTOTest extends TestCase
 
             $this->assertContains([
                 'name' => 'rubric_association[association_type]',
-                'contents' => $type
+                'contents' => $type,
             ], $result);
         }
     }
@@ -246,7 +248,7 @@ class CreateRubricAssociationDTOTest extends TestCase
 
             $this->assertContains([
                 'name' => 'rubric_association[purpose]',
-                'contents' => $purpose
+                'contents' => $purpose,
             ], $result);
         }
     }

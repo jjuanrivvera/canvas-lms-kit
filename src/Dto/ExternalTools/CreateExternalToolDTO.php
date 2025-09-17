@@ -88,6 +88,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Custom fields that will be sent to the tool consumer
+     *
      * @var array<string, string>|null
      */
     public ?array $customFields = null;
@@ -134,60 +135,70 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * The configuration for account navigation links
+     *
      * @var array<string, mixed>|null
      */
     public ?array $accountNavigation = null;
 
     /**
      * The configuration for user navigation links
+     *
      * @var array<string, mixed>|null
      */
     public ?array $userNavigation = null;
 
     /**
      * The configuration for course home navigation links
+     *
      * @var array<string, mixed>|null
      */
     public ?array $courseHomeSubNavigation = null;
 
     /**
      * The configuration for course navigation links
+     *
      * @var array<string, mixed>|null
      */
     public ?array $courseNavigation = null;
 
     /**
      * The configuration for a WYSIWYG editor button
+     *
      * @var array<string, mixed>|null
      */
     public ?array $editorButton = null;
 
     /**
      * The configuration for homework submission selection
+     *
      * @var array<string, mixed>|null
      */
     public ?array $homeworkSubmission = null;
 
     /**
      * The configuration for link selection
+     *
      * @var array<string, mixed>|null
      */
     public ?array $linkSelection = null;
 
     /**
      * The configuration for migration selection
+     *
      * @var array<string, mixed>|null
      */
     public ?array $migrationSelection = null;
 
     /**
      * The configuration for a tool configuration link
+     *
      * @var array<string, mixed>|null
      */
     public ?array $toolConfiguration = null;
 
     /**
      * The configuration for a resource selector in modules
+     *
      * @var array<string, mixed>|null
      */
     public ?array $resourceSelection = null;
@@ -338,6 +349,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get custom fields
+     *
      * @return array<string, string>|null
      */
     public function getCustomFields(): ?array
@@ -347,6 +359,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set custom fields
+     *
      * @param array<string, string>|null $customFields
      */
     public function setCustomFields(?array $customFields): void
@@ -468,6 +481,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get account navigation configuration
+     *
      * @return array<string, mixed>|null
      */
     public function getAccountNavigation(): ?array
@@ -477,6 +491,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set account navigation configuration
+     *
      * @param array<string, mixed>|null $accountNavigation
      */
     public function setAccountNavigation(?array $accountNavigation): void
@@ -486,6 +501,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get user navigation configuration
+     *
      * @return array<string, mixed>|null
      */
     public function getUserNavigation(): ?array
@@ -495,6 +511,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set user navigation configuration
+     *
      * @param array<string, mixed>|null $userNavigation
      */
     public function setUserNavigation(?array $userNavigation): void
@@ -504,6 +521,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get course home sub navigation configuration
+     *
      * @return array<string, mixed>|null
      */
     public function getCourseHomeSubNavigation(): ?array
@@ -513,6 +531,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set course home sub navigation configuration
+     *
      * @param array<string, mixed>|null $courseHomeSubNavigation
      */
     public function setCourseHomeSubNavigation(?array $courseHomeSubNavigation): void
@@ -522,6 +541,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get course navigation configuration
+     *
      * @return array<string, mixed>|null
      */
     public function getCourseNavigation(): ?array
@@ -531,6 +551,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set course navigation configuration
+     *
      * @param array<string, mixed>|null $courseNavigation
      */
     public function setCourseNavigation(?array $courseNavigation): void
@@ -540,6 +561,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get editor button configuration
+     *
      * @return array<string, mixed>|null
      */
     public function getEditorButton(): ?array
@@ -549,6 +571,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set editor button configuration
+     *
      * @param array<string, mixed>|null $editorButton
      */
     public function setEditorButton(?array $editorButton): void
@@ -558,6 +581,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get homework submission configuration
+     *
      * @return array<string, mixed>|null
      */
     public function getHomeworkSubmission(): ?array
@@ -567,6 +591,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set homework submission configuration
+     *
      * @param array<string, mixed>|null $homeworkSubmission
      */
     public function setHomeworkSubmission(?array $homeworkSubmission): void
@@ -576,6 +601,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get link selection configuration
+     *
      * @return array<string, mixed>|null
      */
     public function getLinkSelection(): ?array
@@ -585,6 +611,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set link selection configuration
+     *
      * @param array<string, mixed>|null $linkSelection
      */
     public function setLinkSelection(?array $linkSelection): void
@@ -594,6 +621,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get migration selection configuration
+     *
      * @return array<string, mixed>|null
      */
     public function getMigrationSelection(): ?array
@@ -603,6 +631,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set migration selection configuration
+     *
      * @param array<string, mixed>|null $migrationSelection
      */
     public function setMigrationSelection(?array $migrationSelection): void
@@ -612,6 +641,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get tool configuration
+     *
      * @return array<string, mixed>|null
      */
     public function getToolConfiguration(): ?array
@@ -621,6 +651,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set tool configuration
+     *
      * @param array<string, mixed>|null $toolConfiguration
      */
     public function setToolConfiguration(?array $toolConfiguration): void
@@ -630,6 +661,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get resource selection configuration
+     *
      * @return array<string, mixed>|null
      */
     public function getResourceSelection(): ?array
@@ -639,6 +671,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set resource selection configuration
+     *
      * @param array<string, mixed>|null $resourceSelection
      */
     public function setResourceSelection(?array $resourceSelection): void
@@ -888,7 +921,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
                         $fieldName = $this->apiPropertyName . '[' . $placementName . '][' . $configKey . ']';
                         $modifiedProperties[] = [
                             'name' => $fieldName,
-                            'contents' => $configValue
+                            'contents' => $configValue,
                         ];
                     }
                 }
@@ -901,7 +934,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
             if ($value instanceof \DateTimeInterface) {
                 $modifiedProperties[] = [
                     'name' => $propertyName,
-                    'contents' => $value->format(\DateTimeInterface::ATOM)
+                    'contents' => $value->format(\DateTimeInterface::ATOM),
                 ];
                 continue;
             }
@@ -911,7 +944,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
                 foreach ($value as $arrayValue) {
                     $modifiedProperties[] = [
                         'name' => $propertyName . '[]',
-                        'contents' => $arrayValue
+                        'contents' => $arrayValue,
                     ];
                 }
                 continue;
@@ -920,7 +953,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
             // Handle scalar values (int, string, bool)
             $modifiedProperties[] = [
                 'name' => $propertyName,
-                'contents' => $value
+                'contents' => $value,
             ];
         }
 

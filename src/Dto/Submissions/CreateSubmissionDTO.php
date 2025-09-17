@@ -41,6 +41,7 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Array of file IDs for online_upload submissions
+     *
      * @var array<int>|null
      */
     public ?array $fileIds = null;
@@ -75,6 +76,7 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set submission type
+     *
      * @throws InvalidArgumentException
      */
     public function setSubmissionType(?string $submissionType): void
@@ -86,7 +88,7 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
                 'online_upload',
                 'media_recording',
                 'basic_lti_launch',
-                'student_annotation'
+                'student_annotation',
             ];
 
             if (!in_array($submissionType, $validTypes, true)) {
@@ -141,6 +143,7 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set submission URL
+     *
      * @throws InvalidArgumentException
      */
     public function setUrl(?string $url): void
@@ -159,7 +162,7 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
             $host = strtolower($parsedUrl['host'] ?? '');
             $internalHosts = ['localhost', '127.0.0.1', '0.0.0.0'];
-            $isInternal = in_array($host, $internalHosts) ||
+            $isInternal = in_array($host, $internalHosts, true) ||
                          preg_match('/^192\.168\./', $host) ||
                          preg_match('/^10\./', $host) ||
                          preg_match('/^172\.(1[6-9]|2[0-9]|3[01])\./', $host);
@@ -179,6 +182,7 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get file IDs
+     *
      * @return array<int>|null
      */
     public function getFileIds(): ?array
@@ -188,7 +192,9 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set file IDs
+     *
      * @param array<int>|null $fileIds
+     *
      * @throws InvalidArgumentException
      */
     public function setFileIds(?array $fileIds): void

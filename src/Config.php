@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS;
 
 use CanvasLMS\Exceptions\ConfigurationException;
@@ -144,6 +146,7 @@ class Config
      * Get the application key.
      *
      * @param string|null $context The context to get the key from. If null, uses active context.
+     *
      * @return string|null The application key or null if not set.
      */
     public static function getAppKey(?string $context = null): ?string
@@ -168,6 +171,7 @@ class Config
      *
      * @param string $url The base URL.
      * @param string|null $context The context to set the URL for. If null, uses active context.
+     *
      * @throws \InvalidArgumentException If the URL is not valid.
      */
     public static function setBaseUrl(string $url, ?string $context = null): void
@@ -212,6 +216,7 @@ class Config
      * Get the base URL for API requests.
      *
      * @param string|null $context The context to get the URL from. If null, uses active context.
+     *
      * @return string|null The base URL or null if not set.
      */
     public static function getBaseUrl(?string $context = null): ?string
@@ -253,6 +258,7 @@ class Config
      * Get the API version.
      *
      * @param string|null $context The context to get the version from. If null, uses active context.
+     *
      * @return string|null The API version or null if not set.
      */
     public static function getApiVersion(?string $context = null): ?string
@@ -294,6 +300,7 @@ class Config
      * Get the timeout for API requests.
      *
      * @param string|null $context The context to get the timeout from. If null, uses active context.
+     *
      * @return int|null The timeout in seconds or null if not set.
      */
     public static function getTimeout(?string $context = null): ?int
@@ -335,6 +342,7 @@ class Config
      * Get the account ID.
      *
      * @param string|null $context The context to get the account ID from. If null, uses active context.
+     *
      * @return int The account ID.
      */
     public static function getAccountId(?string $context = null): int
@@ -356,7 +364,7 @@ class Config
             $logger = self::getLogger($context);
             $logger->notice(
                 "No account ID configured for context '{$context}', using default value 1. " .
-                "Consider setting explicitly with Config::setAccountId().",
+                'Consider setting explicitly with Config::setAccountId().',
                 ['context' => $context, 'default_value' => 1]
             );
         }
@@ -369,6 +377,7 @@ class Config
      * Check if an account ID has been explicitly configured for a context.
      *
      * @param string|null $context The context to check. If null, uses active context.
+     *
      * @return bool True if account ID is explicitly configured, false if using default.
      */
     public static function hasAccountIdConfigured(?string $context = null): bool
@@ -497,6 +506,7 @@ class Config
      *
      * @param array<string, array<string, mixed>> $middleware Middleware configuration
      * @param string|null $context The context to set the middleware for (null for active context)
+     *
      * @return void
      */
     public static function setMiddleware(array $middleware, ?string $context = null): void
@@ -509,11 +519,13 @@ class Config
      * Get middleware configuration.
      *
      * @param string|null $context The context to get the middleware for (null for active context)
+     *
      * @return array<string, array<string, mixed>> The middleware configuration
      */
     public static function getMiddleware(?string $context = null): array
     {
         $context ??= self::$activeContext;
+
         return self::$contexts[$context]['middleware'] ?? [];
     }
 
@@ -539,6 +551,7 @@ class Config
      * Get the configured logger instance.
      *
      * @param string|null $context The context to get the logger from. If null, uses active context.
+     *
      * @return LoggerInterface The logger instance (returns NullLogger if not configured)
      */
     public static function getLogger(?string $context = null): LoggerInterface
@@ -563,6 +576,7 @@ class Config
      * Check if a logger has been configured.
      *
      * @param string|null $context The context to check. If null, uses active context.
+     *
      * @return bool True if a logger is configured, false otherwise
      */
     public static function hasLogger(?string $context = null): bool
@@ -617,6 +631,7 @@ class Config
      * Auto-detect configuration from environment variables.
      *
      * @param string|null $context The context to set configuration for. If null, uses active context.
+     *
      * @throws ConfigurationException If environment variables contain invalid values.
      */
     public static function autoDetect(?string $context = null): void
@@ -627,7 +642,7 @@ class Config
         if (isset($_ENV['CANVAS_API_KEY'])) {
             $apiKey = trim($_ENV['CANVAS_API_KEY']);
             if (empty($apiKey)) {
-                throw new ConfigurationException("CANVAS_API_KEY environment variable is empty");
+                throw new ConfigurationException('CANVAS_API_KEY environment variable is empty');
             }
             self::setAppKey($apiKey, $context);
         }
@@ -635,7 +650,7 @@ class Config
         if (isset($_ENV['CANVAS_BASE_URL'])) {
             $baseUrl = trim($_ENV['CANVAS_BASE_URL']);
             if (empty($baseUrl)) {
-                throw new ConfigurationException("CANVAS_BASE_URL environment variable is empty");
+                throw new ConfigurationException('CANVAS_BASE_URL environment variable is empty');
             }
             self::setBaseUrl($baseUrl, $context);
         }
@@ -651,7 +666,7 @@ class Config
         if (isset($_ENV['CANVAS_API_VERSION'])) {
             $apiVersion = trim($_ENV['CANVAS_API_VERSION']);
             if (empty($apiVersion)) {
-                throw new ConfigurationException("CANVAS_API_VERSION environment variable is empty");
+                throw new ConfigurationException('CANVAS_API_VERSION environment variable is empty');
             }
             self::setApiVersion($apiVersion, $context);
         }
@@ -716,6 +731,7 @@ class Config
      * Debug the configuration for a specific context.
      *
      * @param string|null $context The context to debug. If null, uses active context.
+     *
      * @return array<string, mixed> Configuration details for debugging.
      */
     public static function debugConfig(?string $context = null): array
@@ -738,6 +754,7 @@ class Config
      * Validate the configuration for a specific context.
      *
      * @param string|null $context The context to validate. If null, uses active context.
+     *
      * @throws ConfigurationException If the configuration is invalid.
      */
     public static function validate(?string $context = null): void
@@ -775,6 +792,7 @@ class Config
      * Get the API key (alias for getAppKey for common naming).
      *
      * @param string|null $context The context to get the key from. If null, uses active context.
+     *
      * @return string|null The API key or null if not set.
      */
     public static function getApiKey(?string $context = null): ?string
@@ -803,6 +821,7 @@ class Config
      * Get the OAuth client ID.
      *
      * @param string|null $context The context to get the client ID from. If null, uses active context.
+     *
      * @return string|null The OAuth client ID or null if not set.
      */
     public static function getOAuthClientId(?string $context = null): ?string
@@ -841,6 +860,7 @@ class Config
      * Get the OAuth client secret.
      *
      * @param string|null $context The context to get the client secret from. If null, uses active context.
+     *
      * @return string|null The OAuth client secret or null if not set.
      */
     public static function getOAuthClientSecret(?string $context = null): ?string
@@ -879,6 +899,7 @@ class Config
      * Get the OAuth redirect URI.
      *
      * @param string|null $context The context to get the redirect URI from. If null, uses active context.
+     *
      * @return string|null The OAuth redirect URI or null if not set.
      */
     public static function getOAuthRedirectUri(?string $context = null): ?string
@@ -917,6 +938,7 @@ class Config
      * Get the OAuth access token.
      *
      * @param string|null $context The context to get the token from. If null, uses active context.
+     *
      * @return string|null The OAuth access token or null if not set.
      */
     public static function getOAuthToken(?string $context = null): ?string
@@ -955,6 +977,7 @@ class Config
      * Get the OAuth refresh token.
      *
      * @param string|null $context The context to get the refresh token from. If null, uses active context.
+     *
      * @return string|null The OAuth refresh token or null if not set.
      */
     public static function getOAuthRefreshToken(?string $context = null): ?string
@@ -993,6 +1016,7 @@ class Config
      * Get the OAuth token expiration timestamp.
      *
      * @param string|null $context The context to get the expiration from. If null, uses active context.
+     *
      * @return int|null The Unix timestamp when the token expires or null if not set.
      */
     public static function getOAuthExpiresAt(?string $context = null): ?int
@@ -1031,6 +1055,7 @@ class Config
      * Get the OAuth user ID.
      *
      * @param string|null $context The context to get the user ID from. If null, uses active context.
+     *
      * @return int|null The OAuth user ID or null if not set.
      */
     public static function getOAuthUserId(?string $context = null): ?int
@@ -1069,6 +1094,7 @@ class Config
      * Get the OAuth user name.
      *
      * @param string|null $context The context to get the user name from. If null, uses active context.
+     *
      * @return string|null The OAuth user name or null if not set.
      */
     public static function getOAuthUserName(?string $context = null): ?string
@@ -1107,6 +1133,7 @@ class Config
      * Get the OAuth scopes.
      *
      * @param string|null $context The context to get the scopes from. If null, uses active context.
+     *
      * @return array<string>|null The OAuth scopes or null if not set.
      */
     public static function getOAuthScopes(?string $context = null): ?array
@@ -1160,6 +1187,7 @@ class Config
      * Get the current authentication mode.
      *
      * @param string|null $context The context to get the auth mode from. If null, uses active context.
+     *
      * @return string The authentication mode ('api_key' or 'oauth').
      */
     public static function getAuthMode(?string $context = null): string
@@ -1181,6 +1209,7 @@ class Config
      * Check if the OAuth token is expired or about to expire.
      *
      * @param string|null $context The context to check. If null, uses active context.
+     *
      * @return bool True if token is expired or will expire within 5 minutes.
      */
     public static function isOAuthTokenExpired(?string $context = null): bool
@@ -1281,6 +1310,7 @@ class Config
      * Get the current masquerade user ID.
      *
      * @param string|null $context The context to get the masquerade user ID from. If null, uses active context.
+     *
      * @return int|null The user ID being masqueraded as, or null if not masquerading.
      */
     public static function getMasqueradeUserId(?string $context = null): ?int
@@ -1304,6 +1334,7 @@ class Config
      * Check if masquerading is currently active.
      *
      * @param string|null $context The context to check. If null, uses active context.
+     *
      * @return bool True if masquerading is active, false otherwise.
      */
     public static function isMasquerading(?string $context = null): bool

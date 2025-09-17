@@ -120,7 +120,7 @@ class UpdateSharedBrandConfigDTOTest extends TestCase
         // Assert
         $this->assertIsArray($result);
         $this->assertCount(1, $result);
-        
+
         $this->assertArrayHasKey('name', $result[0]);
         $this->assertEquals('shared_brand_config[name]', $result[0]['name']);
         $this->assertArrayHasKey('contents', $result[0]);
@@ -140,7 +140,7 @@ class UpdateSharedBrandConfigDTOTest extends TestCase
         // Assert
         $this->assertIsArray($result);
         $this->assertCount(1, $result);
-        
+
         $this->assertArrayHasKey('name', $result[0]);
         $this->assertEquals('shared_brand_config[brand_config_md5]', $result[0]['name']);
         $this->assertArrayHasKey('contents', $result[0]);
@@ -161,13 +161,13 @@ class UpdateSharedBrandConfigDTOTest extends TestCase
         // Assert
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
-        
+
         // Check name field
         $this->assertArrayHasKey('name', $result[0]);
         $this->assertEquals('shared_brand_config[name]', $result[0]['name']);
         $this->assertArrayHasKey('contents', $result[0]);
         $this->assertEquals('Both Fields', $result[0]['contents']);
-        
+
         // Check brand_config_md5 field
         $this->assertArrayHasKey('name', $result[1]);
         $this->assertEquals('shared_brand_config[brand_config_md5]', $result[1]['name']);

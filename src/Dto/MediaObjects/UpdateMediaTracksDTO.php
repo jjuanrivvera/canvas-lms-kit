@@ -24,7 +24,7 @@ class UpdateMediaTracksDTO extends AbstractBaseDto
         'captions',
         'descriptions',
         'chapters',
-        'metadata'
+        'metadata',
     ];
 
     /** @var array<array<string, mixed>> */
@@ -70,7 +70,7 @@ class UpdateMediaTracksDTO extends AbstractBaseDto
             }
 
             // If kind is provided, validate it's valid
-            if (isset($track['kind']) && !in_array($track['kind'], self::VALID_KINDS)) {
+            if (isset($track['kind']) && !in_array($track['kind'], self::VALID_KINDS, true)) {
                 throw new InvalidArgumentException(
                     "Track at index {$index} has invalid kind. Valid kinds are: " .
                     implode(', ', self::VALID_KINDS)
@@ -102,6 +102,7 @@ class UpdateMediaTracksDTO extends AbstractBaseDto
      * Create DTO from array
      *
      * @param array<array<string, mixed>> $data
+     *
      * @return self
      */
     public static function fromArray(array $data): self
@@ -118,6 +119,7 @@ class UpdateMediaTracksDTO extends AbstractBaseDto
      * @param string $locale The locale code
      * @param string|null $content The track content (SRT format)
      * @param string|null $kind The track kind
+     *
      * @return self
      */
     public function addTrack(string $locale, ?string $content = null, ?string $kind = null): self
@@ -146,6 +148,7 @@ class UpdateMediaTracksDTO extends AbstractBaseDto
     public function clearTracks(): self
     {
         $this->tracks = [];
+
         return $this;
     }
 }

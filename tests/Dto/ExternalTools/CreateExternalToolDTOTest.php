@@ -23,8 +23,8 @@ class CreateExternalToolDTOTest extends TestCase
                     'privacy_level' => 'public',
                     'consumer_key' => 'test_key',
                     'shared_secret' => 'test_secret',
-                    'url' => 'https://example.com/lti/launch'
-                ]
+                    'url' => 'https://example.com/lti/launch',
+                ],
             ],
             'full configuration data' => [
                 [
@@ -39,9 +39,9 @@ class CreateExternalToolDTOTest extends TestCase
                     'custom_fields' => ['key1' => 'value1', 'key2' => 'value2'],
                     'not_selectable' => false,
                     'oauth_compliant' => true,
-                    'unified_tool_id' => 'unified123'
-                ]
-            ]
+                    'unified_tool_id' => 'unified123',
+                ],
+            ],
         ];
     }
 
@@ -55,8 +55,8 @@ class CreateExternalToolDTOTest extends TestCase
                     'text' => 'Test Tool',
                     'visibility' => 'public',
                     'windowTarget' => '_self',
-                    'default' => 'enabled'
-                ]
+                    'default' => 'enabled',
+                ],
             ],
             'editor button' => [
                 'editor_button',
@@ -65,8 +65,8 @@ class CreateExternalToolDTOTest extends TestCase
                     'icon_url' => 'https://example.com/icon.png',
                     'selection_width' => '500',
                     'selection_height' => '400',
-                    'message_type' => 'ContentItemSelectionRequest'
-                ]
+                    'message_type' => 'ContentItemSelectionRequest',
+                ],
             ],
             'resource selection' => [
                 'resource_selection',
@@ -74,9 +74,9 @@ class CreateExternalToolDTOTest extends TestCase
                     'enabled' => true,
                     'icon_url' => 'https://example.com/resource_icon.png',
                     'selection_width' => '800',
-                    'selection_height' => '600'
-                ]
-            ]
+                    'selection_height' => '600',
+                ],
+            ],
         ];
     }
 
@@ -86,17 +86,17 @@ class CreateExternalToolDTOTest extends TestCase
     public function testConstructorWithValidData(array $data): void
     {
         $dto = new CreateExternalToolDTO($data);
-        
+
         $this->assertEquals($data['name'], $dto->getName());
         $this->assertEquals($data['privacy_level'], $dto->getPrivacyLevel());
         $this->assertEquals($data['consumer_key'], $dto->getConsumerKey());
         $this->assertEquals($data['shared_secret'], $dto->getSharedSecret());
         $this->assertEquals($data['url'], $dto->getUrl());
-        
+
         if (isset($data['description'])) {
             $this->assertEquals($data['description'], $dto->getDescription());
         }
-        
+
         if (isset($data['custom_fields'])) {
             $this->assertEquals($data['custom_fields'], $dto->getCustomFields());
         }
@@ -105,7 +105,7 @@ class CreateExternalToolDTOTest extends TestCase
     public function testEmptyConstructor(): void
     {
         $dto = new CreateExternalToolDTO([]);
-        
+
         $this->assertNull($dto->getName());
         $this->assertNull($dto->getPrivacyLevel());
         $this->assertNull($dto->getConsumerKey());
@@ -117,31 +117,31 @@ class CreateExternalToolDTOTest extends TestCase
     public function testBasicGettersAndSetters(): void
     {
         $dto = new CreateExternalToolDTO([]);
-        
+
         $dto->setName('Test Tool');
         $this->assertEquals('Test Tool', $dto->getName());
-        
+
         $dto->setDescription('Test Description');
         $this->assertEquals('Test Description', $dto->getDescription());
-        
+
         $dto->setPrivacyLevel('public');
         $this->assertEquals('public', $dto->getPrivacyLevel());
-        
+
         $dto->setConsumerKey('test_key');
         $this->assertEquals('test_key', $dto->getConsumerKey());
-        
+
         $dto->setSharedSecret('test_secret');
         $this->assertEquals('test_secret', $dto->getSharedSecret());
-        
+
         $dto->setUrl('https://example.com/lti/launch');
         $this->assertEquals('https://example.com/lti/launch', $dto->getUrl());
-        
+
         $dto->setDomain('example.com');
         $this->assertEquals('example.com', $dto->getDomain());
-        
+
         $dto->setIconUrl('https://example.com/icon.png');
         $this->assertEquals('https://example.com/icon.png', $dto->getIconUrl());
-        
+
         $dto->setText('Launch Tool');
         $this->assertEquals('Launch Tool', $dto->getText());
     }
@@ -150,10 +150,10 @@ class CreateExternalToolDTOTest extends TestCase
     {
         $dto = new CreateExternalToolDTO([]);
         $customFields = ['key1' => 'value1', 'key2' => 'value2'];
-        
+
         $dto->setCustomFields($customFields);
         $this->assertEquals($customFields, $dto->getCustomFields());
-        
+
         $dto->setCustomFields(null);
         $this->assertNull($dto->getCustomFields());
     }
@@ -161,13 +161,13 @@ class CreateExternalToolDTOTest extends TestCase
     public function testBooleanGettersAndSetters(): void
     {
         $dto = new CreateExternalToolDTO([]);
-        
+
         $dto->setIsRceFavorite(true);
         $this->assertTrue($dto->getIsRceFavorite());
-        
+
         $dto->setNotSelectable(false);
         $this->assertFalse($dto->getNotSelectable());
-        
+
         $dto->setOauthCompliant(true);
         $this->assertTrue($dto->getOauthCompliant());
     }
@@ -175,16 +175,16 @@ class CreateExternalToolDTOTest extends TestCase
     public function testConfigurationGettersAndSetters(): void
     {
         $dto = new CreateExternalToolDTO([]);
-        
+
         $dto->setConfigType('by_url');
         $this->assertEquals('by_url', $dto->getConfigType());
-        
+
         $dto->setConfigXml('<xml>test</xml>');
         $this->assertEquals('<xml>test</xml>', $dto->getConfigXml());
-        
+
         $dto->setConfigUrl('https://example.com/config.xml');
         $this->assertEquals('https://example.com/config.xml', $dto->getConfigUrl());
-        
+
         $dto->setUnifiedToolId('unified123');
         $this->assertEquals('unified123', $dto->getUnifiedToolId());
     }
@@ -197,7 +197,7 @@ class CreateExternalToolDTOTest extends TestCase
         $dto = new CreateExternalToolDTO([]);
         $getterMethod = 'get' . ucfirst(str_replace('_', '', ucwords($placementType, '_')));
         $setterMethod = 'set' . ucfirst(str_replace('_', '', ucwords($placementType, '_')));
-        
+
         $dto->$setterMethod($config);
         $this->assertEquals($config, $dto->$getterMethod());
     }
@@ -205,15 +205,15 @@ class CreateExternalToolDTOTest extends TestCase
     public function testAccountNavigationHelperMethods(): void
     {
         $dto = new CreateExternalToolDTO([]);
-        
+
         $dto->setAccountNavigationUrl('https://example.com/account');
         $accountNav = $dto->getAccountNavigation();
         $this->assertEquals('https://example.com/account', $accountNav['url']);
-        
+
         $dto->setAccountNavigationEnabled(true);
         $accountNav = $dto->getAccountNavigation();
         $this->assertTrue($accountNav['enabled']);
-        
+
         $dto->setAccountNavigationText('Account Tool');
         $accountNav = $dto->getAccountNavigation();
         $this->assertEquals('Account Tool', $accountNav['text']);
@@ -222,23 +222,23 @@ class CreateExternalToolDTOTest extends TestCase
     public function testCourseNavigationHelperMethods(): void
     {
         $dto = new CreateExternalToolDTO([]);
-        
+
         $dto->setCourseNavigationEnabled(true);
         $courseNav = $dto->getCourseNavigation();
         $this->assertTrue($courseNav['enabled']);
-        
+
         $dto->setCourseNavigationText('Course Tool');
         $courseNav = $dto->getCourseNavigation();
         $this->assertEquals('Course Tool', $courseNav['text']);
-        
+
         $dto->setCourseNavigationVisibility('public');
         $courseNav = $dto->getCourseNavigation();
         $this->assertEquals('public', $courseNav['visibility']);
-        
+
         $dto->setCourseNavigationWindowTarget('_blank');
         $courseNav = $dto->getCourseNavigation();
         $this->assertEquals('_blank', $courseNav['windowTarget']);
-        
+
         $dto->setCourseNavigationDefault('enabled');
         $courseNav = $dto->getCourseNavigation();
         $this->assertEquals('enabled', $courseNav['default']);
@@ -247,27 +247,27 @@ class CreateExternalToolDTOTest extends TestCase
     public function testEditorButtonHelperMethods(): void
     {
         $dto = new CreateExternalToolDTO([]);
-        
+
         $dto->setEditorButtonUrl('https://example.com/editor');
         $editorButton = $dto->getEditorButton();
         $this->assertEquals('https://example.com/editor', $editorButton['url']);
-        
+
         $dto->setEditorButtonEnabled(true);
         $editorButton = $dto->getEditorButton();
         $this->assertTrue($editorButton['enabled']);
-        
+
         $dto->setEditorButtonIconUrl('https://example.com/icon.png');
         $editorButton = $dto->getEditorButton();
         $this->assertEquals('https://example.com/icon.png', $editorButton['icon_url']);
-        
+
         $dto->setEditorButtonSelectionWidth('500');
         $editorButton = $dto->getEditorButton();
         $this->assertEquals('500', $editorButton['selection_width']);
-        
+
         $dto->setEditorButtonSelectionHeight('400');
         $editorButton = $dto->getEditorButton();
         $this->assertEquals('400', $editorButton['selection_height']);
-        
+
         $dto->setEditorButtonMessageType('ContentItemSelectionRequest');
         $editorButton = $dto->getEditorButton();
         $this->assertEquals('ContentItemSelectionRequest', $editorButton['message_type']);
@@ -276,23 +276,23 @@ class CreateExternalToolDTOTest extends TestCase
     public function testResourceSelectionHelperMethods(): void
     {
         $dto = new CreateExternalToolDTO([]);
-        
+
         $dto->setResourceSelectionUrl('https://example.com/resource');
         $resourceSelection = $dto->getResourceSelection();
         $this->assertEquals('https://example.com/resource', $resourceSelection['url']);
-        
+
         $dto->setResourceSelectionEnabled(true);
         $resourceSelection = $dto->getResourceSelection();
         $this->assertTrue($resourceSelection['enabled']);
-        
+
         $dto->setResourceSelectionIconUrl('https://example.com/resource_icon.png');
         $resourceSelection = $dto->getResourceSelection();
         $this->assertEquals('https://example.com/resource_icon.png', $resourceSelection['icon_url']);
-        
+
         $dto->setResourceSelectionWidth('800');
         $resourceSelection = $dto->getResourceSelection();
         $this->assertEquals('800', $resourceSelection['selection_width']);
-        
+
         $dto->setResourceSelectionHeight('600');
         $resourceSelection = $dto->getResourceSelection();
         $this->assertEquals('600', $resourceSelection['selection_height']);
@@ -306,16 +306,16 @@ class CreateExternalToolDTOTest extends TestCase
             'consumer_key' => 'test_key',
             'shared_secret' => 'test_secret',
             'url' => 'https://example.com/lti/launch',
-            'custom_fields' => ['key1' => 'value1']
+            'custom_fields' => ['key1' => 'value1'],
         ]);
-        
+
         $dto->setCourseNavigationEnabled(true);
         $dto->setCourseNavigationText('Test Tool');
-        
+
         $apiArray = $dto->toApiArray();
-        
+
         $this->assertIsArray($apiArray);
-        
+
         foreach ($apiArray as $item) {
             $this->assertArrayHasKey('name', $item);
             $this->assertArrayHasKey('contents', $item);
@@ -329,12 +329,12 @@ class CreateExternalToolDTOTest extends TestCase
             'privacy_level' => 'public',
             'consumer_key' => 'test_key',
             'shared_secret' => 'test_secret',
-            'url' => 'https://example.com/lti/launch'
+            'url' => 'https://example.com/lti/launch',
         ];
-        
+
         $dto = new CreateExternalToolDTO($data);
         $array = $dto->toArray();
-        
+
         $this->assertIsArray($array);
         $this->assertEquals($data['name'], $array['name']);
         $this->assertEquals($data['privacy_level'], $array['privacyLevel']);
@@ -357,7 +357,7 @@ class CreateExternalToolDTOTest extends TestCase
             ['not_selectable', true, 'notSelectable'],
             ['oauth_compliant', false, 'oauthCompliant'],
             ['unified_tool_id', 'unified123', 'unifiedToolId'],
-            ['is_rce_favorite', true, 'isRceFavorite']
+            ['is_rce_favorite', true, 'isRceFavorite'],
         ];
     }
 
@@ -368,7 +368,7 @@ class CreateExternalToolDTOTest extends TestCase
     {
         $dto = new CreateExternalToolDTO([$snakeCase => $value]);
         $array = $dto->toArray();
-        
+
         $this->assertArrayHasKey($camelCase, $array);
         $this->assertEquals($value, $array[$camelCase]);
     }
@@ -380,17 +380,17 @@ class CreateExternalToolDTOTest extends TestCase
             'text' => 'My Tool',
             'visibility' => 'members',
             'windowTarget' => '_blank',
-            'default' => 'disabled'
+            'default' => 'disabled',
         ];
-        
+
         $editorButtonConfig = [
             'enabled' => true,
             'icon_url' => 'https://example.com/icon.png',
             'selection_width' => '500',
             'selection_height' => '400',
-            'message_type' => 'ContentItemSelectionRequest'
+            'message_type' => 'ContentItemSelectionRequest',
         ];
-        
+
         $dto = new CreateExternalToolDTO([
             'name' => 'Complex Tool',
             'privacy_level' => 'email_only',
@@ -398,23 +398,23 @@ class CreateExternalToolDTOTest extends TestCase
             'shared_secret' => 'complex_secret',
             'url' => 'https://example.com/complex',
             'course_navigation' => $courseNavConfig,
-            'editor_button' => $editorButtonConfig
+            'editor_button' => $editorButtonConfig,
         ]);
-        
+
         $this->assertEquals($courseNavConfig, $dto->getCourseNavigation());
         $this->assertEquals($editorButtonConfig, $dto->getEditorButton());
-        
+
         $apiArray = $dto->toApiArray();
         $this->assertIsArray($apiArray);
-        
+
         $foundCourseNav = false;
         $foundEditorButton = false;
-        
+
         // Note: The AbstractBaseDto handles nested arrays differently than expected
         // For now, just verify that course_navigation and editor_button arrays are included
         $foundCourseNav = false;
         $foundEditorButton = false;
-        
+
         foreach ($apiArray as $item) {
             if (str_contains($item['name'], 'course_navigation')) {
                 $foundCourseNav = true;
@@ -423,13 +423,13 @@ class CreateExternalToolDTOTest extends TestCase
                 $foundEditorButton = true;
             }
         }
-        
+
         // Test that nested placement configurations are properly formatted
         $foundCourseNavEnabled = false;
         $foundCourseNavText = false;
         $foundEditorButtonEnabled = false;
         $foundEditorButtonIcon = false;
-        
+
         foreach ($apiArray as $item) {
             if ($item['name'] === 'external_tool[course_navigation][enabled]') {
                 $foundCourseNavEnabled = true;
@@ -448,7 +448,7 @@ class CreateExternalToolDTOTest extends TestCase
                 $this->assertEquals('https://example.com/icon.png', $item['contents']);
             }
         }
-        
+
         $this->assertTrue($foundCourseNavEnabled, 'Course navigation enabled should be in API array');
         $this->assertTrue($foundCourseNavText, 'Course navigation text should be in API array');
         $this->assertTrue($foundEditorButtonEnabled, 'Editor button enabled should be in API array');

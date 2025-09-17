@@ -20,9 +20,13 @@ use CanvasLMS\Dto\Bookmarks\UpdateBookmarkDTO;
 class Bookmark extends AbstractBaseApi
 {
     public ?int $id = null;
+
     public ?string $name = null;
+
     public ?string $url = null;
+
     public ?int $position = null;
+
     public ?string $data = null;
 
     /**
@@ -49,6 +53,7 @@ class Bookmark extends AbstractBaseApi
      * Create a new bookmark
      *
      * @param array<string, mixed>|CreateBookmarkDTO $data Bookmark data
+     *
      * @return self
      */
     public static function create(array|CreateBookmarkDTO $data): self
@@ -63,6 +68,7 @@ class Bookmark extends AbstractBaseApi
         );
 
         $bookmarkData = self::parseJsonResponse($response);
+
         return new self($bookmarkData);
     }
 
@@ -70,6 +76,7 @@ class Bookmark extends AbstractBaseApi
      * Fetch all bookmarks (alias for get)
      *
      * @param array<string, mixed> $params Query parameters
+     *
      * @return array<self>
      */
     public static function get(array $params = []): array
@@ -81,6 +88,7 @@ class Bookmark extends AbstractBaseApi
      * Get paginated results with metadata
      *
      * @param array<string, mixed> $params Query parameters
+     *
      * @return \CanvasLMS\Pagination\PaginationResult
      */
     public static function paginate(array $params = []): \CanvasLMS\Pagination\PaginationResult
@@ -92,6 +100,7 @@ class Bookmark extends AbstractBaseApi
      * Get all pages of results
      *
      * @param array<string, mixed> $params Query parameters
+     *
      * @return array<self>
      */
     public static function all(array $params = []): array
@@ -103,6 +112,7 @@ class Bookmark extends AbstractBaseApi
      * Find a bookmark by ID
      *
      * @param int $id Bookmark ID
+     *
      * @return self
      */
     public static function find(int $id, array $params = []): self
@@ -112,6 +122,7 @@ class Bookmark extends AbstractBaseApi
         );
 
         $bookmarkData = self::parseJsonResponse($response);
+
         return new self($bookmarkData);
     }
 
@@ -120,6 +131,7 @@ class Bookmark extends AbstractBaseApi
      *
      * @param int $id Bookmark ID
      * @param array<string, mixed>|UpdateBookmarkDTO $data Update data
+     *
      * @return self
      */
     public static function update(int $id, array|UpdateBookmarkDTO $data): self
@@ -134,6 +146,7 @@ class Bookmark extends AbstractBaseApi
         );
 
         $bookmarkData = self::parseJsonResponse($response);
+
         return new self($bookmarkData);
     }
 
@@ -151,7 +164,7 @@ class Bookmark extends AbstractBaseApi
             'data' => $this->data,
         ];
 
-        $data = array_filter($data, fn($value) => $value !== null);
+        $data = array_filter($data, fn ($value) => $value !== null);
 
         if ($this->id === null) {
             $dto = CreateBookmarkDTO::fromArray($data);

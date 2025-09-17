@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Dto\Courses;
 
-use DateTime;
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
+use DateTime;
 
 class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
 {
@@ -237,6 +239,7 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
     public ?bool $template = null;
 
     // Canvas for Elementary Properties
+
     /**
      * @var bool|null Sets the course as a homeroom course.
      * The setting takes effect only when the course is associated with a Canvas for Elementary-enabled account.
@@ -300,6 +303,7 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Convert the DTO to an array for API requests
+     *
      * @return mixed[]
      */
     public function toApiArray(): array
@@ -320,8 +324,8 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
 
             // Rename keys to this format course[{key}]
             $modifiedProperties[] = [
-                "name" => 'course[' . str_to_snake_case($key) . ']',
-                "contents" => $value
+                'name' => 'course[' . str_to_snake_case($key) . ']',
+                'contents' => $value,
             ];
         }
 
@@ -1028,6 +1032,7 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * @param string|null $courseColor Hex color code (e.g., '#ff0000' or 'ff0000')
+     *
      * @throws \InvalidArgumentException If color format is invalid
      */
     public function setCourseColor(?string $courseColor): void

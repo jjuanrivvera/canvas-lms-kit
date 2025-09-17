@@ -31,6 +31,7 @@ class OverrideTarget
 
     /**
      * Constructor
+     *
      * @param mixed[] $data
      */
     public function __construct(array $data = [])
@@ -122,6 +123,7 @@ class OverrideTarget
 
     /**
      * Convert to array
+     *
      * @return mixed[]
      */
     public function toArray(): array

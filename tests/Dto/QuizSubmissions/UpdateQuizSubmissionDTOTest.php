@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Dto\QuizSubmissions;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\QuizSubmissions\UpdateQuizSubmissionDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\QuizSubmissions\UpdateQuizSubmissionDTO
@@ -29,12 +29,12 @@ class UpdateQuizSubmissionDTOTest extends TestCase
             'attempt' => 2,
             'fudge_points' => 5.5,
             'quiz_submissions' => [
-                ['attempt' => 2, 'fudge_points' => 5.5]
+                ['attempt' => 2, 'fudge_points' => 5.5],
             ],
             'questions' => [
-                'question_1' => ['score' => 10.0, 'comment' => 'Perfect answer']
+                'question_1' => ['score' => 10.0, 'comment' => 'Perfect answer'],
             ],
-            'validation_token' => 'abc123xyz'
+            'validation_token' => 'abc123xyz',
         ];
 
         $dto = new UpdateQuizSubmissionDTO($data);
@@ -57,13 +57,13 @@ class UpdateQuizSubmissionDTOTest extends TestCase
         $this->assertEquals(2.5, $dto->getFudgePoints());
 
         $quizSubmissions = [
-            ['attempt' => 3, 'fudge_points' => 2.5]
+            ['attempt' => 3, 'fudge_points' => 2.5],
         ];
         $dto->setQuizSubmissions($quizSubmissions);
         $this->assertEquals($quizSubmissions, $dto->getQuizSubmissions());
 
         $questions = [
-            'question_2' => ['score' => 7.5, 'comment' => 'Good work']
+            'question_2' => ['score' => 7.5, 'comment' => 'Good work'],
         ];
         $dto->setQuestions($questions);
         $this->assertEquals($questions, $dto->getQuestions());
@@ -93,7 +93,7 @@ class UpdateQuizSubmissionDTOTest extends TestCase
         $dto = new UpdateQuizSubmissionDTO([
             'attempt' => 2,
             'fudge_points' => 3.0,
-            'validation_token' => 'abc123'
+            'validation_token' => 'abc123',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -124,7 +124,7 @@ class UpdateQuizSubmissionDTOTest extends TestCase
             'attempt' => 2,
             'fudge_points' => null,
             'validation_token' => 'abc123',
-            'questions' => null
+            'questions' => null,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -140,11 +140,11 @@ class UpdateQuizSubmissionDTOTest extends TestCase
     {
         $quizSubmissions = [
             ['attempt' => 1, 'fudge_points' => 2.0],
-            ['attempt' => 2, 'fudge_points' => 3.0]
+            ['attempt' => 2, 'fudge_points' => 3.0],
         ];
 
         $dto = new UpdateQuizSubmissionDTO([
-            'quiz_submissions' => $quizSubmissions
+            'quiz_submissions' => $quizSubmissions,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -153,7 +153,7 @@ class UpdateQuizSubmissionDTOTest extends TestCase
         $this->assertContains('quiz_submission[quiz_submissions][]', $names);
 
         // Should have multiple entries for the array
-        $quizSubmissionEntries = array_filter($apiArray, function($entry) {
+        $quizSubmissionEntries = array_filter($apiArray, function ($entry) {
             return $entry['name'] === 'quiz_submission[quiz_submissions][]';
         });
 
@@ -164,7 +164,7 @@ class UpdateQuizSubmissionDTOTest extends TestCase
     {
         $dto = new UpdateQuizSubmissionDTO([
             'attempt' => 0,
-            'fudge_points' => 0.0
+            'fudge_points' => 0.0,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -181,7 +181,7 @@ class UpdateQuizSubmissionDTOTest extends TestCase
     public function testNegativeValues(): void
     {
         $dto = new UpdateQuizSubmissionDTO([
-            'fudge_points' => -2.5
+            'fudge_points' => -2.5,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -198,7 +198,7 @@ class UpdateQuizSubmissionDTOTest extends TestCase
     {
         // Test that we can update just a few fields
         $dto = new UpdateQuizSubmissionDTO([
-            'fudge_points' => 1.5
+            'fudge_points' => 1.5,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -219,16 +219,16 @@ class UpdateQuizSubmissionDTOTest extends TestCase
         $questions = [
             'question_1' => [
                 'score' => 8.5,
-                'comment' => 'Good answer with minor issues'
+                'comment' => 'Good answer with minor issues',
             ],
             'question_2' => [
                 'score' => 10.0,
-                'comment' => 'Perfect!'
-            ]
+                'comment' => 'Perfect!',
+            ],
         ];
 
         $dto = new UpdateQuizSubmissionDTO([
-            'questions' => $questions
+            'questions' => $questions,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -237,7 +237,7 @@ class UpdateQuizSubmissionDTOTest extends TestCase
         $this->assertContains('quiz_submission[questions][]', $names);
 
         // Should have multiple entries for the questions array
-        $questionEntries = array_filter($apiArray, function($entry) {
+        $questionEntries = array_filter($apiArray, function ($entry) {
             return $entry['name'] === 'quiz_submission[questions][]';
         });
 
@@ -248,13 +248,13 @@ class UpdateQuizSubmissionDTOTest extends TestCase
     {
         $dto = new UpdateQuizSubmissionDTO([
             'quiz_submissions' => [],
-            'questions' => []
+            'questions' => [],
         ]);
 
         $apiArray = $dto->toApiArray();
 
         $names = array_column($apiArray, 'name');
-        
+
         // Empty arrays should not generate any entries
         $this->assertNotContains('quiz_submission[quiz_submissions][]', $names);
         $this->assertNotContains('quiz_submission[questions][]', $names);

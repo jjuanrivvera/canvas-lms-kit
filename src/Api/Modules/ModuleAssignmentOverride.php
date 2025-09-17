@@ -22,18 +22,21 @@ class ModuleAssignmentOverride
 {
     /**
      * The ID of the assignment override
+     *
      * @var int
      */
     public int $id;
 
     /**
      * The ID of the module the override applies to
+     *
      * @var int
      */
     public int $contextModuleId;
 
     /**
      * The title of the override
+     *
      * @var string
      */
     public string $title;
@@ -41,6 +44,7 @@ class ModuleAssignmentOverride
     /**
      * An array of the override's target students
      * (present only if the override targets an adhoc set of students)
+     *
      * @var mixed[]|null
      */
     public ?array $students;
@@ -48,6 +52,7 @@ class ModuleAssignmentOverride
     /**
      * The override's target section
      * (present only if the override targets a section)
+     *
      * @var mixed[]|null
      */
     public ?array $courseSection;
@@ -55,12 +60,14 @@ class ModuleAssignmentOverride
     /**
      * The override's target group
      * (present only if the override targets a group and Differentiation Tags are enabled)
+     *
      * @var mixed[]|null
      */
     public ?array $group;
 
     /**
      * Constructor
+     *
      * @param mixed[] $data
      */
     public function __construct(array $data = [])

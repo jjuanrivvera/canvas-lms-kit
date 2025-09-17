@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Tests;
 
 use CanvasLMS\Config;
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Exceptions\ConfigurationException;
+use PHPUnit\Framework\TestCase;
 
 class ConfigTest extends TestCase
 {
@@ -16,10 +18,10 @@ class ConfigTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Save original context
         $this->originalContext = Config::getContext();
-        
+
         // Reset to default context for each test
         Config::setContext('default');
         Config::resetContext('default');
@@ -33,10 +35,10 @@ class ConfigTest extends TestCase
                 Config::resetContext($context);
             }
         }
-        
+
         // Restore original context
         Config::setContext($this->originalContext);
-        
+
         parent::tearDown();
     }
 
@@ -116,7 +118,7 @@ class ConfigTest extends TestCase
         Config::setApiKey('key3', 'context3');
 
         $contexts = Config::getAllContexts();
-        
+
         $this->assertContains('context1', $contexts);
         $this->assertContains('context2', $contexts);
         $this->assertContains('context3', $contexts);
@@ -257,7 +259,7 @@ class ConfigTest extends TestCase
     public function testMultiTenantScenario(): void
     {
         // Simulate a real multi-tenant scenario
-        
+
         // Production tenant
         Config::setContext('production');
         Config::setApiKey('prod-key');
@@ -303,14 +305,14 @@ class ConfigTest extends TestCase
 
         // Enable masquerading
         Config::asUser(12345);
-        
+
         // Check that masquerading is active
         $this->assertEquals(12345, Config::getMasqueradeUserId());
         $this->assertTrue(Config::isMasquerading());
 
         // Stop masquerading
         Config::stopMasquerading();
-        
+
         // Check that masquerading is disabled
         $this->assertNull(Config::getMasqueradeUserId());
         $this->assertFalse(Config::isMasquerading());
@@ -321,34 +323,34 @@ class ConfigTest extends TestCase
         // Set up multiple contexts
         Config::setContext('production');
         Config::asUser(11111, 'production');
-        
+
         Config::setContext('staging');
         Config::asUser(22222, 'staging');
-        
+
         // Check production context
         $this->assertEquals(11111, Config::getMasqueradeUserId('production'));
         $this->assertTrue(Config::isMasquerading('production'));
-        
+
         // Check staging context (current)
         $this->assertEquals(22222, Config::getMasqueradeUserId('staging'));
         $this->assertTrue(Config::isMasquerading('staging'));
-        
+
         // Switch contexts and verify isolation
         Config::setContext('production');
         $this->assertEquals(11111, Config::getMasqueradeUserId());
-        
+
         Config::setContext('staging');
         $this->assertEquals(22222, Config::getMasqueradeUserId());
-        
+
         // Stop masquerading in staging
         Config::stopMasquerading('staging');
         $this->assertNull(Config::getMasqueradeUserId('staging'));
         $this->assertFalse(Config::isMasquerading('staging'));
-        
+
         // Production should still have masquerading
         $this->assertEquals(11111, Config::getMasqueradeUserId('production'));
         $this->assertTrue(Config::isMasquerading('production'));
-        
+
         // Clean up
         Config::stopMasquerading('production');
         Config::resetContext('production');
@@ -360,21 +362,21 @@ class ConfigTest extends TestCase
         // Set masquerading in default context
         Config::setContext('default');
         Config::asUser(33333);
-        
+
         // Create new context
         Config::setContext('new_context');
-        
+
         // New context should not have masquerading
         $this->assertNull(Config::getMasqueradeUserId());
         $this->assertFalse(Config::isMasquerading());
-        
+
         // Switch back to default
         Config::setContext('default');
-        
+
         // Masquerading should still be active in default
         $this->assertEquals(33333, Config::getMasqueradeUserId());
         $this->assertTrue(Config::isMasquerading());
-        
+
         // Clean up
         Config::stopMasquerading();
         Config::resetContext('new_context');
@@ -386,10 +388,10 @@ class ConfigTest extends TestCase
         Config::setContext('test');
         Config::asUser(44444, 'test');
         $this->assertTrue(Config::isMasquerading('test'));
-        
+
         // Reset the context
         Config::resetContext('test');
-        
+
         // Masquerading should be cleared
         Config::setContext('test');
         $this->assertNull(Config::getMasqueradeUserId('test'));
@@ -510,7 +512,7 @@ class ConfigTest extends TestCase
 
         // Switch back to sync-test - legacy values should sync
         Config::setContext('sync-test');
-        
+
         // Verify legacy values are synchronized
         $this->assertEquals('sync-key', Config::getApiKey());
         $this->assertEquals('https://sync.canvas.com/', Config::getBaseUrl());
@@ -543,7 +545,7 @@ class ConfigTest extends TestCase
         // Test setting a custom logger
         $mockLogger = $this->createMock(\Psr\Log\LoggerInterface::class);
         Config::setLogger($mockLogger);
-        
+
         $retrievedLogger = Config::getLogger();
         $this->assertSame($mockLogger, $retrievedLogger);
         $this->assertTrue(Config::hasLogger());
@@ -554,16 +556,16 @@ class ConfigTest extends TestCase
         // Set logger for default context
         $defaultLogger = $this->createMock(\Psr\Log\LoggerInterface::class);
         Config::setLogger($defaultLogger);
-        
+
         // Set logger for test context
         Config::setContext('test');
         $testLogger = $this->createMock(\Psr\Log\LoggerInterface::class);
         Config::setLogger($testLogger);
-        
+
         // Verify loggers are isolated per context
         $this->assertSame($testLogger, Config::getLogger('test'));
         $this->assertSame($defaultLogger, Config::getLogger('default'));
-        
+
         // Context without logger returns NullLogger
         $this->assertInstanceOf(\Psr\Log\NullLogger::class, Config::getLogger('new-context'));
         $this->assertFalse(Config::hasLogger('new-context'));
@@ -575,7 +577,7 @@ class ConfigTest extends TestCase
         $logger = $this->createMock(\Psr\Log\LoggerInterface::class);
         Config::setLogger($logger, 'test');
         $this->assertTrue(Config::hasLogger('test'));
-        
+
         // Reset context should clear logger
         Config::resetContext('test');
         $this->assertFalse(Config::hasLogger('test'));
@@ -587,16 +589,16 @@ class ConfigTest extends TestCase
         // Set logger for default context
         $defaultLogger = $this->createMock(\Psr\Log\LoggerInterface::class);
         Config::setLogger($defaultLogger);
-        
+
         // Create and switch to new context with different logger
         Config::setContext('production');
         $productionLogger = $this->createMock(\Psr\Log\LoggerInterface::class);
         Config::setLogger($productionLogger);
-        
+
         // Switch back to default - logger should be restored
         Config::setContext('default');
         $this->assertSame($defaultLogger, Config::getLogger());
-        
+
         // Switch to production - logger should be production logger
         Config::setContext('production');
         $this->assertSame($productionLogger, Config::getLogger());

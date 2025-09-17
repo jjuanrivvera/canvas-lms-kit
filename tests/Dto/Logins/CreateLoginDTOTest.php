@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Logins;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Logins\CreateLoginDTO;
+use PHPUnit\Framework\TestCase;
 
 class CreateLoginDTOTest extends TestCase
 {
@@ -17,7 +19,7 @@ class CreateLoginDTOTest extends TestCase
             'uniqueId' => 'user@example.com',
             'password' => 'secret123',
             'authenticationProviderId' => 'facebook',
-            'declaredUserType' => 'student'
+            'declaredUserType' => 'student',
         ];
 
         $dto = new CreateLoginDTO($data);
@@ -28,7 +30,7 @@ class CreateLoginDTOTest extends TestCase
             ['name' => 'login[unique_id]', 'contents' => 'user@example.com'],
             ['name' => 'login[password]', 'contents' => 'secret123'],
             ['name' => 'login[authentication_provider_id]', 'contents' => 'facebook'],
-            ['name' => 'login[declared_user_type]', 'contents' => 'student']
+            ['name' => 'login[declared_user_type]', 'contents' => 'student'],
         ];
 
         $this->assertEquals($expected, $apiArray);
@@ -42,7 +44,7 @@ class CreateLoginDTOTest extends TestCase
         $data = [
             'existingUserId' => 'existing123',
             'trustedAccount' => 'example.edu',
-            'uniqueId' => 'user@example.com'
+            'uniqueId' => 'user@example.com',
         ];
 
         $dto = new CreateLoginDTO($data);
@@ -51,7 +53,7 @@ class CreateLoginDTOTest extends TestCase
         $expected = [
             ['name' => 'user[existing_user_id]', 'contents' => 'existing123'],
             ['name' => 'user[trusted_account]', 'contents' => 'example.edu'],
-            ['name' => 'login[unique_id]', 'contents' => 'user@example.com']
+            ['name' => 'login[unique_id]', 'contents' => 'user@example.com'],
         ];
 
         $this->assertEquals($expected, $apiArray);
@@ -78,7 +80,7 @@ class CreateLoginDTOTest extends TestCase
         $data = [
             'userId' => 123,
             'existingUserId' => 'existing123',
-            'uniqueId' => 'user@example.com'
+            'uniqueId' => 'user@example.com',
         ];
 
         $dto = new CreateLoginDTO($data);
@@ -96,7 +98,7 @@ class CreateLoginDTOTest extends TestCase
     {
         $data = [
             'existingUserId' => 'existing123',
-            'uniqueId' => 'user@example.com'
+            'uniqueId' => 'user@example.com',
         ];
 
         $dto = new CreateLoginDTO($data);
@@ -128,7 +130,7 @@ class CreateLoginDTOTest extends TestCase
         $data = [
             'userId' => 123,
             'uniqueId' => 'user@example.com',
-            'declaredUserType' => 'invalid_type'
+            'declaredUserType' => 'invalid_type',
         ];
 
         $dto = new CreateLoginDTO($data);
@@ -150,7 +152,7 @@ class CreateLoginDTOTest extends TestCase
             $data = [
                 'userId' => 123,
                 'uniqueId' => 'user@example.com',
-                'declaredUserType' => $type
+                'declaredUserType' => $type,
             ];
 
             $dto = new CreateLoginDTO($data);
@@ -206,7 +208,7 @@ class CreateLoginDTOTest extends TestCase
             'uniqueId' => 'user@example.com',
             'password' => '',
             'sisUserId' => null,
-            'authenticationProviderId' => 'facebook'
+            'authenticationProviderId' => 'facebook',
         ];
 
         $dto = new CreateLoginDTO($data);
@@ -215,7 +217,7 @@ class CreateLoginDTOTest extends TestCase
         $expected = [
             ['name' => 'user[id]', 'contents' => '123'],
             ['name' => 'login[unique_id]', 'contents' => 'user@example.com'],
-            ['name' => 'login[authentication_provider_id]', 'contents' => 'facebook']
+            ['name' => 'login[authentication_provider_id]', 'contents' => 'facebook'],
         ];
 
         $this->assertEquals($expected, $apiArray);

@@ -14,8 +14,8 @@ class CreateContentMigrationDTOTest extends TestCase
         $dto = new CreateContentMigrationDTO([
             'migration_type' => 'course_copy_importer',
             'settings' => [
-                'source_course_id' => 123
-            ]
+                'source_course_id' => 123,
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -31,8 +31,8 @@ class CreateContentMigrationDTOTest extends TestCase
             'pre_attachment' => [
                 'name' => 'course.imscc',
                 'size' => 12345,
-                'content_type' => 'application/zip'
-            ]
+                'content_type' => 'application/zip',
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -54,9 +54,9 @@ class CreateContentMigrationDTOTest extends TestCase
                 'new_start_date' => '2024-09-01',
                 'day_substitutions' => [
                     '1' => '2',
-                    '3' => '4'
-                ]
-            ]
+                    '3' => '4',
+                ],
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -76,8 +76,8 @@ class CreateContentMigrationDTOTest extends TestCase
             'selective_import' => true,
             'select' => [
                 'assignments' => [1, 2, 3],
-                'quizzes' => ['id_abc', 'id_def']
-            ]
+                'quizzes' => ['id_abc', 'id_def'],
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -102,34 +102,34 @@ class CreateContentMigrationDTOTest extends TestCase
 
         // Course copy without source_course_id
         $dto = new CreateContentMigrationDTO([
-            'migration_type' => 'course_copy_importer'
+            'migration_type' => 'course_copy_importer',
         ]);
         $this->assertFalse($dto->validate());
 
         // Valid course copy
         $dto = new CreateContentMigrationDTO([
             'migration_type' => 'course_copy_importer',
-            'settings' => ['source_course_id' => 123]
+            'settings' => ['source_course_id' => 123],
         ]);
         $this->assertTrue($dto->validate());
 
         // File-based migration without file info
         $dto = new CreateContentMigrationDTO([
-            'migration_type' => 'common_cartridge_importer'
+            'migration_type' => 'common_cartridge_importer',
         ]);
         $this->assertFalse($dto->validate());
 
         // File-based migration with pre_attachment
         $dto = new CreateContentMigrationDTO([
             'migration_type' => 'common_cartridge_importer',
-            'pre_attachment' => ['name' => 'test.imscc']
+            'pre_attachment' => ['name' => 'test.imscc'],
         ]);
         $this->assertTrue($dto->validate());
 
         // File-based migration with file_url
         $dto = new CreateContentMigrationDTO([
             'migration_type' => 'zip_file_importer',
-            'settings' => ['file_url' => 'https://example.com/file.zip']
+            'settings' => ['file_url' => 'https://example.com/file.zip'],
         ]);
         $this->assertTrue($dto->validate());
     }
@@ -137,7 +137,7 @@ class CreateContentMigrationDTOTest extends TestCase
     public function testHelperMethods(): void
     {
         $dto = new CreateContentMigrationDTO();
-        
+
         // Test file upload setter
         $dto->setFileUpload('test.zip', 12345, 'application/zip');
         $preAttachment = $dto->getPreAttachment();
@@ -177,8 +177,8 @@ class CreateContentMigrationDTOTest extends TestCase
                 'overwrite_quizzes' => true,
                 'question_bank_id' => 456,
                 'insert_into_module_id' => 789,
-                'importer_skips' => ['all_course_settings', 'visibility_settings']
-            ]
+                'importer_skips' => ['all_course_settings', 'visibility_settings'],
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();

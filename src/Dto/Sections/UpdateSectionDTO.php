@@ -90,8 +90,8 @@ class UpdateSectionDTO extends AbstractBaseDto implements DTOInterface
             // Handle DateTime objects
             if ($value instanceof \DateTimeInterface) {
                 $modifiedProperties[] = [
-                    "name" => $propertyName,
-                    "contents" => $value->format(\DateTimeInterface::ATOM)
+                    'name' => $propertyName,
+                    'contents' => $value->format(\DateTimeInterface::ATOM),
                 ];
                 continue;
             }
@@ -100,8 +100,8 @@ class UpdateSectionDTO extends AbstractBaseDto implements DTOInterface
             if (is_array($value)) {
                 foreach ($value as $arrayValue) {
                     $modifiedProperties[] = [
-                        "name" => $propertyName . '[]',
-                        "contents" => $arrayValue
+                        'name' => $propertyName . '[]',
+                        'contents' => $arrayValue,
                     ];
                 }
                 continue;
@@ -109,16 +109,16 @@ class UpdateSectionDTO extends AbstractBaseDto implements DTOInterface
 
             // Handle regular values
             $modifiedProperties[] = [
-                "name" => $propertyName,
-                "contents" => $value
+                'name' => $propertyName,
+                'contents' => $value,
             ];
         }
 
         // Handle override_sis_stickiness separately (not part of course_section)
         if ($this->overrideSisStickiness !== null) {
             $modifiedProperties[] = [
-                "name" => 'override_sis_stickiness',
-                "contents" => $this->overrideSisStickiness
+                'name' => 'override_sis_stickiness',
+                'contents' => $this->overrideSisStickiness,
             ];
         }
 

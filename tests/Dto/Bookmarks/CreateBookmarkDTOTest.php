@@ -73,7 +73,7 @@ class CreateBookmarkDTOTest extends TestCase
             'name' => 'Array Bookmark',
             'url' => '/users/789',
             'position' => 5,
-            'data' => '{"user_id": 789}'
+            'data' => '{"user_id": 789}',
         ];
 
         $dto = CreateBookmarkDTO::fromArray($data);
@@ -89,7 +89,7 @@ class CreateBookmarkDTOTest extends TestCase
     {
         $data = [
             'name' => 'Partial Bookmark',
-            'url' => '/courses/999'
+            'url' => '/courses/999',
         ];
 
         $dto = CreateBookmarkDTO::fromArray($data);
@@ -118,7 +118,7 @@ class CreateBookmarkDTOTest extends TestCase
             'name' => 'Test',
             'url' => '/test',
             'extra_field' => 'should be ignored',
-            'another_field' => 123
+            'another_field' => 123,
         ];
 
         $dto = CreateBookmarkDTO::fromArray($data);

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Objects;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Objects\SubmissionVersion;
+use PHPUnit\Framework\TestCase;
 
 class SubmissionVersionTest extends TestCase
 {
@@ -34,7 +34,7 @@ class SubmissionVersionTest extends TestCase
             'submission_type' => 'online_quiz',
             'url' => 'https://example.com',
             'user_id' => 123,
-            'workflow_state' => 'graded'
+            'workflow_state' => 'graded',
         ];
 
         $version = new SubmissionVersion($data);
@@ -67,7 +67,7 @@ class SubmissionVersionTest extends TestCase
             'assignment_id' => 123,
             'assignment_name' => 'Test Assignment',
             'new_grade' => '90',
-            'previous_grade' => '85'
+            'previous_grade' => '85',
         ];
 
         $version = SubmissionVersion::fromArray($data);
@@ -81,13 +81,13 @@ class SubmissionVersionTest extends TestCase
     {
         $versionWithChange = new SubmissionVersion([
             'new_grade' => '85',
-            'previous_grade' => '80'
+            'previous_grade' => '80',
         ]);
         $this->assertTrue($versionWithChange->hasGradeChange());
 
         $versionWithoutChange = new SubmissionVersion([
             'new_grade' => '85',
-            'previous_grade' => '85'
+            'previous_grade' => '85',
         ]);
         $this->assertFalse($versionWithoutChange->hasGradeChange());
 
@@ -100,13 +100,13 @@ class SubmissionVersionTest extends TestCase
         // Test with new_grade
         $versionWithNewGrade = new SubmissionVersion([
             'new_grade' => '90',
-            'current_grade' => '85'
+            'current_grade' => '85',
         ]);
         $this->assertEquals('90', $versionWithNewGrade->getGrade());
 
         // Test without new_grade, fallback to current_grade
         $versionWithCurrentGrade = new SubmissionVersion([
-            'current_grade' => '85'
+            'current_grade' => '85',
         ]);
         $this->assertEquals('85', $versionWithCurrentGrade->getGrade());
 
@@ -118,12 +118,12 @@ class SubmissionVersionTest extends TestCase
     public function testIsGraded(): void
     {
         $gradedVersion = new SubmissionVersion([
-            'workflow_state' => 'graded'
+            'workflow_state' => 'graded',
         ]);
         $this->assertTrue($gradedVersion->isGraded());
 
         $ungradedVersion = new SubmissionVersion([
-            'workflow_state' => 'pending'
+            'workflow_state' => 'pending',
         ]);
         $this->assertFalse($ungradedVersion->isGraded());
 
@@ -134,12 +134,12 @@ class SubmissionVersionTest extends TestCase
     public function testIsUnsubmitted(): void
     {
         $unsubmittedVersion = new SubmissionVersion([
-            'workflow_state' => 'unsubmitted'
+            'workflow_state' => 'unsubmitted',
         ]);
         $this->assertTrue($unsubmittedVersion->isUnsubmitted());
 
         $submittedVersion = new SubmissionVersion([
-            'workflow_state' => 'submitted'
+            'workflow_state' => 'submitted',
         ]);
         $this->assertFalse($submittedVersion->isUnsubmitted());
     }
@@ -149,13 +149,13 @@ class SubmissionVersionTest extends TestCase
         // Test with new_graded_at
         $versionWithNewTimestamp = new SubmissionVersion([
             'new_graded_at' => '2025-01-15T15:00:00Z',
-            'graded_at' => '2025-01-14T14:00:00Z'
+            'graded_at' => '2025-01-14T14:00:00Z',
         ]);
         $this->assertEquals('2025-01-15T15:00:00Z', $versionWithNewTimestamp->getGradedTimestamp());
 
         // Test without new_graded_at, fallback to graded_at
         $versionWithTimestamp = new SubmissionVersion([
-            'graded_at' => '2025-01-14T14:00:00Z'
+            'graded_at' => '2025-01-14T14:00:00Z',
         ]);
         $this->assertEquals('2025-01-14T14:00:00Z', $versionWithTimestamp->getGradedTimestamp());
     }
@@ -165,13 +165,13 @@ class SubmissionVersionTest extends TestCase
         // Test with new_grader
         $versionWithNewGrader = new SubmissionVersion([
             'new_grader' => 'New Grader',
-            'grader' => 'Old Grader'
+            'grader' => 'Old Grader',
         ]);
         $this->assertEquals('New Grader', $versionWithNewGrader->getGraderName());
 
         // Test without new_grader, fallback to grader
         $versionWithGrader = new SubmissionVersion([
-            'grader' => 'Grader Name'
+            'grader' => 'Grader Name',
         ]);
         $this->assertEquals('Grader Name', $versionWithGrader->getGraderName());
     }
@@ -183,7 +183,7 @@ class SubmissionVersionTest extends TestCase
             'grader_id' => '456',
             'id' => '12345',
             'score' => '85.5',
-            'user_id' => '123'
+            'user_id' => '123',
         ];
 
         $version = new SubmissionVersion($data);

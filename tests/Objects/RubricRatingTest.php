@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Objects;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Objects\RubricRating;
+use PHPUnit\Framework\TestCase;
 
 class RubricRatingTest extends TestCase
 {
@@ -19,7 +21,7 @@ class RubricRatingTest extends TestCase
             'long_description' => 'Demonstrates exceptional understanding',
             'points' => 10.0,
             'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-02T00:00:00Z'
+            'updated_at' => '2024-01-02T00:00:00Z',
         ];
 
         $rating = new RubricRating($data);
@@ -40,7 +42,7 @@ class RubricRatingTest extends TestCase
     {
         $data = [
             'description' => 'Good',
-            'points' => 7.5
+            'points' => 7.5,
         ];
 
         $rating = new RubricRating($data);
@@ -78,7 +80,7 @@ class RubricRatingTest extends TestCase
         $data = [
             'id' => 'rating_789',
             'description' => 'Satisfactory',
-            'points' => 5.0
+            'points' => 5.0,
         ];
 
         $rating = new RubricRating($data);
@@ -104,7 +106,7 @@ class RubricRatingTest extends TestCase
             'long_description' => 'Exceeds all expectations',
             'points' => 12.5,
             'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-02T00:00:00Z'
+            'updated_at' => '2024-01-02T00:00:00Z',
         ];
 
         $rating = new RubricRating($data);

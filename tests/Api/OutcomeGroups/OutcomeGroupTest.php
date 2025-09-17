@@ -6,9 +6,6 @@ namespace CanvasLMS\Tests\Api\OutcomeGroups;
 
 use CanvasLMS\Api\OutcomeGroups\OutcomeGroup;
 use CanvasLMS\Config;
-use CanvasLMS\Dto\OutcomeGroups\CreateOutcomeGroupDTO;
-use CanvasLMS\Dto\OutcomeGroups\UpdateOutcomeGroupDTO;
-use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Objects\OutcomeLink;
 use CanvasLMS\Pagination\PaginatedResponse;
@@ -19,7 +16,9 @@ use Psr\Http\Message\StreamInterface;
 class OutcomeGroupTest extends TestCase
 {
     private HttpClientInterface $mockClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
 
     protected function setUp(): void
@@ -38,7 +37,7 @@ class OutcomeGroupTest extends TestCase
     {
         $responseData = [
             ['id' => 1, 'title' => 'Group 1'],
-            ['id' => 2, 'title' => 'Group 2']
+            ['id' => 2, 'title' => 'Group 2'],
         ];
 
         $mockResponse = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
@@ -65,7 +64,7 @@ class OutcomeGroupTest extends TestCase
     {
         $responseData = [
             ['id' => 1, 'title' => 'Global Group 1'],
-            ['id' => 2, 'title' => 'Global Group 2']
+            ['id' => 2, 'title' => 'Global Group 2'],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -133,13 +132,13 @@ class OutcomeGroupTest extends TestCase
     {
         $createData = [
             'title' => 'New Global Group',
-            'description' => 'Test description'
+            'description' => 'Test description',
         ];
 
         $responseData = [
             'id' => 456,
             'title' => 'New Global Group',
-            'description' => 'Test description'
+            'description' => 'Test description',
         ];
 
         $this->mockStream->method('getContents')
@@ -170,7 +169,7 @@ class OutcomeGroupTest extends TestCase
         $group = new OutcomeGroup([
             'id' => 123,
             'context_type' => 'Account',
-            'context_id' => 1
+            'context_id' => 1,
         ]);
 
         $responseData = [
@@ -182,9 +181,9 @@ class OutcomeGroupTest extends TestCase
                 'can_unlink' => true,
                 'outcome' => [
                     'id' => 1,
-                    'title' => 'Outcome 1'
-                ]
-            ]
+                    'title' => 'Outcome 1',
+                ],
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -196,7 +195,7 @@ class OutcomeGroupTest extends TestCase
             ->with(
                 'Account/1/outcome_groups/123/outcomes',
                 $this->callback(function ($options) {
-                    return isset($options['query']) && 
+                    return isset($options['query']) &&
                            $options['query']['outcome_style'] === 'abbrev';
                 })
             )
@@ -216,12 +215,12 @@ class OutcomeGroupTest extends TestCase
         $group = new OutcomeGroup([
             'id' => 123,
             'context_type' => 'Account',
-            'context_id' => 1
+            'context_id' => 1,
         ]);
 
         $responseData = [
             'url' => '/api/v1/accounts/1/outcome_groups/123/outcomes/456',
-            'outcome' => ['id' => 456, 'title' => 'Linked Outcome']
+            'outcome' => ['id' => 456, 'title' => 'Linked Outcome'],
         ];
 
         $this->mockStream->method('getContents')
@@ -235,7 +234,7 @@ class OutcomeGroupTest extends TestCase
             ->with(
                 'Account/1/outcome_groups/123/outcomes/456',
                 $this->callback(function ($options) {
-                    return isset($options['query']) && 
+                    return isset($options['query']) &&
                            $options['query']['move_from'] === 789;
                 })
             )
@@ -252,13 +251,13 @@ class OutcomeGroupTest extends TestCase
         $group = new OutcomeGroup([
             'id' => 123,
             'context_type' => 'Account',
-            'context_id' => 1
+            'context_id' => 1,
         ]);
 
         $createData = [
             'title' => 'New Outcome',
             'description' => 'Test outcome',
-            'mastery_points' => 3
+            'mastery_points' => 3,
         ];
 
         $responseData = [
@@ -266,8 +265,8 @@ class OutcomeGroupTest extends TestCase
             'outcome' => [
                 'id' => 789,
                 'title' => 'New Outcome',
-                'description' => 'Test outcome'
-            ]
+                'description' => 'Test outcome',
+            ],
         ];
 
         $this->mockStream->method('getContents')
@@ -298,8 +297,8 @@ class OutcomeGroupTest extends TestCase
             [
                 'url' => '/api/v1/accounts/1/outcome_group_links/1',
                 'outcome' => ['id' => 1, 'title' => 'Outcome 1'],
-                'outcome_group' => ['id' => 10, 'title' => 'Group 1']
-            ]
+                'outcome_group' => ['id' => 10, 'title' => 'Group 1'],
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -323,8 +322,8 @@ class OutcomeGroupTest extends TestCase
         $responseData = [
             [
                 'url' => '/api/v1/courses/123/outcome_group_links/1',
-                'outcome' => ['id' => 1, 'title' => 'Outcome 1']
-            ]
+                'outcome' => ['id' => 1, 'title' => 'Outcome 1'],
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\Files;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Files\File;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use PHPUnit\Framework\TestCase;
 
 class FileRelationshipTest extends TestCase
 {
@@ -34,7 +34,7 @@ class FileRelationshipTest extends TestCase
         $file = new File([
             'id' => 456,
             'display_name' => 'test.pdf',
-            'folder_id' => 789
+            'folder_id' => 789,
         ]);
 
         // Test the method
@@ -49,7 +49,7 @@ class FileRelationshipTest extends TestCase
         // Create test file without folder_id
         $file = new File([
             'id' => 456,
-            'display_name' => 'test.pdf'
+            'display_name' => 'test.pdf',
         ]);
 
         // Test the method
@@ -65,7 +65,7 @@ class FileRelationshipTest extends TestCase
         $file = new File([
             'id' => 456,
             'display_name' => 'test.pdf',
-            'folder_id' => 789
+            'folder_id' => 789,
         ]);
 
         // Expect no API calls

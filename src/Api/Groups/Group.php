@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace CanvasLMS\Api\Groups;
 
 use CanvasLMS\Api\AbstractBaseApi;
+use CanvasLMS\Api\ContentMigrations\ContentMigration;
 use CanvasLMS\Api\Users\User;
 use CanvasLMS\Config;
+use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 use CanvasLMS\Dto\Groups\CreateGroupDTO;
 use CanvasLMS\Dto\Groups\CreateGroupMembershipDTO;
 use CanvasLMS\Dto\Groups\UpdateGroupDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Api\ContentMigrations\ContentMigration;
-use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 
 /**
  * Canvas LMS Groups API
@@ -163,6 +163,7 @@ class Group extends AbstractBaseApi
 
     /**
      * Permissions for the current user
+     *
      * @var array<string, bool>|null
      */
     public ?array $permissions = null;
@@ -170,6 +171,7 @@ class Group extends AbstractBaseApi
     /**
      * Optional list of users that are members in the group
      * Returned only if include[]=users
+     *
      * @var array<mixed>|null
      */
     public ?array $users = null;
@@ -183,8 +185,10 @@ class Group extends AbstractBaseApi
      * Get a single group by ID
      *
      * @param int $id Group ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -199,11 +203,13 @@ class Group extends AbstractBaseApi
 
     /**
      * Get the API endpoint for this resource
+     *
      * @return string
      */
     protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
+
         return sprintf('accounts/%d/groups', $accountId);
     }
 
@@ -213,8 +219,10 @@ class Group extends AbstractBaseApi
      * @param string $contextType 'accounts' or 'courses'
      * @param int $contextId Account or Course ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<Group>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<Group>
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
@@ -222,7 +230,7 @@ class Group extends AbstractBaseApi
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
 
-        return array_map(fn($data) => new self($data), $allData);
+        return array_map(fn ($data) => new self($data), $allData);
     }
 
     /**
@@ -231,8 +239,10 @@ class Group extends AbstractBaseApi
      * @param string $contextType 'accounts' or 'courses'
      * @param int $contextId Account or Course ID
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public static function fetchByContextPaginated(
         string $contextType,
@@ -247,8 +257,10 @@ class Group extends AbstractBaseApi
      *
      * @param int $userId User ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<Group>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<Group>
      */
     public static function fetchUserGroups(int $userId, array $params = []): array
     {
@@ -256,7 +268,7 @@ class Group extends AbstractBaseApi
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
 
-        return array_map(fn($data) => new self($data), $allData);
+        return array_map(fn ($data) => new self($data), $allData);
     }
 
     /**
@@ -264,8 +276,10 @@ class Group extends AbstractBaseApi
      *
      * @param int $userId User ID
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public static function fetchUserGroupsPaginated(int $userId, array $params = []): PaginatedResponse
     {
@@ -276,8 +290,10 @@ class Group extends AbstractBaseApi
      * Create a new group
      *
      * @param array<string, mixed>|CreateGroupDTO $data Group data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function create(array|CreateGroupDTO $data): self
     {
@@ -300,8 +316,10 @@ class Group extends AbstractBaseApi
      *
      * @param int $id Group ID
      * @param array<string, mixed>|UpdateGroupDTO $data Update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function update(int $id, array|UpdateGroupDTO $data): self
     {
@@ -321,8 +339,9 @@ class Group extends AbstractBaseApi
     /**
      * Save the group (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -335,14 +354,16 @@ class Group extends AbstractBaseApi
             $created = self::create($dto);
             $this->populate(get_object_vars($created));
         }
+
         return $this;
     }
 
     /**
      * Delete the group
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
@@ -353,6 +374,7 @@ class Group extends AbstractBaseApi
         self::checkApiClient();
         $endpoint = sprintf('groups/%d', $this->id);
         self::$apiClient->delete($endpoint);
+
         return $this;
     }
 
@@ -360,8 +382,10 @@ class Group extends AbstractBaseApi
      * Get group members
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<User>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<User>
      */
     public function members(array $params = []): array
     {
@@ -375,22 +399,25 @@ class Group extends AbstractBaseApi
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
 
-        return array_map(fn($data) => new User($data), $allData);
+        return array_map(fn ($data) => new User($data), $allData);
     }
-
 
     /**
      * Add user to group
      *
      * @param int $userId User ID to add
-     * @return bool
+     *
      * @throws CanvasApiException
+     *
+     * @return bool
+     *
      * @deprecated Use createMembership() for more control
      */
     public function addUser(int $userId): bool
     {
         try {
             $membership = $this->createMembership(['user_id' => $userId]);
+
             return $membership !== null;
         } catch (\Exception) {
             return false;
@@ -401,8 +428,10 @@ class Group extends AbstractBaseApi
      * Create a membership in this group
      *
      * @param array<string, mixed>|CreateGroupMembershipDTO $data Membership data
-     * @return GroupMembership
+     *
      * @throws CanvasApiException
+     *
+     * @return GroupMembership
      */
     public function createMembership(array|CreateGroupMembershipDTO $data): GroupMembership
     {
@@ -417,8 +446,10 @@ class Group extends AbstractBaseApi
      * Get memberships for this group
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<GroupMembership>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<GroupMembership>
      */
     public function memberships(array $params = []): array
     {
@@ -429,13 +460,14 @@ class Group extends AbstractBaseApi
         return GroupMembership::fetchAllForGroup($this->id, $params);
     }
 
-
     /**
      * Invite users to this group
      *
      * @param array<string> $emails Email addresses to invite
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function invite(array $emails): self
     {
@@ -458,6 +490,7 @@ class Group extends AbstractBaseApi
             $data[] = ['name' => 'invitees[]', 'contents' => $email];
         }
         self::$apiClient->post($endpoint, ['multipart' => $data]);
+
         return $this;
     }
 
@@ -470,8 +503,10 @@ class Group extends AbstractBaseApi
      * memberships once and managing them locally.
      *
      * @param int $userId User ID to remove
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function removeUser(int $userId): self
     {
@@ -496,6 +531,7 @@ class Group extends AbstractBaseApi
 
         // Delete the membership
         $membershipToDelete->delete();
+
         return $this;
     }
 
@@ -516,6 +552,9 @@ class Group extends AbstractBaseApi
      * and context-specific fields based on the activity type.
      *
      * @param array<string, mixed> $params Query parameters
+     *
+     * @throws CanvasApiException
+     *
      * @return array{
      *   0?: array{
      *     id: int,
@@ -528,7 +567,6 @@ class Group extends AbstractBaseApi
      *     ...
      *   }
      * } Array of activity stream items
-     * @throws CanvasApiException
      */
     public function activityStream(array $params = []): array
     {
@@ -549,12 +587,13 @@ class Group extends AbstractBaseApi
      *
      * Returns a summary of the group's activity stream with counts by type.
      *
+     * @throws CanvasApiException
+     *
      * @return array{
      *   type: string,
      *   unread_count: int,
      *   count: int
      * }[] Array of activity type summaries
-     * @throws CanvasApiException
      */
     public function activityStreamSummary(): array
     {
@@ -574,8 +613,10 @@ class Group extends AbstractBaseApi
      * Get permissions for the current user
      *
      * @param array<string> $permissions Optional array of permission names to check
-     * @return array<string, bool>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, bool>
      */
     public function permissions(array $permissions = []): array
     {
@@ -610,7 +651,7 @@ class Group extends AbstractBaseApi
             'join_level' => $this->joinLevel,
             'storage_quota_mb' => $this->storageQuotaMb,
             'sis_group_id' => $this->sisGroupId,
-        ], fn($value) => $value !== null);
+        ], fn ($value) => $value !== null);
     }
 
     // Getter and setter methods
@@ -801,8 +842,10 @@ class Group extends AbstractBaseApi
      * Get content migrations for this group
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<ContentMigration>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<ContentMigration>
      */
     public function contentMigrations(array $params = []): array
     {
@@ -817,8 +860,10 @@ class Group extends AbstractBaseApi
      * Get a specific content migration for this group
      *
      * @param int $migrationId Content migration ID
-     * @return ContentMigration
+     *
      * @throws CanvasApiException
+     *
+     * @return ContentMigration
      */
     public function contentMigration(int $migrationId): ContentMigration
     {
@@ -833,8 +878,10 @@ class Group extends AbstractBaseApi
      * Create a content migration for this group
      *
      * @param array<string, mixed>|CreateContentMigrationDTO $data Migration data
-     * @return ContentMigration
+     *
      * @throws CanvasApiException
+     *
+     * @return ContentMigration
      */
     public function createContentMigration(array|CreateContentMigrationDTO $data): ContentMigration
     {
@@ -850,8 +897,10 @@ class Group extends AbstractBaseApi
      *
      * @param string $filePath Path to the .imscc file
      * @param array<string, mixed> $options Additional options
-     * @return ContentMigration
+     *
      * @throws CanvasApiException
+     *
+     * @return ContentMigration
      */
     public function importCommonCartridge(string $filePath, array $options = []): ContentMigration
     {
@@ -863,8 +912,8 @@ class Group extends AbstractBaseApi
             'migration_type' => ContentMigration::TYPE_COMMON_CARTRIDGE,
             'pre_attachment' => [
                 'name' => basename($filePath),
-                'size' => filesize($filePath)
-            ]
+                'size' => filesize($filePath),
+            ],
         ]));
 
         if ($migration->isFileUploadPending()) {
@@ -879,8 +928,10 @@ class Group extends AbstractBaseApi
      *
      * @param string $filePath Path to the .zip file
      * @param array<string, mixed> $options Additional options
-     * @return ContentMigration
+     *
      * @throws CanvasApiException
+     *
+     * @return ContentMigration
      */
     public function importZipFile(string $filePath, array $options = []): ContentMigration
     {
@@ -892,8 +943,8 @@ class Group extends AbstractBaseApi
             'migration_type' => ContentMigration::TYPE_ZIP_FILE,
             'pre_attachment' => [
                 'name' => basename($filePath),
-                'size' => filesize($filePath)
-            ]
+                'size' => filesize($filePath),
+            ],
         ]));
 
         if ($migration->isFileUploadPending()) {
@@ -907,14 +958,17 @@ class Group extends AbstractBaseApi
      * Get media objects for this group
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<\CanvasLMS\Api\MediaObjects\MediaObject> Array of MediaObject instances
+     *
      * @throws CanvasApiException
+     *
+     * @return array<\CanvasLMS\Api\MediaObjects\MediaObject> Array of MediaObject instances
      */
     public function mediaObjects(array $params = []): array
     {
         if (!isset($this->id) || !$this->id) {
             throw new CanvasApiException('Group ID is required to fetch media objects');
         }
+
         return \CanvasLMS\Api\MediaObjects\MediaObject::fetchByGroup($this->id, $params);
     }
 
@@ -922,14 +976,17 @@ class Group extends AbstractBaseApi
      * Get media attachments for this group
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<\CanvasLMS\Api\MediaObjects\MediaObject> Array of MediaObject instances
+     *
      * @throws CanvasApiException
+     *
+     * @return array<\CanvasLMS\Api\MediaObjects\MediaObject> Array of MediaObject instances
      */
     public function mediaAttachments(array $params = []): array
     {
         if (!isset($this->id) || !$this->id) {
             throw new CanvasApiException('Group ID is required to fetch media attachments');
         }
+
         return \CanvasLMS\Api\MediaObjects\MediaObject::fetchAttachmentsByGroup($this->id, $params);
     }
 }

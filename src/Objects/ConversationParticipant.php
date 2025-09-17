@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Objects;
 
 /**
@@ -18,8 +20,11 @@ namespace CanvasLMS\Objects;
 class ConversationParticipant
 {
     public ?int $id = null;
+
     public ?string $name = null;
+
     public ?string $fullName = null;
+
     public ?string $avatarUrl = null;
 
     /**

@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Assignments;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Assignments\CreateAssignmentDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\Assignments\CreateAssignmentDTO
@@ -31,7 +33,7 @@ class CreateAssignmentDTOTest extends TestCase
             'published' => true,
             'grading_type' => 'points',
             'submission_types' => ['online_text_entry'],
-            'assignment_group_id' => 456
+            'assignment_group_id' => 456,
         ];
 
         $dto = new CreateAssignmentDTO($data);
@@ -166,7 +168,7 @@ class CreateAssignmentDTOTest extends TestCase
             'published' => true,
             'grading_type' => 'points',
             'submission_types' => ['online_text_entry'],
-            'assignment_group_id' => 456
+            'assignment_group_id' => 456,
         ];
 
         $dto = new CreateAssignmentDTO($data);
@@ -190,7 +192,7 @@ class CreateAssignmentDTOTest extends TestCase
             'description' => 'Test description',
             'due_at' => '2024-12-31T23:59:59Z',
             'points_possible' => 100.0,
-            'published' => true
+            'published' => true,
         ];
 
         $dto = new CreateAssignmentDTO($data);
@@ -212,7 +214,7 @@ class CreateAssignmentDTOTest extends TestCase
         $data = [
             'name' => 'Test Assignment',
             'submission_types' => ['online_text_entry', 'online_upload'],
-            'allowed_extensions' => ['pdf', 'doc', 'docx']
+            'allowed_extensions' => ['pdf', 'doc', 'docx'],
         ];
 
         $dto = new CreateAssignmentDTO($data);
@@ -231,7 +233,7 @@ class CreateAssignmentDTOTest extends TestCase
             'name' => 'Test Assignment',
             'description' => null,
             'due_at' => null,
-            'points_possible' => 100.0
+            'points_possible' => 100.0,
         ];
 
         $dto = new CreateAssignmentDTO($data);

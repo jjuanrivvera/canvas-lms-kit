@@ -23,25 +23,32 @@ class UpdateOutcomeDTO extends AbstractBaseDto
         $this->description = $data['description'] ?? null;
         $this->vendorGuid = $data['vendorGuid'] ?? $data['vendor_guid'] ?? null;
         $this->masteryPoints = isset($data['masteryPoints'])
-            ? (float)$data['masteryPoints']
-            : (isset($data['mastery_points']) ? (float)$data['mastery_points'] : null);
+            ? (float) $data['masteryPoints']
+            : (isset($data['mastery_points']) ? (float) $data['mastery_points'] : null);
         $this->ratings = $data['ratings'] ?? null;
         $this->calculationMethod = $data['calculationMethod'] ?? $data['calculation_method'] ?? null;
         $this->calculationInt = isset($data['calculationInt'])
-            ? (int)$data['calculationInt']
-            : (isset($data['calculation_int']) ? (int)$data['calculation_int'] : null);
+            ? (int) $data['calculationInt']
+            : (isset($data['calculation_int']) ? (int) $data['calculation_int'] : null);
 
         parent::__construct($data);
     }
 
     public ?string $title = null;
+
     public ?string $displayName = null;
+
     public ?string $description = null;
+
     public ?string $vendorGuid = null;
+
     public ?float $masteryPoints = null;
+
     /** @var array<int, array{description: string, points: float}>|null */
     public ?array $ratings = null;
+
     public ?string $calculationMethod = null;
+
     public ?int $calculationInt = null;
 
     /**
@@ -56,35 +63,35 @@ class UpdateOutcomeDTO extends AbstractBaseDto
         if ($this->title !== null) {
             $data[] = [
                 'name' => 'title',
-                'contents' => $this->title
+                'contents' => $this->title,
             ];
         }
 
         if ($this->displayName !== null) {
             $data[] = [
                 'name' => 'display_name',
-                'contents' => $this->displayName
+                'contents' => $this->displayName,
             ];
         }
 
         if ($this->description !== null) {
             $data[] = [
                 'name' => 'description',
-                'contents' => $this->description
+                'contents' => $this->description,
             ];
         }
 
         if ($this->vendorGuid !== null) {
             $data[] = [
                 'name' => 'vendor_guid',
-                'contents' => $this->vendorGuid
+                'contents' => $this->vendorGuid,
             ];
         }
 
         if ($this->masteryPoints !== null) {
             $data[] = [
                 'name' => 'mastery_points',
-                'contents' => (string)$this->masteryPoints
+                'contents' => (string) $this->masteryPoints,
             ];
         }
 
@@ -92,11 +99,11 @@ class UpdateOutcomeDTO extends AbstractBaseDto
             foreach ($this->ratings as $index => $rating) {
                 $data[] = [
                     'name' => sprintf('ratings[%d][description]', $index),
-                    'contents' => $rating['description']
+                    'contents' => $rating['description'],
                 ];
                 $data[] = [
                     'name' => sprintf('ratings[%d][points]', $index),
-                    'contents' => (string)$rating['points']
+                    'contents' => (string) $rating['points'],
                 ];
             }
         }
@@ -104,14 +111,14 @@ class UpdateOutcomeDTO extends AbstractBaseDto
         if ($this->calculationMethod !== null) {
             $data[] = [
                 'name' => 'calculation_method',
-                'contents' => $this->calculationMethod
+                'contents' => $this->calculationMethod,
             ];
         }
 
         if ($this->calculationInt !== null) {
             $data[] = [
                 'name' => 'calculation_int',
-                'contents' => (string)$this->calculationInt
+                'contents' => (string) $this->calculationInt,
             ];
         }
 
@@ -122,6 +129,7 @@ class UpdateOutcomeDTO extends AbstractBaseDto
      * Create an UpdateOutcomeDTO with only specific fields.
      *
      * @param array<string, mixed> $fields
+     *
      * @return self
      */
     public static function withFields(array $fields): self
@@ -141,6 +149,7 @@ class UpdateOutcomeDTO extends AbstractBaseDto
      * Update only the title.
      *
      * @param string $title
+     *
      * @return self
      */
     public static function updateTitle(string $title): self
@@ -152,6 +161,7 @@ class UpdateOutcomeDTO extends AbstractBaseDto
      * Update only the description.
      *
      * @param string $description
+     *
      * @return self
      */
     public static function updateDescription(string $description): self
@@ -163,6 +173,7 @@ class UpdateOutcomeDTO extends AbstractBaseDto
      * Update only the mastery points.
      *
      * @param float $masteryPoints
+     *
      * @return self
      */
     public static function updateMasteryPoints(float $masteryPoints): self
@@ -174,6 +185,7 @@ class UpdateOutcomeDTO extends AbstractBaseDto
      * Update only the ratings.
      *
      * @param array<int, array{description: string, points: float}> $ratings
+     *
      * @return self
      */
     public static function updateRatings(array $ratings): self
@@ -186,6 +198,7 @@ class UpdateOutcomeDTO extends AbstractBaseDto
      *
      * @param string $method
      * @param int|null $calculationInt
+     *
      * @return self
      */
     public static function updateCalculationMethod(string $method, ?int $calculationInt = null): self
@@ -209,7 +222,7 @@ class UpdateOutcomeDTO extends AbstractBaseDto
             'n_mastery',
             'latest',
             'highest',
-            'average'
+            'average',
         ];
 
         return in_array($this->calculationMethod, $validMethods, true);
@@ -231,7 +244,7 @@ class UpdateOutcomeDTO extends AbstractBaseDto
         if ($this->masteryPoints !== null) {
             $masteryFound = false;
             foreach ($this->ratings as $rating) {
-                if ((float)$rating['points'] === $this->masteryPoints) {
+                if ((float) $rating['points'] === $this->masteryPoints) {
                     $masteryFound = true;
                     break;
                 }

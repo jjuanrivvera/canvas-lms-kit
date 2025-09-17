@@ -61,6 +61,7 @@ class CreatePageDTO extends AbstractBaseDto implements DTOInterface
      * Constructor with validation
      *
      * @param array<string, mixed> $data Initial data
+     *
      * @throws \InvalidArgumentException If required fields are missing
      */
     public function __construct(array $data = [])

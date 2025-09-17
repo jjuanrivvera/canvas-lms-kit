@@ -27,10 +27,10 @@ class UpdateContentMigrationDTOTest extends TestCase
             'copy' => [
                 'assignments' => [
                     'id_123' => '1',
-                    'id_456' => '1'
+                    'id_456' => '1',
                 ],
-                'all_quizzes' => '1'
-            ]
+                'all_quizzes' => '1',
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -55,7 +55,7 @@ class UpdateContentMigrationDTOTest extends TestCase
     public function testSetCopyProperty(): void
     {
         $dto = new UpdateContentMigrationDTO();
-        
+
         // Test with include = true
         $dto->setCopyProperty('copy[assignments][id_i2102a7fa93b29226774949298626719d]', true);
         $copy = $dto->getCopy();
@@ -71,7 +71,7 @@ class UpdateContentMigrationDTOTest extends TestCase
     {
         $dto = new UpdateContentMigrationDTO();
         $dto->setCopyAll('copy[all_assignments]');
-        
+
         $copy = $dto->getCopy();
         $this->assertEquals('1', $copy['all_assignments']);
     }
@@ -82,15 +82,15 @@ class UpdateContentMigrationDTOTest extends TestCase
             'copy' => [
                 'context_modules' => [
                     'id_123' => '1',
-                    'id_456' => '1'
+                    'id_456' => '1',
                 ],
                 'module_items' => [
                     'id_abc' => [
                         'content' => '1',
-                        'settings' => '1'
-                    ]
-                ]
-            ]
+                        'settings' => '1',
+                    ],
+                ],
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -105,8 +105,8 @@ class UpdateContentMigrationDTOTest extends TestCase
         $dto = new UpdateContentMigrationDTO([
             'settings' => [
                 'overwrite_quizzes' => false,
-                'question_bank_name' => 'Updated Bank'
-            ]
+                'question_bank_name' => 'Updated Bank',
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -122,9 +122,9 @@ class UpdateContentMigrationDTOTest extends TestCase
                 'remove_dates' => true,
                 'day_substitutions' => [
                     '0' => '1', // Sunday to Monday
-                    '6' => '5'  // Saturday to Friday
-                ]
-            ]
+                    '6' => '5',  // Saturday to Friday
+                ],
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();

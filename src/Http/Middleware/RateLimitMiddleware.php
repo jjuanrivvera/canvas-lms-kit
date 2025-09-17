@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Http\Middleware;
 
-use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Promise\Create;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use GuzzleHttp\Exception\ClientException;
 
 /**
  * Middleware for handling Canvas API rate limits using a leaky bucket algorithm
@@ -66,6 +67,7 @@ class RateLimitMiddleware extends AbstractMiddleware
                             [],
                             "Rate limit would be exceeded. Would need to wait {$delay} seconds."
                         );
+
                         return Create::rejectionFor(new ClientException(
                             "Rate limit would be exceeded. Would need to wait {$delay} seconds.",
                             $request,
@@ -80,6 +82,7 @@ class RateLimitMiddleware extends AbstractMiddleware
                             [],
                             "Rate limit wait time ({$delay}s) exceeds maximum ({$maxWait}s)."
                         );
+
                         return Create::rejectionFor(new ClientException(
                             "Rate limit wait time ({$delay}s) exceeds maximum ({$maxWait}s).",
                             $request,
@@ -98,6 +101,7 @@ class RateLimitMiddleware extends AbstractMiddleware
                     function (ResponseInterface $response) use ($bucketKey) {
                         // Update bucket based on response headers
                         $this->updateBucketFromResponse($bucketKey, $response);
+
                         return $response;
                     },
                     function ($reason) use ($bucketKey) {
@@ -105,6 +109,7 @@ class RateLimitMiddleware extends AbstractMiddleware
                         if (!$this->isRateLimitError($reason)) {
                             $this->refundToBucket($bucketKey, $this->getConfig('initial_cost', 50));
                         }
+
                         return Create::rejectionFor($reason);
                     }
                 );
@@ -116,6 +121,7 @@ class RateLimitMiddleware extends AbstractMiddleware
      * Calculate delay needed before making a request
      *
      * @param string $bucketKey
+     *
      * @return int Delay in seconds
      */
     private function calculateDelay(string $bucketKey): int
@@ -140,6 +146,7 @@ class RateLimitMiddleware extends AbstractMiddleware
      * Get or initialize a bucket
      *
      * @param string $bucketKey
+     *
      * @return array{remaining: int, cost: int, timestamp: float}
      */
     private function getBucket(string $bucketKey): array
@@ -173,6 +180,7 @@ class RateLimitMiddleware extends AbstractMiddleware
      *
      * @param string $bucketKey
      * @param int $cost
+     *
      * @return void
      */
     private function consumeFromBucket(string $bucketKey, int $cost): void
@@ -187,6 +195,7 @@ class RateLimitMiddleware extends AbstractMiddleware
      *
      * @param string $bucketKey
      * @param int $cost
+     *
      * @return void
      */
     private function refundToBucket(string $bucketKey, int $cost): void
@@ -203,6 +212,7 @@ class RateLimitMiddleware extends AbstractMiddleware
      *
      * @param string $bucketKey
      * @param ResponseInterface $response
+     *
      * @return void
      */
     private function updateBucketFromResponse(string $bucketKey, ResponseInterface $response): void
@@ -232,6 +242,7 @@ class RateLimitMiddleware extends AbstractMiddleware
      * Check if an error is a rate limit error
      *
      * @param mixed $reason
+     *
      * @return bool
      */
     private function isRateLimitError($reason): bool
@@ -242,10 +253,12 @@ class RateLimitMiddleware extends AbstractMiddleware
                 // Check for Canvas rate limit indicators
                 if ($response->hasHeader('X-Rate-Limit-Remaining')) {
                     $remaining = (int) $response->getHeaderLine('X-Rate-Limit-Remaining');
+
                     return $remaining <= 0;
                 }
 
                 $body = (string) $response->getBody();
+
                 return strpos($body, 'Rate Limit Exceeded') !== false;
             }
         }
@@ -257,6 +270,7 @@ class RateLimitMiddleware extends AbstractMiddleware
      * Reset rate limit buckets (useful for testing)
      *
      * @param string|null $bucketKey Specific bucket to reset, or null for all
+     *
      * @return void
      */
     public static function resetBuckets(?string $bucketKey = null): void

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Objects;
 
 /**
@@ -52,6 +54,7 @@ class Avatar
 
     /**
      * Constructor
+     *
      * @param array<string, mixed> $data
      */
     public function __construct(array $data = [])
@@ -66,6 +69,7 @@ class Avatar
 
     /**
      * Check if this is an attachment avatar
+     *
      * @return bool
      */
     public function isAttachment(): bool
@@ -75,6 +79,7 @@ class Avatar
 
     /**
      * Check if this is a Gravatar
+     *
      * @return bool
      */
     public function isGravatar(): bool
@@ -84,15 +89,17 @@ class Avatar
 
     /**
      * Check if this is a social media avatar
+     *
      * @return bool
      */
     public function isSocialMedia(): bool
     {
-        return in_array($this->type, ['twitter', 'facebook', 'linkedin']);
+        return in_array($this->type, ['twitter', 'facebook', 'linkedin'], true);
     }
 
     /**
      * Get avatar size info (for attachment type)
+     *
      * @return string|null Human readable size
      */
     public function getHumanReadableSize(): ?string
@@ -115,6 +122,7 @@ class Avatar
 
     /**
      * Convert to array
+     *
      * @return array<string, mixed>
      */
     public function toArray(): array

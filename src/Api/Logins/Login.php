@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace CanvasLMS\Api\Logins;
 
 use CanvasLMS\Api\AbstractBaseApi;
-use CanvasLMS\Dto\Logins\CreateLoginDTO;
-use CanvasLMS\Dto\Logins\UpdateLoginDTO;
-use CanvasLMS\Dto\Logins\PasswordResetDTO;
 use CanvasLMS\Config;
-use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Dto\Logins\CreateLoginDTO;
+use CanvasLMS\Dto\Logins\PasswordResetDTO;
+use CanvasLMS\Dto\Logins\UpdateLoginDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Pagination\PaginatedResponse;
 
 /**
  * Canvas LMS Login API
@@ -34,15 +34,25 @@ class Login extends AbstractBaseApi
 
     // Properties (camelCase following SDK convention)
     public ?int $accountId = null;
+
     public ?int $id = null;
+
     public ?string $sisUserId = null;
+
     public ?string $integrationId = null;
+
     public ?string $uniqueId = null;
+
     public ?int $userId = null;
+
     public ?int $authenticationProviderId = null;
+
     public ?string $authenticationProviderType = null;
+
     public ?string $workflowState = null;
+
     public ?string $declaredUserType = null;
+
     public ?string $createdAt = null;
 
     /**
@@ -54,6 +64,7 @@ class Login extends AbstractBaseApi
     {
         // Default to account context for the base endpoint
         $accountId = Config::getAccountId();
+
         return sprintf('accounts/%d/logins', $accountId);
     }
 
@@ -62,6 +73,7 @@ class Login extends AbstractBaseApi
      * Uses account context by default
      *
      * @param array<string, mixed> $params Optional query parameters
+     *
      * @return array<Login> Array of Login objects
      */
     public static function get(array $params = []): array
@@ -71,15 +83,15 @@ class Login extends AbstractBaseApi
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return array_map(fn(array $item) => new self($item), $data);
+        return array_map(fn (array $item) => new self($item), $data);
     }
-
 
     /**
      * Find a specific login by ID (implements ApiInterface)
      * Uses account context by default
      *
      * @param int $id The login ID
+     *
      * @return self The Login instance
      */
     public static function find(int $id, array $params = []): self
@@ -97,12 +109,12 @@ class Login extends AbstractBaseApi
         throw new CanvasApiException("Login with ID {$id} not found");
     }
 
-
     /**
      * Create a new login for an existing user
      *
      * @param int $accountId The account ID to create the login under
      * @param array<string, mixed>|CreateLoginDTO $data Login creation data
+     *
      * @return self The created Login instance
      */
     public static function create(int $accountId, array|CreateLoginDTO $data): self
@@ -115,7 +127,7 @@ class Login extends AbstractBaseApi
 
         $endpoint = sprintf('accounts/%d/logins', $accountId);
         $response = self::$apiClient->post($endpoint, [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
         ]);
         $responseData = self::parseJsonResponse($response);
 
@@ -127,6 +139,7 @@ class Login extends AbstractBaseApi
      *
      * @param int $accountId The account ID
      * @param int $loginId The login ID
+     *
      * @return self The Login instance
      */
     public static function findByAccountAndId(int $accountId, int $loginId): self
@@ -148,6 +161,7 @@ class Login extends AbstractBaseApi
      * Update this login
      *
      * @param array<string, mixed>|UpdateLoginDTO $data Login update data
+     *
      * @return self The updated Login instance
      */
     public function update(array|UpdateLoginDTO $data): self
@@ -164,7 +178,7 @@ class Login extends AbstractBaseApi
 
         $endpoint = sprintf('accounts/%d/logins/%d', $this->accountId, $this->id);
         $response = self::$apiClient->put($endpoint, [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
         ]);
         $responseData = self::parseJsonResponse($response);
 
@@ -205,6 +219,7 @@ class Login extends AbstractBaseApi
      * Initiate password recovery flow for a user
      *
      * @param string|array<string, mixed>|PasswordResetDTO $email User email or data array
+     *
      * @return array<string, mixed> Recovery request status
      */
     public static function resetPassword(string|array|PasswordResetDTO $email): array
@@ -220,7 +235,7 @@ class Login extends AbstractBaseApi
         }
 
         $response = self::$apiClient->post('users/reset_password', [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
         ]);
 
         return self::parseJsonResponse($response);
@@ -232,6 +247,7 @@ class Login extends AbstractBaseApi
      * @param string $contextType 'accounts' or 'users'
      * @param int $contextId Account or User ID
      * @param array<string, mixed> $params Query parameters
+     *
      * @return array<Login>
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
@@ -240,7 +256,8 @@ class Login extends AbstractBaseApi
         $endpoint = sprintf('%s/%d/logins', $contextType, $contextId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
-        return array_map(fn(array $item) => new self($item), $data);
+
+        return array_map(fn (array $item) => new self($item), $data);
     }
 
     /**
@@ -249,6 +266,7 @@ class Login extends AbstractBaseApi
      * @param string $contextType 'accounts' or 'users'
      * @param int $contextId Account or User ID
      * @param array<string, mixed> $params Query parameters
+     *
      * @return PaginatedResponse
      */
     public static function fetchByContextPaginated(
@@ -257,6 +275,7 @@ class Login extends AbstractBaseApi
         array $params = []
     ): PaginatedResponse {
         $endpoint = sprintf('%s/%d/logins', $contextType, $contextId);
+
         return self::getPaginatedResponse($endpoint, $params);
     }
 

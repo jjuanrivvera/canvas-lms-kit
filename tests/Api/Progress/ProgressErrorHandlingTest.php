@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace Tests\Api\Progress;
 
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
 use CanvasLMS\Api\Progress\Progress;
 use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Exceptions\CanvasApiException;
 use GuzzleHttp\Exception\RequestException;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 
 class ProgressErrorHandlingTest extends TestCase
 {
     private HttpClientInterface|MockObject $mockHttpClient;
+
     private ResponseInterface|MockObject $mockResponse;
+
     private StreamInterface|MockObject $mockStream;
 
     protected function setUp(): void
@@ -39,8 +40,8 @@ class ProgressErrorHandlingTest extends TestCase
     {
         $errorResponse = [
             'errors' => [
-                ['message' => 'The specified resource does not exist.']
-            ]
+                ['message' => 'The specified resource does not exist.'],
+            ],
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($errorResponse));
@@ -76,8 +77,8 @@ class ProgressErrorHandlingTest extends TestCase
 
         $errorResponse = [
             'errors' => [
-                ['message' => 'Cannot cancel this operation']
-            ]
+                ['message' => 'Cannot cancel this operation'],
+            ],
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($errorResponse));
@@ -96,7 +97,7 @@ class ProgressErrorHandlingTest extends TestCase
     public function testCancelWithNetworkError(): void
     {
         $progress = new Progress(['id' => 123, 'workflow_state' => 'running']);
-        
+
         $mockRequest = $this->createMock(RequestInterface::class);
         $exception = new RequestException('Server error', $mockRequest);
 
@@ -114,7 +115,7 @@ class ProgressErrorHandlingTest extends TestCase
     public function testRefreshWithNetworkError(): void
     {
         $progress = new Progress(['id' => 123, 'workflow_state' => 'running']);
-        
+
         $mockRequest = $this->createMock(RequestInterface::class);
         $exception = new RequestException('Network unreachable', $mockRequest);
 
@@ -133,8 +134,8 @@ class ProgressErrorHandlingTest extends TestCase
     {
         $errorResponse = [
             'errors' => [
-                ['message' => 'Course not found']
-            ]
+                ['message' => 'Course not found'],
+            ],
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($errorResponse));
@@ -156,7 +157,7 @@ class ProgressErrorHandlingTest extends TestCase
 
         // First call succeeds, second call fails
         $goodResponse = ['id' => 123, 'workflow_state' => 'running', 'completion' => 30];
-        
+
         $this->mockStream->method('getContents')
             ->willReturnOnConsecutiveCalls(
                 json_encode($goodResponse),
@@ -221,7 +222,7 @@ class ProgressErrorHandlingTest extends TestCase
             json_encode(['id' => 123, 'workflow_state' => 'running', 'completion' => 25]),
             $this->throwException(new RequestException('Temporary error', $this->createMock(RequestInterface::class))),
             json_encode(['id' => 123, 'workflow_state' => 'running', 'completion' => 75]),
-            json_encode(['id' => 123, 'workflow_state' => 'completed', 'completion' => 100])
+            json_encode(['id' => 123, 'workflow_state' => 'completed', 'completion' => 100]),
         ];
 
         // Since we can't easily mock consecutive calls with exceptions, test the first error case
@@ -241,7 +242,7 @@ class ProgressErrorHandlingTest extends TestCase
         $responseData = [
             'id' => 123,
             'workflow_state' => 'failed',
-            'message' => 'Cancelled: User requested stop'
+            'message' => 'Cancelled: User requested stop',
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
@@ -283,7 +284,7 @@ class ProgressErrorHandlingTest extends TestCase
             Progress::STATE_QUEUED,
             Progress::STATE_RUNNING,
             Progress::STATE_COMPLETED,
-            Progress::STATE_FAILED
+            Progress::STATE_FAILED,
         ];
 
         foreach ($validStates as $state) {
@@ -305,7 +306,7 @@ class ProgressErrorHandlingTest extends TestCase
         // Test with invalid date format
         $progress = new Progress([
             'created_at' => 'invalid-date-format',
-            'updated_at' => 'also-invalid'
+            'updated_at' => 'also-invalid',
         ]);
 
         // DateTime constructor should handle invalid dates gracefully or throw exceptions

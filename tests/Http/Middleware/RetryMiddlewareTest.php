@@ -1,18 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Http\Middleware;
 
 use CanvasLMS\Config;
+use CanvasLMS\Http\HttpClient;
+use CanvasLMS\Http\Middleware\RetryMiddleware;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use CanvasLMS\Http\HttpClient;
 use PHPUnit\Framework\TestCase;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Exception\RequestException;
-use CanvasLMS\Http\Middleware\RetryMiddleware;
 
 class RetryMiddlewareTest extends TestCase
 {
@@ -26,7 +27,7 @@ class RetryMiddlewareTest extends TestCase
     {
         // This test verifies that the retry middleware properly retries on 500 errors
         // We'll check that multiple attempts are made by providing fewer responses than max_attempts
-        
+
         $mock = new MockHandler([
             new Response(500, [], 'First failure'),
             new Response(500, [], 'Second failure'),
@@ -35,9 +36,9 @@ class RetryMiddlewareTest extends TestCase
 
         $handlerStack = HandlerStack::create($mock);
         $retryMiddleware = new RetryMiddleware([
-            'delay' => 10, 
+            'delay' => 10,
             'jitter' => false,
-            'max_attempts' => 2  // Only allow 2 attempts total
+            'max_attempts' => 2,  // Only allow 2 attempts total
         ]);
         $handlerStack->push($retryMiddleware(), 'retry');
 
@@ -69,12 +70,12 @@ class RetryMiddlewareTest extends TestCase
 
         $client = new Client([
             'handler' => $handlerStack,
-            'http_errors' => false  // Don't throw on 4xx/5xx responses
+            'http_errors' => false,  // Don't throw on 4xx/5xx responses
         ]);
         $httpClient = new HttpClient($client);
 
         $response = $httpClient->get('/test');
-        
+
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('Success', (string) $response->getBody());
     }
@@ -91,18 +92,18 @@ class RetryMiddlewareTest extends TestCase
         $retryMiddleware = new RetryMiddleware([
             'delay' => 10,
             'jitter' => false,
-            'retry_on_timeout' => true
+            'retry_on_timeout' => true,
         ]);
         $handlerStack->push($retryMiddleware(), 'retry');
 
         $client = new Client([
             'handler' => $handlerStack,
-            'http_errors' => false  // Don't throw on 4xx/5xx responses
+            'http_errors' => false,  // Don't throw on 4xx/5xx responses
         ]);
         $httpClient = new HttpClient($client);
 
         $response = $httpClient->get('/test');
-        
+
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('Success', (string) $response->getBody());
     }
@@ -120,7 +121,7 @@ class RetryMiddlewareTest extends TestCase
         $retryMiddleware = new RetryMiddleware([
             'max_attempts' => 3,
             'delay' => 10,
-            'jitter' => false
+            'jitter' => false,
         ]);
         $handlerStack->push($retryMiddleware(), 'retry');
 
@@ -137,7 +138,7 @@ class RetryMiddlewareTest extends TestCase
             'delay' => 1000,
             'multiplier' => 2,
             'jitter' => false,
-            'max_delay' => 10000
+            'max_delay' => 10000,
         ]);
 
         // Use reflection to test private method
@@ -166,12 +167,12 @@ class RetryMiddlewareTest extends TestCase
 
         $client = new Client([
             'handler' => $handlerStack,
-            'http_errors' => false  // Don't throw on 4xx/5xx responses
+            'http_errors' => false,  // Don't throw on 4xx/5xx responses
         ]);
         $httpClient = new HttpClient($client);
 
         $response = $httpClient->get('/test');
-        
+
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('Success', (string) $response->getBody());
     }
@@ -187,18 +188,18 @@ class RetryMiddlewareTest extends TestCase
         $retryMiddleware = new RetryMiddleware([
             'delay' => 10,
             'jitter' => false,
-            'retry_on_status' => [429, 500, 502]
+            'retry_on_status' => [429, 500, 502],
         ]);
         $handlerStack->push($retryMiddleware(), 'retry');
 
         $client = new Client([
             'handler' => $handlerStack,
-            'http_errors' => false  // Don't throw on 4xx/5xx responses
+            'http_errors' => false,  // Don't throw on 4xx/5xx responses
         ]);
         $httpClient = new HttpClient($client);
 
         $response = $httpClient->get('/test');
-        
+
         $this->assertEquals(200, $response->getStatusCode());
     }
 }

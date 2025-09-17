@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Quizzes;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Quizzes\CreateQuizDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\Quizzes\CreateQuizDTO
@@ -43,7 +45,7 @@ class CreateQuizDTOTest extends TestCase
             'hide_results' => 'always',
             'ip_filter' => '192.168.1.0/24',
             'access_code' => 'secret123',
-            'require_lockdown_browser' => true
+            'require_lockdown_browser' => true,
         ];
 
         $dto = new CreateQuizDTO($data);

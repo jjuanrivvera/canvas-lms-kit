@@ -4,21 +4,24 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\DiscussionTopics;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
-use CanvasLMS\Api\Courses\Course;
-use CanvasLMS\Api\Users\User;
 use CanvasLMS\Api\Assignments\Assignment;
+use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
+use CanvasLMS\Api\Users\User;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 class DiscussionTopicRelationshipTest extends TestCase
 {
     private HttpClientInterface $mockHttpClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
+
     private Course $mockCourse;
 
     protected function setUp(): void
@@ -52,7 +55,7 @@ class DiscussionTopicRelationshipTest extends TestCase
         $topic = new DiscussionTopic([
             'id' => 456,
             'title' => 'Test Discussion',
-            'course_id' => 123
+            'course_id' => 123,
         ]);
 
         // Test the method
@@ -70,20 +73,20 @@ class DiscussionTopicRelationshipTest extends TestCase
         $topic = new DiscussionTopic([
             'id' => 456,
             'title' => 'Test Discussion',
-            'user_id' => 789
+            'user_id' => 789,
         ]);
 
         // Mock user response
         $userData = [
             'id' => 789,
             'name' => 'Discussion Author',
-            'email' => 'author@example.com'
+            'email' => 'author@example.com',
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($userData));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode($userData));
 
@@ -109,7 +112,7 @@ class DiscussionTopicRelationshipTest extends TestCase
         // Create topic without user_id
         $topic = new DiscussionTopic([
             'id' => 456,
-            'title' => 'Test Discussion'
+            'title' => 'Test Discussion',
         ]);
 
         // Test the method
@@ -124,7 +127,7 @@ class DiscussionTopicRelationshipTest extends TestCase
         // Create test topic
         $topic = new DiscussionTopic([
             'id' => 456,
-            'user_id' => 789
+            'user_id' => 789,
         ]);
 
         // Set up mock to throw exception
@@ -144,7 +147,7 @@ class DiscussionTopicRelationshipTest extends TestCase
         $topic = new DiscussionTopic([
             'id' => 456,
             'title' => 'Graded Discussion',
-            'assignment_id' => 999
+            'assignment_id' => 999,
         ]);
 
         // Mock assignment response
@@ -152,13 +155,13 @@ class DiscussionTopicRelationshipTest extends TestCase
             'id' => 999,
             'name' => 'Graded Discussion Assignment',
             'points_possible' => 100,
-            'due_at' => '2024-12-31T23:59:59Z'
+            'due_at' => '2024-12-31T23:59:59Z',
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($assignmentData));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode($assignmentData));
 
@@ -185,7 +188,7 @@ class DiscussionTopicRelationshipTest extends TestCase
         // Create topic without assignment_id
         $topic = new DiscussionTopic([
             'id' => 456,
-            'title' => 'Ungraded Discussion'
+            'title' => 'Ungraded Discussion',
         ]);
 
         // Test the method
@@ -200,7 +203,7 @@ class DiscussionTopicRelationshipTest extends TestCase
         // Create test topic
         $topic = new DiscussionTopic([
             'id' => 456,
-            'assignment_id' => 999
+            'assignment_id' => 999,
         ]);
 
         // Set up mock to throw exception
@@ -219,19 +222,19 @@ class DiscussionTopicRelationshipTest extends TestCase
         // Create test discussion topic
         $topic = new DiscussionTopic([
             'id' => 456,
-            'assignment_id' => 999
+            'assignment_id' => 999,
         ]);
 
         // Mock assignment response
         $assignmentData = [
             'id' => 999,
-            'name' => 'Assignment'
+            'name' => 'Assignment',
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($assignmentData));
-        
+
         $this->mockResponse->method('getBody')
             ->willReturn($this->mockStream);
 

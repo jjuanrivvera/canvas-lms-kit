@@ -1,16 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Quizzes;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\Quizzes\Quiz;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Quizzes\Quiz;
 use CanvasLMS\Dto\Quizzes\CreateQuizDTO;
 use CanvasLMS\Dto\Quizzes\UpdateQuizDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -20,6 +20,7 @@ use Psr\Http\Message\StreamInterface;
 class QuizTest extends TestCase
 {
     private HttpClientInterface $httpClientMock;
+
     private Course $course;
 
     protected function setUp(): void
@@ -84,7 +85,7 @@ class QuizTest extends TestCase
             'ip_filter' => '192.168.1.0/24',
             'access_code' => 'secret123',
             'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-01T00:00:00Z'
+            'updated_at' => '2024-01-01T00:00:00Z',
         ];
 
         $quiz = new Quiz($data);
@@ -216,7 +217,7 @@ class QuizTest extends TestCase
             'title' => 'Test Quiz',
             'quiz_type' => 'assignment',
             'points_possible' => 100.0,
-            'published' => true
+            'published' => true,
         ]);
 
         $array = $quiz->toArray();
@@ -237,7 +238,7 @@ class QuizTest extends TestCase
             'quiz_type' => 'assignment',
             'points_possible' => 100.0,
             'published' => true,
-            'course_id' => 123
+            'course_id' => 123,
         ]);
 
         $dtoArray = $quiz->toDtoArray();
@@ -256,7 +257,7 @@ class QuizTest extends TestCase
         $quizData = [
             'id' => 1,
             'title' => 'Test Quiz',
-            'quiz_type' => 'assignment'
+            'quiz_type' => 'assignment',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -287,7 +288,7 @@ class QuizTest extends TestCase
     {
         $quizzesData = [
             ['id' => 1, 'title' => 'Quiz 1', 'quiz_type' => 'assignment'],
-            ['id' => 2, 'title' => 'Quiz 2', 'quiz_type' => 'practice_quiz']
+            ['id' => 2, 'title' => 'Quiz 2', 'quiz_type' => 'practice_quiz'],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -320,7 +321,7 @@ class QuizTest extends TestCase
     {
         $params = ['published' => true];
         $quizzesData = [
-            ['id' => 1, 'title' => 'Published Quiz', 'quiz_type' => 'assignment', 'published' => true]
+            ['id' => 1, 'title' => 'Published Quiz', 'quiz_type' => 'assignment', 'published' => true],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -351,7 +352,7 @@ class QuizTest extends TestCase
         $createData = [
             'title' => 'New Quiz',
             'quiz_type' => 'assignment',
-            'points_possible' => 100.0
+            'points_possible' => 100.0,
         ];
 
         $responseData = array_merge($createData, ['id' => 1]);
@@ -391,14 +392,14 @@ class QuizTest extends TestCase
         $createDto = new CreateQuizDTO([
             'title' => 'New Quiz with DTO',
             'quiz_type' => 'practice_quiz',
-            'time_limit' => 30
+            'time_limit' => 30,
         ]);
 
         $responseData = [
             'id' => 2,
             'title' => 'New Quiz with DTO',
             'quiz_type' => 'practice_quiz',
-            'time_limit' => 30
+            'time_limit' => 30,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -435,14 +436,14 @@ class QuizTest extends TestCase
     {
         $updateData = [
             'title' => 'Updated Quiz',
-            'time_limit' => 120
+            'time_limit' => 120,
         ];
 
         $responseData = [
             'id' => 1,
             'title' => 'Updated Quiz',
             'quiz_type' => 'assignment',
-            'time_limit' => 120
+            'time_limit' => 120,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -478,14 +479,14 @@ class QuizTest extends TestCase
     {
         $updateDto = new UpdateQuizDTO([
             'title' => 'Updated Quiz with DTO',
-            'published' => true
+            'published' => true,
         ]);
 
         $responseData = [
             'id' => 1,
             'title' => 'Updated Quiz with DTO',
             'quiz_type' => 'assignment',
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -521,13 +522,13 @@ class QuizTest extends TestCase
     {
         $quiz = new Quiz([
             'title' => 'New Quiz to Save',
-            'quiz_type' => 'survey'
+            'quiz_type' => 'survey',
         ]);
 
         $responseData = [
             'id' => 3,
             'title' => 'New Quiz to Save',
-            'quiz_type' => 'survey'
+            'quiz_type' => 'survey',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -562,7 +563,7 @@ class QuizTest extends TestCase
         $quiz = new Quiz([
             'id' => 1,
             'title' => 'Existing Quiz',
-            'quiz_type' => 'assignment'
+            'quiz_type' => 'assignment',
         ]);
 
         $quiz->setTitle('Updated Existing Quiz');
@@ -570,7 +571,7 @@ class QuizTest extends TestCase
         $responseData = [
             'id' => 1,
             'title' => 'Updated Existing Quiz',
-            'quiz_type' => 'assignment'
+            'quiz_type' => 'assignment',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -630,7 +631,7 @@ class QuizTest extends TestCase
             'id' => 1,
             'title' => 'Test Quiz',
             'published' => true,
-            'workflow_state' => 'published'
+            'workflow_state' => 'published',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -669,7 +670,7 @@ class QuizTest extends TestCase
             'id' => 1,
             'title' => 'Test Quiz',
             'published' => false,
-            'workflow_state' => 'unpublished'
+            'workflow_state' => 'unpublished',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -826,7 +827,7 @@ class QuizTest extends TestCase
 
         // Should not throw exception for safe HTML
         $quiz->setDescription('<p>This is <strong>safe</strong> HTML content with <em>formatting</em>.</p>');
-        
+
         $this->assertEquals('<p>This is <strong>safe</strong> HTML content with <em>formatting</em>.</p>', $quiz->getDescription());
     }
 
@@ -836,7 +837,7 @@ class QuizTest extends TestCase
 
         // Should not throw exception for null
         $quiz->setDescription(null);
-        
+
         $this->assertNull($quiz->getDescription());
     }
 }

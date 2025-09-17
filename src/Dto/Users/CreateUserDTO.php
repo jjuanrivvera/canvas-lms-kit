@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Dto\Users;
 
-use DateTimeInterface;
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
+use DateTimeInterface;
 
 class CreateUserDTO extends AbstractBaseDto implements DTOInterface
 {
@@ -258,8 +260,8 @@ class CreateUserDTO extends AbstractBaseDto implements DTOInterface
             };
 
             $modifiedProperties[] = [
-                "name" => $apiKeyName,
-                "contents" => $value
+                'name' => $apiKeyName,
+                'contents' => $value,
             ];
         }
 

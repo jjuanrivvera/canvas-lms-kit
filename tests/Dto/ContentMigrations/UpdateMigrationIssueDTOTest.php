@@ -62,7 +62,7 @@ class UpdateMigrationIssueDTOTest extends TestCase
     public function testSetterAndGetter(): void
     {
         $dto = new UpdateMigrationIssueDTO();
-        
+
         $dto->setWorkflowState('resolved');
         $this->assertEquals('resolved', $dto->getWorkflowState());
 

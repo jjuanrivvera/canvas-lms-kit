@@ -10,8 +10,8 @@ use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -35,21 +35,21 @@ class CalendarEventAccountContextTest extends TestCase
                 'title' => 'Account Meeting',
                 'context_code' => 'account_1',
                 'start_at' => '2025-03-15T10:00:00Z',
-                'end_at' => '2025-03-15T11:00:00Z'
+                'end_at' => '2025-03-15T11:00:00Z',
             ],
             [
                 'id' => 2,
                 'title' => 'Department Review',
                 'context_code' => 'account_1',
                 'start_at' => '2025-03-16T14:00:00Z',
-                'end_at' => '2025-03-16T15:00:00Z'
-            ]
+                'end_at' => '2025-03-16T15:00:00Z',
+            ],
         ]);
 
         $expectedParams = [
             'query' => [
-                'context_codes' => ['account_1']
-            ]
+                'context_codes' => ['account_1'],
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -69,12 +69,12 @@ class CalendarEventAccountContextTest extends TestCase
     public function testGetWithCustomContextCodes(): void
     {
         $mockResponse = $this->createMockResponseWithBody([
-            ['id' => 3, 'title' => 'Course Event', 'context_code' => 'course_123']
+            ['id' => 3, 'title' => 'Course Event', 'context_code' => 'course_123'],
         ]);
 
         $params = ['context_codes' => ['course_123', 'user_456']];
         $expectedParams = [
-            'query' => $params
+            'query' => $params,
         ];
 
         $this->mockClient->expects($this->once())
@@ -94,9 +94,9 @@ class CalendarEventAccountContextTest extends TestCase
         $mockPaginatedResponse->expects($this->once())
             ->method('getJsonData')
             ->willReturn([
-                ['id' => 1, 'title' => 'Test Event', 'context_code' => 'account_1']
+                ['id' => 1, 'title' => 'Test Event', 'context_code' => 'account_1'],
             ]);
-        
+
         $mockPaginationResult = $this->createMock(PaginationResult::class);
         $mockPaginatedResponse->expects($this->once())
             ->method('toPaginationResult')
@@ -105,8 +105,8 @@ class CalendarEventAccountContextTest extends TestCase
 
         $expectedParams = [
             'query' => [
-                'context_codes' => ['account_1']
-            ]
+                'context_codes' => ['account_1'],
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -127,14 +127,14 @@ class CalendarEventAccountContextTest extends TestCase
                 'title' => 'Midterm Exam',
                 'context_code' => 'course_789',
                 'start_at' => '2025-03-20T10:00:00Z',
-                'end_at' => '2025-03-20T12:00:00Z'
-            ]
+                'end_at' => '2025-03-20T12:00:00Z',
+            ],
         ]);
 
         $expectedParams = [
             'query' => [
-                'context_codes' => ['course_789']
-            ]
+                'context_codes' => ['course_789'],
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -158,14 +158,14 @@ class CalendarEventAccountContextTest extends TestCase
                 'title' => 'Personal Task',
                 'context_code' => 'user_456',
                 'start_at' => '2025-03-25T09:00:00Z',
-                'end_at' => '2025-03-25T09:30:00Z'
-            ]
+                'end_at' => '2025-03-25T09:30:00Z',
+            ],
         ]);
 
         $expectedParams = [
             'query' => [
-                'context_codes' => ['user_456']
-            ]
+                'context_codes' => ['user_456'],
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -189,14 +189,14 @@ class CalendarEventAccountContextTest extends TestCase
                 'title' => 'Group Meeting',
                 'context_code' => 'group_321',
                 'start_at' => '2025-03-28T15:00:00Z',
-                'end_at' => '2025-03-28T16:00:00Z'
-            ]
+                'end_at' => '2025-03-28T16:00:00Z',
+            ],
         ]);
 
         $expectedParams = [
             'query' => [
-                'context_codes' => ['group_321']
-            ]
+                'context_codes' => ['group_321'],
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -215,19 +215,19 @@ class CalendarEventAccountContextTest extends TestCase
     public function testFetchByContextWithAdditionalParams(): void
     {
         $mockResponse = $this->createMockResponseWithBody([
-            ['id' => 7, 'title' => 'Important Event', 'context_code' => 'course_999']
+            ['id' => 7, 'title' => 'Important Event', 'context_code' => 'course_999'],
         ]);
 
         $params = [
             'important_dates' => true,
             'start_date' => '2025-03-01',
-            'end_date' => '2025-03-31'
+            'end_date' => '2025-03-31',
         ];
 
         $expectedParams = [
             'query' => array_merge($params, [
-                'context_codes' => ['course_999']
-            ])
+                'context_codes' => ['course_999'],
+            ]),
         ];
 
         $this->mockClient->expects($this->once())
@@ -244,13 +244,13 @@ class CalendarEventAccountContextTest extends TestCase
     public function testCourseCalendarEventsMethod(): void
     {
         $mockResponse = $this->createMockResponseWithBody([
-            ['id' => 8, 'title' => 'Course Assignment Due', 'context_code' => 'course_555']
+            ['id' => 8, 'title' => 'Course Assignment Due', 'context_code' => 'course_555'],
         ]);
 
         $expectedParams = [
             'query' => [
-                'context_codes' => ['course_555']
-            ]
+                'context_codes' => ['course_555'],
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -270,7 +270,7 @@ class CalendarEventAccountContextTest extends TestCase
         $event = new CalendarEvent([
             'id' => 9,
             'title' => 'Test Event',
-            'context_code' => 'course_123'
+            'context_code' => 'course_123',
         ]);
 
         $this->assertEquals('course', $event->getContextType());
@@ -286,7 +286,7 @@ class CalendarEventAccountContextTest extends TestCase
         $this->expectExceptionMessage('Account ID must be configured to fetch calendar events');
 
         CalendarEvent::get();
-        
+
         // Reset to valid value for other tests
         Config::setAccountId(1);
     }

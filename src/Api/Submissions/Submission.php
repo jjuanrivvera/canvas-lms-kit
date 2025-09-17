@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Api\Submissions;
 
-use Exception;
-use InvalidArgumentException;
 use CanvasLMS\Api\AbstractBaseApi;
-use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Assignments\Assignment;
+use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Users\User;
 use CanvasLMS\Dto\Submissions\CreateSubmissionDTO;
 use CanvasLMS\Dto\Submissions\UpdateSubmissionDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
+use Exception;
+use InvalidArgumentException;
 
 /**
  * Canvas LMS Submissions API
@@ -88,12 +87,14 @@ class Submission extends AbstractBaseApi
 {
     /**
      * Course context (required)
+     *
      * @var Course
      */
     protected static ?Course $course = null;
 
     /**
      * Assignment context (required)
+     *
      * @var Assignment
      */
     protected static ?Assignment $assignment = null;
@@ -232,12 +233,14 @@ class Submission extends AbstractBaseApi
 
     /**
      * Array of submission comments
+     *
      * @var array<mixed>|null
      */
     public ?array $submissionComments = null;
 
     /**
      * Array of file attachments
+     *
      * @var array<mixed>|null
      */
     public ?array $attachments = null;
@@ -260,6 +263,7 @@ class Submission extends AbstractBaseApi
 
     /**
      * Check if course context is set
+     *
      * @throws Exception
      */
     public static function checkCourse(): bool
@@ -269,11 +273,13 @@ class Submission extends AbstractBaseApi
                 'Course context must be set before calling Submission methods. Use Submission::setCourse($course)'
             );
         }
+
         return true;
     }
 
     /**
      * Check if assignment context is set
+     *
      * @throws Exception
      */
     public static function checkAssignment(): bool
@@ -284,17 +290,20 @@ class Submission extends AbstractBaseApi
                 'Use Submission::setAssignment($assignment)'
             );
         }
+
         return true;
     }
 
     /**
      * Check if both contexts are set
+     *
      * @throws Exception
      */
     public static function checkContexts(): bool
     {
         self::checkCourse();
         self::checkAssignment();
+
         return true;
     }
 
@@ -311,7 +320,9 @@ class Submission extends AbstractBaseApi
 
     /**
      * Create a new submission
+     *
      * @param array<string, mixed>|CreateSubmissionDTO $data
+     *
      * @throws CanvasApiException
      * @throws Exception
      */
@@ -325,7 +336,7 @@ class Submission extends AbstractBaseApi
         $endpoint = sprintf('courses/%d/assignments/%d/submissions', self::$course->id, self::$assignment->id);
 
         $response = self::$apiClient->request('POST', $endpoint, [
-            'multipart' => $dto->toApiArray()
+            'multipart' => $dto->toApiArray(),
         ]);
 
         $submissionData = self::parseJsonResponse($response);
@@ -335,11 +346,14 @@ class Submission extends AbstractBaseApi
 
     /**
      * Find a submission by user ID
+     *
      * @param int $id User ID (submissions are fetched by user ID)
      * @param array<string, mixed> $params Optional query parameters
-     * @return static
+     *
      * @throws CanvasApiException
      * @throws Exception
+     *
+     * @return static
      */
     public static function find(int $id, array $params = []): static
     {
@@ -362,10 +376,13 @@ class Submission extends AbstractBaseApi
 
     /**
      * Fetch all submissions for the assignment
+     *
      * @param array<string, mixed> $params Query parameters
-     * @return Submission[]
+     *
      * @throws CanvasApiException
      * @throws Exception
+     *
+     * @return Submission[]
      */
     public static function get(array $params = []): array
     {
@@ -384,14 +401,15 @@ class Submission extends AbstractBaseApi
         return $submissions;
     }
 
-
-
     /**
      * Get paginated submissions
+     *
      * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
+     *
      * @throws CanvasApiException
      * @throws Exception
+     *
+     * @return PaginationResult
      */
     public static function paginate(array $params = []): PaginationResult
     {
@@ -406,10 +424,13 @@ class Submission extends AbstractBaseApi
 
     /**
      * Fetch all submissions from all pages
+     *
      * @param array<string, mixed> $params Query parameters
-     * @return Submission[]
+     *
      * @throws CanvasApiException
      * @throws Exception
+     *
+     * @return Submission[]
      */
     public static function all(array $params = []): array
     {
@@ -430,7 +451,9 @@ class Submission extends AbstractBaseApi
 
     /**
      * Update/grade a submission
+     *
      * @param array<string, mixed>|UpdateSubmissionDTO $data
+     *
      * @throws CanvasApiException
      * @throws Exception
      */
@@ -449,7 +472,7 @@ class Submission extends AbstractBaseApi
         );
 
         $response = self::$apiClient->request('PUT', $endpoint, [
-            'multipart' => $dto->toApiArray()
+            'multipart' => $dto->toApiArray(),
         ]);
 
         $submissionData = self::parseJsonResponse($response);
@@ -459,6 +482,7 @@ class Submission extends AbstractBaseApi
 
     /**
      * Mark submission as read
+     *
      * @throws CanvasApiException
      * @throws Exception
      */
@@ -474,11 +498,13 @@ class Submission extends AbstractBaseApi
             $userId
         );
         self::$apiClient->put($endpoint);
+
         return new self([]);
     }
 
     /**
      * Mark submission as unread
+     *
      * @throws CanvasApiException
      * @throws Exception
      */
@@ -494,12 +520,15 @@ class Submission extends AbstractBaseApi
             $userId
         );
         self::$apiClient->delete($endpoint);
+
         return new self([]);
     }
 
     /**
      * Bulk update grades for multiple submissions
+     *
      * @param array<string, mixed> $gradeData
+     *
      * @throws CanvasApiException
      * @throws Exception
      * @throws InvalidArgumentException
@@ -541,15 +570,18 @@ class Submission extends AbstractBaseApi
         );
 
         self::$apiClient->request('PUT', $endpoint, [
-            'json' => $gradeData
+            'json' => $gradeData,
         ]);
+
         return new self([]);
     }
 
     /**
      * Save the submission (update only - submissions are created via static create method)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -571,7 +603,7 @@ class Submission extends AbstractBaseApi
         );
 
         $response = self::$apiClient->request('PUT', $endpoint, [
-            'multipart' => $dto->toApiArray()
+            'multipart' => $dto->toApiArray(),
         ]);
 
         $submissionData = self::parseJsonResponse($response);
@@ -883,6 +915,7 @@ class Submission extends AbstractBaseApi
 
     /**
      * Convert submission to array for DTO
+     *
      * @return array<string, mixed>
      */
     protected function toDtoArray(): array
@@ -894,7 +927,7 @@ class Submission extends AbstractBaseApi
             'url' => $this->url,
             'posted_grade' => $this->grade,
             'excuse' => $this->excused,
-        ], fn($value) => $value !== null);
+        ], fn ($value) => $value !== null);
     }
 
     // Relationship Methods
@@ -922,8 +955,9 @@ class Submission extends AbstractBaseApi
     /**
      * Get the user who made this submission
      *
-     * @return User|null
      * @throws CanvasApiException
+     *
+     * @return User|null
      */
     public function user(): ?User
     {
@@ -934,15 +968,16 @@ class Submission extends AbstractBaseApi
         try {
             return User::find($this->userId);
         } catch (\Exception $e) {
-            throw new CanvasApiException("Could not load submission user: " . $e->getMessage());
+            throw new CanvasApiException('Could not load submission user: ' . $e->getMessage());
         }
     }
 
     /**
      * Get the user who graded this submission
      *
-     * @return User|null
      * @throws CanvasApiException
+     *
+     * @return User|null
      */
     public function grader(): ?User
     {
@@ -953,19 +988,22 @@ class Submission extends AbstractBaseApi
         try {
             return User::find($this->graderId);
         } catch (\Exception $e) {
-            throw new CanvasApiException("Could not load grader: " . $e->getMessage());
+            throw new CanvasApiException('Could not load grader: ' . $e->getMessage());
         }
     }
 
     /**
      * Get the API endpoint for this resource
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
         self::checkAssignment();
+
         return sprintf('courses/%d/assignments/%d/submissions', self::$course->getId(), self::$assignment->getId());
     }
 }

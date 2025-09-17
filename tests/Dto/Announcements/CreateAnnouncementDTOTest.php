@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Announcements;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Announcements\CreateAnnouncementDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\Announcements\CreateAnnouncementDTO
@@ -14,7 +16,7 @@ class CreateAnnouncementDTOTest extends TestCase
     {
         $dto = new CreateAnnouncementDTO([
             'title' => 'Test Announcement',
-            'message' => 'Test message content'
+            'message' => 'Test message content',
         ]);
 
         $this->assertTrue($dto->isAnnouncement);
@@ -30,7 +32,7 @@ class CreateAnnouncementDTOTest extends TestCase
             'message' => 'Test message',
             'discussionType' => 'flat',
             'published' => false,
-            'locked' => true
+            'locked' => true,
         ]);
 
         $this->assertEquals('Test Announcement', $dto->title);
@@ -46,7 +48,7 @@ class CreateAnnouncementDTOTest extends TestCase
     {
         $dto = new CreateAnnouncementDTO([
             'title' => 'Scheduled Announcement',
-            'published' => true
+            'published' => true,
         ]);
 
         $this->assertTrue($dto->published);
@@ -60,7 +62,7 @@ class CreateAnnouncementDTOTest extends TestCase
     public function testSetDelayedPostAtNull(): void
     {
         $dto = new CreateAnnouncementDTO([
-            'title' => 'Immediate Announcement'
+            'title' => 'Immediate Announcement',
         ]);
 
         $dto->setDelayedPostAt(null);
@@ -72,7 +74,7 @@ class CreateAnnouncementDTOTest extends TestCase
     public function testLockComments(): void
     {
         $dto = new CreateAnnouncementDTO([
-            'title' => 'No Comments Announcement'
+            'title' => 'No Comments Announcement',
         ]);
 
         $this->assertNull($dto->lockComment);
@@ -87,7 +89,7 @@ class CreateAnnouncementDTOTest extends TestCase
     public function testLockCommentsDefaultValue(): void
     {
         $dto = new CreateAnnouncementDTO([
-            'title' => 'Locked Comments Announcement'
+            'title' => 'Locked Comments Announcement',
         ]);
 
         $dto->lockComments();
@@ -97,7 +99,7 @@ class CreateAnnouncementDTOTest extends TestCase
     public function testSetSections(): void
     {
         $dto = new CreateAnnouncementDTO([
-            'title' => 'Section-specific Announcement'
+            'title' => 'Section-specific Announcement',
         ]);
 
         $this->assertNull($dto->specificSections);
@@ -140,23 +142,23 @@ class CreateAnnouncementDTOTest extends TestCase
             'title' => 'API Test Announcement',
             'message' => 'Test content',
             'locked' => true,
-            'pinned' => false
+            'pinned' => false,
         ]);
 
         $apiArray = $dto->toApiArray();
 
         $this->assertIsArray($apiArray);
-        
+
         // Check for multipart format
         $this->assertArrayHasKey(0, $apiArray);
         $this->assertArrayHasKey('name', $apiArray[0]);
         $this->assertArrayHasKey('contents', $apiArray[0]);
-        
+
         // Find the title field
         $titleFound = false;
         $isAnnouncementFound = false;
         $requireInitialPostFound = false;
-        
+
         foreach ($apiArray as $field) {
             if ($field['name'] === 'discussion_topic[title]') {
                 $this->assertEquals('API Test Announcement', $field['contents']);
@@ -171,7 +173,7 @@ class CreateAnnouncementDTOTest extends TestCase
                 $requireInitialPostFound = true;
             }
         }
-        
+
         $this->assertTrue($titleFound, 'Title field not found in API array');
         $this->assertTrue($isAnnouncementFound, 'is_announcement field not found in API array');
         $this->assertTrue($requireInitialPostFound, 'require_initial_post field not found in API array');
@@ -180,11 +182,11 @@ class CreateAnnouncementDTOTest extends TestCase
     public function testApiPropertyName(): void
     {
         $dto = new CreateAnnouncementDTO();
-        
+
         $reflection = new \ReflectionClass($dto);
         $property = $reflection->getProperty('apiPropertyName');
         $property->setAccessible(true);
-        
+
         $this->assertEquals('discussion_topic', $property->getValue($dto));
     }
 }

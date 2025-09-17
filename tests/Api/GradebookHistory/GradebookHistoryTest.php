@@ -4,22 +4,23 @@ declare(strict_types=1);
 
 namespace Tests\Api\GradebookHistory;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\GradebookHistory\GradebookHistory;
 use CanvasLMS\Config;
+use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
 use CanvasLMS\Objects\GradebookHistoryDay;
 use CanvasLMS\Objects\GradebookHistoryGrader;
 use CanvasLMS\Objects\SubmissionHistory;
 use CanvasLMS\Objects\SubmissionVersion;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Exceptions\CanvasApiException;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 
 class GradebookHistoryTest extends TestCase
 {
     private $httpClientMock;
+
     private int $testCourseId = 123;
 
     protected function setUp(): void
@@ -46,7 +47,7 @@ class GradebookHistoryTest extends TestCase
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockResponse->method('getBody')
             ->willReturn($mockStream);
-        
+
         foreach ($headers as $name => $value) {
             $mockResponse->method('getHeader')
                 ->with($name)
@@ -65,9 +66,9 @@ class GradebookHistoryTest extends TestCase
                     [
                         'id' => 456,
                         'name' => 'John Teacher',
-                        'assignments' => [789, 790]
-                    ]
-                ]
+                        'assignments' => [789, 790],
+                    ],
+                ],
             ],
             [
                 'date' => '2025-01-14',
@@ -75,10 +76,10 @@ class GradebookHistoryTest extends TestCase
                     [
                         'id' => 457,
                         'name' => 'Jane Teacher',
-                        'assignments' => [791]
-                    ]
-                ]
-            ]
+                        'assignments' => [791],
+                    ],
+                ],
+            ],
         ];
 
         $this->httpClientMock
@@ -105,13 +106,13 @@ class GradebookHistoryTest extends TestCase
             [
                 'id' => 456,
                 'name' => 'John Teacher',
-                'assignments' => [789, 790]
+                'assignments' => [789, 790],
             ],
             [
                 'id' => 457,
                 'name' => 'Jane Teacher',
-                'assignments' => [791]
-            ]
+                'assignments' => [791],
+            ],
         ];
 
         $this->httpClientMock
@@ -166,10 +167,10 @@ class GradebookHistoryTest extends TestCase
                         'user_id' => 123,
                         'user_name' => 'Alice Student',
                         'submission_type' => 'online_quiz',
-                        'workflow_state' => 'graded'
-                    ]
-                ]
-            ]
+                        'workflow_state' => 'graded',
+                    ],
+                ],
+            ],
         ];
 
         $this->httpClientMock
@@ -206,8 +207,8 @@ class GradebookHistoryTest extends TestCase
                 'user_id' => 123,
                 'user_name' => 'Alice Student',
                 'submission_type' => 'online_quiz',
-                'workflow_state' => 'graded'
-            ]
+                'workflow_state' => 'graded',
+            ],
         ];
 
         $this->httpClientMock
@@ -248,7 +249,7 @@ class GradebookHistoryTest extends TestCase
     public function testRequiresCourseContext(): void
     {
         GradebookHistory::resetCourse();
-        
+
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course context is required for Gradebook History operations');
 

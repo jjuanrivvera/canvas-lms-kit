@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Announcements;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Announcements\UpdateAnnouncementDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\Announcements\UpdateAnnouncementDTO
@@ -15,7 +17,7 @@ class UpdateAnnouncementDTOTest extends TestCase
         $dto = new UpdateAnnouncementDTO([
             'title' => 'Updated Announcement',
             'is_announcement' => false,  // Try to change it to non-announcement
-            'require_initial_post' => true  // Try to enable initial post
+            'require_initial_post' => true,  // Try to enable initial post
         ]);
 
         // Should maintain announcement status even if attempted to change
@@ -27,7 +29,7 @@ class UpdateAnnouncementDTOTest extends TestCase
     public function testPartialUpdate(): void
     {
         $dto = new UpdateAnnouncementDTO([
-            'title' => 'New Title Only'
+            'title' => 'New Title Only',
         ]);
 
         $this->assertEquals('New Title Only', $dto->title);
@@ -39,7 +41,7 @@ class UpdateAnnouncementDTOTest extends TestCase
     public function testSetDelayedPostAtPublishesWhenNull(): void
     {
         $dto = new UpdateAnnouncementDTO([
-            'title' => 'Post Now'
+            'title' => 'Post Now',
         ]);
 
         $dto->setDelayedPostAt(null);
@@ -128,7 +130,7 @@ class UpdateAnnouncementDTOTest extends TestCase
     {
         $dto = new UpdateAnnouncementDTO([
             'title' => 'Updated API Announcement',
-            'locked' => true
+            'locked' => true,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -137,11 +139,11 @@ class UpdateAnnouncementDTOTest extends TestCase
 
         // Check for multipart format
         $this->assertArrayHasKey(0, $apiArray);
-        
+
         // Find the title and locked fields
         $titleFound = false;
         $lockedFound = false;
-        
+
         foreach ($apiArray as $field) {
             if (isset($field['name'])) {
                 if ($field['name'] === 'discussion_topic[title]') {
@@ -154,7 +156,7 @@ class UpdateAnnouncementDTOTest extends TestCase
                 }
             }
         }
-        
+
         $this->assertTrue($titleFound, 'Title field not found in API array');
         $this->assertTrue($lockedFound, 'Locked field not found in API array');
     }
@@ -162,18 +164,18 @@ class UpdateAnnouncementDTOTest extends TestCase
     public function testApiPropertyName(): void
     {
         $dto = new UpdateAnnouncementDTO();
-        
+
         $reflection = new \ReflectionClass($dto);
         $property = $reflection->getProperty('apiPropertyName');
         $property->setAccessible(true);
-        
+
         $this->assertEquals('discussion_topic', $property->getValue($dto));
     }
 
     public function testInheritanceFromUpdateDiscussionTopicDTO(): void
     {
         $dto = new UpdateAnnouncementDTO();
-        
+
         $this->assertInstanceOf(
             \CanvasLMS\Dto\DiscussionTopics\UpdateDiscussionTopicDTO::class,
             $dto

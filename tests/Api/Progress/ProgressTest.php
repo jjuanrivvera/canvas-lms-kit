@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace Tests\Api\Progress;
 
+use CanvasLMS\Api\Progress\Progress;
+use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Interfaces\HttpClientInterface;
 use DateTime;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use CanvasLMS\Api\Progress\Progress;
-use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Exceptions\CanvasApiException;
 
 class ProgressTest extends TestCase
 {
     private HttpClientInterface|MockObject $mockHttpClient;
+
     private ResponseInterface|MockObject $mockResponse;
+
     private StreamInterface|MockObject $mockStream;
 
     protected function setUp(): void
@@ -48,7 +50,7 @@ class ProgressTest extends TestCase
             'updated_at' => '2023-01-15T15:03:00Z',
             'message' => 'Processing course updates...',
             'results' => null,
-            'url' => 'https://canvas.example.com/api/v1/progress/123'
+            'url' => 'https://canvas.example.com/api/v1/progress/123',
         ];
 
         $progress = new Progress($data);
@@ -74,7 +76,7 @@ class ProgressTest extends TestCase
             'context_id' => 456,
             'context_type' => 'Course',
             'workflow_state' => 'completed',
-            'completion' => 100
+            'completion' => 100,
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
@@ -96,7 +98,7 @@ class ProgressTest extends TestCase
             'context_id' => 456,
             'context_type' => 'Course',
             'workflow_state' => 'running',
-            'completion' => 50
+            'completion' => 50,
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
@@ -162,14 +164,14 @@ class ProgressTest extends TestCase
     {
         $queuedProgress = new Progress([
             'workflow_state' => Progress::STATE_QUEUED,
-            'message' => 'Waiting for resources'
+            'message' => 'Waiting for resources',
         ]);
         $this->assertEquals('Waiting to start - Waiting for resources', $queuedProgress->getStatusDescription());
 
         $runningProgress = new Progress([
             'workflow_state' => Progress::STATE_RUNNING,
             'completion' => 45,
-            'message' => 'Processing data'
+            'message' => 'Processing data',
         ]);
         $this->assertEquals('In progress (45%) - Processing data', $runningProgress->getStatusDescription());
 
@@ -178,7 +180,7 @@ class ProgressTest extends TestCase
 
         $failedProgress = new Progress([
             'workflow_state' => Progress::STATE_FAILED,
-            'message' => 'Connection timeout'
+            'message' => 'Connection timeout',
         ]);
         $this->assertEquals('Failed - Connection timeout', $failedProgress->getStatusDescription());
     }
@@ -190,7 +192,7 @@ class ProgressTest extends TestCase
         $responseData = [
             'id' => 123,
             'workflow_state' => 'failed',
-            'message' => 'Cancelled by user'
+            'message' => 'Cancelled by user',
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
@@ -225,7 +227,7 @@ class ProgressTest extends TestCase
             'id' => 123,
             'completion' => 75,
             'workflow_state' => 'running',
-            'message' => 'Updated progress'
+            'message' => 'Updated progress',
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
@@ -256,7 +258,7 @@ class ProgressTest extends TestCase
         $responses = [
             ['id' => 123, 'workflow_state' => 'running', 'completion' => 30],
             ['id' => 123, 'workflow_state' => 'running', 'completion' => 60],
-            ['id' => 123, 'workflow_state' => 'completed', 'completion' => 100, 'results' => ['success' => true]]
+            ['id' => 123, 'workflow_state' => 'completed', 'completion' => 100, 'results' => ['success' => true]],
         ];
 
         $this->mockStream->method('getContents')->willReturnOnConsecutiveCalls(

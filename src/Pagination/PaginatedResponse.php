@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Pagination;
 
 use CanvasLMS\Config;
-use Psr\Http\Message\ResponseInterface;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -32,36 +34,42 @@ class PaginatedResponse
 {
     /**
      * The HTTP response
+     *
      * @var ResponseInterface
      */
     private ResponseInterface $response;
 
     /**
      * HTTP client for making additional requests
+     *
      * @var HttpClientInterface
      */
     private HttpClientInterface $httpClient;
 
     /**
      * Link header parser instance
+     *
      * @var LinkHeaderParser
      */
     private LinkHeaderParser $linkParser;
 
     /**
      * Parsed Link header navigation URLs
+     *
      * @var string[]
      */
     private array $navigationUrls;
 
     /**
      * Cached Link header string
+     *
      * @var string|null
      */
     private ?string $linkHeader = null;
 
     /**
      * Logger instance
+     *
      * @var LoggerInterface
      */
     private LoggerInterface $logger;
@@ -86,7 +94,7 @@ class PaginatedResponse
                 'has_next' => $this->hasNext(),
                 'has_prev' => $this->hasPrev(),
                 'current_page' => $this->getCurrentPage(),
-                'per_page' => $this->getPerPage()
+                'per_page' => $this->getPerPage(),
             ]);
         }
     }
@@ -147,6 +155,7 @@ class PaginatedResponse
     private function parseLinkHeader(): array
     {
         $linkHeader = $this->getLinkHeader();
+
         return $this->linkParser->parse($linkHeader);
     }
 
@@ -164,6 +173,7 @@ class PaginatedResponse
      * Get URL for specific relation
      *
      * @param string $relation The relation (next, prev, first, last, current)
+     *
      * @return string|null
      */
     public function getUrl(string $relation): ?string
@@ -245,6 +255,7 @@ class PaginatedResponse
      * Check if relation exists in Link header
      *
      * @param string $relation The relation to check
+     *
      * @return bool
      */
     public function hasRelation(string $relation): bool
@@ -364,6 +375,7 @@ class PaginatedResponse
      * Fetch a specific page by URL
      *
      * @param string $url The URL to fetch
+     *
      * @return self|null
      */
     private function fetchUrl(string $url): ?self
@@ -385,7 +397,7 @@ class PaginatedResponse
 
             $this->logger->debug('Pagination: Fetching page', [
                 'path' => $path,
-                'has_query' => isset($parsedUrl['query'])
+                'has_query' => isset($parsedUrl['query']),
             ]);
 
             $startTime = microtime(true);
@@ -394,15 +406,16 @@ class PaginatedResponse
 
             $this->logger->info('Pagination: Page fetched successfully', [
                 'path' => $path,
-                'duration_ms' => round($duration * 1000, 2)
+                'duration_ms' => round($duration * 1000, 2),
             ]);
 
             return new self($response, $this->httpClient);
         } catch (\Exception $e) {
             $this->logger->error('Pagination: Failed to fetch page', [
                 'url' => $url,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -411,6 +424,7 @@ class PaginatedResponse
      * Convert to PaginationResult
      *
      * @param mixed[] $data The decoded response data
+     *
      * @return PaginationResult
      */
     public function toPaginationResult(array $data): PaginationResult
@@ -432,6 +446,7 @@ class PaginatedResponse
      * Fetch all pages starting from current page
      *
      * @return mixed[] Array containing all data from all pages
+     *
      * @deprecated Use all() instead
      */
     public function fetchAllPages(): array
@@ -451,7 +466,7 @@ class PaginatedResponse
             $this->logger->debug('Pagination: Processing page', [
                 'page_number' => $pageCount,
                 'items_on_page' => $itemCount,
-                'total_items_so_far' => count($allData) + $itemCount
+                'total_items_so_far' => count($allData) + $itemCount,
             ]);
 
             $allData = array_merge($allData, $data);
@@ -465,7 +480,7 @@ class PaginatedResponse
             'total_pages' => $pageCount,
             'total_items' => count($allData),
             'duration_s' => round($duration, 2),
-            'avg_time_per_page_ms' => round(($duration / $pageCount) * 1000, 2)
+            'avg_time_per_page_ms' => round(($duration / $pageCount) * 1000, 2),
         ]);
 
         return $allData;

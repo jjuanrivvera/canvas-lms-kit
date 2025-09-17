@@ -1,21 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Dto\Courses;
 
-use DateTime;
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
+use DateTime;
 
 class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
 {
     /**
      * The name of the course. If omitted, the course will be named “Unnamed Course.”
+     *
      * @var string $name
      */
     public string $name = 'Unnamed Course';
 
     /**
      * The course code for the course.
+     *
      * @var string $courseCode
      */
     public string $courseCode = '';
@@ -23,6 +27,7 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Course start date in ISO8601 format, e.g. 2011-01-01T01:00Z.
      * This value is ignored unless ‘restrict_enrollments_to_course_dates’ is set to true.
+     *
      * @var DateTime|null $startAt
      */
     public ?DateTime $startAt = null;
@@ -30,6 +35,7 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Course end date in ISO8601 format, e.g. 2011-01-01T01:00Z.
      * This value is ignored unless ‘restrict_enrollments_to_course_dates’ is set to true.
+     *
      * @var DateTime|null $endAt
      */
     public ?DateTime $endAt = null;
@@ -45,66 +51,77 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
      * - ‘cc_by_sa’ (CC Attribution Share Alike)
      * - ‘cc_by’ (CC Attribution)
      * - ‘public_domain’ (Public Domain).
+     *
      * @var string $license
      */
     public string $license = 'private';
 
     /**
      * Set to true if course is public to both authenticated and unauthenticated users.
+     *
      * @var bool $isPublic
      */
     public bool $isPublic = false;
 
     /**
      * Set to true if course is public only to authenticated users.
+     *
      * @var bool $isPublicToAuthUsers
      */
     public bool $isPublicToAuthUsers = false;
 
     /**
      * Set to true to make the course syllabus public.
+     *
      * @var bool $publicSyllabus
      */
     public bool $publicSyllabus = false;
 
     /**
      * Set to true to make the course syllabus public for authenticated users.
+     *
      * @var bool $publicSyllabusToAuth
      */
     public bool $publicSyllabusToAuth = false;
 
     /**
      * A publicly visible description of the course.
+     *
      * @var string|null $publicDescription
      */
     public ?string $publicDescription = null;
 
     /**
      * If true, students will be able to modify the course wiki.
+     *
      * @var bool $allowStudentWikiEdits
      */
     public bool $allowStudentWikiEdits = false;
 
     /**
      * If true, course members will be able to comment on wiki pages.
+     *
      * @var bool $allowWikiComments
      */
     public bool $allowWikiComments = false;
 
     /**
      * If true, students can attach files to forum posts.
+     *
      * @var bool $allowStudentForumAttachments
      */
     public bool $allowStudentForumAttachments = false;
 
     /**
      * Set to true if the course is open enrollment.
+     *
      * @var bool $openEnrollment
      */
     public bool $openEnrollment = false;
 
     /**
      * Set to true if the course is self enrollment.
+     *
      * @var bool $selfEnrollment
      */
     public bool $selfEnrollment = false;
@@ -112,36 +129,42 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Set to true to restrict user enrollments to the start and end dates of the course.
      * This value must be set to true in order to specify a course start date and/or end date.
+     *
      * @var bool $restrictEnrollmentsToCourseDates
      */
     public bool $restrictEnrollmentsToCourseDates = false;
 
     /**
      * The unique ID of the term to create to course in.
+     *
      * @var int|null $termId
      */
     public ?int $termId = null;
 
     /**
      * The unique SIS identifier.
+     *
      * @var string|null $sisCourseId
      */
     public ?string $sisCourseId = null;
 
     /**
      * The unique Integration identifier.
+     *
      * @var string|null $integrationId
      */
     public ?string $integrationId = null;
 
     /**
      * If this option is set to true, the totals in student grades summary will be hidden.
+     *
      * @var bool $hideFinalGrades
      */
     public bool $hideFinalGrades = false;
 
     /**
      * Set to true to weight final grade based on assignment groups percentages.
+     *
      * @var bool $applyAssignmentGroupWeights
      */
     public bool $applyAssignmentGroupWeights = false;
@@ -149,18 +172,21 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
     /**
      * The time zone for the course. Allowed time zones are IANA time zones
      * or friendlier Ruby on Rails time zones.
+     *
      * @var string $timeZone
      */
     public string $timeZone = 'UTC';
 
     /**
      * If this option is set to true, the course will be available to students immediately.
+     *
      * @var bool $offer
      */
     public bool $offer = false;
 
     /**
      * Set to true to enroll the current user as the teacher.
+     *
      * @var bool $enrollMe
      */
     public bool $enrollMe = false;
@@ -173,12 +199,14 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
      * - ‘syllabus’ Course Syllabus Page
      * - other types may be added in the future
      * Allowed values: feed, wiki, modules, syllabus, assignments
+     *
      * @var string $defaultView
      */
     public string $defaultView = 'syllabus';
 
     /**
      * The syllabus body for the course.
+     *
      * @var string|null $syllabusBody
      */
     public ?string $syllabusBody = null;
@@ -186,24 +214,28 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
     /**
      * The grading standard id to set for the course.
      * If no value is provided for this argument the current grading_standard will be un-set from this course.
+     *
      * @var int|null $gradingStandardId
      */
     public ?int $gradingStandardId = null;
 
     /**
      * Optional. The grade_passback_setting for the course. Only ‘nightly_sync’, ‘disabled’, and ” are allowed.
+     *
      * @var string|null $gradePassbackSetting
      */
     public ?string $gradePassbackSetting = null;
 
     /**
      * Optional. Specifies the format of the course. (Should be ‘on_campus’, ‘online’, or ‘blended’)
+     *
      * @var string|null $courseFormat
      */
     public ?string $courseFormat = null;
 
     /**
      * When true, will first try to re-activate a deleted course with matching sis_course_id if possible.
+     *
      * @var bool $enableSisReactivation
      */
     public bool $enableSisReactivation = false;
@@ -211,12 +243,14 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Default is false. When true, all grades in the course must be posted manually,
      * and will not be automatically posted. When false, all grades in the course will be automatically posted.
+     *
      * @var bool $postManually
      */
     public bool $postManually = false;
 
     /**
      * Convert the DTO to an array for API requests
+     *
      * @return mixed[]
      */
     public function toApiArray(): array
@@ -237,8 +271,8 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
 
             // Rename keys to this format course[{key}]
             $modifiedProperties[] = [
-                "name" => 'course[' . str_to_snake_case($key) . ']',
-                "contents" => $value
+                'name' => 'course[' . str_to_snake_case($key) . ']',
+                'contents' => $value,
             ];
         }
 

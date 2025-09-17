@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Quizzes;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Quizzes\UpdateQuizDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\Quizzes\UpdateQuizDTO
@@ -43,7 +45,7 @@ class UpdateQuizDTOTest extends TestCase
             'hide_results' => 'until_after_last_attempt',
             'ip_filter' => '172.16.0.0/12',
             'access_code' => 'newpassword',
-            'require_lockdown_browser' => false
+            'require_lockdown_browser' => false,
         ];
 
         $dto = new UpdateQuizDTO($data);
@@ -142,7 +144,7 @@ class UpdateQuizDTOTest extends TestCase
             'title' => 'Updated Quiz',
             'quiz_type' => 'practice_quiz',
             'time_limit' => 90,
-            'published' => false
+            'published' => false,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -185,7 +187,7 @@ class UpdateQuizDTOTest extends TestCase
             'title' => 'Updated Quiz',
             'description' => null,
             'time_limit' => 90,
-            'points_possible' => null
+            'points_possible' => null,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -202,17 +204,17 @@ class UpdateQuizDTOTest extends TestCase
         // Test that we can update just a few fields
         $dto = new UpdateQuizDTO([
             'published' => true,
-            'time_limit' => 30
+            'time_limit' => 30,
         ]);
 
         $apiArray = $dto->toApiArray();
 
         $this->assertCount(2, $apiArray); // 2 actual properties (apiPropertyName excluded)
-        
+
         $names = array_column($apiArray, 'name');
         $this->assertContains('quiz[published]', $names);
         $this->assertContains('quiz[time_limit]', $names);
-        
+
         // Should not contain other fields
         $this->assertNotContains('quiz[title]', $names);
         $this->assertNotContains('quiz[description]', $names);
@@ -225,7 +227,7 @@ class UpdateQuizDTOTest extends TestCase
             'title' => '',
             'description' => '',
             'access_code' => '',
-            'ip_filter' => ''
+            'ip_filter' => '',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -244,7 +246,7 @@ class UpdateQuizDTOTest extends TestCase
             'published' => true,
             'shuffle_answers' => false,
             'one_question_at_a_time' => true,
-            'require_lockdown_browser' => false
+            'require_lockdown_browser' => false,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -266,7 +268,7 @@ class UpdateQuizDTOTest extends TestCase
             'time_limit' => 0,
             'points_possible' => 0.0,
             'allowed_attempts' => -1,
-            'assignment_group_id' => 123
+            'assignment_group_id' => 123,
         ]);
 
         $apiArray = $dto->toApiArray();

@@ -1,15 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Dto\Modules;
 
-use DateTimeInterface;
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
+use DateTimeInterface;
 
 class CreateModuleDTO extends AbstractBaseDto implements DTOInterface
 {
     /**
      * The name of the property in the API
+     *
      * @var string
      */
     protected string $apiPropertyName = 'module';

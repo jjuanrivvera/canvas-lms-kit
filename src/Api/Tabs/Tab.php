@@ -8,8 +8,6 @@ use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Dto\Tabs\UpdateTabDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Tabs API
@@ -100,6 +98,7 @@ class Tab extends AbstractBaseApi
      * Set the course context for tab operations
      *
      * @param Course $course The course to operate on
+     *
      * @return void
      */
     public static function setCourse(Course $course): void
@@ -110,14 +109,16 @@ class Tab extends AbstractBaseApi
     /**
      * Check if course context is set
      *
-     * @return bool
      * @throws CanvasApiException If course is not set
+     *
+     * @return bool
      */
     public static function checkCourse(): bool
     {
         if (!isset(self::$course) || !isset(self::$course->id)) {
             throw new CanvasApiException('Course is required');
         }
+
         return true;
     }
 
@@ -135,6 +136,7 @@ class Tab extends AbstractBaseApi
      * Set HTML URL
      *
      * @param string|null $htmlUrl
+     *
      * @return void
      */
     public function setHtmlUrl(?string $htmlUrl): void
@@ -156,6 +158,7 @@ class Tab extends AbstractBaseApi
      * Set ID
      *
      * @param string|null $id
+     *
      * @return void
      */
     public function setId(?string $id): void
@@ -177,6 +180,7 @@ class Tab extends AbstractBaseApi
      * Set label
      *
      * @param string|null $label
+     *
      * @return void
      */
     public function setLabel(?string $label): void
@@ -198,6 +202,7 @@ class Tab extends AbstractBaseApi
      * Set type
      *
      * @param string|null $type
+     *
      * @return void
      */
     public function setType(?string $type): void
@@ -219,6 +224,7 @@ class Tab extends AbstractBaseApi
      * Set hidden status
      *
      * @param bool|null $hidden
+     *
      * @return void
      */
     public function setHidden(?bool $hidden): void
@@ -240,6 +246,7 @@ class Tab extends AbstractBaseApi
      * Set visibility
      *
      * @param string|null $visibility
+     *
      * @return void
      */
     public function setVisibility(?string $visibility): void
@@ -261,6 +268,7 @@ class Tab extends AbstractBaseApi
      * Set position
      *
      * @param int|null $position
+     *
      * @return void
      */
     public function setPosition(?int $position): void
@@ -275,8 +283,10 @@ class Tab extends AbstractBaseApi
      * This method throws an exception as it's not supported.
      *
      * @param int $id Tab ID
-     * @return static
+     *
      * @throws CanvasApiException Always throws as this operation is not supported
+     *
+     * @return static
      */
     public static function find(int $id, array $params = []): static
     {
@@ -290,8 +300,10 @@ class Tab extends AbstractBaseApi
      *
      * @param string $id Tab ID
      * @param array<string, mixed>|UpdateTabDTO $data Tab data
-     * @return self Updated Tab object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Updated Tab object
      */
     public static function update(string $id, array|UpdateTabDTO $data): self
     {
@@ -326,8 +338,9 @@ class Tab extends AbstractBaseApi
     /**
      * Save the current tab (update only)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -399,12 +412,15 @@ class Tab extends AbstractBaseApi
 
     /**
      * Get the API endpoint for this resource
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
+
         return sprintf('courses/%d/tabs', self::$course->getId());
     }
 }

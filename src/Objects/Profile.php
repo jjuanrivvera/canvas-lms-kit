@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Objects;
 
 /**
@@ -97,6 +99,7 @@ class Profile
 
     /**
      * Constructor
+     *
      * @param array<string, mixed> $data
      */
     public function __construct(array $data = [])
@@ -111,6 +114,7 @@ class Profile
 
     /**
      * Check if user has a bio
+     *
      * @return bool
      */
     public function hasBio(): bool
@@ -120,6 +124,7 @@ class Profile
 
     /**
      * Check if user has a title
+     *
      * @return bool
      */
     public function hasTitle(): bool
@@ -129,6 +134,7 @@ class Profile
 
     /**
      * Check if user has an avatar
+     *
      * @return bool
      */
     public function hasAvatar(): bool
@@ -138,6 +144,7 @@ class Profile
 
     /**
      * Convert to array
+     *
      * @return array<string, mixed>
      */
     public function toArray(): array

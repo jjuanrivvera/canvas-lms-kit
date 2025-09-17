@@ -22,15 +22,18 @@ class UpdateOutcomeGroupDTO extends AbstractBaseDto
         $this->description = $data['description'] ?? null;
         $this->vendorGuid = $data['vendorGuid'] ?? $data['vendor_guid'] ?? null;
         $this->parentOutcomeGroupId = isset($data['parentOutcomeGroupId'])
-            ? (int)$data['parentOutcomeGroupId']
-            : (isset($data['parent_outcome_group_id']) ? (int)$data['parent_outcome_group_id'] : null);
+            ? (int) $data['parentOutcomeGroupId']
+            : (isset($data['parent_outcome_group_id']) ? (int) $data['parent_outcome_group_id'] : null);
 
         parent::__construct($data);
     }
 
     public ?string $title = null;
+
     public ?string $description = null;
+
     public ?string $vendorGuid = null;
+
     public ?int $parentOutcomeGroupId = null;
 
     /**
@@ -45,28 +48,28 @@ class UpdateOutcomeGroupDTO extends AbstractBaseDto
         if ($this->title !== null) {
             $data[] = [
                 'name' => 'title',
-                'contents' => $this->title
+                'contents' => $this->title,
             ];
         }
 
         if ($this->description !== null) {
             $data[] = [
                 'name' => 'description',
-                'contents' => $this->description
+                'contents' => $this->description,
             ];
         }
 
         if ($this->vendorGuid !== null) {
             $data[] = [
                 'name' => 'vendor_guid',
-                'contents' => $this->vendorGuid
+                'contents' => $this->vendorGuid,
             ];
         }
 
         if ($this->parentOutcomeGroupId !== null) {
             $data[] = [
                 'name' => 'parent_outcome_group_id',
-                'contents' => (string)$this->parentOutcomeGroupId
+                'contents' => (string) $this->parentOutcomeGroupId,
             ];
         }
 
@@ -77,6 +80,7 @@ class UpdateOutcomeGroupDTO extends AbstractBaseDto
      * Update only the title.
      *
      * @param string $title
+     *
      * @return self
      */
     public static function updateTitle(string $title): self
@@ -88,6 +92,7 @@ class UpdateOutcomeGroupDTO extends AbstractBaseDto
      * Update only the description.
      *
      * @param string $description
+     *
      * @return self
      */
     public static function updateDescription(string $description): self
@@ -99,6 +104,7 @@ class UpdateOutcomeGroupDTO extends AbstractBaseDto
      * Update the parent group (move group).
      *
      * @param int $parentGroupId
+     *
      * @return self
      */
     public static function moveToParent(int $parentGroupId): self
@@ -110,6 +116,7 @@ class UpdateOutcomeGroupDTO extends AbstractBaseDto
      * Update vendor GUID.
      *
      * @param string $vendorGuid
+     *
      * @return self
      */
     public static function updateVendorGuid(string $vendorGuid): self
@@ -121,6 +128,7 @@ class UpdateOutcomeGroupDTO extends AbstractBaseDto
      * Create an UpdateOutcomeGroupDTO with only specific fields.
      *
      * @param array<string, mixed> $fields
+     *
      * @return self
      */
     public static function withFields(array $fields): self

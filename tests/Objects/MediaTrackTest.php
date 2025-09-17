@@ -27,7 +27,7 @@ class MediaTrackTest extends TestCase
             'webvtt_content' => 'WEBVTT\n\n1\n00:00:00.000 --> 00:00:05.000\nTest',
             'url' => 'https://example.com/track',
             'created_at' => '2024-01-15T10:00:00Z',
-            'updated_at' => '2024-01-15T11:00:00Z'
+            'updated_at' => '2024-01-15T11:00:00Z',
         ];
 
         $track = new MediaTrack($data);
@@ -73,7 +73,7 @@ class MediaTrackTest extends TestCase
             'media_object_id' => 'm-abc456',
             'webvtt_content' => 'WEBVTT content',
             'created_at' => '2024-01-01',
-            'updated_at' => '2024-01-02'
+            'updated_at' => '2024-01-02',
         ];
 
         $track = new MediaTrack($data);
@@ -97,7 +97,7 @@ class MediaTrackTest extends TestCase
             'kind' => 'captions',
             'locale' => 'es',
             'content' => 'Spanish captions',
-            'url' => 'https://example.com/es'
+            'url' => 'https://example.com/es',
         ]);
 
         $array = $track->toArray();
@@ -110,7 +110,7 @@ class MediaTrackTest extends TestCase
         $this->assertEquals('es', $array['locale']);
         $this->assertEquals('Spanish captions', $array['content']);
         $this->assertEquals('https://example.com/es', $array['url']);
-        
+
         // Should not include null values
         $this->assertArrayNotHasKey('webvtt_content', $array);
         $this->assertArrayNotHasKey('created_at', $array);
@@ -139,7 +139,7 @@ class MediaTrackTest extends TestCase
             'id' => 1,
             'user_id' => null,
             'kind' => 'subtitles',
-            'locale' => null
+            'locale' => null,
         ];
 
         $track = new MediaTrack($data);
@@ -158,7 +158,7 @@ class MediaTrackTest extends TestCase
         $data = [
             'id' => 5,
             'unknown_property' => 'should be ignored',
-            'another_unknown' => 123
+            'another_unknown' => 123,
         ];
 
         $track = new MediaTrack($data);
@@ -207,12 +207,12 @@ class MediaTrackTest extends TestCase
             "2\n" .
             "00:00:05.000 --> 00:00:10.000\n" .
             "This is the second subtitle\n" .
-            "with multiple lines";
+            'with multiple lines';
 
         $track = new MediaTrack(['webvtt_content' => $webvttContent]);
 
         $this->assertEquals($webvttContent, $track->webvttContent);
-        
+
         $array = $track->toArray();
         $this->assertEquals($webvttContent, $array['webvtt_content']);
     }
@@ -227,7 +227,7 @@ class MediaTrackTest extends TestCase
             "This is SRT format with commas\n\n" .
             "2\n" .
             "00:00:05,000 --> 00:00:10,000\n" .
-            "Instead of dots for milliseconds";
+            'Instead of dots for milliseconds';
 
         $track = new MediaTrack(['content' => $srtContent]);
 

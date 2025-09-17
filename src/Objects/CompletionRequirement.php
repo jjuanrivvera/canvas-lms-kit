@@ -38,6 +38,7 @@ class CompletionRequirement
 
     /**
      * Constructor
+     *
      * @param mixed[] $data
      */
     public function __construct(array $data = [])
@@ -132,6 +133,7 @@ class CompletionRequirement
 
     /**
      * Convert to array
+     *
      * @return mixed[]
      */
     public function toArray(): array

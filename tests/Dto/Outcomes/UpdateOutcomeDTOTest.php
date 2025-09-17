@@ -27,7 +27,7 @@ class UpdateOutcomeDTOTest extends TestCase
     {
         $data = [
             'title' => 'Updated Outcome Title',
-            'description' => 'Updated description'
+            'description' => 'Updated description',
         ];
 
         $dto = new UpdateOutcomeDTO($data);
@@ -45,7 +45,7 @@ class UpdateOutcomeDTOTest extends TestCase
             'vendor_guid' => 'updated-guid',
             'mastery_points' => 3.5,
             'calculation_method' => 'latest',
-            'calculation_int' => 90
+            'calculation_int' => 90,
         ];
 
         $dto = new UpdateOutcomeDTO($data);
@@ -66,8 +66,8 @@ class UpdateOutcomeDTOTest extends TestCase
         $expected = [
             [
                 'name' => 'title',
-                'contents' => 'New Title'
-            ]
+                'contents' => 'New Title',
+            ],
         ];
 
         $this->assertEquals($expected, $result);
@@ -78,13 +78,13 @@ class UpdateOutcomeDTOTest extends TestCase
         $dto = new UpdateOutcomeDTO([
             'title' => 'Updated Title',
             'description' => 'Updated description',
-            'masteryPoints' => 2.5
+            'masteryPoints' => 2.5,
         ]);
 
         $result = $dto->toArray();
 
         $this->assertCount(3, $result);
-        
+
         // Check each field
         $fields = array_column($result, 'name');
         $this->assertContains('title', $fields);
@@ -97,8 +97,8 @@ class UpdateOutcomeDTOTest extends TestCase
         $dto = new UpdateOutcomeDTO([
             'ratings' => [
                 ['description' => 'Excellent', 'points' => 4.0],
-                ['description' => 'Good', 'points' => 3.0]
-            ]
+                ['description' => 'Good', 'points' => 3.0],
+            ],
         ]);
 
         $result = $dto->toArray();
@@ -106,13 +106,13 @@ class UpdateOutcomeDTOTest extends TestCase
         $this->assertCount(4, $result); // 2 ratings × 2 fields each
 
         // Find rating fields
-        $ratingFields = array_filter($result, fn($item) => str_contains($item['name'], 'ratings['));
+        $ratingFields = array_filter($result, fn ($item) => str_contains($item['name'], 'ratings['));
         $this->assertCount(4, $ratingFields);
 
         // Check specific rating values
-        $rating0Desc = array_filter($result, fn($item) => $item['name'] === 'ratings[0][description]');
-        $rating1Points = array_filter($result, fn($item) => $item['name'] === 'ratings[1][points]');
-        
+        $rating0Desc = array_filter($result, fn ($item) => $item['name'] === 'ratings[0][description]');
+        $rating1Points = array_filter($result, fn ($item) => $item['name'] === 'ratings[1][points]');
+
         $this->assertEquals('Excellent', array_values($rating0Desc)[0]['contents']);
         $this->assertEquals('3', array_values($rating1Points)[0]['contents']);
     }
@@ -122,7 +122,7 @@ class UpdateOutcomeDTOTest extends TestCase
         $dto = new UpdateOutcomeDTO([
             'title' => 'Updated Title',
             'description' => null,
-            'masteryPoints' => null
+            'masteryPoints' => null,
         ]);
 
         $result = $dto->toArray();
@@ -136,7 +136,7 @@ class UpdateOutcomeDTOTest extends TestCase
         $fields = [
             'title' => 'Title from withFields',
             'description' => 'Description from withFields',
-            'masteryPoints' => 3.0
+            'masteryPoints' => 3.0,
         ];
 
         $dto = UpdateOutcomeDTO::withFields($fields);
@@ -152,7 +152,7 @@ class UpdateOutcomeDTOTest extends TestCase
         $fields = [
             'title' => 'Valid Title',
             'invalidProperty' => 'Should be ignored',
-            'anotherInvalid' => 123
+            'anotherInvalid' => 123,
         ];
 
         $dto = UpdateOutcomeDTO::withFields($fields);
@@ -207,7 +207,7 @@ class UpdateOutcomeDTOTest extends TestCase
         $ratings = [
             ['description' => 'Exceeds', 'points' => 4.0],
             ['description' => 'Meets', 'points' => 3.0],
-            ['description' => 'Below', 'points' => 2.0]
+            ['description' => 'Below', 'points' => 2.0],
         ];
 
         $dto = UpdateOutcomeDTO::updateRatings($ratings);
@@ -229,7 +229,7 @@ class UpdateOutcomeDTOTest extends TestCase
 
         $result = $dto->toArray();
         $this->assertCount(2, $result);
-        
+
         $fields = array_column($result, 'name');
         $this->assertContains('calculation_method', $fields);
         $this->assertContains('calculation_int', $fields);
@@ -254,7 +254,7 @@ class UpdateOutcomeDTOTest extends TestCase
             'n_mastery',
             'latest',
             'highest',
-            'average'
+            'average',
         ];
 
         foreach ($validMethods as $method) {
@@ -282,8 +282,8 @@ class UpdateOutcomeDTOTest extends TestCase
             'ratings' => [
                 ['description' => 'Exceeds', 'points' => 4.0],
                 ['description' => 'Meets', 'points' => 3.0],
-                ['description' => 'Below', 'points' => 2.0]
-            ]
+                ['description' => 'Below', 'points' => 2.0],
+            ],
         ]);
 
         $this->assertTrue($dto->validateRatings());
@@ -295,8 +295,8 @@ class UpdateOutcomeDTOTest extends TestCase
             'masteryPoints' => 5.0, // No rating has 5.0 points
             'ratings' => [
                 ['description' => 'Good', 'points' => 4.0],
-                ['description' => 'Fair', 'points' => 3.0]
-            ]
+                ['description' => 'Fair', 'points' => 3.0],
+            ],
         ]);
 
         $this->assertFalse($dto->validateRatings());
@@ -318,7 +318,7 @@ class UpdateOutcomeDTOTest extends TestCase
     {
         $dto = new UpdateOutcomeDTO([
             'masteryPoints' => '2.75',
-            'calculationInt' => '85'
+            'calculationInt' => '85',
         ]);
 
         $this->assertSame(2.75, $dto->masteryPoints);
@@ -341,7 +341,7 @@ class UpdateOutcomeDTOTest extends TestCase
         // Simulate updating only title and mastery points
         $dto = UpdateOutcomeDTO::withFields([
             'title' => 'Partially Updated Outcome',
-            'masteryPoints' => 3.0
+            'masteryPoints' => 3.0,
         ]);
 
         $this->assertEquals('Partially Updated Outcome', $dto->title);
@@ -364,7 +364,7 @@ class UpdateOutcomeDTOTest extends TestCase
             ['description' => 'Advanced', 'points' => 4.0],
             ['description' => 'Proficient', 'points' => 3.0],
             ['description' => 'Basic', 'points' => 2.0],
-            ['description' => 'Novice', 'points' => 1.0]
+            ['description' => 'Novice', 'points' => 1.0],
         ];
 
         $dto = UpdateOutcomeDTO::updateRatings($ratings);
@@ -377,9 +377,9 @@ class UpdateOutcomeDTOTest extends TestCase
         $this->assertCount(8, $result); // 4 ratings × 2 fields each
 
         // Verify all ratings are properly formatted
-        $ratingDescriptions = array_filter($result, fn($item) => str_contains($item['name'], '[description]'));
-        $ratingPoints = array_filter($result, fn($item) => str_contains($item['name'], '[points]'));
-        
+        $ratingDescriptions = array_filter($result, fn ($item) => str_contains($item['name'], '[description]'));
+        $ratingPoints = array_filter($result, fn ($item) => str_contains($item['name'], '[points]'));
+
         $this->assertCount(4, $ratingDescriptions);
         $this->assertCount(4, $ratingPoints);
     }
@@ -396,22 +396,22 @@ class UpdateOutcomeDTOTest extends TestCase
             'ratings' => [
                 ['description' => 'Mastery', 'points' => 4.0],
                 ['description' => 'Proficient', 'points' => 3.0],
-                ['description' => 'Developing', 'points' => 2.0]
-            ]
+                ['description' => 'Developing', 'points' => 2.0],
+            ],
         ]);
 
         $this->assertTrue($dto->validateCalculationMethod());
         $this->assertTrue($dto->validateRatings());
 
         $result = $dto->toArray();
-        
+
         // Should have 5 base fields + 6 rating fields = 11 total
         $this->assertCount(11, $result);
 
         $apiResult = $dto->toApiArray();
         $this->assertIsArray($apiResult);
         $this->assertNotEmpty($apiResult);
-        
+
         // Check that API fields are properly formatted with outcome[] prefix
         $apiFields = array_column($apiResult, 'name');
         $this->assertContains('outcome[title]', $apiFields);

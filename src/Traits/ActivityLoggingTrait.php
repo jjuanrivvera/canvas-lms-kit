@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Traits;
 
 use CanvasLMS\Config;
@@ -18,6 +20,7 @@ trait ActivityLoggingTrait
      *
      * @param string $action The action being performed (e.g., 'fetch', 'create', 'update', 'delete')
      * @param array<string, mixed> $context Additional context for the log entry
+     *
      * @return void
      */
     protected function logActivity(string $action, array $context = []): void
@@ -40,6 +43,7 @@ trait ActivityLoggingTrait
      * @param string $operation The operation being measured
      * @param float $duration The duration in seconds
      * @param array<string, mixed> $context Additional context for the log entry
+     *
      * @return void
      */
     protected function logPerformance(string $operation, float $duration, array $context = []): void
@@ -79,6 +83,7 @@ trait ActivityLoggingTrait
      * @param string $operation The operation that failed
      * @param \Throwable $exception The exception that was thrown
      * @param array<string, mixed> $context Additional context for the log entry
+     *
      * @return void
      */
     protected function logError(string $operation, \Throwable $exception, array $context = []): void
@@ -107,6 +112,7 @@ trait ActivityLoggingTrait
      *
      * @param string $operation The operation that succeeded
      * @param array<string, mixed> $context Additional context for the log entry
+     *
      * @return void
      */
     protected function logSuccess(string $operation, array $context = []): void
@@ -130,6 +136,7 @@ trait ActivityLoggingTrait
      * @param int $page The current page number
      * @param int $perPage The number of items per page
      * @param array<string, mixed> $context Additional context for the log entry
+     *
      * @return void
      */
     protected function logPagination(string $operation, int $page, int $perPage, array $context = []): void
@@ -152,6 +159,7 @@ trait ActivityLoggingTrait
      *
      * @param string $operation The OAuth operation (e.g., 'refresh', 'validate', 'revoke')
      * @param array<string, mixed> $context Additional context for the log entry
+     *
      * @return void
      */
     protected function logOAuthOperation(string $operation, array $context = []): void
@@ -176,6 +184,7 @@ trait ActivityLoggingTrait
      *
      * @param string $step The upload step (e.g., 'initiate', 'upload', 'confirm')
      * @param array<string, mixed> $context Additional context for the log entry
+     *
      * @return void
      */
     protected function logFileUpload(string $step, array $context = []): void
@@ -206,13 +215,14 @@ trait ActivityLoggingTrait
      * Sanitize OAuth context to remove sensitive data.
      *
      * @param array<string, mixed> $context The context to sanitize
+     *
      * @return array<string, mixed> The sanitized context
      */
     private function sanitizeOAuthContext(array $context): array
     {
         $sensitiveKeys = [
             'token', 'access_token', 'refresh_token',
-            'client_secret', 'password', 'api_key'
+            'client_secret', 'password', 'api_key',
         ];
 
         $sanitized = [];
@@ -248,6 +258,7 @@ trait ActivityLoggingTrait
      * @param float $startTime The start time from startTimer()
      * @param string $operation The operation being measured
      * @param array<string, mixed> $context Additional context
+     *
      * @return void
      */
     protected function endTimer(float $startTime, string $operation, array $context = []): void

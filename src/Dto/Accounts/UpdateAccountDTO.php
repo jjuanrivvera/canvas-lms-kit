@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Dto\Accounts;
 
 use CanvasLMS\Dto\AbstractBaseDto;
@@ -14,30 +16,35 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
 {
     /**
      * The name of the property in the API
+     *
      * @var string
      */
     protected string $apiPropertyName = 'account';
 
     /**
      * Updates the account name
+     *
      * @var string|null
      */
     public ?string $name = null;
 
     /**
      * Updates the account sis_account_id
+     *
      * @var string|null
      */
     public ?string $sisAccountId = null;
 
     /**
      * Updates the account integration_id
+     *
      * @var string|null
      */
     public ?string $integrationId = null;
 
     /**
      * The ID of a parent account to move the account to
+     *
      * @var int|null
      */
     public ?int $parentAccountId = null;
@@ -45,48 +52,56 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
     /**
      * The default time zone of the account.
      * Allowed time zones are IANA time zones or friendlier Ruby on Rails time zones.
+     *
      * @var string|null
      */
     public ?string $defaultTimeZone = null;
 
     /**
      * The default course storage quota in megabytes
+     *
      * @var int|null
      */
     public ?int $defaultStorageQuotaMb = null;
 
     /**
      * The default user storage quota in megabytes
+     *
      * @var int|null
      */
     public ?int $defaultUserStorageQuotaMb = null;
 
     /**
      * The default group storage quota in megabytes
+     *
      * @var int|null
      */
     public ?int $defaultGroupStorageQuotaMb = null;
 
     /**
      * The ID of a course to be used as a template for all newly created courses
+     *
      * @var int|null
      */
     public ?int $courseTemplateId = null;
 
     /**
      * Account settings
+     *
      * @var array<string, mixed>|null
      */
     public ?array $settings = null;
 
     /**
      * Override SIS stickiness for this update (default true)
+     *
      * @var bool|null
      */
     public ?bool $overrideSisStickiness = null;
 
     /**
      * Enable or disable services (hash of service names to boolean values)
+     *
      * @var array<string, bool>|null
      */
     public ?array $services = null;
@@ -105,11 +120,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      * Set the account name
      *
      * @param string|null $name
+     *
      * @return self
      */
     public function setName(?string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -127,11 +144,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      * Set the SIS account ID
      *
      * @param string|null $sisAccountId
+     *
      * @return self
      */
     public function setSisAccountId(?string $sisAccountId): self
     {
         $this->sisAccountId = $sisAccountId;
+
         return $this;
     }
 
@@ -149,11 +168,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      * Set the integration ID
      *
      * @param string|null $integrationId
+     *
      * @return self
      */
     public function setIntegrationId(?string $integrationId): self
     {
         $this->integrationId = $integrationId;
+
         return $this;
     }
 
@@ -171,11 +192,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      * Set the parent account ID
      *
      * @param int|null $parentAccountId
+     *
      * @return self
      */
     public function setParentAccountId(?int $parentAccountId): self
     {
         $this->parentAccountId = $parentAccountId;
+
         return $this;
     }
 
@@ -193,11 +216,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      * Set the default time zone
      *
      * @param string|null $defaultTimeZone
+     *
      * @return self
      */
     public function setDefaultTimeZone(?string $defaultTimeZone): self
     {
         $this->defaultTimeZone = $defaultTimeZone;
+
         return $this;
     }
 
@@ -215,11 +240,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      * Set the default storage quota in MB
      *
      * @param int|null $defaultStorageQuotaMb
+     *
      * @return self
      */
     public function setDefaultStorageQuotaMb(?int $defaultStorageQuotaMb): self
     {
         $this->defaultStorageQuotaMb = $defaultStorageQuotaMb;
+
         return $this;
     }
 
@@ -237,11 +264,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      * Set the default user storage quota in MB
      *
      * @param int|null $defaultUserStorageQuotaMb
+     *
      * @return self
      */
     public function setDefaultUserStorageQuotaMb(?int $defaultUserStorageQuotaMb): self
     {
         $this->defaultUserStorageQuotaMb = $defaultUserStorageQuotaMb;
+
         return $this;
     }
 
@@ -259,11 +288,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      * Set the default group storage quota in MB
      *
      * @param int|null $defaultGroupStorageQuotaMb
+     *
      * @return self
      */
     public function setDefaultGroupStorageQuotaMb(?int $defaultGroupStorageQuotaMb): self
     {
         $this->defaultGroupStorageQuotaMb = $defaultGroupStorageQuotaMb;
+
         return $this;
     }
 
@@ -281,11 +312,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      * Set the course template ID
      *
      * @param int|null $courseTemplateId
+     *
      * @return self
      */
     public function setCourseTemplateId(?int $courseTemplateId): self
     {
         $this->courseTemplateId = $courseTemplateId;
+
         return $this;
     }
 
@@ -303,11 +336,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      * Set the account settings
      *
      * @param array<string, mixed>|null $settings
+     *
      * @return self
      */
     public function setSettings(?array $settings): self
     {
         $this->settings = $settings;
+
         return $this;
     }
 
@@ -316,6 +351,7 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      *
      * @param string $key
      * @param mixed $value
+     *
      * @return self
      */
     public function addSetting(string $key, $value): self
@@ -325,6 +361,7 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
         }
 
         $this->settings[$key] = $value;
+
         return $this;
     }
 
@@ -342,11 +379,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      * Set the override SIS stickiness flag
      *
      * @param bool|null $overrideSisStickiness
+     *
      * @return self
      */
     public function setOverrideSisStickiness(?bool $overrideSisStickiness): self
     {
         $this->overrideSisStickiness = $overrideSisStickiness;
+
         return $this;
     }
 
@@ -364,11 +403,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      * Set the services
      *
      * @param array<string, bool>|null $services
+     *
      * @return self
      */
     public function setServices(?array $services): self
     {
         $this->services = $services;
+
         return $this;
     }
 
@@ -377,6 +418,7 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
      *
      * @param string $serviceName
      * @param bool $enabled
+     *
      * @return self
      */
     public function setService(string $serviceName, bool $enabled): self
@@ -386,6 +428,7 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
         }
 
         $this->services[$serviceName] = $enabled;
+
         return $this;
     }
 
@@ -419,13 +462,13 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
                         foreach ($settingValue as $subKey => $subValue) {
                             $modifiedProperties[] = [
                                 'name' => sprintf('%s[settings][%s][%s]', $this->apiPropertyName, $settingKey, $subKey),
-                                'contents' => $subValue
+                                'contents' => $subValue,
                             ];
                         }
                     } else {
                         $modifiedProperties[] = [
                             'name' => sprintf('%s[settings][%s]', $this->apiPropertyName, $settingKey),
-                            'contents' => $settingValue
+                            'contents' => $settingValue,
                         ];
                     }
                 }
@@ -437,7 +480,7 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
                 foreach ($value as $serviceKey => $serviceValue) {
                     $modifiedProperties[] = [
                         'name' => sprintf('%s[services][%s]', $this->apiPropertyName, $serviceKey),
-                        'contents' => $serviceValue ? 'true' : 'false'
+                        'contents' => $serviceValue ? 'true' : 'false',
                     ];
                 }
                 continue;
@@ -447,7 +490,7 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
             if ($property === 'overrideSisStickiness') {
                 $modifiedProperties[] = [
                     'name' => 'override_sis_stickiness',
-                    'contents' => $value ? 'true' : 'false'
+                    'contents' => $value ? 'true' : 'false',
                 ];
                 continue;
             }
@@ -462,7 +505,7 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
 
             $modifiedProperties[] = [
                 'name' => sprintf('%s[%s]', $this->apiPropertyName, $snakeCase),
-                'contents' => $value
+                'contents' => $value,
             ];
         }
 

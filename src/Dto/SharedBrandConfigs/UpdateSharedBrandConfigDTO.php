@@ -86,7 +86,7 @@ class UpdateSharedBrandConfigDTO extends AbstractBaseDto
         if (!empty($this->name)) {
             $properties[] = [
                 'name' => sprintf('%s[name]', $this->apiPropertyName),
-                'contents' => $this->name
+                'contents' => $this->name,
             ];
         }
 
@@ -94,7 +94,7 @@ class UpdateSharedBrandConfigDTO extends AbstractBaseDto
         if (!empty($this->brandConfigMd5)) {
             $properties[] = [
                 'name' => sprintf('%s[brand_config_md5]', $this->apiPropertyName),
-                'contents' => $this->brandConfigMd5
+                'contents' => $this->brandConfigMd5,
             ];
         }
 

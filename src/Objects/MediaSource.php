@@ -92,6 +92,6 @@ class MediaSource
             'size' => $this->size,
             'is_original' => $this->isOriginal,
             'file_ext' => $this->fileExt,
-        ], fn($value) => !is_null($value));
+        ], fn ($value) => !is_null($value));
     }
 }

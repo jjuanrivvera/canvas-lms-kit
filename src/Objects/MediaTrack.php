@@ -98,6 +98,6 @@ class MediaTrack
             'url' => $this->url,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
-        ], fn($value) => !is_null($value));
+        ], fn ($value) => !is_null($value));
     }
 }

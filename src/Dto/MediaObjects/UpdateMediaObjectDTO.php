@@ -49,13 +49,14 @@ class UpdateMediaObjectDTO extends AbstractBaseDto
     {
         return array_filter([
             'user_entered_title' => $this->userEnteredTitle,
-        ], fn($value) => !is_null($value));
+        ], fn ($value) => !is_null($value));
     }
 
     /**
      * Create DTO from array
      *
      * @param array<string, mixed> $data
+     *
      * @return self
      */
     public static function fromArray(array $data): self

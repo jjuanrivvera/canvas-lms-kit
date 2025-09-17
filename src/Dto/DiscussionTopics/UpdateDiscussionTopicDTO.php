@@ -109,18 +109,21 @@ class UpdateDiscussionTopicDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Podcast settings
+     *
      * @var array<string, mixed>|null
      */
     public ?array $podcastSettings = null;
 
     /**
      * Attachment settings
+     *
      * @var array<string, mixed>|null
      */
     public ?array $attachment = null;
 
     /**
      * Specific sections the topic is assigned to
+     *
      * @var array<int>|null
      */
     public ?array $specificSections = null;
@@ -147,6 +150,7 @@ class UpdateDiscussionTopicDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Assignment configuration for graded discussions
+     *
      * @var array<string, mixed>|null
      */
     public ?array $assignment = null;
@@ -450,6 +454,7 @@ class UpdateDiscussionTopicDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get podcast settings
+     *
      * @return array<string, mixed>|null
      */
     public function getPodcastSettings(): ?array
@@ -459,6 +464,7 @@ class UpdateDiscussionTopicDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set podcast settings
+     *
      * @param array<string, mixed>|null $podcastSettings
      */
     public function setPodcastSettings(?array $podcastSettings): void
@@ -468,6 +474,7 @@ class UpdateDiscussionTopicDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get attachment settings
+     *
      * @return array<string, mixed>|null
      */
     public function getAttachment(): ?array
@@ -477,6 +484,7 @@ class UpdateDiscussionTopicDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set attachment settings
+     *
      * @param array<string, mixed>|null $attachment
      */
     public function setAttachment(?array $attachment): void
@@ -486,6 +494,7 @@ class UpdateDiscussionTopicDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get specific sections
+     *
      * @return array<int>|null
      */
     public function getSpecificSections(): ?array
@@ -495,6 +504,7 @@ class UpdateDiscussionTopicDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set specific sections
+     *
      * @param array<int>|null $specificSections
      */
     public function setSpecificSections(?array $specificSections): void
@@ -568,6 +578,7 @@ class UpdateDiscussionTopicDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get assignment configuration
+     *
      * @return array<string, mixed>|null
      */
     public function getAssignment(): ?array
@@ -577,6 +588,7 @@ class UpdateDiscussionTopicDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set assignment configuration
+     *
      * @param array<string, mixed>|null $assignment
      */
     public function setAssignment(?array $assignment): void

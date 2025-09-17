@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Accounts;
 
-use GuzzleHttp\Psr7\Response;
-use CanvasLMS\Http\HttpClient;
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Accounts\Account;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Config;
 use CanvasLMS\Dto\Accounts\CreateAccountDTO;
 use CanvasLMS\Dto\Accounts\UpdateAccountDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Config;
+use CanvasLMS\Http\HttpClient;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 class AccountTest extends TestCase
 {
@@ -32,15 +34,16 @@ class AccountTest extends TestCase
         $this->httpClientMock = $this->createMock(HttpClient::class);
         Account::setApiClient($this->httpClientMock);
         Course::setApiClient($this->httpClientMock);
-        
+
         // Set default account ID in config
         Config::setAccountId(1);
-        
+
         $this->account = new Account([]);
     }
 
     /**
      * Account data provider
+     *
      * @return array
      */
     public static function accountDataProvider(): array
@@ -58,8 +61,8 @@ class AccountTest extends TestCase
                     'parent_account_id' => 1,
                     'root_account_id' => 1,
                     'sis_account_id' => 'MATH_DEPT',
-                    'workflow_state' => 'active'
-                ]
+                    'workflow_state' => 'active',
+                ],
             ],
             'account_with_storage' => [
                 [
@@ -67,7 +70,7 @@ class AccountTest extends TestCase
                     'sisAccountId' => 'SCI_DEPT',
                     'defaultStorageQuotaMb' => 1000,
                     'defaultUserStorageQuotaMb' => 100,
-                    'defaultGroupStorageQuotaMb' => 200
+                    'defaultGroupStorageQuotaMb' => 200,
                 ],
                 [
                     'id' => 3,
@@ -79,17 +82,20 @@ class AccountTest extends TestCase
                     'default_storage_quota_mb' => 1000,
                     'default_user_storage_quota_mb' => 100,
                     'default_group_storage_quota_mb' => 200,
-                    'workflow_state' => 'active'
-                ]
-            ]
+                    'workflow_state' => 'active',
+                ],
+            ],
         ];
     }
 
     /**
      * Test the create account method
+     *
      * @dataProvider accountDataProvider
+     *
      * @param array $accountData
      * @param array $expectedResult
+     *
      * @return void
      */
     public function testCreateAccount(array $accountData, array $expectedResult): void
@@ -114,9 +120,12 @@ class AccountTest extends TestCase
 
     /**
      * Test the create account method with DTO
+     *
      * @dataProvider accountDataProvider
+     *
      * @param array $accountData
      * @param array $expectedResult
+     *
      * @return void
      */
     public function testCreateAccountWithDto(array $accountData, array $expectedResult): void
@@ -145,13 +154,14 @@ class AccountTest extends TestCase
 
     /**
      * Test create account with explicit parent ID
+     *
      * @return void
      */
     public function testCreateAccountWithParentId(): void
     {
         $accountData = [
             'name' => 'Sub Department',
-            'sisAccountId' => 'SUB_DEPT'
+            'sisAccountId' => 'SUB_DEPT',
         ];
 
         $expectedResult = [
@@ -159,7 +169,7 @@ class AccountTest extends TestCase
             'name' => 'Sub Department',
             'parent_account_id' => 2,
             'root_account_id' => 1,
-            'sis_account_id' => 'SUB_DEPT'
+            'sis_account_id' => 'SUB_DEPT',
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -181,6 +191,7 @@ class AccountTest extends TestCase
 
     /**
      * Test create account without parent ID and no config
+     *
      * @return void
      */
     public function testCreateAccountWithoutParentIdThrowsException(): void
@@ -188,7 +199,7 @@ class AccountTest extends TestCase
         // Save current account ID and clear it
         $originalAccountId = Config::getAccountId();
         Config::setAccountId(0); // Set to 0 to simulate no account ID
-        
+
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Parent account ID must be provided or set in Config');
 
@@ -204,6 +215,7 @@ class AccountTest extends TestCase
 
     /**
      * Test the find account method
+     *
      * @return void
      */
     public function testFindAccount(): void
@@ -212,7 +224,7 @@ class AccountTest extends TestCase
             'id' => 123,
             'name' => 'Found Account',
             'uuid' => 'ABC123',
-            'workflow_state' => 'active'
+            'workflow_state' => 'active',
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -232,6 +244,7 @@ class AccountTest extends TestCase
 
     /**
      * Test find account with SIS ID
+     *
      * @return void
      */
     public function testFindAccountWithSisId(): void
@@ -239,7 +252,7 @@ class AccountTest extends TestCase
         $expectedResult = [
             'id' => 456,
             'name' => 'SIS Account',
-            'sis_account_id' => 'SIS_ACCT_123'
+            'sis_account_id' => 'SIS_ACCT_123',
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -258,6 +271,7 @@ class AccountTest extends TestCase
 
     /**
      * Test the fetchAll method
+     *
      * @return void
      */
     public function testGet(): void
@@ -265,7 +279,7 @@ class AccountTest extends TestCase
         $expectedResult = [
             ['id' => 1, 'name' => 'Account 1'],
             ['id' => 2, 'name' => 'Account 2'],
-            ['id' => 3, 'name' => 'Account 3']
+            ['id' => 3, 'name' => 'Account 3'],
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -286,19 +300,20 @@ class AccountTest extends TestCase
 
     /**
      * Test the update account method
+     *
      * @return void
      */
     public function testUpdateAccount(): void
     {
         $updateData = [
             'name' => 'Updated Department',
-            'defaultStorageQuotaMb' => 2000
+            'defaultStorageQuotaMb' => 2000,
         ];
 
         $expectedResult = [
             'id' => 1,
             'name' => 'Updated Department',
-            'default_storage_quota_mb' => 2000
+            'default_storage_quota_mb' => 2000,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -317,6 +332,7 @@ class AccountTest extends TestCase
 
     /**
      * Test the update account method with DTO
+     *
      * @return void
      */
     public function testUpdateAccountWithDto(): void
@@ -325,7 +341,7 @@ class AccountTest extends TestCase
 
         $expectedResult = [
             'id' => 1,
-            'name' => 'Updated Department'
+            'name' => 'Updated Department',
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -342,6 +358,7 @@ class AccountTest extends TestCase
 
     /**
      * Test the save account method
+     *
      * @return void
      */
     public function testSaveAccount(): void
@@ -369,6 +386,7 @@ class AccountTest extends TestCase
 
     /**
      * Test save without ID throws exception
+     *
      * @return void
      */
     public function testSaveWithoutIdThrowsException(): void
@@ -381,6 +399,7 @@ class AccountTest extends TestCase
 
     /**
      * Test the delete account method
+     *
      * @return void
      */
     public function testDeleteAccount(): void
@@ -403,6 +422,7 @@ class AccountTest extends TestCase
 
     /**
      * Test delete root account throws exception
+     *
      * @return void
      */
     public function testDeleteRootAccountThrowsException(): void
@@ -418,6 +438,7 @@ class AccountTest extends TestCase
 
     /**
      * Test get sub accounts
+     *
      * @return void
      */
     public function testGetSubAccounts(): void
@@ -426,7 +447,7 @@ class AccountTest extends TestCase
 
         $expectedResult = [
             ['id' => 2, 'name' => 'Sub Account 1', 'parent_account_id' => 1],
-            ['id' => 3, 'name' => 'Sub Account 2', 'parent_account_id' => 1]
+            ['id' => 3, 'name' => 'Sub Account 2', 'parent_account_id' => 1],
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -447,6 +468,7 @@ class AccountTest extends TestCase
 
     /**
      * Test get parent account
+     *
      * @return void
      */
     public function testGetParentAccount(): void
@@ -456,7 +478,7 @@ class AccountTest extends TestCase
         $expectedResult = [
             'id' => 1,
             'name' => 'Root Account',
-            'parent_account_id' => null
+            'parent_account_id' => null,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -476,6 +498,7 @@ class AccountTest extends TestCase
 
     /**
      * Test get parent account returns null for root account
+     *
      * @return void
      */
     public function testGetParentAccountReturnsNullForRootAccount(): void
@@ -489,6 +512,7 @@ class AccountTest extends TestCase
 
     /**
      * Test is root account
+     *
      * @return void
      */
     public function testIsRootAccount(): void
@@ -504,6 +528,7 @@ class AccountTest extends TestCase
 
     /**
      * Test get account settings
+     *
      * @return void
      */
     public function testGetSettings(): void
@@ -515,8 +540,8 @@ class AccountTest extends TestCase
             'microsoft_sync_login_attribute_suffix' => false,
             'restrict_student_past_view' => [
                 'value' => true,
-                'locked' => false
-            ]
+                'locked' => false,
+            ],
         ];
 
         $response = new Response(200, [], json_encode($expectedSettings));
@@ -536,6 +561,7 @@ class AccountTest extends TestCase
 
     /**
      * Test update account settings
+     *
      * @return void
      */
     public function testUpdateSettings(): void
@@ -546,8 +572,8 @@ class AccountTest extends TestCase
             'microsoft_sync_enabled' => false,
             'restrict_student_past_view' => [
                 'value' => false,
-                'locked' => true
-            ]
+                'locked' => true,
+            ],
         ];
 
         $updateResponse = new Response(200, [], json_encode(['id' => 1]));
@@ -571,6 +597,7 @@ class AccountTest extends TestCase
 
     /**
      * Test get permissions
+     *
      * @return void
      */
     public function testGetPermissions(): void
@@ -579,7 +606,7 @@ class AccountTest extends TestCase
 
         $expectedPermissions = [
             'manage_account_memberships' => false,
-            'become_user' => true
+            'become_user' => true,
         ];
 
         $response = new Response(200, [], json_encode($expectedPermissions));
@@ -591,8 +618,8 @@ class AccountTest extends TestCase
                 $this->equalTo('accounts/1/permissions'),
                 $this->callback(function ($options) {
                     return isset($options['query']['permissions']) &&
-                           in_array('manage_account_memberships', $options['query']['permissions']) &&
-                           in_array('become_user', $options['query']['permissions']);
+                           in_array('manage_account_memberships', $options['query']['permissions'], true) &&
+                           in_array('become_user', $options['query']['permissions'], true);
                 })
             )
             ->willReturn($response);
@@ -606,6 +633,7 @@ class AccountTest extends TestCase
 
     /**
      * Test get courses for account
+     *
      * @return void
      */
     public function testGetCourses(): void
@@ -614,7 +642,7 @@ class AccountTest extends TestCase
 
         $expectedCourses = [
             ['id' => 1, 'name' => 'Course 1', 'account_id' => 1],
-            ['id' => 2, 'name' => 'Course 2', 'account_id' => 1]
+            ['id' => 2, 'name' => 'Course 2', 'account_id' => 1],
         ];
 
         $response = new Response(200, [], json_encode($expectedCourses));
@@ -635,13 +663,14 @@ class AccountTest extends TestCase
 
     /**
      * Test get manageable accounts
+     *
      * @return void
      */
     public function testGetManageableAccounts(): void
     {
         $expectedResult = [
             ['id' => 1, 'name' => 'Account 1'],
-            ['id' => 2, 'name' => 'Account 2']
+            ['id' => 2, 'name' => 'Account 2'],
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -661,13 +690,14 @@ class AccountTest extends TestCase
 
     /**
      * Test get course creation accounts
+     *
      * @return void
      */
     public function testGetCourseCreationAccounts(): void
     {
         $expectedResult = [
             ['id' => 1, 'name' => 'Account 1'],
-            ['id' => 3, 'name' => 'Account 3']
+            ['id' => 3, 'name' => 'Account 3'],
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -687,6 +717,7 @@ class AccountTest extends TestCase
 
     /**
      * Test get root account
+     *
      * @return void
      */
     public function testGetRootAccount(): void
@@ -697,7 +728,7 @@ class AccountTest extends TestCase
             'id' => 1,
             'name' => 'Root Account',
             'parent_account_id' => null,
-            'root_account_id' => null
+            'root_account_id' => null,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -723,7 +754,7 @@ class AccountTest extends TestCase
         $subAccountsData = [
             ['id' => 2, 'name' => 'Sub Account 1', 'parent_account_id' => 1],
             ['id' => 3, 'name' => 'Sub Account 2', 'parent_account_id' => 1],
-            ['id' => 4, 'name' => 'Sub Account 3', 'parent_account_id' => 1]
+            ['id' => 4, 'name' => 'Sub Account 3', 'parent_account_id' => 1],
         ];
 
         $response = new Response(200, [], json_encode($subAccountsData));
@@ -751,7 +782,7 @@ class AccountTest extends TestCase
         $subAccountsData = [
             ['id' => 2, 'name' => 'Sub Account 1', 'parent_account_id' => 1],
             ['id' => 3, 'name' => 'Sub Account 1.1', 'parent_account_id' => 2],
-            ['id' => 4, 'name' => 'Sub Account 1.2', 'parent_account_id' => 2]
+            ['id' => 4, 'name' => 'Sub Account 1.2', 'parent_account_id' => 2],
         ];
 
         $response = new Response(200, [], json_encode($subAccountsData));

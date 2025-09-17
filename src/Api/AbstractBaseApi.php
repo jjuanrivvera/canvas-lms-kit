@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Api;
 
-use DateTime;
-use Exception;
 use CanvasLMS\Config;
-use InvalidArgumentException;
 use CanvasLMS\Http\HttpClient;
-use CanvasLMS\Interfaces\ApiInterface;
-use CanvasLMS\Pagination\PaginationResult;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Http\Middleware\RetryMiddleware;
 use CanvasLMS\Http\Middleware\LoggingMiddleware;
 use CanvasLMS\Http\Middleware\RateLimitMiddleware;
+use CanvasLMS\Http\Middleware\RetryMiddleware;
+use CanvasLMS\Interfaces\ApiInterface;
+use CanvasLMS\Interfaces\HttpClientInterface;
+use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Pagination\PaginationResult;
+use DateTime;
+use Exception;
+use InvalidArgumentException;
 
 /**
  * Abstract base class for Canvas LMS API resources.
@@ -31,20 +33,21 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     protected static ?HttpClientInterface $apiClient = null;
 
-
     /**
      * Define method aliases
+     *
      * @var mixed[]
      */
     protected static array $methodAliases = [
         'get' => ['fetch', 'list', 'fetchAll'],
         'all' => ['fetchAllPages', 'getAll'],
         'paginate' => ['getPaginated', 'withPagination', 'fetchPage'],
-        'find' => ['one', 'getOne']
+        'find' => ['one', 'getOne'],
     ];
 
     /**
      * BaseApi constructor.
+     *
      * @param mixed[] $data
      */
     public function __construct(array $data)
@@ -53,6 +56,30 @@ abstract class AbstractBaseApi implements ApiInterface
             $key = lcfirst(str_replace('_', '', ucwords($key, '_')));
 
             if (property_exists($this, $key) && !is_null($value)) {
+                // Handle type conversion for strict_types compatibility
+                $reflection = new \ReflectionClass($this);
+                if ($reflection->hasProperty($key)) {
+                    $property = $reflection->getProperty($key);
+                    $type = $property->getType();
+
+                    if ($type instanceof \ReflectionNamedType && $type->isBuiltin()) {
+                        switch ($type->getName()) {
+                            case 'int':
+                                $value = (int) $value;
+                                break;
+                            case 'float':
+                                $value = (float) $value;
+                                break;
+                            case 'string':
+                                $value = (string) $value;
+                                break;
+                            case 'bool':
+                                $value = (bool) $value;
+                                break;
+                        }
+                    }
+                }
+
                 $this->{$key} = $value;
             }
         }
@@ -60,7 +87,9 @@ abstract class AbstractBaseApi implements ApiInterface
 
     /**
      * Set the API client
+     *
      * @param HttpClientInterface $apiClient
+     *
      * @return void
      */
     public static function setApiClient(HttpClientInterface $apiClient): void
@@ -70,6 +99,7 @@ abstract class AbstractBaseApi implements ApiInterface
 
     /**
      * Check if the API client is set, if not, instantiate a new one
+     *
      * @return void
      */
     protected static function checkApiClient(): void
@@ -81,6 +111,7 @@ abstract class AbstractBaseApi implements ApiInterface
 
     /**
      * Create an HttpClient with configured middleware
+     *
      * @return HttpClient
      */
     protected static function createConfiguredHttpClient(): HttpClient
@@ -118,6 +149,7 @@ abstract class AbstractBaseApi implements ApiInterface
 
     /**
      * Convert the object to an array
+     *
      * @return mixed[]
      */
     protected function toDtoArray(): array
@@ -136,9 +168,12 @@ abstract class AbstractBaseApi implements ApiInterface
 
     /**
      * Populate the object with new data
+     *
      * @param mixed[] $data
-     * @return void
+     *
      * @throws Exception
+     *
+     * @return void
      */
     protected function populate(array $data): void
     {
@@ -153,10 +188,13 @@ abstract class AbstractBaseApi implements ApiInterface
 
     /**
      * Cast a value to the correct type
+     *
      * @param string $key
      * @param mixed $value
-     * @return DateTime|mixed
+     *
      * @throws Exception
+     *
+     * @return DateTime|mixed
      */
     protected function castValue(string $key, mixed $value): mixed
     {
@@ -173,19 +211,22 @@ abstract class AbstractBaseApi implements ApiInterface
             'lockAt',
             'unlockAt',
             'submittedAt',
-            'gradedAt'
+            'gradedAt',
         ];
 
-        if (in_array($key, $dateFields) && is_string($value) && !empty($value)) {
+        if (in_array($key, $dateFields, true) && is_string($value) && !empty($value)) {
             return new DateTime($value);
         }
+
         return $value;
     }
 
     /**
      * Helper method to get paginated response from API endpoint
+     *
      * @param string $endpoint The API endpoint path
      * @param mixed[] $params Query parameters for the request
+     *
      * @return PaginatedResponse
      */
     protected static function getPaginatedResponse(string $endpoint, array $params = []): PaginatedResponse
@@ -193,13 +234,15 @@ abstract class AbstractBaseApi implements ApiInterface
         self::checkApiClient();
 
         return self::$apiClient->getPaginated($endpoint, [
-            'query' => $params
+            'query' => $params,
         ]);
     }
 
     /**
      * Helper method to convert paginated response data to model instances
+     *
      * @param PaginatedResponse $paginatedResponse
+     *
      * @return static[]
      */
     protected static function convertPaginatedResponseToModels(PaginatedResponse $paginatedResponse): array
@@ -211,15 +254,17 @@ abstract class AbstractBaseApi implements ApiInterface
         }, $data);
     }
 
-
     /**
      * Helper method to create PaginationResult from paginated response
+     *
      * @param PaginatedResponse $paginatedResponse
+     *
      * @return PaginationResult
      */
     protected static function createPaginationResult(PaginatedResponse $paginatedResponse): PaginationResult
     {
         $models = self::convertPaginatedResponseToModels($paginatedResponse);
+
         return $paginatedResponse->toPaginationResult($models);
     }
 
@@ -227,18 +272,22 @@ abstract class AbstractBaseApi implements ApiInterface
      * Parse JSON response from API safely handling StreamInterface
      *
      * @param \Psr\Http\Message\ResponseInterface $response
+     *
      * @return array<mixed>
      */
     protected static function parseJsonResponse(\Psr\Http\Message\ResponseInterface $response): array
     {
         $body = $response->getBody()->getContents();
         $data = json_decode($body, true);
+
         return is_array($data) ? $data : [];
     }
 
     /**
      * Get first page of results
+     *
      * @param array<string, mixed> $params Query parameters
+     *
      * @return array<static>
      */
     public static function get(array $params = []): array
@@ -249,12 +298,14 @@ abstract class AbstractBaseApi implements ApiInterface
 
         $data = self::parseJsonResponse($response);
 
-        return array_map(fn($item) => new static($item), $data);
+        return array_map(fn ($item) => new static($item), $data);
     }
 
     /**
      * Get all pages of results
+     *
      * @param array<string, mixed> $params Query parameters
+     *
      * @return array<static>
      */
     public static function all(array $params = []): array
@@ -277,7 +328,9 @@ abstract class AbstractBaseApi implements ApiInterface
 
     /**
      * Get paginated results with metadata
+     *
      * @param array<string, mixed> $params Query parameters
+     *
      * @return PaginationResult
      */
     public static function paginate(array $params = []): PaginationResult
@@ -286,28 +339,33 @@ abstract class AbstractBaseApi implements ApiInterface
         $endpoint = static::getEndpoint();
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
 
-        $data = array_map(fn($item) => new static($item), $paginatedResponse->getJsonData());
+        $data = array_map(fn ($item) => new static($item), $paginatedResponse->getJsonData());
+
         return $paginatedResponse->toPaginationResult($data);
     }
 
     /**
      * Get the API endpoint for this resource
      * Subclasses must implement this to provide their specific endpoint
+     *
      * @return string
      */
     abstract protected static function getEndpoint(): string;
 
     /**
      * Magic method to handle function aliases
+     *
      * @param string $name
      * @param mixed[] $arguments
-     * @return mixed
+     *
      * @throws InvalidArgumentException
+     *
+     * @return mixed
      */
     public static function __callStatic($name, $arguments)
     {
         foreach (static::$methodAliases as $method => $aliases) {
-            if (in_array($name, $aliases)) {
+            if (in_array($name, $aliases, true)) {
                 return static::$method(...$arguments);
             }
         }

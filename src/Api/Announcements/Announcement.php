@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace CanvasLMS\Api\Announcements;
 
 use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
-use CanvasLMS\Dto\DiscussionTopics\CreateDiscussionTopicDTO;
-use CanvasLMS\Dto\DiscussionTopics\UpdateDiscussionTopicDTO;
 use CanvasLMS\Dto\Announcements\CreateAnnouncementDTO;
 use CanvasLMS\Dto\Announcements\UpdateAnnouncementDTO;
+use CanvasLMS\Dto\DiscussionTopics\CreateDiscussionTopicDTO;
+use CanvasLMS\Dto\DiscussionTopics\UpdateDiscussionTopicDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
 
 /**
@@ -74,8 +73,10 @@ class Announcement extends DiscussionTopic
      * Overrides parent to automatically filter for announcements only
      *
      * @param array<string, mixed> $params Optional parameters
-     * @return array<Announcement> Array of Announcement objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<Announcement> Array of Announcement objects
      */
     public static function get(array $params = []): array
     {
@@ -100,8 +101,10 @@ class Announcement extends DiscussionTopic
      * Get paginated announcements
      *
      * @param array<string, mixed> $params Query parameters
-     * @return PaginationResult
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginationResult
      */
     public static function paginate(array $params = []): PaginationResult
     {
@@ -126,8 +129,10 @@ class Announcement extends DiscussionTopic
      * Get all announcements from all pages
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<int, self>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, self>
      */
     public static function all(array $params = []): array
     {
@@ -150,12 +155,15 @@ class Announcement extends DiscussionTopic
 
     /**
      * Get the API endpoint for this resource
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
+
         return sprintf('courses/%d/discussion_topics', self::$course->id);
     }
 
@@ -164,8 +172,10 @@ class Announcement extends DiscussionTopic
      * Overrides parent to ensure announcement flag is set
      *
      * @param array<string, mixed>|CreateAnnouncementDTO|CreateDiscussionTopicDTO $data Announcement data
-     * @return self Created Announcement object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Created Announcement object
      */
     public static function create(array|CreateDiscussionTopicDTO $data): self
     {
@@ -192,8 +202,10 @@ class Announcement extends DiscussionTopic
      *
      * @param int $id Announcement ID
      * @param array<string, mixed>|UpdateAnnouncementDTO|UpdateDiscussionTopicDTO $data Announcement data
-     * @return self Updated Announcement object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Updated Announcement object
      */
     public static function update(int $id, array|UpdateDiscussionTopicDTO $data): self
     {
@@ -237,8 +249,10 @@ class Announcement extends DiscussionTopic
      *
      * @param array<string> $contextCodes Array of context codes (e.g., ['course_123', 'course_456'])
      * @param array<string, mixed> $params Optional parameters (start_date, end_date, active_only, latest_only, include)
-     * @return array<Announcement> Array of Announcement objects with context_code added
+     *
      * @throws CanvasApiException
+     *
+     * @return array<Announcement> Array of Announcement objects with context_code added
      */
     public static function fetchGlobalAnnouncements(array $contextCodes, array $params = []): array
     {
@@ -275,6 +289,7 @@ class Announcement extends DiscussionTopic
 
     /**
      * Context code for global announcements (populated when using fetchGlobalAnnouncements)
+     *
      * @var string|null
      */
     public ?string $contextCode = null;
@@ -293,6 +308,7 @@ class Announcement extends DiscussionTopic
      * Set context code (for global announcements)
      *
      * @param string|null $contextCode
+     *
      * @return void
      */
     public function setContextCode(?string $contextCode): void
@@ -304,8 +320,9 @@ class Announcement extends DiscussionTopic
      * Save the current announcement (create or update)
      * Overrides parent to ensure announcement-specific validation
      *
-     * @return static
      * @throws CanvasApiException
+     *
+     * @return static
      */
     public function save(): static
     {
@@ -325,8 +342,10 @@ class Announcement extends DiscussionTopic
      * Schedule an announcement to be posted at a future date
      *
      * @param string $datetime ISO 8601 formatted datetime (e.g., '2024-03-15T10:00:00Z')
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function scheduleFor(string $datetime): self
     {
@@ -344,8 +363,9 @@ class Announcement extends DiscussionTopic
     /**
      * Post an announcement immediately (remove delayed posting)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function postImmediately(): self
     {
@@ -355,7 +375,7 @@ class Announcement extends DiscussionTopic
 
         $updatedAnnouncement = self::update($this->id, [
             'delayed_post_at' => null,
-            'published' => true
+            'published' => true,
         ]);
         $this->delayedPostAt = $updatedAnnouncement->delayedPostAt;
         $this->published = $updatedAnnouncement->published;

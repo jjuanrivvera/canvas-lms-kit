@@ -1,22 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Http;
 
 use CanvasLMS\Auth\OAuth;
 use CanvasLMS\Config;
-use Psr\Log\LoggerInterface;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\HandlerStack;
-use CanvasLMS\Http\Middleware\MiddlewareInterface;
-use Psr\Http\Message\ResponseInterface;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\RequestException;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Exceptions\MissingApiKeyException;
 use CanvasLMS\Exceptions\MissingBaseUrlException;
 use CanvasLMS\Exceptions\MissingOAuthTokenException;
+use CanvasLMS\Http\Middleware\MiddlewareInterface;
+use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\HandlerStack;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * HTTP client for Canvas LMS API communication.
@@ -77,24 +79,27 @@ class HttpClient implements HttpClientInterface
         } else {
             // Apply timeout configuration from Config
             $timeout = Config::getTimeout() ?? 30;  // Default to 30 seconds
-            $connectTimeout = min(10, (int)($timeout / 3));  // Cap at 10s, max 1/3 of total timeout
+            $connectTimeout = min(10, (int) ($timeout / 3));  // Cap at 10s, max 1/3 of total timeout
 
             $this->client = new \GuzzleHttp\Client([
                 'handler' => $this->handlerStack,
                 'timeout' => $timeout,
-                'connect_timeout' => $connectTimeout
+                'connect_timeout' => $connectTimeout,
             ]);
         }
     }
 
     /**
      * Get request
+     *
      * @param string $url
      * @param mixed[] $options
-     * @return ResponseInterface
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     *
+     * @return ResponseInterface
      */
     public function get(string $url, array $options = []): ResponseInterface
     {
@@ -103,12 +108,15 @@ class HttpClient implements HttpClientInterface
 
     /**
      * Post request
+     *
      * @param string $url
      * @param mixed[] $options
-     * @return ResponseInterface
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     *
+     * @return ResponseInterface
      */
     public function post(string $url, array $options = []): ResponseInterface
     {
@@ -117,12 +125,15 @@ class HttpClient implements HttpClientInterface
 
     /**
      * Put request
+     *
      * @param string $url
      * @param mixed[] $options
-     * @return ResponseInterface
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     *
+     * @return ResponseInterface
      */
     public function put(string $url, array $options = []): ResponseInterface
     {
@@ -131,12 +142,15 @@ class HttpClient implements HttpClientInterface
 
     /**
      * Patch request
+     *
      * @param string $url
      * @param mixed[] $options
-     * @return ResponseInterface
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     *
+     * @return ResponseInterface
      */
     public function patch(string $url, array $options = []): ResponseInterface
     {
@@ -145,12 +159,15 @@ class HttpClient implements HttpClientInterface
 
     /**
      * delete request
+     *
      * @param string $url
      * @param mixed[] $options
-     * @return ResponseInterface
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     *
+     * @return ResponseInterface
      */
     public function delete(string $url, array $options = []): ResponseInterface
     {
@@ -159,32 +176,40 @@ class HttpClient implements HttpClientInterface
 
     /**
      * Get request with pagination support
+     *
      * @param string $url
      * @param mixed[] $options
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     *
+     * @return PaginatedResponse
      */
     public function getPaginated(string $url, array $options = []): PaginatedResponse
     {
         $response = $this->get($url, $options);
+
         return new PaginatedResponse($response, $this);
     }
 
     /**
      * Make an HTTP request with pagination support
+     *
      * @param string $method
      * @param string $url
      * @param mixed[] $options
-     * @return PaginatedResponse
+     *
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public function requestPaginated(string $method, string $url, array $options = []): PaginatedResponse
     {
         $response = $this->request($method, $url, $options);
+
         return new PaginatedResponse($response, $this);
     }
 
@@ -192,6 +217,7 @@ class HttpClient implements HttpClientInterface
      * Add middleware to the stack
      *
      * @param MiddlewareInterface $middleware
+     *
      * @return void
      */
     public function addMiddleware(MiddlewareInterface $middleware): void
@@ -204,6 +230,7 @@ class HttpClient implements HttpClientInterface
      * Remove middleware from the stack
      *
      * @param string $name
+     *
      * @return void
      */
     public function removeMiddleware(string $name): void
@@ -272,13 +299,16 @@ class HttpClient implements HttpClientInterface
 
     /**
      * Make an HTTP request
+     *
      * @param string $method
      * @param string $url
      * @param mixed[] $options
-     * @return ResponseInterface
+     *
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
      * @throws CanvasApiException
+     *
+     * @return ResponseInterface
      */
     public function request(string $method, string $url, array $options = []): ResponseInterface
     {
@@ -298,6 +328,7 @@ class HttpClient implements HttpClientInterface
                     }
                 }
             }
+
             throw new CanvasApiException($e->getMessage(), $e->getCode(), $errors);
         } catch (GuzzleException $e) {
             throw new CanvasApiException($e->getMessage(), $e->getCode(), []);
@@ -307,10 +338,12 @@ class HttpClient implements HttpClientInterface
     /**
      * @param string $url
      * @param mixed[] $options
-     * @return mixed[]
+     *
      * @throws MissingApiKeyException
      * @throws MissingOAuthTokenException
      * @throws MissingBaseUrlException
+     *
+     * @return mixed[]
      */
     private function prepareDefaultOptions(string &$url, array $options): array
     {
@@ -405,11 +438,13 @@ class HttpClient implements HttpClientInterface
      * @param string $url Full URL or relative path
      * @param string $method HTTP method (GET, POST, PUT, DELETE, PATCH, etc.)
      * @param mixed[] $options Guzzle request options
-     * @return ResponseInterface
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
      * @throws MissingOAuthTokenException
+     *
+     * @return ResponseInterface
      */
     public function rawRequest(string $url, string $method = 'GET', array $options = []): ResponseInterface
     {
@@ -430,6 +465,7 @@ class HttpClient implements HttpClientInterface
                     }
                 }
             }
+
             throw new CanvasApiException($e->getMessage(), $e->getCode(), $errors);
         } catch (GuzzleException $e) {
             throw new CanvasApiException($e->getMessage(), $e->getCode(), []);
@@ -441,11 +477,13 @@ class HttpClient implements HttpClientInterface
      *
      * @param string $url The URL to process (passed by reference, may be modified)
      * @param mixed[] $options The request options
-     * @return mixed[]
+     *
      * @throws MissingApiKeyException
      * @throws MissingOAuthTokenException
      * @throws MissingBaseUrlException
      * @throws CanvasApiException
+     *
+     * @return mixed[]
      */
     private function prepareRawRequestOptions(string &$url, array $options): array
     {
@@ -510,8 +548,10 @@ class HttpClient implements HttpClientInterface
      * Validate that a URL points to the configured Canvas domain
      *
      * @param string $url The URL to validate
-     * @return void
+     *
      * @throws CanvasApiException
+     *
+     * @return void
      */
     private function validateCanvasUrl(string $url): void
     {
@@ -548,7 +588,7 @@ class HttpClient implements HttpClientInterface
 
         // Validate scheme (only allow HTTP for localhost, HTTPS otherwise)
         $scheme = $parsedUrl['scheme'] ?? '';
-        $isLocalhost = in_array($parsedUrl['host'], ['localhost', '127.0.0.1', '::1']);
+        $isLocalhost = in_array($parsedUrl['host'], ['localhost', '127.0.0.1', '::1'], true);
 
         if (!$isLocalhost && $scheme !== 'https') {
             throw new CanvasApiException(

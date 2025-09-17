@@ -18,31 +18,50 @@ use CanvasLMS\Pagination\PaginatedResponse;
  * Direct fetching without context is not supported by Canvas API.
  *
  * @package CanvasLMS\Api\OutcomeResults
+ *
  * @see https://canvas.instructure.com/doc/api/outcome_results.html
  */
 class OutcomeResult extends AbstractBaseApi
 {
     public ?int $id = null;
+
     public ?float $score = null;
+
     public ?string $submittedOrAssessedAt = null;
+
     /** @var array<string, mixed>|null */
     public ?array $links = null;
+
     public ?float $percent = null;
+
     public ?float $possiblePoints = null;
+
     public ?bool $mastery = null;
+
     public ?bool $hidden = null;
+
     public ?string $attemptedAt = null;
+
     public ?string $assessedAt = null;
+
     public ?int $assignmentId = null;
+
     public ?string $assignmentName = null;
+
     public ?int $userId = null;
+
     public ?string $userName = null;
+
     public ?int $outcomeId = null;
+
     public ?string $outcomeTitle = null;
+
     /** @var array<string, mixed>|null */
     public ?array $outcome = null;
+
     /** @var array<string, mixed>|null */
     public ?array $alignment = null;
+
     /** @var array<string, mixed>|null */
     public ?array $user = null;
 
@@ -51,8 +70,10 @@ class OutcomeResult extends AbstractBaseApi
      * OutcomeResult requires context. Use fetchByContext() instead.
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<int, static> Never returns - always throws exception
+     *
      * @throws CanvasApiException Always thrown as method requires context
+     *
+     * @return array<int, static> Never returns - always throws exception
      */
     public static function get(array $params = []): array
     {
@@ -67,8 +88,10 @@ class OutcomeResult extends AbstractBaseApi
      * @param string $contextType Context type (courses, users)
      * @param int $contextId Context ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<int, OutcomeResult> Array of OutcomeResult objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, OutcomeResult> Array of OutcomeResult objects
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
@@ -81,7 +104,7 @@ class OutcomeResult extends AbstractBaseApi
         $endpoint = sprintf('%s/%d/outcome_results', $contextType, $contextId);
 
         $response = self::$apiClient->get($endpoint, [
-            'query' => $params
+            'query' => $params,
         ]);
 
         $data = self::parseJsonResponse($response);
@@ -109,8 +132,10 @@ class OutcomeResult extends AbstractBaseApi
      * Find method - NOT SUPPORTED for OutcomeResult.
      *
      * @param int $id ID
-     * @return static Never returns - always throws exception
+     *
      * @throws CanvasApiException Always thrown as OutcomeResult doesn't support direct find
+     *
+     * @return static Never returns - always throws exception
      */
     public static function find(int $id, array $params = []): static
     {
@@ -124,8 +149,10 @@ class OutcomeResult extends AbstractBaseApi
      *
      * @param int $courseId Course ID
      * @param array<string, mixed> $params Query parameters (user_ids, outcome_ids, include, etc.)
-     * @return array<int, OutcomeResult> Array of OutcomeResult objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, OutcomeResult> Array of OutcomeResult objects
      */
     public static function fetchByCourse(int $courseId, array $params = []): array
     {
@@ -137,8 +164,10 @@ class OutcomeResult extends AbstractBaseApi
      *
      * @param int $userId User ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<int, OutcomeResult> Array of OutcomeResult objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, OutcomeResult> Array of OutcomeResult objects
      */
     public static function fetchByUser(int $userId, array $params = []): array
     {
@@ -151,8 +180,10 @@ class OutcomeResult extends AbstractBaseApi
      * @param string $contextType Context type (courses, users)
      * @param int $contextId Context ID
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public static function fetchByContextPaginated(
         string $contextType,
@@ -166,6 +197,7 @@ class OutcomeResult extends AbstractBaseApi
         }
 
         $endpoint = sprintf('%s/%d/outcome_results', $contextType, $contextId);
+
         return self::getPaginatedResponse($endpoint, $params);
     }
 
@@ -217,6 +249,7 @@ class OutcomeResult extends AbstractBaseApi
         if ($this->links && isset($this->links['user'])) {
             return (int) $this->links['user'];
         }
+
         return null;
     }
 
@@ -230,6 +263,7 @@ class OutcomeResult extends AbstractBaseApi
         if ($this->links && isset($this->links['learning_outcome'])) {
             return (int) $this->links['learning_outcome'];
         }
+
         return null;
     }
 
@@ -243,11 +277,13 @@ class OutcomeResult extends AbstractBaseApi
         if ($this->links && isset($this->links['alignment'])) {
             return (string) $this->links['alignment'];
         }
+
         return null;
     }
 
     /**
      * Get the API endpoint for this resource
+     *
      * @return string
      */
     protected static function getEndpoint(): string

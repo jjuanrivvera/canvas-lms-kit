@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Logins;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Logins\UpdateLoginDTO;
+use PHPUnit\Framework\TestCase;
 
 class UpdateLoginDTOTest extends TestCase
 {
@@ -17,7 +19,7 @@ class UpdateLoginDTOTest extends TestCase
             'password' => 'newpassword123',
             'oldPassword' => 'oldpassword',
             'workflowState' => 'active',
-            'declaredUserType' => 'teacher'
+            'declaredUserType' => 'teacher',
         ];
 
         $dto = new UpdateLoginDTO($data);
@@ -28,7 +30,7 @@ class UpdateLoginDTOTest extends TestCase
             ['name' => 'login[password]', 'contents' => 'newpassword123'],
             ['name' => 'login[old_password]', 'contents' => 'oldpassword'],
             ['name' => 'login[workflow_state]', 'contents' => 'active'],
-            ['name' => 'login[declared_user_type]', 'contents' => 'teacher']
+            ['name' => 'login[declared_user_type]', 'contents' => 'teacher'],
         ];
 
         $this->assertEquals($expected, $apiArray);
@@ -43,7 +45,7 @@ class UpdateLoginDTOTest extends TestCase
             'uniqueId' => 'user@example.com',
             'sisUserId' => 'SIS123',
             'integrationId' => 'INT456',
-            'overrideSisStickiness' => true
+            'overrideSisStickiness' => true,
         ];
 
         $dto = new UpdateLoginDTO($data);
@@ -53,7 +55,7 @@ class UpdateLoginDTOTest extends TestCase
             ['name' => 'login[unique_id]', 'contents' => 'user@example.com'],
             ['name' => 'login[sis_user_id]', 'contents' => 'SIS123'],
             ['name' => 'login[integration_id]', 'contents' => 'INT456'],
-            ['name' => 'override_sis_stickiness', 'contents' => '1']
+            ['name' => 'override_sis_stickiness', 'contents' => '1'],
         ];
 
         $this->assertEquals($expected, $apiArray);
@@ -66,7 +68,7 @@ class UpdateLoginDTOTest extends TestCase
     {
         $dto = new UpdateLoginDTO([
             'uniqueId' => 'user@example.com',
-            'workflowState' => 'invalid_state'
+            'workflowState' => 'invalid_state',
         ]);
 
         $this->expectException(\InvalidArgumentException::class);
@@ -82,7 +84,7 @@ class UpdateLoginDTOTest extends TestCase
     {
         $dto = new UpdateLoginDTO([
             'uniqueId' => 'user@example.com',
-            'declaredUserType' => 'invalid_type'
+            'declaredUserType' => 'invalid_type',
         ]);
 
         $this->expectException(\InvalidArgumentException::class);
@@ -101,7 +103,7 @@ class UpdateLoginDTOTest extends TestCase
         foreach ($validStates as $state) {
             $data = [
                 'uniqueId' => 'user@example.com',
-                'workflowState' => $state
+                'workflowState' => $state,
             ];
 
             $dto = new UpdateLoginDTO($data);
@@ -121,7 +123,7 @@ class UpdateLoginDTOTest extends TestCase
         foreach ($validTypes as $type) {
             $data = [
                 'uniqueId' => 'user@example.com',
-                'declaredUserType' => $type
+                'declaredUserType' => $type,
             ];
 
             $dto = new UpdateLoginDTO($data);
@@ -139,18 +141,18 @@ class UpdateLoginDTOTest extends TestCase
         // Test with provider ID
         $dto = new UpdateLoginDTO([
             'uniqueId' => 'user@example.com',
-            'authenticationProviderId' => 'facebook'
+            'authenticationProviderId' => 'facebook',
         ]);
-        
+
         $apiArray = $dto->toApiArray();
         $this->assertContains(['name' => 'login[authentication_provider_id]', 'contents' => 'facebook'], $apiArray);
 
         // Test with null to unassociate
         $dto = new UpdateLoginDTO([
             'uniqueId' => 'user@example.com',
-            'authenticationProviderId' => null
+            'authenticationProviderId' => null,
         ]);
-        
+
         $apiArray = $dto->toApiArray();
         // Null values should be filtered out
         $this->assertCount(1, $apiArray);
@@ -211,7 +213,7 @@ class UpdateLoginDTOTest extends TestCase
             'password' => '',
             'oldPassword' => null,
             'sisUserId' => 'SIS123',
-            'authenticationProviderId' => ''
+            'authenticationProviderId' => '',
         ];
 
         $dto = new UpdateLoginDTO($data);
@@ -219,7 +221,7 @@ class UpdateLoginDTOTest extends TestCase
 
         $expected = [
             ['name' => 'login[unique_id]', 'contents' => 'user@example.com'],
-            ['name' => 'login[sis_user_id]', 'contents' => 'SIS123']
+            ['name' => 'login[sis_user_id]', 'contents' => 'SIS123'],
         ];
 
         $this->assertEquals($expected, $apiArray);
@@ -234,7 +236,7 @@ class UpdateLoginDTOTest extends TestCase
         $apiArray = $dto->toApiArray();
 
         $expected = [
-            ['name' => 'login[unique_id]', 'contents' => 'user@example.com']
+            ['name' => 'login[unique_id]', 'contents' => 'user@example.com'],
         ];
 
         $this->assertEquals($expected, $apiArray);
@@ -247,14 +249,14 @@ class UpdateLoginDTOTest extends TestCase
     {
         $dto = new UpdateLoginDTO([
             'uniqueId' => 'user@example.com',
-            'overrideSisStickiness' => true
+            'overrideSisStickiness' => true,
         ]);
-        
+
         $apiArray = $dto->toApiArray();
 
         $expected = [
             ['name' => 'login[unique_id]', 'contents' => 'user@example.com'],
-            ['name' => 'override_sis_stickiness', 'contents' => '1']
+            ['name' => 'override_sis_stickiness', 'contents' => '1'],
         ];
 
         $this->assertEquals($expected, $apiArray);
@@ -262,14 +264,14 @@ class UpdateLoginDTOTest extends TestCase
         // Test false boolean
         $dto = new UpdateLoginDTO([
             'uniqueId' => 'user@example.com',
-            'overrideSisStickiness' => false
+            'overrideSisStickiness' => false,
         ]);
-        
+
         $apiArray = $dto->toApiArray();
 
         $expected = [
             ['name' => 'login[unique_id]', 'contents' => 'user@example.com'],
-            ['name' => 'override_sis_stickiness', 'contents' => '']
+            ['name' => 'override_sis_stickiness', 'contents' => ''],
         ];
 
         $this->assertEquals($expected, $apiArray);

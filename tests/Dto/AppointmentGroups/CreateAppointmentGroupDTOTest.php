@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\AppointmentGroups;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\AppointmentGroups\CreateAppointmentGroupDTO;
+use PHPUnit\Framework\TestCase;
 
 class CreateAppointmentGroupDTOTest extends TestCase
 {
     /**
      * Test basic DTO creation and array conversion
+     *
      * @return void
      */
     public function testBasicDtoCreation(): void
@@ -19,7 +22,7 @@ class CreateAppointmentGroupDTOTest extends TestCase
             'description' => 'Weekly office hours',
             'locationName' => 'Room 101',
             'locationAddress' => '123 Main St',
-            'participantsPerAppointment' => 1
+            'participantsPerAppointment' => 1,
         ];
 
         $dto = new CreateAppointmentGroupDTO($data);
@@ -27,11 +30,11 @@ class CreateAppointmentGroupDTOTest extends TestCase
 
         // Check the array has the right structure
         $this->assertIsArray($apiArray);
-        
+
         // Check context codes
         $this->assertContains(['name' => 'appointment_group[context_codes][0]', 'contents' => 'course_123'], $apiArray);
         $this->assertContains(['name' => 'appointment_group[context_codes][1]', 'contents' => 'course_456'], $apiArray);
-        
+
         // Check other fields
         $this->assertContains(['name' => 'appointment_group[title]', 'contents' => 'Office Hours'], $apiArray);
         $this->assertContains(['name' => 'appointment_group[description]', 'contents' => 'Weekly office hours'], $apiArray);
@@ -42,6 +45,7 @@ class CreateAppointmentGroupDTOTest extends TestCase
 
     /**
      * Test boolean conversion
+     *
      * @return void
      */
     public function testBooleanConversion(): void
@@ -49,7 +53,7 @@ class CreateAppointmentGroupDTOTest extends TestCase
         $dto = new CreateAppointmentGroupDTO([
             'contextCodes' => ['course_123'],
             'publish' => true,
-            'allowObserverSignup' => false
+            'allowObserverSignup' => false,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -60,6 +64,7 @@ class CreateAppointmentGroupDTOTest extends TestCase
 
     /**
      * Test new appointments array formatting
+     *
      * @return void
      */
     public function testNewAppointmentsFormatting(): void
@@ -68,8 +73,8 @@ class CreateAppointmentGroupDTOTest extends TestCase
             'contextCodes' => ['course_123'],
             'newAppointments' => [
                 ['start_at' => '2024-01-15T10:00:00Z', 'end_at' => '2024-01-15T11:00:00Z'],
-                ['start_at' => '2024-01-16T10:00:00Z', 'end_at' => '2024-01-16T11:00:00Z']
-            ]
+                ['start_at' => '2024-01-16T10:00:00Z', 'end_at' => '2024-01-16T11:00:00Z'],
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -97,13 +102,14 @@ class CreateAppointmentGroupDTOTest extends TestCase
 
     /**
      * Test sub context codes
+     *
      * @return void
      */
     public function testSubContextCodes(): void
     {
         $dto = new CreateAppointmentGroupDTO([
             'contextCodes' => ['course_123'],
-            'subContextCodes' => ['course_section_456', 'course_section_789']
+            'subContextCodes' => ['course_section_456', 'course_section_789'],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -114,6 +120,7 @@ class CreateAppointmentGroupDTOTest extends TestCase
 
     /**
      * Test participant limits
+     *
      * @return void
      */
     public function testParticipantLimits(): void
@@ -122,7 +129,7 @@ class CreateAppointmentGroupDTOTest extends TestCase
             'contextCodes' => ['course_123'],
             'minAppointmentsPerParticipant' => 1,
             'maxAppointmentsPerParticipant' => 3,
-            'participantsPerAppointment' => 2
+            'participantsPerAppointment' => 2,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -134,13 +141,14 @@ class CreateAppointmentGroupDTOTest extends TestCase
 
     /**
      * Test participant visibility
+     *
      * @return void
      */
     public function testParticipantVisibility(): void
     {
         $dto = new CreateAppointmentGroupDTO([
             'contextCodes' => ['course_123'],
-            'participantVisibility' => 'protected'
+            'participantVisibility' => 'protected',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -150,13 +158,14 @@ class CreateAppointmentGroupDTOTest extends TestCase
 
     /**
      * Test required fields
+     *
      * @return void
      */
     public function testRequiredFields(): void
     {
         // Only context codes is required
         $dto = new CreateAppointmentGroupDTO([
-            'contextCodes' => ['course_123']
+            'contextCodes' => ['course_123'],
         ]);
 
         $apiArray = $dto->toApiArray();

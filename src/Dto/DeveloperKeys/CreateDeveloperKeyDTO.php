@@ -21,23 +21,33 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
 
     // Basic configuration
     public ?string $name = null;
+
     public ?string $email = null;
+
     public ?string $iconUrl = null;
+
     public ?string $notes = null;
+
     public ?string $vendorCode = null;
+
     public ?bool $visible = null;
 
     // OAuth configuration
     public ?string $redirectUri = null; // Deprecated in favor of redirectUris
+
     /** @var array<string>|null */
     public ?array $redirectUris = null;
+
     /** @var array<string>|null */
     public ?array $scopes = null;
+
     public ?bool $requireScopes = null;
+
     public ?bool $allowIncludes = null;
 
     // Security and testing
     public ?bool $testClusterOnly = null;
+
     public ?bool $autoExpireTokens = null;
 
     // OAuth2 client credentials flow
@@ -47,6 +57,7 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Create DTO instance from array data
      *
      * @param array<string, mixed> $data Input data
+     *
      * @return self
      */
     public static function fromArray(array $data): self
@@ -115,7 +126,7 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
         }
 
         return [
-            $this->apiPropertyName => $data
+            $this->apiPropertyName => $data,
         ];
     }
 
@@ -135,13 +146,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
                 foreach ($value as $index => $item) {
                     $multipart[] = [
                         'name' => "{$this->apiPropertyName}[{$key}][{$index}]",
-                        'contents' => (string) $item
+                        'contents' => (string) $item,
                     ];
                 }
             } else {
                 $multipart[] = [
                     'name' => "{$this->apiPropertyName}[{$key}]",
-                    'contents' => (string) $value
+                    'contents' => (string) $value,
                 ];
             }
         }
@@ -153,11 +164,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set the developer key name
      *
      * @param string|null $name The display name for the developer key
+     *
      * @return self
      */
     public function setName(?string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -165,11 +178,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set the contact email
      *
      * @param string|null $email Contact email for the key
+     *
      * @return self
      */
     public function setEmail(?string $email): self
     {
         $this->email = $email;
+
         return $this;
     }
 
@@ -177,11 +192,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set the icon URL
      *
      * @param string|null $iconUrl URL for a small icon to display in key list
+     *
      * @return self
      */
     public function setIconUrl(?string $iconUrl): self
     {
         $this->iconUrl = $iconUrl;
+
         return $this;
     }
 
@@ -189,11 +206,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set user notes about the key
      *
      * @param string|null $notes User-provided notes about the key
+     *
      * @return self
      */
     public function setNotes(?string $notes): self
     {
         $this->notes = $notes;
+
         return $this;
     }
 
@@ -201,11 +220,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set the vendor code
      *
      * @param string|null $vendorCode User-specified code representing the vendor
+     *
      * @return self
      */
     public function setVendorCode(?string $vendorCode): self
     {
         $this->vendorCode = $vendorCode;
+
         return $this;
     }
 
@@ -213,11 +234,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set key visibility
      *
      * @param bool|null $visible If false, key will not be visible in the UI
+     *
      * @return self
      */
     public function setVisible(?bool $visible): self
     {
         $this->visible = $visible;
+
         return $this;
     }
 
@@ -225,11 +248,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set redirect URIs for OAuth2 flow
      *
      * @param array<string>|null $redirectUris List of URLs used during OAuth2 flow
+     *
      * @return self
      */
     public function setRedirectUris(?array $redirectUris): self
     {
         $this->redirectUris = $redirectUris;
+
         return $this;
     }
 
@@ -237,11 +262,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set API scopes
      *
      * @param array<string>|null $scopes List of API endpoints key is allowed to access
+     *
      * @return self
      */
     public function setScopes(?array $scopes): self
     {
         $this->scopes = $scopes;
+
         return $this;
     }
 
@@ -249,11 +276,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set whether scopes are required
      *
      * @param bool|null $requireScopes If true, token requests must include scopes
+     *
      * @return self
      */
     public function setRequireScopes(?bool $requireScopes): self
     {
         $this->requireScopes = $requireScopes;
+
         return $this;
     }
 
@@ -261,11 +290,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set whether includes are allowed
      *
      * @param bool|null $allowIncludes If true, allows 'includes' parameters in API requests
+     *
      * @return self
      */
     public function setAllowIncludes(?bool $allowIncludes): self
     {
         $this->allowIncludes = $allowIncludes;
+
         return $this;
     }
 
@@ -273,11 +304,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set test cluster restriction
      *
      * @param bool|null $testClusterOnly If true, key only works in test/beta environments
+     *
      * @return self
      */
     public function setTestClusterOnly(?bool $testClusterOnly): self
     {
         $this->testClusterOnly = $testClusterOnly;
+
         return $this;
     }
 
@@ -285,11 +318,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set auto-expire tokens setting
      *
      * @param bool|null $autoExpireTokens If true, tokens expire after 1 hour
+     *
      * @return self
      */
     public function setAutoExpireTokens(?bool $autoExpireTokens): self
     {
         $this->autoExpireTokens = $autoExpireTokens;
+
         return $this;
     }
 
@@ -297,11 +332,13 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Set client credentials audience
      *
      * @param string|null $audience Audience for OAuth2 client credentials flow
+     *
      * @return self
      */
     public function setClientCredentialsAudience(?string $audience): self
     {
         $this->clientCredentialsAudience = $audience;
+
         return $this;
     }
 
@@ -309,6 +346,7 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Add a single redirect URI
      *
      * @param string $uri Redirect URI to add
+     *
      * @return self
      */
     public function addRedirectUri(string $uri): self
@@ -317,6 +355,7 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
             $this->redirectUris = [];
         }
         $this->redirectUris[] = $uri;
+
         return $this;
     }
 
@@ -324,6 +363,7 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
      * Add a single scope
      *
      * @param string $scope API scope to add
+     *
      * @return self
      */
     public function addScope(string $scope): self
@@ -332,6 +372,7 @@ class CreateDeveloperKeyDTO extends AbstractBaseDto implements DTOInterface
             $this->scopes = [];
         }
         $this->scopes[] = $scope;
+
         return $this;
     }
 }

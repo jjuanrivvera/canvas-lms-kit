@@ -4,20 +4,23 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\Pages;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\Pages\Page;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Pages\Page;
 use CanvasLMS\Api\Users\User;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 class PageRelationshipTest extends TestCase
 {
     private HttpClientInterface $mockHttpClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
+
     private Course $mockCourse;
 
     protected function setUp(): void
@@ -49,7 +52,7 @@ class PageRelationshipTest extends TestCase
         $page = new Page([
             'url' => 'test-page',
             'title' => 'Test Page',
-            'body' => 'Page content'
+            'body' => 'Page content',
         ]);
 
         // Test the method
@@ -72,7 +75,7 @@ class PageRelationshipTest extends TestCase
         // Create test page
         $page = new Page([
             'url' => 'test-page',
-            'title' => 'Test Page'
+            'title' => 'Test Page',
         ]);
 
         // Mock revisions response
@@ -83,7 +86,7 @@ class PageRelationshipTest extends TestCase
                 'title' => 'Test Page V1',
                 'created_at' => '2024-01-01T00:00:00Z',
                 'updated_at' => '2024-01-01T00:00:00Z',
-                'edited_by' => ['id' => 100, 'display_name' => 'User 1']
+                'edited_by' => ['id' => 100, 'display_name' => 'User 1'],
             ],
             [
                 'revision_id' => 2,
@@ -91,14 +94,14 @@ class PageRelationshipTest extends TestCase
                 'title' => 'Test Page V2',
                 'created_at' => '2024-01-02T00:00:00Z',
                 'updated_at' => '2024-01-02T00:00:00Z',
-                'edited_by' => ['id' => 101, 'display_name' => 'User 2']
-            ]
+                'edited_by' => ['id' => 101, 'display_name' => 'User 2'],
+            ],
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($revisionsData));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode($revisionsData));
 
@@ -155,21 +158,21 @@ class PageRelationshipTest extends TestCase
             'title' => 'Test Page',
             'last_edited_by' => [
                 'id' => 456,
-                'display_name' => 'Test User'
-            ]
+                'display_name' => 'Test User',
+            ],
         ]);
 
         // Mock user response
         $userData = [
             'id' => 456,
             'name' => 'Test User',
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($userData));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode($userData));
 
@@ -195,7 +198,7 @@ class PageRelationshipTest extends TestCase
         // Create page without last_edited_by
         $page = new Page([
             'url' => 'test-page',
-            'title' => 'Test Page'
+            'title' => 'Test Page',
         ]);
 
         // Test the method
@@ -212,8 +215,8 @@ class PageRelationshipTest extends TestCase
             'url' => 'test-page',
             'title' => 'Test Page',
             'last_edited_by' => [
-                'display_name' => 'Test User'
-            ]
+                'display_name' => 'Test User',
+            ],
         ]);
 
         // Test the method
@@ -228,7 +231,7 @@ class PageRelationshipTest extends TestCase
         // Create test page
         $page = new Page([
             'url' => 'test-page',
-            'last_edited_by' => ['id' => 456]
+            'last_edited_by' => ['id' => 456],
         ]);
 
         // Set up mock to throw exception

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -50,21 +52,21 @@ class AbstractBaseApiTest extends TestCase
     {
         // Use anonymous class instead of eval()
         // We need to pass empty array to constructor to avoid the error
-        $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
-        {
+        $testClass = new class ([]) extends \CanvasLMS\Api\AbstractBaseApi {
             public $id;
+
             public $name;
-            
+
             protected static function getEndpoint(): string
             {
                 return 'test_items';
             }
-            
+
             public static function find(int $id, array $params = []): self
             {
                 return new self(['id' => $id, 'name' => 'Test Item']);
             }
-            
+
             public static function get(array $params = []): array
             {
                 return [
@@ -72,18 +74,17 @@ class AbstractBaseApiTest extends TestCase
                     new self(['id' => 2, 'name' => 'Test Item 2']),
                 ];
             }
-            
+
             public static function testGetPaginatedResponse(string $endpoint, array $params = []): \CanvasLMS\Pagination\PaginatedResponse
             {
                 return parent::getPaginatedResponse($endpoint, $params);
             }
-            
+
             public static function testConvertPaginatedResponseToModels(\CanvasLMS\Pagination\PaginatedResponse $paginatedResponse): array
             {
                 return parent::convertPaginatedResponseToModels($paginatedResponse);
             }
-            
-            
+
             public static function testCreatePaginationResult(\CanvasLMS\Pagination\PaginatedResponse $paginatedResponse): \CanvasLMS\Pagination\PaginationResult
             {
                 return parent::createPaginationResult($paginatedResponse);
@@ -173,7 +174,7 @@ class AbstractBaseApiTest extends TestCase
         // Test the new pattern: getPaginatedResponse + all() + array_map
         $paginatedResponse = $this->testApiClass::testGetPaginatedResponse('/test/endpoint', ['per_page' => 50]);
         $allData = $paginatedResponse->all();
-        $models = array_map(fn($data) => new $this->testApiClass($data), $allData);
+        $models = array_map(fn ($data) => new $this->testApiClass($data), $allData);
 
         $this->assertIsArray($models);
         $this->assertCount(4, $models);
@@ -295,28 +296,28 @@ class AbstractBaseApiTest extends TestCase
     {
         // Use anonymous class instead of eval()
         // We need to pass empty array to constructor to avoid the error
-        $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
-        {
+        $testClass = new class ([]) extends \CanvasLMS\Api\AbstractBaseApi {
             public $id;
+
             public $name;
-            
+
             protected static function getEndpoint(): string
             {
                 return 'test';
             }
-            
+
             public static function find(int $id, array $params = []): self
             {
                 return new self(['id' => $id, 'name' => 'Test Item']);
             }
-            
+
             public static function get(array $params = []): array
             {
                 self::checkApiClient();
-                
+
                 $response = self::$apiClient->get('/test', ['query' => $params]);
                 $data = json_decode($response->getBody()->getContents(), true);
-                
+
                 return array_map(function ($item) {
                     return new self($item);
                 }, $data);
@@ -357,7 +358,7 @@ class AbstractBaseApiTest extends TestCase
         $data = [
             'id' => 123,
             'name' => 'Test Name',
-            'non_existent_property' => 'should be ignored'
+            'non_existent_property' => 'should be ignored',
         ];
 
         $instance = new $this->testApiClass($data);
@@ -374,20 +375,19 @@ class AbstractBaseApiTest extends TestCase
     {
         // Use anonymous class instead of eval()
         // We need to pass empty array to constructor to avoid the error
-        $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
-        {
+        $testClass = new class ([]) extends \CanvasLMS\Api\AbstractBaseApi {
             public $someProperty;
-            
+
             protected static function getEndpoint(): string
             {
                 return 'test';
             }
-            
+
             public static function find(int $id, array $params = []): self
             {
                 return new self(['id' => $id]);
             }
-            
+
             public static function get(array $params = []): array
             {
                 return [];
@@ -395,7 +395,7 @@ class AbstractBaseApiTest extends TestCase
         };
 
         $data = [
-            'some_property' => 'test value'
+            'some_property' => 'test value',
         ];
 
         $className = get_class($testClass);
@@ -410,11 +410,13 @@ class AbstractBaseApiTest extends TestCase
     public function testPopulateHandlesCamelCaseProperties(): void
     {
         // Create a test class with camelCase properties
-        $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
-        {
+        $testClass = new class ([]) extends \CanvasLMS\Api\AbstractBaseApi {
             public ?string $firstName = null;
+
             public ?string $lastName = null;
+
             public ?int $userId = null;
+
             public ?bool $isActive = null;
 
             protected static function getEndpoint(): string
@@ -442,7 +444,7 @@ class AbstractBaseApiTest extends TestCase
             'first_name' => 'John',
             'last_name' => 'Doe',
             'user_id' => 123,
-            'is_active' => true
+            'is_active' => true,
         ];
 
         $instance->testPopulate($snakeCaseData);
@@ -457,7 +459,7 @@ class AbstractBaseApiTest extends TestCase
             'firstName' => 'Jane',
             'lastName' => 'Smith',
             'userId' => 456,
-            'isActive' => false
+            'isActive' => false,
         ];
 
         $instance->testPopulate($camelCaseData);
@@ -479,7 +481,7 @@ class AbstractBaseApiTest extends TestCase
         $responseData = [
             'id' => 123,
             'name' => 'Test Item',
-            'status' => 'active'
+            'status' => 'active',
         ];
 
         $mockStream->expects($this->once())
@@ -573,7 +575,7 @@ class AbstractBaseApiTest extends TestCase
         $responseData = [
             ['id' => 1, 'name' => 'Item 1'],
             ['id' => 2, 'name' => 'Item 2'],
-            ['id' => 3, 'name' => 'Item 3']
+            ['id' => 3, 'name' => 'Item 3'],
         ];
 
         $mockStream->expects($this->once())
@@ -634,7 +636,7 @@ class AbstractBaseApiTest extends TestCase
             'lockAt' => '2024-02-01T00:00:00Z',
             'unlockAt' => '2024-01-02T06:00:00Z',
             'submittedAt' => '2024-01-29T22:00:00Z',
-            'gradedAt' => '2024-01-31T14:00:00Z'
+            'gradedAt' => '2024-01-31T14:00:00Z',
         ];
 
         foreach ($dateFields as $field => $dateString) {
@@ -658,7 +660,7 @@ class AbstractBaseApiTest extends TestCase
             'isPublished' => true,
             'score' => 95.5,
             'gradeMatchesCurrentSubmission' => true,  // This is the field we fixed!
-            'someRandomField' => 'some value'
+            'someRandomField' => 'some value',
         ];
 
         foreach ($nonDateFields as $field => $value) {

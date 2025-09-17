@@ -38,6 +38,7 @@ class CourseProgress
 
     /**
      * Constructor
+     *
      * @param mixed[] $data
      */
     public function __construct(array $data = [])
@@ -160,6 +161,7 @@ class CourseProgress
 
     /**
      * Convert to array
+     *
      * @return mixed[]
      */
     public function toArray(): array

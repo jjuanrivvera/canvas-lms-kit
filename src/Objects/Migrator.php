@@ -34,6 +34,7 @@ class Migrator
 
     /**
      * A list of fields this system requires
+     *
      * @var array<string>|null
      */
     public ?array $requiredSettings = null;
@@ -58,6 +59,7 @@ class Migrator
      * Check if this migrator requires a specific setting
      *
      * @param string $setting Setting name to check
+     *
      * @return bool
      */
     public function requiresSetting(string $setting): bool
@@ -66,7 +68,7 @@ class Migrator
             return false;
         }
 
-        return in_array($setting, $this->requiredSettings);
+        return in_array($setting, $this->requiredSettings, true);
     }
 
     /**

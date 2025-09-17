@@ -97,11 +97,13 @@ class Version
      * Check if a version is pre-release
      *
      * @param string|null $version Version to check (defaults to current)
+     *
      * @return bool
      */
     public static function isPreRelease(?string $version = null): bool
     {
         $version = $version ?? self::VERSION;
+
         return str_contains($version, '-alpha')
             || str_contains($version, '-beta')
             || str_contains($version, '-rc');
