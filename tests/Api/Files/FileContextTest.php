@@ -260,6 +260,7 @@ class FileContextTest extends TestCase
     {
         $mockBody = $this->createMock(StreamInterface::class);
         $mockBody->method('__toString')->willReturn(json_encode($data));
+        $mockBody->method('getContents')->willReturn(json_encode($data));
 
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockResponse->method('getBody')->willReturn($mockBody);
