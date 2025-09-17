@@ -69,6 +69,7 @@ class UpdateRubricDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Convert the DTO to an array for API requests
+     *
      * @return array<int, array<string, mixed>>
      */
     public function toApiArray(): array
@@ -79,28 +80,28 @@ class UpdateRubricDTO extends AbstractBaseDto implements DTOInterface
         if ($this->title !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric[title]',
-                'contents' => $this->title
+                'contents' => $this->title,
             ];
         }
 
         if ($this->freeFormCriterionComments !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric[free_form_criterion_comments]',
-                'contents' => $this->freeFormCriterionComments ? '1' : '0'
+                'contents' => $this->freeFormCriterionComments ? '1' : '0',
             ];
         }
 
         if ($this->skipUpdatingPointsPossible !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric[skip_updating_points_possible]',
-                'contents' => $this->skipUpdatingPointsPossible ? '1' : '0'
+                'contents' => $this->skipUpdatingPointsPossible ? '1' : '0',
             ];
         }
 
         if ($this->hideScoreTotal !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric[hide_score_total]',
-                'contents' => $this->hideScoreTotal ? '1' : '0'
+                'contents' => $this->hideScoreTotal ? '1' : '0',
             ];
         }
 
@@ -108,7 +109,7 @@ class UpdateRubricDTO extends AbstractBaseDto implements DTOInterface
         if ($this->rubricAssociationId !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_association_id',
-                'contents' => (string) $this->rubricAssociationId
+                'contents' => (string) $this->rubricAssociationId,
             ];
         }
 
@@ -121,28 +122,28 @@ class UpdateRubricDTO extends AbstractBaseDto implements DTOInterface
                 if (isset($criterion['description'])) {
                     $modifiedProperties[] = [
                         'name' => "rubric[criteria][$criterionKey][description]",
-                        'contents' => $criterion['description']
+                        'contents' => $criterion['description'],
                     ];
                 }
 
                 if (isset($criterion['long_description'])) {
                     $modifiedProperties[] = [
                         'name' => "rubric[criteria][$criterionKey][long_description]",
-                        'contents' => $criterion['long_description']
+                        'contents' => $criterion['long_description'],
                     ];
                 }
 
                 if (isset($criterion['points'])) {
                     $modifiedProperties[] = [
                         'name' => "rubric[criteria][$criterionKey][points]",
-                        'contents' => (string) $criterion['points']
+                        'contents' => (string) $criterion['points'],
                     ];
                 }
 
                 if (isset($criterion['criterion_use_range'])) {
                     $modifiedProperties[] = [
                         'name' => "rubric[criteria][$criterionKey][criterion_use_range]",
-                        'contents' => $criterion['criterion_use_range'] ? '1' : '0'
+                        'contents' => $criterion['criterion_use_range'] ? '1' : '0',
                     ];
                 }
 
@@ -154,21 +155,21 @@ class UpdateRubricDTO extends AbstractBaseDto implements DTOInterface
                         if (isset($rating['description'])) {
                             $modifiedProperties[] = [
                                 'name' => "rubric[criteria][$criterionKey][ratings][$ratingKey][description]",
-                                'contents' => $rating['description']
+                                'contents' => $rating['description'],
                             ];
                         }
 
                         if (isset($rating['long_description'])) {
                             $modifiedProperties[] = [
                                 'name' => "rubric[criteria][$criterionKey][ratings][$ratingKey][long_description]",
-                                'contents' => $rating['long_description']
+                                'contents' => $rating['long_description'],
                             ];
                         }
 
                         if (isset($rating['points'])) {
                             $modifiedProperties[] = [
                                 'name' => "rubric[criteria][$criterionKey][ratings][$ratingKey][points]",
-                                'contents' => (string) $rating['points']
+                                'contents' => (string) $rating['points'],
                             ];
                         }
                     }
@@ -186,7 +187,7 @@ class UpdateRubricDTO extends AbstractBaseDto implements DTOInterface
                     }
                     $modifiedProperties[] = [
                         'name' => "rubric_association[$snakeKey]",
-                        'contents' => (string) $value
+                        'contents' => (string) $value,
                     ];
                 }
             }

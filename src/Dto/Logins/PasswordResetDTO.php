@@ -33,7 +33,7 @@ class PasswordResetDTO extends AbstractBaseDto implements DTOInterface
         if (!empty($this->email)) {
             $modifiedProperties[] = [
                 'name' => 'pseudonym_session[unique_id_forgot]',
-                'contents' => $this->email
+                'contents' => $this->email,
             ];
         }
 

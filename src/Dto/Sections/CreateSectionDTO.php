@@ -90,8 +90,8 @@ class CreateSectionDTO extends AbstractBaseDto implements DTOInterface
             // Handle DateTime objects
             if ($value instanceof \DateTimeInterface) {
                 $modifiedProperties[] = [
-                    "name" => $propertyName,
-                    "contents" => $value->format(\DateTimeInterface::ATOM)
+                    'name' => $propertyName,
+                    'contents' => $value->format(\DateTimeInterface::ATOM),
                 ];
                 continue;
             }
@@ -100,8 +100,8 @@ class CreateSectionDTO extends AbstractBaseDto implements DTOInterface
             if (is_array($value)) {
                 foreach ($value as $arrayValue) {
                     $modifiedProperties[] = [
-                        "name" => $propertyName . '[]',
-                        "contents" => $arrayValue
+                        'name' => $propertyName . '[]',
+                        'contents' => $arrayValue,
                     ];
                 }
                 continue;
@@ -109,16 +109,16 @@ class CreateSectionDTO extends AbstractBaseDto implements DTOInterface
 
             // Handle regular values
             $modifiedProperties[] = [
-                "name" => $propertyName,
-                "contents" => $value
+                'name' => $propertyName,
+                'contents' => $value,
             ];
         }
 
         // Handle enable_sis_reactivation separately (not part of course_section)
         if ($this->enableSisReactivation !== null) {
             $modifiedProperties[] = [
-                "name" => 'enable_sis_reactivation',
-                "contents" => $this->enableSisReactivation
+                'name' => 'enable_sis_reactivation',
+                'contents' => $this->enableSisReactivation,
             ];
         }
 

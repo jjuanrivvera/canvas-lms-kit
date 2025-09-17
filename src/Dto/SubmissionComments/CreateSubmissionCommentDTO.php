@@ -44,6 +44,7 @@ class CreateSubmissionCommentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Array of file IDs to attach to the comment
+     *
      * @var array<int>|null
      */
     public ?array $fileIds = null;
@@ -114,6 +115,7 @@ class CreateSubmissionCommentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get file IDs
+     *
      * @return array<int>|null
      */
     public function getFileIds(): ?array
@@ -123,6 +125,7 @@ class CreateSubmissionCommentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set file IDs
+     *
      * @param array<int>|null $fileIds
      */
     public function setFileIds(?array $fileIds): void

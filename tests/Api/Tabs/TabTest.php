@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Tabs;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\Tabs\Tab;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Tabs\Tab;
 use CanvasLMS\Dto\Tabs\UpdateTabDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -19,6 +20,7 @@ use Psr\Http\Message\StreamInterface;
 class TabTest extends TestCase
 {
     private HttpClientInterface $httpClientMock;
+
     private Course $course;
 
     protected function setUp(): void
@@ -72,7 +74,7 @@ class TabTest extends TestCase
             'type' => 'internal',
             'hidden' => false,
             'visibility' => 'public',
-            'position' => 2
+            'position' => 2,
         ];
 
         $tab = new Tab($data);
@@ -122,7 +124,7 @@ class TabTest extends TestCase
                 'type' => 'internal',
                 'hidden' => false,
                 'visibility' => 'public',
-                'position' => 1
+                'position' => 1,
             ],
             [
                 'id' => 'assignments',
@@ -131,8 +133,8 @@ class TabTest extends TestCase
                 'type' => 'internal',
                 'hidden' => false,
                 'visibility' => 'public',
-                'position' => 2
-            ]
+                'position' => 2,
+            ],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -190,7 +192,7 @@ class TabTest extends TestCase
         $paginatedResponseMock = $this->createMock(PaginatedResponse::class);
 
         // Mock the getPaginatedResponse method
-        $tabClass = new class extends Tab {
+        $tabClass = new class () extends Tab {
             public static function testGetPaginatedResponse(string $endpoint, array $params): PaginatedResponse
             {
                 return parent::getPaginatedResponse($endpoint, $params);
@@ -210,7 +212,7 @@ class TabTest extends TestCase
             'id' => 'assignments',
             'label' => 'Assignments',
             'position' => 3,
-            'hidden' => true
+            'hidden' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -245,7 +247,7 @@ class TabTest extends TestCase
             'id' => 'home',
             'label' => 'Home',
             'position' => 1,
-            'hidden' => false
+            'hidden' => false,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -278,7 +280,7 @@ class TabTest extends TestCase
             'id' => 'assignments',
             'label' => 'Assignments',
             'position' => 2,
-            'hidden' => false
+            'hidden' => false,
         ]);
 
         // Change some properties
@@ -289,7 +291,7 @@ class TabTest extends TestCase
             'id' => 'assignments',
             'label' => 'Assignments',
             'position' => 5,
-            'hidden' => true
+            'hidden' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -337,7 +339,7 @@ class TabTest extends TestCase
     {
         $tab = new Tab([
             'id' => 'assignments',
-            'position' => 3
+            'position' => 3,
         ]);
 
         $this->httpClientMock->expects($this->once())
@@ -358,7 +360,7 @@ class TabTest extends TestCase
             'type' => 'internal',
             'hidden' => false,
             'visibility' => 'public',
-            'position' => 2
+            'position' => 2,
         ];
 
         $tab = new Tab($data);

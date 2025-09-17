@@ -20,12 +20,14 @@ class CreateGroupMembershipDTO extends AbstractBaseDto
 
     /**
      * Array of user IDs to add to the group (for bulk operations)
+     *
      * @var array<int>|null
      */
     public ?array $userIds = null;
 
     /**
      * Email addresses to invite to the group
+     *
      * @var array<string>|null
      */
     public ?array $invitees = null;
@@ -51,12 +53,12 @@ class CreateGroupMembershipDTO extends AbstractBaseDto
         $data = [];
 
         if ($this->userId !== null) {
-            $data[] = ['name' => 'user_id', 'contents' => (string)$this->userId];
+            $data[] = ['name' => 'user_id', 'contents' => (string) $this->userId];
         }
 
         if ($this->userIds !== null) {
             foreach ($this->userIds as $userId) {
-                $data[] = ['name' => 'user_ids[]', 'contents' => (string)$userId];
+                $data[] = ['name' => 'user_ids[]', 'contents' => (string) $userId];
             }
         }
 

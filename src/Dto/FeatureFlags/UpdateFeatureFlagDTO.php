@@ -67,21 +67,21 @@ class UpdateFeatureFlagDTO extends AbstractBaseDto
         if ($this->state !== null) {
             $multipart[] = [
                 'name' => 'state',
-                'contents' => $this->state
+                'contents' => $this->state,
             ];
         }
 
         if ($this->locked !== null) {
             $multipart[] = [
                 'name' => 'locked',
-                'contents' => $this->locked ? 'true' : 'false'
+                'contents' => $this->locked ? 'true' : 'false',
             ];
         }
 
         if ($this->hidden !== null) {
             $multipart[] = [
                 'name' => 'hidden',
-                'contents' => $this->hidden ? 'true' : 'false'
+                'contents' => $this->hidden ? 'true' : 'false',
             ];
         }
 
@@ -92,13 +92,16 @@ class UpdateFeatureFlagDTO extends AbstractBaseDto
      * Set the state of the feature flag
      *
      * @param string $state The state to set ('off', 'allowed', 'on')
-     * @return self
+     *
      * @throws \InvalidArgumentException If the state is invalid
+     *
+     * @return self
      */
     public function setState(string $state): self
     {
         $this->validateState($state);
         $this->state = $state;
+
         return $this;
     }
 
@@ -110,6 +113,7 @@ class UpdateFeatureFlagDTO extends AbstractBaseDto
     public function enable(): self
     {
         $this->state = 'on';
+
         return $this;
     }
 
@@ -121,6 +125,7 @@ class UpdateFeatureFlagDTO extends AbstractBaseDto
     public function disable(): self
     {
         $this->state = 'off';
+
         return $this;
     }
 
@@ -132,6 +137,7 @@ class UpdateFeatureFlagDTO extends AbstractBaseDto
     public function allow(): self
     {
         $this->state = 'allowed';
+
         return $this;
     }
 
@@ -139,11 +145,13 @@ class UpdateFeatureFlagDTO extends AbstractBaseDto
      * Set whether the feature flag is locked
      *
      * @param bool $locked Whether to lock the flag
+     *
      * @return self
      */
     public function setLocked(bool $locked): self
     {
         $this->locked = $locked;
+
         return $this;
     }
 
@@ -155,6 +163,7 @@ class UpdateFeatureFlagDTO extends AbstractBaseDto
     public function lock(): self
     {
         $this->locked = true;
+
         return $this;
     }
 
@@ -166,6 +175,7 @@ class UpdateFeatureFlagDTO extends AbstractBaseDto
     public function unlock(): self
     {
         $this->locked = false;
+
         return $this;
     }
 
@@ -173,11 +183,13 @@ class UpdateFeatureFlagDTO extends AbstractBaseDto
      * Set whether the feature flag is hidden
      *
      * @param bool $hidden Whether to hide the flag
+     *
      * @return self
      */
     public function setHidden(bool $hidden): self
     {
         $this->hidden = $hidden;
+
         return $this;
     }
 
@@ -189,6 +201,7 @@ class UpdateFeatureFlagDTO extends AbstractBaseDto
     public function hide(): self
     {
         $this->hidden = true;
+
         return $this;
     }
 
@@ -200,6 +213,7 @@ class UpdateFeatureFlagDTO extends AbstractBaseDto
     public function show(): self
     {
         $this->hidden = false;
+
         return $this;
     }
 
@@ -207,6 +221,7 @@ class UpdateFeatureFlagDTO extends AbstractBaseDto
      * Validate the state value
      *
      * @param string $state The state to validate
+     *
      * @throws \InvalidArgumentException If the state is invalid
      */
     protected function validateState(string $state): void

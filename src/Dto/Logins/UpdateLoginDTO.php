@@ -118,7 +118,7 @@ class UpdateLoginDTO extends AbstractBaseDto implements DTOInterface
 
             $modifiedProperties[] = [
                 'name' => $apiKeyName,
-                'contents' => (string) $value
+                'contents' => (string) $value,
             ];
         }
 
@@ -133,15 +133,16 @@ class UpdateLoginDTO extends AbstractBaseDto implements DTOInterface
     private function validateParameters(): void
     {
         // Validate workflow state if provided
-        if ($this->workflowState && !in_array($this->workflowState, ['active', 'suspended'])) {
+        if ($this->workflowState && !in_array($this->workflowState, ['active', 'suspended'], true)) {
             throw new \InvalidArgumentException('Invalid workflowState. Valid values are: active, suspended');
         }
 
         // Validate declared user type if provided
         if ($this->declaredUserType) {
             $validTypes = ['administrative', 'observer', 'staff', 'student', 'student_other', 'teacher'];
-            if (!in_array($this->declaredUserType, $validTypes)) {
+            if (!in_array($this->declaredUserType, $validTypes, true)) {
                 $validTypesStr = implode(', ', $validTypes);
+
                 throw new \InvalidArgumentException("Invalid declaredUserType. Valid values are: {$validTypesStr}");
             }
         }

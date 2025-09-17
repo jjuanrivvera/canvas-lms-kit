@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Dto\Conversations;
 
 /**
@@ -15,36 +17,42 @@ class UpdateConversationDTO
 {
     /**
      * The workflow state of the conversation (read, unread, archived)
+     *
      * @var string|null
      */
     public ?string $workflowState = null;
 
     /**
      * Whether the user is subscribed to the conversation
+     *
      * @var bool|null
      */
     public ?bool $subscribed = null;
 
     /**
      * Whether the conversation is starred
+     *
      * @var bool|null
      */
     public ?bool $starred = null;
 
     /**
      * Used when generating "visible" in the API response
+     *
      * @var string|null
      */
     public ?string $scope = null;
 
     /**
      * Used when generating "visible" in the API response
+     *
      * @var array<string>|null
      */
     public ?array $filter = null;
 
     /**
      * Used when generating "visible" in the API response
+     *
      * @var string|null
      */
     public ?string $filterMode = null;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Dto\Conversations;
 
 /**
@@ -16,6 +18,7 @@ class AddRecipientsDTO
     /**
      * An array of recipient ids to add to the conversation.
      * These may be user ids or course/group ids prefixed with "course_" or "group_"
+     *
      * @var array<string>
      */
     public array $recipients;

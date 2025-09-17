@@ -69,7 +69,7 @@ class CreateGroupDTO extends AbstractBaseDto
         }
 
         if ($this->storageQuotaMb !== null) {
-            $data[] = ['name' => 'storage_quota_mb', 'contents' => (string)$this->storageQuotaMb];
+            $data[] = ['name' => 'storage_quota_mb', 'contents' => (string) $this->storageQuotaMb];
         }
 
         if ($this->sisGroupId !== null) {

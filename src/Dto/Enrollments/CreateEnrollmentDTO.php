@@ -13,18 +13,25 @@ class CreateEnrollmentDTO extends AbstractBaseDto implements DTOInterface
 
     // Required fields
     public ?string $userId = null;
+
     public ?string $type = null;
 
     // Optional enrollment configuration
     public ?string $enrollmentState = 'active';
+
     public ?string $courseSectionId = null;
+
     public ?string $roleId = null;
+
     public ?bool $limitPrivilegesToCourseSection = null;
+
     public ?bool $notify = null;
+
     public ?string $selfEnrollmentCode = null;
 
     // Date constraints
     public ?\DateTime $startAt = null;
+
     public ?\DateTime $endAt = null;
 
     // SIS integration
@@ -32,8 +39,11 @@ class CreateEnrollmentDTO extends AbstractBaseDto implements DTOInterface
 
     // Associated user fields (when creating via email/sis)
     public ?string $userEmail = null;
+
     public ?string $userFirstName = null;
+
     public ?string $userLastName = null;
+
     public ?string $userSisId = null;
 
     /**
@@ -286,6 +296,7 @@ class CreateEnrollmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Convert the DTO to an array with proper date formatting
+     *
      * @return mixed[]
      */
     public function toArray(): array

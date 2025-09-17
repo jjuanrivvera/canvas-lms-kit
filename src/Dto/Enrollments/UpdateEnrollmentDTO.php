@@ -13,12 +13,16 @@ class UpdateEnrollmentDTO extends AbstractBaseDto implements DTOInterface
 
     // Updatable enrollment fields
     public ?string $enrollmentState = null;
+
     public ?string $courseSectionId = null;
+
     public ?string $roleId = null;
+
     public ?bool $limitPrivilegesToCourseSection = null;
 
     // Date constraints
     public ?\DateTime $startAt = null;
+
     public ?\DateTime $endAt = null;
 
     // Notification preference for updates
@@ -146,6 +150,7 @@ class UpdateEnrollmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Convert the DTO to an array with proper date formatting
+     *
      * @return mixed[]
      */
     public function toArray(): array
