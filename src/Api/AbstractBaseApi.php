@@ -173,8 +173,7 @@ abstract class AbstractBaseApi implements ApiInterface
             'lockAt',
             'unlockAt',
             'submittedAt',
-            'gradedAt',
-            'gradeMatchesCurrentSubmission'
+            'gradedAt'
         ];
 
         if (in_array($key, $dateFields) && is_string($value) && !empty($value)) {

@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved error handling for malformed JSON responses
   - Standardized response parsing across entire SDK
 
+- **Fixed gradeMatchesCurrentSubmission Type Casting Bug** (#135)
+  - Removed `gradeMatchesCurrentSubmission` from date fields array in `AbstractBaseApi::castValue()`
+  - Field now correctly remains as boolean type per Canvas API specification
+  - Added comprehensive test coverage for `castValue()` method
+  - Prevents runtime errors when processing Submission objects
+  - Ensures type safety for all date and non-date fields
+
 ## [1.5.2] - 2025-09-15
 
 ### Fixed
