@@ -18,6 +18,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enables better IDE support and compile-time validation
   - Maintains backward compatibility (only affects incorrect usage)
 
+### Changed
+- **Refactored Global Helper Function to Avoid Namespace Collisions** (#138)
+  - Created new `CanvasLMS\Utilities\Str` class with static `toSnakeCase()` method
+  - Updated all 14 DTO files to use the new namespaced method
+  - Added deprecation wrapper to existing global `str_to_snake_case()` function
+  - Eliminates risk of global namespace collisions with other packages
+  - Follows modern PHP best practices with proper namespacing
+  - Provides smooth migration path with backward compatibility
+  - Added comprehensive test coverage for the new Str utility class
+
+### Deprecated
+- **Global `str_to_snake_case()` function** - Use `\CanvasLMS\Utilities\Str::toSnakeCase()` instead. The global function will be removed in version 2.0.0
+
 ### Fixed
 - **Critical StreamInterface TypeError Fix** (#134)
   - Fixed critical bug where `json_decode()` was receiving StreamInterface objects instead of strings

@@ -6,6 +6,7 @@ namespace CanvasLMS\Dto\Courses;
 
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
+use CanvasLMS\Utilities\Str;
 use DateTime;
 
 class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
@@ -324,7 +325,7 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
 
             // Rename keys to this format course[{key}]
             $modifiedProperties[] = [
-                'name' => 'course[' . str_to_snake_case($key) . ']',
+                'name' => 'course[' . Str::toSnakeCase($key) . ']',
                 'contents' => $value,
             ];
         }

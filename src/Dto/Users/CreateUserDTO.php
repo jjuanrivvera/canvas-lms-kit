@@ -6,6 +6,7 @@ namespace CanvasLMS\Dto\Users;
 
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
+use CanvasLMS\Utilities\Str;
 use DateTimeInterface;
 
 class CreateUserDTO extends AbstractBaseDto implements DTOInterface
@@ -245,18 +246,18 @@ class CreateUserDTO extends AbstractBaseDto implements DTOInterface
                 'sendConfirmation',
                 'forceSelfRegistration',
                 'authenticationProviderId',
-                'declaredUserType' => 'pseudonym[' . str_to_snake_case($key) . ']',
+                'declaredUserType' => 'pseudonym[' . Str::toSnakeCase($key) . ']',
                 'communicationType',
                 'communicationAddress',
                 'confirmationUrl',
                 'skipConfirmation' =>
-                'communication_channel[' . str_to_snake_case(substr($key, strlen('communication'))) . ']',
+                'communication_channel[' . Str::toSnakeCase(substr($key, strlen('communication'))) . ']',
                 'destination',
                 'initialEnrollmentType',
                 'pairingCode',
                 'forceValidations',
-                'enableSisReactivation' => str_to_snake_case($key),
-                default => 'user[' . str_to_snake_case($key) . ']'
+                'enableSisReactivation' => Str::toSnakeCase($key),
+                default => 'user[' . Str::toSnakeCase($key) . ']'
             };
 
             $modifiedProperties[] = [

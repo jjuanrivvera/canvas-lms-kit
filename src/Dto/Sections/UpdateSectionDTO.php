@@ -6,8 +6,7 @@ namespace CanvasLMS\Dto\Sections;
 
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
-
-use function str_to_snake_case;
+use CanvasLMS\Utilities\Str;
 
 /**
  * Data Transfer Object for updating Canvas sections.
@@ -80,7 +79,7 @@ class UpdateSectionDTO extends AbstractBaseDto implements DTOInterface
                 throw new \Exception('The API property name must be set in the DTO');
             }
 
-            $propertyName = $this->apiPropertyName . '[' . str_to_snake_case($property) . ']';
+            $propertyName = $this->apiPropertyName . '[' . Str::toSnakeCase($property) . ']';
 
             // Skip null values
             if (is_null($value)) {

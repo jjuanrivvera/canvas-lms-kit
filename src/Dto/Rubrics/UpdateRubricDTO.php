@@ -6,8 +6,7 @@ namespace CanvasLMS\Dto\Rubrics;
 
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
-
-use function str_to_snake_case;
+use CanvasLMS\Utilities\Str;
 
 /**
  * Data Transfer Object for updating Canvas rubrics.
@@ -180,7 +179,7 @@ class UpdateRubricDTO extends AbstractBaseDto implements DTOInterface
         // Handle association data if provided
         if ($this->association !== null) {
             foreach ($this->association as $key => $value) {
-                $snakeKey = str_to_snake_case($key);
+                $snakeKey = Str::toSnakeCase($key);
                 if ($value !== null) {
                     if (is_bool($value)) {
                         $value = $value ? '1' : '0';

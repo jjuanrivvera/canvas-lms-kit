@@ -6,6 +6,7 @@ namespace CanvasLMS\Dto\ExternalTools;
 
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
+use CanvasLMS\Utilities\Str;
 
 /**
  * Data Transfer Object for creating external tools in Canvas LMS
@@ -928,7 +929,7 @@ class CreateExternalToolDTO extends AbstractBaseDto implements DTOInterface
                 continue;
             }
 
-            $propertyName = $this->apiPropertyName . '[' . str_to_snake_case($property) . ']';
+            $propertyName = $this->apiPropertyName . '[' . Str::toSnakeCase($property) . ']';
 
             // For DateTimeInterface values, format them as ISO 8601 strings
             if ($value instanceof \DateTimeInterface) {

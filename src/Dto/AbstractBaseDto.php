@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Dto;
 
+use CanvasLMS\Utilities\Str;
 use DateTime;
 use DateTimeInterface;
 use Exception;
@@ -154,7 +155,7 @@ abstract class AbstractBaseDto
                 throw new Exception('The API property name must be set in the DTO');
             }
 
-            $propertyName = $this->apiPropertyName . '[' . str_to_snake_case($property) . ']';
+            $propertyName = $this->apiPropertyName . '[' . Str::toSnakeCase($property) . ']';
 
             // Directly handle null values to continue to the next iteration.
             if (is_null($value)) {

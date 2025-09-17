@@ -6,6 +6,7 @@ namespace CanvasLMS\Dto\Users;
 
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
+use CanvasLMS\Utilities\Str;
 use DateTimeInterface;
 
 class UpdateUserDTO extends AbstractBaseDto implements DTOInterface
@@ -145,13 +146,13 @@ class UpdateUserDTO extends AbstractBaseDto implements DTOInterface
                 $value = $value->format('Y-m-d'); // Convert DateTime to YYYY-MM-DD format for birthdate
             }
 
-            $apiKeyName = 'user[' . str_to_snake_case($key) . ']';
+            $apiKeyName = 'user[' . Str::toSnakeCase($key) . ']';
 
             // For the avatar, since it's a nested array
             if (in_array($key, ['avatarToken', 'avatarUrl', 'avatarState'], true)) {
                 $avatarKey = str_replace('avatar', '', $key);
                 $avatarKey = lcfirst($avatarKey); // make sure the first letter is lowercase
-                $apiKeyName = 'user[avatar][' . str_to_snake_case($avatarKey) . ']';
+                $apiKeyName = 'user[avatar][' . Str::toSnakeCase($avatarKey) . ']';
             }
 
             // For override_sis_stickiness, it should be at root level
