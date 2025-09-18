@@ -453,10 +453,10 @@ class File extends AbstractBaseApi
                 'skipAuth' => true,  // Don't send Canvas Bearer token to external location
                 'skipDomainValidation' => true,  // Allow external redirect URLs
             ]);
-            $fileData = json_decode($confirmResponse->getBody()->getContents(), true);
+            $fileData = self::parseJsonResponse($confirmResponse);
         } else {
             $logger->debug('File Upload: Step 3 - Processing upload response directly');
-            $fileData = json_decode($uploadResponse->getBody()->getContents(), true);
+            $fileData = self::parseJsonResponse($uploadResponse);
         }
 
         $logger->info('File Upload: Successfully completed 3-step upload process', [
@@ -466,7 +466,7 @@ class File extends AbstractBaseApi
             'content_type' => $fileData['content-type'] ?? null,
         ]);
 
-        return new self($fileData ?? []);
+        return new self($fileData);
     }
 
     /**

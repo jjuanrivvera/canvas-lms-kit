@@ -943,4 +943,78 @@ class EnrollmentTest extends TestCase
         $this->assertInstanceOf(Course::class, $retrievedCourse);
         $this->assertEquals(789, $retrievedCourse->getId());
     }
+
+    // Invalid JSON Response Tests
+
+    public function testFindHandlesInvalidJson(): void
+    {
+        $this->httpClientMock->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments/1')
+            ->willReturn(new Response(200, [], 'Invalid JSON {not valid}'));
+
+        $enrollment = Enrollment::find(1);
+
+        // Should create an empty enrollment object without TypeError
+        $this->assertInstanceOf(Enrollment::class, $enrollment);
+        $this->assertNull($enrollment->id);
+    }
+
+    public function testGetHandlesInvalidJson(): void
+    {
+        $this->httpClientMock->expects($this->once())
+            ->method('get')
+            ->with('courses/123/enrollments')
+            ->willReturn(new Response(200, [], '<html>Error page</html>'));
+
+        $enrollments = Enrollment::get();
+
+        // Should return empty array without TypeError
+        $this->assertIsArray($enrollments);
+        $this->assertEmpty($enrollments);
+    }
+
+    public function testCreateHandlesInvalidJson(): void
+    {
+        $dto = new CreateEnrollmentDTO(['userId' => 100, 'type' => 'StudentEnrollment']);
+
+        $this->httpClientMock->expects($this->once())
+            ->method('post')
+            ->with('courses/123/enrollments')
+            ->willReturn(new Response(200, [], ''));
+
+        $enrollment = Enrollment::create($dto);
+
+        // Should create an empty enrollment object without TypeError
+        $this->assertInstanceOf(Enrollment::class, $enrollment);
+        $this->assertNull($enrollment->id);
+    }
+
+    public function testAcceptHandlesInvalidJson(): void
+    {
+        $this->httpClientMock->expects($this->once())
+            ->method('post')
+            ->with('courses/123/enrollments/456/accept')
+            ->willReturn(new Response(200, [], 'null'));
+
+        $enrollment = Enrollment::accept(456);
+
+        // Should create an empty enrollment object without TypeError
+        $this->assertInstanceOf(Enrollment::class, $enrollment);
+        $this->assertNull($enrollment->id);
+    }
+
+    public function testFetchAllByUserHandlesInvalidJson(): void
+    {
+        $this->httpClientMock->expects($this->once())
+            ->method('get')
+            ->with('users/100/enrollments')
+            ->willReturn(new Response(200, [], '{malformed: json}'));
+
+        $enrollments = Enrollment::fetchAllByUser(100);
+
+        // Should return empty array without TypeError
+        $this->assertIsArray($enrollments);
+        $this->assertEmpty($enrollments);
+    }
 }

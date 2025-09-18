@@ -28,6 +28,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Provides smooth migration path with backward compatibility
   - Added comprehensive test coverage for the new Str utility class
 
+### Fixed
+- **Improved JSON Decode Safety with Consistent Null Checking** (#140)
+  - Fixed 9 unsafe `json_decode()` calls in `Enrollment` class
+  - Fixed 2 unsafe `json_decode()` calls in `File` upload process
+  - All JSON parsing now uses `parseJsonResponse()` from AbstractBaseApi
+  - Prevents TypeErrors when Canvas API returns invalid or empty JSON
+  - Added comprehensive test coverage for invalid JSON scenarios
+  - Maintains backward compatibility with empty array fallback
+
 ### Deprecated
 - **Global `str_to_snake_case()` function** - Use `\CanvasLMS\Utilities\Str::toSnakeCase()` instead. The global function will be removed in version 2.0.0
 

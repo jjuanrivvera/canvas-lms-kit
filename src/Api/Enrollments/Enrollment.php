@@ -219,7 +219,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments/%d', self::$course->id, $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -245,7 +245,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments', self::$course->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         $enrollments = [];
         foreach ($data as $item) {
@@ -278,7 +278,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments', self::$course->id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $responseData = json_decode((string) $response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -306,7 +306,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments/%d', self::$course->id, $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $responseData = json_decode((string) $response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -325,7 +325,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments/%d/accept', self::$course->id, $enrollmentId);
         $response = self::$apiClient->post($endpoint);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -344,7 +344,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments/%d/reject', self::$course->id, $enrollmentId);
         $response = self::$apiClient->post($endpoint);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -363,7 +363,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments/%d/reactivate', self::$course->id, $enrollmentId);
         $response = self::$apiClient->put($endpoint);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -388,7 +388,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('sections/%d/enrollments', $sectionId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         $enrollments = [];
         foreach ($data as $item) {
@@ -418,7 +418,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('users/%d/enrollments', $userId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         $enrollments = [];
         foreach ($data as $item) {
