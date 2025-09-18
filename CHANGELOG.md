@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.3] - 2025-09-18
+
 ### Added
 - **Code Quality: Added strict_types Declarations to All PHP Files** (#137)
   - Added `declare(strict_types=1);` to all 188 PHP files in `src/` directory
