@@ -18,10 +18,11 @@
 
 - 🚀 **Production Ready**: Rate limiting, middleware support, battle-tested
 - 📚 **Comprehensive**: 45 Canvas APIs fully implemented
-- 🛡️ **Type Safe**: Full PHP 8.1+ type declarations and PHPStan level 6
+- 🛡️ **Type Safe**: Full PHP 8.1+ type declarations, strict_types, and PHPStan level 6
 - 🔧 **Developer Friendly**: Intuitive Active Record pattern - just pass arrays!
 - 📖 **Well Documented**: Extensive examples, guides, and API reference
 - ⚡ **Performance**: Built-in pagination, caching support, and optimized queries
+- 🎯 **Code Quality**: PHP-CS-Fixer integration, PSR-12 compliance
 
 ## 🎯 Quick Start
 
@@ -1157,14 +1158,26 @@ $groupMigrations = $group->contentMigrations();  // Group's migrations
 
 ```bash
 # Using Docker (recommended)
-docker compose exec php composer test
-docker compose exec php composer check  # Run all checks
+docker compose exec php composer test     # Run PHPUnit tests
+docker compose exec php composer check    # Run all checks (CS, PHPStan, tests)
+docker compose exec php composer cs       # Check PSR-12 coding standards
+docker compose exec php composer cs-fix   # Fix coding standards automatically
+docker compose exec php composer phpstan  # Run static analysis (level 6)
 
-# Local development
-composer test
-composer cs-fix   # Fix coding standards
-composer phpstan  # Static analysis
+# Local development (requires PHP 8.1+)
+composer test      # Run PHPUnit tests
+composer check     # Run all checks
+composer cs        # Check coding standards
+composer cs-fix    # Fix coding standards automatically
+composer phpstan   # Static analysis
 ```
+
+### Code Quality Tools
+
+- **PHP-CS-Fixer**: Automatically fixes code to comply with PSR-12 standards
+- **PHPStan**: Static analysis at level 6 for maximum type safety
+- **PHPUnit**: Comprehensive test suite with 2,300+ tests
+- **Strict Types**: All files use `declare(strict_types=1)` for type safety
 
 ## 🤝 Contributing
 
