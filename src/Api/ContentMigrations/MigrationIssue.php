@@ -89,6 +89,7 @@ class MigrationIssue extends AbstractBaseApi
      * Set the parent content migration
      *
      * @param ContentMigration $_contentMigration
+     *
      * @deprecated This method is no longer used and will be removed in a future version
      */
     public static function setContentMigration(ContentMigration $_contentMigration): void
@@ -100,6 +101,7 @@ class MigrationIssue extends AbstractBaseApi
      * Check if content migration is set
      *
      * @return bool
+     *
      * @deprecated This method is no longer used and will be removed in a future version
      */
     public static function checkContentMigration(): bool
@@ -111,8 +113,10 @@ class MigrationIssue extends AbstractBaseApi
      * Get a single migration issue by ID (not supported - use findInMigration instead)
      *
      * @param int $id Migration issue ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -128,8 +132,10 @@ class MigrationIssue extends AbstractBaseApi
      * @param int $contextId Context ID
      * @param int $migrationId Content migration ID
      * @param int $id Migration issue ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function findInMigration(string $contextType, int $contextId, int $migrationId, int $id): self
     {
@@ -143,7 +149,7 @@ class MigrationIssue extends AbstractBaseApi
             $id
         );
         $response = self::$apiClient->get($endpoint);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         if (!is_array($data)) {
             throw new CanvasApiException('Invalid response data from API');
@@ -156,8 +162,10 @@ class MigrationIssue extends AbstractBaseApi
      * List migration issues (not supported - use fetchAllInMigration instead)
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<MigrationIssue>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MigrationIssue>
      */
     public static function get(array $params = []): array
     {
@@ -168,9 +176,12 @@ class MigrationIssue extends AbstractBaseApi
 
     /**
      * Get all pages of records (interface method)
+     *
      * @param array<string, mixed> $params
-     * @return array<MigrationIssue>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MigrationIssue>
      */
     public static function all(array $params = []): array
     {
@@ -186,8 +197,10 @@ class MigrationIssue extends AbstractBaseApi
      * @param int $contextId Context ID
      * @param int $migrationId Content migration ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<MigrationIssue>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MigrationIssue>
      */
     public static function fetchAllInMigration(
         string $contextType,
@@ -205,8 +218,10 @@ class MigrationIssue extends AbstractBaseApi
      * @param int $contextId Context ID
      * @param int $migrationId Content migration ID
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public static function paginateInMigration(
         string $contextType,
@@ -220,6 +235,7 @@ class MigrationIssue extends AbstractBaseApi
             $contextId,
             $migrationId
         );
+
         return self::getPaginatedResponse($endpoint, $params);
     }
 
@@ -230,8 +246,10 @@ class MigrationIssue extends AbstractBaseApi
      * @param int $contextId Context ID
      * @param int $migrationId Content migration ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<MigrationIssue>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<MigrationIssue>
      */
     public static function allInMigration(
         string $contextType,
@@ -247,7 +265,8 @@ class MigrationIssue extends AbstractBaseApi
         );
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
-        return array_map(fn($data) => new self($data), $allData);
+
+        return array_map(fn ($data) => new self($data), $allData);
     }
 
     /**
@@ -258,8 +277,10 @@ class MigrationIssue extends AbstractBaseApi
      * @param int $migrationId Content migration ID
      * @param int $id Migration issue ID
      * @param array<string, mixed>|UpdateMigrationIssueDTO $data Update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function update(
         string $contextType,
@@ -282,7 +303,7 @@ class MigrationIssue extends AbstractBaseApi
             $id
         );
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $issueData = json_decode($response->getBody()->getContents(), true);
+        $issueData = self::parseJsonResponse($response);
 
         if (!is_array($issueData)) {
             throw new CanvasApiException('Invalid response data from API');
@@ -294,8 +315,9 @@ class MigrationIssue extends AbstractBaseApi
     /**
      * Resolve this issue
      *
-     * @return bool
      * @throws CanvasApiException
+     *
+     * @return bool
      */
     public function resolve(): bool
     {
@@ -326,6 +348,7 @@ class MigrationIssue extends AbstractBaseApi
                 // Copy properties from the updated object
                 $this->workflowState = $updated->getWorkflowState();
                 $this->updatedAt = $updated->getUpdatedAt();
+
                 return true;
             } catch (\Exception $_e) {
                 return false;
@@ -338,8 +361,9 @@ class MigrationIssue extends AbstractBaseApi
     /**
      * Reactivate this issue
      *
-     * @return bool
      * @throws CanvasApiException
+     *
+     * @return bool
      */
     public function reactivate(): bool
     {
@@ -370,6 +394,7 @@ class MigrationIssue extends AbstractBaseApi
                 // Copy properties from the updated object
                 $this->workflowState = $updated->getWorkflowState();
                 $this->updatedAt = $updated->getUpdatedAt();
+
                 return true;
             } catch (\Exception $_e) {
                 return false;
@@ -535,8 +560,10 @@ class MigrationIssue extends AbstractBaseApi
      * Get the API endpoint for this resource
      * Note: MigrationIssue is a nested resource under ContentMigration
      * and requires context, so this returns a placeholder that should not be used directly
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {

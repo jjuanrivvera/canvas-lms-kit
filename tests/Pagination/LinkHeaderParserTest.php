@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Tests\Pagination;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Pagination\LinkHeaderParser;
+use PHPUnit\Framework\TestCase;
 
 /**
  * LinkHeaderParserTest Class

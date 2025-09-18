@@ -6,7 +6,6 @@ namespace Tests\Api\ContentMigrations;
 
 use CanvasLMS\Api\ContentMigrations\ContentMigration;
 use CanvasLMS\Api\ContentMigrations\MigrationIssue;
-use CanvasLMS\Dto\ContentMigrations\UpdateMigrationIssueDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use PHPUnit\Framework\TestCase;
@@ -16,7 +15,9 @@ use Psr\Http\Message\StreamInterface;
 class MigrationIssueTest extends TestCase
 {
     private HttpClientInterface $mockClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
 
     protected function setUp(): void
@@ -37,7 +38,7 @@ class MigrationIssueTest extends TestCase
             'description' => 'Quiz questions could not be imported',
             'workflow_state' => 'active',
             'issue_type' => 'warning',
-            'content_migration_url' => 'https://canvas.test/api/v1/courses/1/content_migrations/456'
+            'content_migration_url' => 'https://canvas.test/api/v1/courses/1/content_migrations/456',
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($issueData));
@@ -70,12 +71,12 @@ class MigrationIssueTest extends TestCase
     {
         $issuesData = [
             ['id' => 1, 'issue_type' => 'warning', 'workflow_state' => 'active'],
-            ['id' => 2, 'issue_type' => 'error', 'workflow_state' => 'resolved']
+            ['id' => 2, 'issue_type' => 'error', 'workflow_state' => 'resolved'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->method('all')->willReturn($issuesData);
-        
+
         $this->mockClient->method('getPaginated')
             ->with('courses/1/content_migrations/456/migration_issues', ['query' => []])
             ->willReturn($mockPaginatedResponse);
@@ -90,7 +91,7 @@ class MigrationIssueTest extends TestCase
     {
         $updatedData = [
             'id' => 123,
-            'workflow_state' => 'resolved'
+            'workflow_state' => 'resolved',
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($updatedData));
@@ -107,13 +108,13 @@ class MigrationIssueTest extends TestCase
         $issue = new MigrationIssue([
             'id' => 123,
             'workflow_state' => 'active',
-            'content_migration_url' => 'https://canvas.test/api/v1/courses/1/content_migrations/456'
+            'content_migration_url' => 'https://canvas.test/api/v1/courses/1/content_migrations/456',
         ]);
 
         $resolvedData = [
             'id' => 123,
             'workflow_state' => 'resolved',
-            'content_migration_url' => $issue->getContentMigrationUrl()
+            'content_migration_url' => $issue->getContentMigrationUrl(),
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($resolvedData));
@@ -132,13 +133,13 @@ class MigrationIssueTest extends TestCase
         $issue = new MigrationIssue([
             'id' => 123,
             'workflow_state' => 'resolved',
-            'content_migration_url' => 'https://canvas.test/api/v1/courses/1/content_migrations/456'
+            'content_migration_url' => 'https://canvas.test/api/v1/courses/1/content_migrations/456',
         ]);
 
         $activeData = [
             'id' => 123,
             'workflow_state' => 'active',
-            'content_migration_url' => $issue->getContentMigrationUrl()
+            'content_migration_url' => $issue->getContentMigrationUrl(),
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($activeData));
@@ -165,7 +166,7 @@ class MigrationIssueTest extends TestCase
     {
         $issue = new MigrationIssue([
             'id' => 123,
-            'content_migration_url' => 'invalid-url'
+            'content_migration_url' => 'invalid-url',
         ]);
 
         $this->expectException(CanvasApiException::class);

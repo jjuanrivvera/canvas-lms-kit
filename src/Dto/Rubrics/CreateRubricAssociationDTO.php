@@ -82,6 +82,7 @@ class CreateRubricAssociationDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Convert the DTO to an array for API requests
+     *
      * @return array<int, array<string, mixed>>
      */
     public function toApiArray(): array
@@ -92,70 +93,70 @@ class CreateRubricAssociationDTO extends AbstractBaseDto implements DTOInterface
         if ($this->rubricId !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_association[rubric_id]',
-                'contents' => (string) $this->rubricId
+                'contents' => (string) $this->rubricId,
             ];
         }
 
         if ($this->associationId !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_association[association_id]',
-                'contents' => (string) $this->associationId
+                'contents' => (string) $this->associationId,
             ];
         }
 
         if ($this->associationType !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_association[association_type]',
-                'contents' => $this->associationType
+                'contents' => $this->associationType,
             ];
         }
 
         if ($this->title !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_association[title]',
-                'contents' => $this->title
+                'contents' => $this->title,
             ];
         }
 
         if ($this->useForGrading !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_association[use_for_grading]',
-                'contents' => $this->useForGrading ? '1' : '0'
+                'contents' => $this->useForGrading ? '1' : '0',
             ];
         }
 
         if ($this->purpose !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_association[purpose]',
-                'contents' => $this->purpose
+                'contents' => $this->purpose,
             ];
         }
 
         if ($this->bookmarked !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_association[bookmarked]',
-                'contents' => $this->bookmarked ? '1' : '0'
+                'contents' => $this->bookmarked ? '1' : '0',
             ];
         }
 
         if ($this->hideScoreTotal !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_association[hide_score_total]',
-                'contents' => $this->hideScoreTotal ? '1' : '0'
+                'contents' => $this->hideScoreTotal ? '1' : '0',
             ];
         }
 
         if ($this->hidePoints !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_association[hide_points]',
-                'contents' => $this->hidePoints ? '1' : '0'
+                'contents' => $this->hidePoints ? '1' : '0',
             ];
         }
 
         if ($this->hideOutcomeResults !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_association[hide_outcome_results]',
-                'contents' => $this->hideOutcomeResults ? '1' : '0'
+                'contents' => $this->hideOutcomeResults ? '1' : '0',
             ];
         }
 

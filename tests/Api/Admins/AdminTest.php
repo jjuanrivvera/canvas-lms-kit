@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Admins;
 
-use GuzzleHttp\Psr7\Response;
-use CanvasLMS\Http\HttpClient;
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\Admins\Admin;
 use CanvasLMS\Api\Accounts\Account;
+use CanvasLMS\Api\Admins\Admin;
+use CanvasLMS\Config;
 use CanvasLMS\Dto\Admins\CreateAdminDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Config;
+use CanvasLMS\Http\HttpClient;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 class AdminTest extends TestCase
 {
@@ -40,6 +42,7 @@ class AdminTest extends TestCase
 
     /**
      * Admin data provider
+     *
      * @return array<string, array<int, mixed>>
      */
     public static function adminDataProvider(): array
@@ -56,14 +59,14 @@ class AdminTest extends TestCase
                     'email' => 'john.doe@example.com',
                     'role' => 'AccountAdmin',
                     'role_id' => 1,
-                    'workflow_state' => 'active'
-                ]
+                    'workflow_state' => 'active',
+                ],
             ],
             'admin_with_role_id' => [
                 [
                     'userId' => 456,
                     'roleId' => 2,
-                    'sendConfirmation' => false
+                    'sendConfirmation' => false,
                 ],
                 [
                     'id' => 456,
@@ -71,17 +74,20 @@ class AdminTest extends TestCase
                     'email' => 'jane.smith@example.com',
                     'role' => 'SubAccountAdmin',
                     'role_id' => 2,
-                    'workflow_state' => 'active'
-                ]
-            ]
+                    'workflow_state' => 'active',
+                ],
+            ],
         ];
     }
 
     /**
      * Test the create admin method
+     *
      * @dataProvider adminDataProvider
+     *
      * @param array<string, mixed> $adminData
      * @param array<string, mixed> $expectedResult
+     *
      * @return void
      */
     public function testCreateAdmin(array $adminData, array $expectedResult): void
@@ -107,9 +113,12 @@ class AdminTest extends TestCase
 
     /**
      * Test the create admin method with DTO
+     *
      * @dataProvider adminDataProvider
+     *
      * @param array<string, mixed> $adminData
      * @param array<string, mixed> $expectedResult
+     *
      * @return void
      */
     public function testCreateAdminWithDto(array $adminData, array $expectedResult): void
@@ -138,19 +147,20 @@ class AdminTest extends TestCase
 
     /**
      * Test create admin with explicit account ID
+     *
      * @return void
      */
     public function testCreateAdminWithAccountId(): void
     {
         $adminData = [
             'userId' => 789,
-            'role' => 'AccountAdmin'
+            'role' => 'AccountAdmin',
         ];
 
         $expectedResult = [
             'id' => 789,
             'name' => 'Test Admin',
-            'role' => 'AccountAdmin'
+            'role' => 'AccountAdmin',
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -172,6 +182,7 @@ class AdminTest extends TestCase
 
     /**
      * Test create admin without account ID throws exception
+     *
      * @return void
      */
     public function testCreateAdminWithoutAccountIdThrowsException(): void
@@ -195,6 +206,7 @@ class AdminTest extends TestCase
 
     /**
      * Test the find admin method
+     *
      * @return void
      */
     public function testFindAdmin(): void
@@ -203,8 +215,8 @@ class AdminTest extends TestCase
             [
                 'id' => 123,
                 'name' => 'Found Admin',
-                'role' => 'AccountAdmin'
-            ]
+                'role' => 'AccountAdmin',
+            ],
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -231,6 +243,7 @@ class AdminTest extends TestCase
 
     /**
      * Test find admin not found throws exception
+     *
      * @return void
      */
     public function testFindAdminNotFoundThrowsException(): void
@@ -250,6 +263,7 @@ class AdminTest extends TestCase
 
     /**
      * Test the fetchAll method
+     *
      * @return void
      */
     public function testGet(): void
@@ -257,7 +271,7 @@ class AdminTest extends TestCase
         $expectedResult = [
             ['id' => 1, 'name' => 'Admin 1', 'role' => 'AccountAdmin'],
             ['id' => 2, 'name' => 'Admin 2', 'role' => 'SubAccountAdmin'],
-            ['id' => 3, 'name' => 'Admin 3', 'role' => 'AccountAdmin']
+            ['id' => 3, 'name' => 'Admin 3', 'role' => 'AccountAdmin'],
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -279,6 +293,7 @@ class AdminTest extends TestCase
 
     /**
      * Test the delete admin method
+     *
      * @return void
      */
     public function testDeleteAdmin(): void
@@ -301,6 +316,7 @@ class AdminTest extends TestCase
 
     /**
      * Test delete without ID throws exception
+     *
      * @return void
      */
     public function testDeleteWithoutIdThrowsException(): void
@@ -315,6 +331,7 @@ class AdminTest extends TestCase
 
     /**
      * Test delete without account ID throws exception
+     *
      * @return void
      */
     public function testDeleteWithoutAccountIdThrowsException(): void
@@ -329,13 +346,14 @@ class AdminTest extends TestCase
 
     /**
      * Test get self admin roles
+     *
      * @return void
      */
     public function testGetSelfAdminRoles(): void
     {
         $expectedRoles = [
             ['id' => 1, 'label' => 'Account Admin', 'base_role_type' => 'AccountMembership'],
-            ['id' => 2, 'label' => 'Sub-Account Admin', 'base_role_type' => 'AccountMembership']
+            ['id' => 2, 'label' => 'Sub-Account Admin', 'base_role_type' => 'AccountMembership'],
         ];
 
         $response = new Response(200, [], json_encode($expectedRoles));
@@ -355,6 +373,7 @@ class AdminTest extends TestCase
 
     /**
      * Test get account
+     *
      * @return void
      */
     public function testGetAccount(): void
@@ -364,7 +383,7 @@ class AdminTest extends TestCase
         $expectedAccount = [
             'id' => 1,
             'name' => 'Test Account',
-            'parent_account_id' => null
+            'parent_account_id' => null,
         ];
 
         $response = new Response(200, [], json_encode($expectedAccount));
@@ -384,6 +403,7 @@ class AdminTest extends TestCase
 
     /**
      * Test get account returns null when no account ID
+     *
      * @return void
      */
     public function testGetAccountReturnsNullWhenNoAccountId(): void
@@ -395,6 +415,7 @@ class AdminTest extends TestCase
 
     /**
      * Test DTO creation for role name
+     *
      * @return void
      */
     public function testCreateAdminDtoWithRoleName(): void
@@ -402,7 +423,7 @@ class AdminTest extends TestCase
         $dto = new CreateAdminDTO([
             'userId' => 123,
             'role' => 'AccountAdmin',
-            'sendConfirmation' => true
+            'sendConfirmation' => true,
         ]);
 
         $array = $dto->toApiArray();
@@ -418,6 +439,7 @@ class AdminTest extends TestCase
 
     /**
      * Test DTO creation for role ID
+     *
      * @return void
      */
     public function testCreateAdminDtoWithRoleId(): void
@@ -425,7 +447,7 @@ class AdminTest extends TestCase
         $dto = new CreateAdminDTO([
             'userId' => 456,
             'roleId' => 2,
-            'sendConfirmation' => false
+            'sendConfirmation' => false,
         ]);
 
         $array = $dto->toApiArray();
@@ -441,12 +463,13 @@ class AdminTest extends TestCase
 
     /**
      * Test fetchAll with custom account ID
+     *
      * @return void
      */
     public function testGetWithAccountId(): void
     {
         $expectedResult = [
-            ['id' => 1, 'name' => 'Admin 1', 'role' => 'AccountAdmin']
+            ['id' => 1, 'name' => 'Admin 1', 'role' => 'AccountAdmin'],
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -466,6 +489,7 @@ class AdminTest extends TestCase
 
     /**
      * Test pagination methods throw proper exceptions without account ID
+     *
      * @return void
      */
     public function testPaginationMethodsRequireAccountId(): void

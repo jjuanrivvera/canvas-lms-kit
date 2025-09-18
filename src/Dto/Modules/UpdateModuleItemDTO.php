@@ -6,6 +6,7 @@ namespace CanvasLMS\Dto\Modules;
 
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
+use CanvasLMS\Utilities\Str;
 
 /**
  * Update Module Item DTO
@@ -125,12 +126,13 @@ class UpdateModuleItemDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * @param string|null $type
+     *
      * @throws \InvalidArgumentException If module item type is invalid
      */
     public function setType(?string $type): void
     {
         $validTypes = ['File', 'Page', 'Discussion', 'Assignment', 'Quiz', 'SubHeader', 'ExternalUrl', 'ExternalTool'];
-        if ($type !== null && !in_array($type, $validTypes)) {
+        if ($type !== null && !in_array($type, $validTypes, true)) {
             throw new \InvalidArgumentException("Invalid module item type: $type");
         }
         $this->type = $type;
@@ -178,6 +180,7 @@ class UpdateModuleItemDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * @param string|null $externalUrl
+     *
      * @throws \InvalidArgumentException If URL format is invalid
      */
     public function setExternalUrl(?string $externalUrl): void
@@ -287,6 +290,7 @@ class UpdateModuleItemDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Convert the DTO to an array for API requests
      * Handles nested arrays for iframe and completion_requirement
+     *
      * @return mixed[]
      */
     public function toApiArray(): array
@@ -300,14 +304,14 @@ class UpdateModuleItemDTO extends AbstractBaseDto implements DTOInterface
                 continue;
             }
 
-            $propertyName = $this->apiPropertyName . '[' . str_to_snake_case($property) . ']';
+            $propertyName = $this->apiPropertyName . '[' . Str::toSnakeCase($property) . ']';
 
             // Handle nested arrays (iframe, completionRequirement)
-            if (is_array($value) && in_array($property, ['iframe', 'completionRequirement'])) {
+            if (is_array($value) && in_array($property, ['iframe', 'completionRequirement'], true)) {
                 foreach ($value as $key => $arrayValue) {
                     $modifiedProperties[] = [
-                        "name" => $propertyName . '[' . $key . ']',
-                        "contents" => $arrayValue
+                        'name' => $propertyName . '[' . $key . ']',
+                        'contents' => $arrayValue,
                     ];
                 }
                 continue;
@@ -315,8 +319,8 @@ class UpdateModuleItemDTO extends AbstractBaseDto implements DTOInterface
 
             // Handle scalar values
             $modifiedProperties[] = [
-                "name" => $propertyName,
-                "contents" => $value
+                'name' => $propertyName,
+                'contents' => $value,
             ];
         }
 

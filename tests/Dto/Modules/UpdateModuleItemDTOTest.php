@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Dto\Modules;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Modules\UpdateModuleItemDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\Modules\UpdateModuleItemDTO
@@ -16,11 +16,11 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $data = [
             'title' => 'Updated Assignment Title',
-            'position' => 3
+            'position' => 3,
         ];
-        
+
         $dto = new UpdateModuleItemDTO($data);
-        
+
         $this->assertEquals('Updated Assignment Title', $dto->getTitle());
         $this->assertEquals(3, $dto->getPosition());
         $this->assertNull($dto->getType());
@@ -35,11 +35,11 @@ class UpdateModuleItemDTOTest extends TestCase
             'title' => 'Complete Update',
             'position' => 2,
             'indent' => 1,
-            'completion_requirement' => ['type' => 'min_score', 'min_score' => 90]
+            'completion_requirement' => ['type' => 'min_score', 'min_score' => 90],
         ];
-        
+
         $dto = new UpdateModuleItemDTO($data);
-        
+
         $this->assertEquals('Assignment', $dto->getType());
         $this->assertEquals(456, $dto->getContentId());
         $this->assertEquals('Complete Update', $dto->getTitle());
@@ -53,11 +53,11 @@ class UpdateModuleItemDTOTest extends TestCase
         $data = [
             'external_url' => 'https://updated-tool.com',
             'new_tab' => false,
-            'iframe' => ['width' => 1200, 'height' => 900]
+            'iframe' => ['width' => 1200, 'height' => 900],
         ];
-        
+
         $dto = new UpdateModuleItemDTO($data);
-        
+
         $this->assertEquals('https://updated-tool.com', $dto->getExternalUrl());
         $this->assertFalse($dto->getNewTab());
         $this->assertEquals(['width' => 1200, 'height' => 900], $dto->getIframe());
@@ -67,11 +67,11 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $data = [
             'page_url' => 'updated-page-slug',
-            'title' => 'Updated Page Title'
+            'title' => 'Updated Page Title',
         ];
-        
+
         $dto = new UpdateModuleItemDTO($data);
-        
+
         $this->assertEquals('updated-page-slug', $dto->getPageUrl());
         $this->assertEquals('Updated Page Title', $dto->getTitle());
     }
@@ -80,18 +80,18 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $data = [
             'title' => 'Updated Title',
-            'position' => 5
+            'position' => 5,
         ];
-        
+
         $dto = new UpdateModuleItemDTO($data);
         $apiArray = $dto->toApiArray();
-        
+
         $this->assertIsArray($apiArray);
-        
+
         // Check that only non-null values are included
         $this->assertContains(['name' => 'module_item[title]', 'contents' => 'Updated Title'], $apiArray);
         $this->assertContains(['name' => 'module_item[position]', 'contents' => 5], $apiArray);
-        
+
         // Ensure null values are not included
         foreach ($apiArray as $item) {
             $this->assertNotNull($item['contents'], 'API array should not contain null values');
@@ -105,12 +105,12 @@ class UpdateModuleItemDTOTest extends TestCase
             'content_id' => 789,
             'title' => 'Updated Quiz',
             'position' => 3,
-            'indent' => 2
+            'indent' => 2,
         ];
-        
+
         $dto = new UpdateModuleItemDTO($data);
         $apiArray = $dto->toApiArray();
-        
+
         $this->assertContains(['name' => 'module_item[type]', 'contents' => 'Quiz'], $apiArray);
         $this->assertContains(['name' => 'module_item[content_id]', 'contents' => 789], $apiArray);
         $this->assertContains(['name' => 'module_item[title]', 'contents' => 'Updated Quiz'], $apiArray);
@@ -123,12 +123,12 @@ class UpdateModuleItemDTOTest extends TestCase
         $data = [
             'external_url' => 'https://new-tool.example.com',
             'new_tab' => true,
-            'iframe' => ['width' => 1000, 'height' => 700]
+            'iframe' => ['width' => 1000, 'height' => 700],
         ];
-        
+
         $dto = new UpdateModuleItemDTO($data);
         $apiArray = $dto->toApiArray();
-        
+
         $this->assertContains(['name' => 'module_item[external_url]', 'contents' => 'https://new-tool.example.com'], $apiArray);
         $this->assertContains(['name' => 'module_item[new_tab]', 'contents' => true], $apiArray);
         $this->assertContains(['name' => 'module_item[iframe][width]', 'contents' => 1000], $apiArray);
@@ -139,13 +139,13 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $data = [
             'completion_requirement' => [
-                'type' => 'must_contribute'
-            ]
+                'type' => 'must_contribute',
+            ],
         ];
-        
+
         $dto = new UpdateModuleItemDTO($data);
         $apiArray = $dto->toApiArray();
-        
+
         $this->assertContains(['name' => 'module_item[completion_requirement][type]', 'contents' => 'must_contribute'], $apiArray);
     }
 
@@ -153,15 +153,15 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $data = [
             'title' => 'Test Title',
-            'completion_requirement' => null
+            'completion_requirement' => null,
         ];
-        
+
         $dto = new UpdateModuleItemDTO($data);
         $apiArray = $dto->toApiArray();
-        
+
         // Should only contain title, completion_requirement should be skipped
         $this->assertContains(['name' => 'module_item[title]', 'contents' => 'Test Title'], $apiArray);
-        
+
         // Ensure completion_requirement is not in the array
         $completionRequirementExists = false;
         foreach ($apiArray as $item) {
@@ -176,7 +176,7 @@ class UpdateModuleItemDTOTest extends TestCase
     public function testAllPropertiesAreOptional(): void
     {
         $dto = new UpdateModuleItemDTO([]);
-        
+
         $this->assertNull($dto->getType());
         $this->assertNull($dto->getContentId());
         $this->assertNull($dto->getPageUrl());
@@ -192,62 +192,62 @@ class UpdateModuleItemDTOTest extends TestCase
     public function testPropertyGettersAndSetters(): void
     {
         $dto = new UpdateModuleItemDTO([]);
-        
+
         // Test type (nullable)
         $dto->setType('Discussion');
         $this->assertEquals('Discussion', $dto->getType());
         $dto->setType(null);
         $this->assertNull($dto->getType());
-        
+
         // Test content_id (nullable)
         $dto->setContentId(999);
         $this->assertEquals(999, $dto->getContentId());
         $dto->setContentId(null);
         $this->assertNull($dto->getContentId());
-        
+
         // Test page_url (nullable)
         $dto->setPageUrl('new-page');
         $this->assertEquals('new-page', $dto->getPageUrl());
         $dto->setPageUrl(null);
         $this->assertNull($dto->getPageUrl());
-        
+
         // Test external_url (nullable)
         $dto->setExternalUrl('https://example.com');
         $this->assertEquals('https://example.com', $dto->getExternalUrl());
         $dto->setExternalUrl(null);
         $this->assertNull($dto->getExternalUrl());
-        
+
         // Test title (nullable)
         $dto->setTitle('New Title');
         $this->assertEquals('New Title', $dto->getTitle());
         $dto->setTitle(null);
         $this->assertNull($dto->getTitle());
-        
+
         // Test position (nullable)
         $dto->setPosition(10);
         $this->assertEquals(10, $dto->getPosition());
         $dto->setPosition(null);
         $this->assertNull($dto->getPosition());
-        
+
         // Test indent (nullable)
         $dto->setIndent(4);
         $this->assertEquals(4, $dto->getIndent());
         $dto->setIndent(null);
         $this->assertNull($dto->getIndent());
-        
+
         // Test new_tab (nullable)
         $dto->setNewTab(true);
         $this->assertTrue($dto->getNewTab());
         $dto->setNewTab(null);
         $this->assertNull($dto->getNewTab());
-        
+
         // Test completion_requirement (nullable)
         $requirement = ['type' => 'must_submit'];
         $dto->setCompletionRequirement($requirement);
         $this->assertEquals($requirement, $dto->getCompletionRequirement());
         $dto->setCompletionRequirement(null);
         $this->assertNull($dto->getCompletionRequirement());
-        
+
         // Test iframe (nullable)
         $iframe = ['width' => 500, 'height' => 400];
         $dto->setIframe($iframe);
@@ -263,11 +263,11 @@ class UpdateModuleItemDTOTest extends TestCase
             'page_url' => 'test-page',
             'external_url' => 'https://test.com',
             'new_tab' => false,
-            'completion_requirement' => ['type' => 'must_view']
+            'completion_requirement' => ['type' => 'must_view'],
         ];
-        
+
         $dto = new UpdateModuleItemDTO($data);
-        
+
         $this->assertEquals(123, $dto->getContentId());
         $this->assertEquals('test-page', $dto->getPageUrl());
         $this->assertEquals('https://test.com', $dto->getExternalUrl());
@@ -281,7 +281,7 @@ class UpdateModuleItemDTOTest extends TestCase
         $reflection = new \ReflectionClass($dto);
         $property = $reflection->getProperty('apiPropertyName');
         $property->setAccessible(true);
-        
+
         $this->assertEquals('module_item', $property->getValue($dto));
     }
 
@@ -289,7 +289,7 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $dto = new UpdateModuleItemDTO([]);
         $apiArray = $dto->toApiArray();
-        
+
         $this->assertIsArray($apiArray);
         $this->assertEmpty($apiArray, 'Empty update should produce empty API array');
     }
@@ -298,12 +298,12 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $data = [
             'new_tab' => false,
-            'title' => 'Test Title'
+            'title' => 'Test Title',
         ];
-        
+
         $dto = new UpdateModuleItemDTO($data);
         $apiArray = $dto->toApiArray();
-        
+
         // Both false boolean and string should be included
         $this->assertContains(['name' => 'module_item[new_tab]', 'contents' => false], $apiArray);
         $this->assertContains(['name' => 'module_item[title]', 'contents' => 'Test Title'], $apiArray);
@@ -313,7 +313,7 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid URL format for externalUrl');
-        
+
         $dto = new UpdateModuleItemDTO(['type' => 'ExternalTool']);
         $dto->setExternalUrl('not-a-valid-url');
     }
@@ -322,7 +322,7 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $dto = new UpdateModuleItemDTO(['type' => 'ExternalTool']);
         $dto->setExternalUrl('https://example.com/tool');
-        
+
         $this->assertEquals('https://example.com/tool', $dto->getExternalUrl());
     }
 
@@ -330,7 +330,7 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $dto = new UpdateModuleItemDTO(['type' => 'Assignment']);
         $dto->setExternalUrl(null);
-        
+
         $this->assertNull($dto->getExternalUrl());
     }
 
@@ -338,7 +338,7 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid module item type: InvalidType');
-        
+
         $dto = new UpdateModuleItemDTO([]);
         $dto->setType('InvalidType');
     }
@@ -347,7 +347,7 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $dto = new UpdateModuleItemDTO([]);
         $validTypes = ['File', 'Page', 'Discussion', 'Assignment', 'Quiz', 'SubHeader', 'ExternalUrl', 'ExternalTool'];
-        
+
         foreach ($validTypes as $type) {
             $dto->setType($type);
             $this->assertEquals($type, $dto->getType());
@@ -358,7 +358,7 @@ class UpdateModuleItemDTOTest extends TestCase
     {
         $dto = new UpdateModuleItemDTO([]);
         $dto->setType(null);
-        
+
         $this->assertNull($dto->getType());
     }
 }

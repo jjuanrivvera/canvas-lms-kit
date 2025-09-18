@@ -8,8 +8,8 @@ use CanvasLMS\Api\ExternalTools\ExternalTool;
 use CanvasLMS\Config;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -29,12 +29,12 @@ class ExternalToolAccountContextTest extends TestCase
     {
         $toolsData = [
             ['id' => 1, 'name' => 'Tool 1', 'consumer_key' => 'key1'],
-            ['id' => 2, 'name' => 'Tool 2', 'consumer_key' => 'key2']
+            ['id' => 2, 'name' => 'Tool 2', 'consumer_key' => 'key2'],
         ];
 
         $mockStream = $this->createMock(\Psr\Http\Message\StreamInterface::class);
         $mockStream->method('getContents')->willReturn(json_encode($toolsData));
-        
+
         $mockResponse = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
         $mockResponse->method('getBody')->willReturn($mockStream);
 
@@ -58,7 +58,7 @@ class ExternalToolAccountContextTest extends TestCase
         $mockPaginatedResponse->expects($this->once())
             ->method('getJsonData')
             ->willReturn([
-                ['id' => 3, 'name' => 'Course Tool', 'consumer_key' => 'key3']
+                ['id' => 3, 'name' => 'Course Tool', 'consumer_key' => 'key3'],
             ]);
         $mockPaginatedResponse->expects($this->once())
             ->method('getNext')
@@ -83,7 +83,7 @@ class ExternalToolAccountContextTest extends TestCase
         $mockBody->method('getContents')->willReturn(json_encode([
             'id' => 10,
             'name' => 'Account Tool',
-            'consumer_key' => 'key10'
+            'consumer_key' => 'key10',
         ]));
 
         $mockResponse = $this->createMock(ResponseInterface::class);
@@ -110,7 +110,7 @@ class ExternalToolAccountContextTest extends TestCase
             'id' => 20,
             'name' => 'New Course Tool',
             'consumer_key' => 'newkey',
-            'shared_secret' => 'secret'
+            'shared_secret' => 'secret',
         ]));
 
         $mockResponse = $this->createMock(ResponseInterface::class);
@@ -123,18 +123,18 @@ class ExternalToolAccountContextTest extends TestCase
                 $this->callback(function ($data) {
                     $this->assertArrayHasKey('multipart', $data);
                     $multipart = $data['multipart'];
-                    
+
                     // Check that all required fields are present
                     $fields = [];
                     foreach ($multipart as $field) {
                         $fields[$field['name']] = $field['contents'];
                     }
-                    
+
                     $this->assertEquals('New Course Tool', $fields['external_tool[name]']);
                     $this->assertEquals('newkey', $fields['external_tool[consumer_key]']);
                     $this->assertEquals('secret', $fields['external_tool[shared_secret]']);
                     $this->assertEquals('public', $fields['external_tool[privacy_level]']);
-                    
+
                     return true;
                 })
             )
@@ -144,7 +144,7 @@ class ExternalToolAccountContextTest extends TestCase
             'name' => 'New Course Tool',
             'consumerKey' => 'newkey',
             'sharedSecret' => 'secret',
-            'privacyLevel' => 'public'
+            'privacyLevel' => 'public',
         ]);
 
         $this->assertEquals(20, $tool->id);
@@ -159,7 +159,7 @@ class ExternalToolAccountContextTest extends TestCase
         $mockBody->method('getContents')->willReturn(json_encode([
             'id' => 30,
             'name' => 'Account Tool',
-            'consumer_key' => 'accountkey'
+            'consumer_key' => 'accountkey',
         ]));
 
         $mockResponse = $this->createMock(ResponseInterface::class);
@@ -172,18 +172,18 @@ class ExternalToolAccountContextTest extends TestCase
                 $this->callback(function ($data) {
                     $this->assertArrayHasKey('multipart', $data);
                     $multipart = $data['multipart'];
-                    
+
                     // Check that all required fields are present
                     $fields = [];
                     foreach ($multipart as $field) {
                         $fields[$field['name']] = $field['contents'];
                     }
-                    
+
                     $this->assertEquals('Account Tool', $fields['external_tool[name]']);
                     $this->assertEquals('accountkey', $fields['external_tool[consumer_key]']);
                     $this->assertEquals('secret', $fields['external_tool[shared_secret]']);
                     $this->assertEquals('public', $fields['external_tool[privacy_level]']);
-                    
+
                     return true;
                 })
             )
@@ -193,7 +193,7 @@ class ExternalToolAccountContextTest extends TestCase
             'name' => 'Account Tool',
             'consumerKey' => 'accountkey',
             'sharedSecret' => 'secret',
-            'privacyLevel' => 'public'
+            'privacyLevel' => 'public',
         ]);
 
         $this->assertEquals(30, $tool->id);
@@ -205,7 +205,7 @@ class ExternalToolAccountContextTest extends TestCase
     {
         $tool = new ExternalTool([
             'id' => 40,
-            'name' => 'Tool to Delete'
+            'name' => 'Tool to Delete',
         ]);
         $tool->setContextType('course');
         $tool->setContextId(789);
@@ -238,14 +238,14 @@ class ExternalToolAccountContextTest extends TestCase
             'consumerKey' => 'key',
             'sharedSecret' => 'secret',
             'privacyLevel' => 'public',
-            'url' => 'https://example.com/tool'
+            'url' => 'https://example.com/tool',
         ]);
 
         $mockBody = $this->createMock(StreamInterface::class);
         $mockBody->method('getContents')->willReturn(json_encode([
             'id' => 60,
             'name' => 'New Tool',
-            'consumer_key' => 'key'
+            'consumer_key' => 'key',
         ]));
 
         $mockResponse = $this->createMock(ResponseInterface::class);
@@ -266,7 +266,7 @@ class ExternalToolAccountContextTest extends TestCase
     {
         $tool = new ExternalTool([
             'id' => 70,
-            'name' => 'Updated Tool'
+            'name' => 'Updated Tool',
         ]);
         $tool->setContextType('course');
         $tool->setContextId(999);
@@ -274,7 +274,7 @@ class ExternalToolAccountContextTest extends TestCase
         $mockBody = $this->createMock(StreamInterface::class);
         $mockBody->method('getContents')->willReturn(json_encode([
             'id' => 70,
-            'name' => 'Updated Tool'
+            'name' => 'Updated Tool',
         ]));
 
         $mockResponse = $this->createMock(ResponseInterface::class);
@@ -295,6 +295,7 @@ class ExternalToolAccountContextTest extends TestCase
     {
         $mockBody = $this->createMock(StreamInterface::class);
         $mockBody->method('__toString')->willReturn(json_encode($data));
+        $mockBody->method('getContents')->willReturn(json_encode($data));
 
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockResponse->method('getBody')->willReturn($mockBody);

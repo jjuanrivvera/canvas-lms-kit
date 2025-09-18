@@ -1,23 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Tests\Api\Courses;
 
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Assignments\Assignment;
+use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
+use CanvasLMS\Api\ExternalTools\ExternalTool;
+use CanvasLMS\Api\Files\File;
 use CanvasLMS\Api\Modules\Module;
 use CanvasLMS\Api\Pages\Page;
-use CanvasLMS\Api\Sections\Section;
-use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
 use CanvasLMS\Api\Quizzes\Quiz;
-use CanvasLMS\Api\Files\File;
 use CanvasLMS\Api\Rubrics\Rubric;
-use CanvasLMS\Api\ExternalTools\ExternalTool;
+use CanvasLMS\Api\Sections\Section;
 use CanvasLMS\Api\Tabs\Tab;
-use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Exceptions\CanvasApiException;
-use GuzzleHttp\Psr7\Response;
+use CanvasLMS\Interfaces\HttpClientInterface;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test Course class relationship methods
@@ -25,13 +26,14 @@ use GuzzleHttp\Psr7\Response;
 class CourseRelationshipTest extends TestCase
 {
     private MockObject $httpClient;
+
     private Course $course;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->httpClient = $this->createMock(HttpClientInterface::class);
-        
+
         // Set API client for all classes that will be used in tests
         Course::setApiClient($this->httpClient);
         Assignment::setApiClient($this->httpClient);
@@ -44,17 +46,16 @@ class CourseRelationshipTest extends TestCase
         Rubric::setApiClient($this->httpClient);
         ExternalTool::setApiClient($this->httpClient);
         Tab::setApiClient($this->httpClient);
-        
+
         // Create a course instance with ID
         $this->course = new Course(['id' => 123]);
     }
-
 
     public function testAssignmentsReturnsArrayOfAssignments(): void
     {
         $responseData = [
             ['id' => 1, 'name' => 'Assignment 1'],
-            ['id' => 2, 'name' => 'Assignment 2']
+            ['id' => 2, 'name' => 'Assignment 2'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
@@ -92,7 +93,7 @@ class CourseRelationshipTest extends TestCase
     {
         $responseData = [
             ['id' => 1, 'name' => 'Module 1'],
-            ['id' => 2, 'name' => 'Module 2']
+            ['id' => 2, 'name' => 'Module 2'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
@@ -116,12 +117,11 @@ class CourseRelationshipTest extends TestCase
         $this->assertEquals(1, $modules[0]->id);
     }
 
-
     public function testPagesReturnsArrayOfPages(): void
     {
         $responseData = [
             ['url' => 'page-1', 'title' => 'Page 1'],
-            ['url' => 'page-2', 'title' => 'Page 2']
+            ['url' => 'page-2', 'title' => 'Page 2'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
@@ -149,7 +149,7 @@ class CourseRelationshipTest extends TestCase
     {
         $responseData = [
             ['id' => 1, 'name' => 'Section A'],
-            ['id' => 2, 'name' => 'Section B']
+            ['id' => 2, 'name' => 'Section B'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
@@ -174,7 +174,7 @@ class CourseRelationshipTest extends TestCase
     {
         $responseData = [
             ['id' => 1, 'title' => 'Topic 1'],
-            ['id' => 2, 'title' => 'Topic 2']
+            ['id' => 2, 'title' => 'Topic 2'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
@@ -202,7 +202,7 @@ class CourseRelationshipTest extends TestCase
     {
         $responseData = [
             ['id' => 1, 'title' => 'Quiz 1'],
-            ['id' => 2, 'title' => 'Quiz 2']
+            ['id' => 2, 'title' => 'Quiz 2'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
@@ -230,7 +230,7 @@ class CourseRelationshipTest extends TestCase
     {
         $responseData = [
             ['id' => 1, 'display_name' => 'file1.pdf', 'filename' => 'file1.pdf'],
-            ['id' => 2, 'display_name' => 'file2.doc', 'filename' => 'file2.doc']
+            ['id' => 2, 'display_name' => 'file2.doc', 'filename' => 'file2.doc'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
@@ -258,7 +258,7 @@ class CourseRelationshipTest extends TestCase
     {
         $responseData = [
             ['id' => 1, 'title' => 'Rubric 1'],
-            ['id' => 2, 'title' => 'Rubric 2']
+            ['id' => 2, 'title' => 'Rubric 2'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
@@ -286,7 +286,7 @@ class CourseRelationshipTest extends TestCase
     {
         $responseData = [
             ['id' => 1, 'name' => 'Tool 1'],
-            ['id' => 2, 'name' => 'Tool 2']
+            ['id' => 2, 'name' => 'Tool 2'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
@@ -314,7 +314,7 @@ class CourseRelationshipTest extends TestCase
     {
         $responseData = [
             ['id' => 'home', 'label' => 'Home'],
-            ['id' => 'assignments', 'label' => 'Assignments']
+            ['id' => 'assignments', 'label' => 'Assignments'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
@@ -341,7 +341,7 @@ class CourseRelationshipTest extends TestCase
     public function testRelationshipMethodsAcceptParameters(): void
     {
         $params = ['per_page' => 50, 'include[]' => ['total_scores']];
-        
+
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
             ->method('getJsonData')

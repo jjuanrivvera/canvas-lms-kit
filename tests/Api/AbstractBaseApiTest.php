@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -50,21 +52,21 @@ class AbstractBaseApiTest extends TestCase
     {
         // Use anonymous class instead of eval()
         // We need to pass empty array to constructor to avoid the error
-        $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
-        {
+        $testClass = new class ([]) extends \CanvasLMS\Api\AbstractBaseApi {
             public $id;
+
             public $name;
-            
+
             protected static function getEndpoint(): string
             {
                 return 'test_items';
             }
-            
+
             public static function find(int $id, array $params = []): self
             {
                 return new self(['id' => $id, 'name' => 'Test Item']);
             }
-            
+
             public static function get(array $params = []): array
             {
                 return [
@@ -72,21 +74,30 @@ class AbstractBaseApiTest extends TestCase
                     new self(['id' => 2, 'name' => 'Test Item 2']),
                 ];
             }
-            
+
             public static function testGetPaginatedResponse(string $endpoint, array $params = []): \CanvasLMS\Pagination\PaginatedResponse
             {
                 return parent::getPaginatedResponse($endpoint, $params);
             }
-            
+
             public static function testConvertPaginatedResponseToModels(\CanvasLMS\Pagination\PaginatedResponse $paginatedResponse): array
             {
                 return parent::convertPaginatedResponseToModels($paginatedResponse);
             }
-            
-            
+
             public static function testCreatePaginationResult(\CanvasLMS\Pagination\PaginatedResponse $paginatedResponse): \CanvasLMS\Pagination\PaginationResult
             {
                 return parent::createPaginationResult($paginatedResponse);
+            }
+
+            public static function testParseJsonResponse(\Psr\Http\Message\ResponseInterface $response): array
+            {
+                return parent::parseJsonResponse($response);
+            }
+
+            public function testCastValue(string $key, mixed $value): mixed
+            {
+                return parent::castValue($key, $value);
             }
         };
 
@@ -163,7 +174,7 @@ class AbstractBaseApiTest extends TestCase
         // Test the new pattern: getPaginatedResponse + all() + array_map
         $paginatedResponse = $this->testApiClass::testGetPaginatedResponse('/test/endpoint', ['per_page' => 50]);
         $allData = $paginatedResponse->all();
-        $models = array_map(fn($data) => new $this->testApiClass($data), $allData);
+        $models = array_map(fn ($data) => new $this->testApiClass($data), $allData);
 
         $this->assertIsArray($models);
         $this->assertCount(4, $models);
@@ -285,28 +296,28 @@ class AbstractBaseApiTest extends TestCase
     {
         // Use anonymous class instead of eval()
         // We need to pass empty array to constructor to avoid the error
-        $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
-        {
+        $testClass = new class ([]) extends \CanvasLMS\Api\AbstractBaseApi {
             public $id;
+
             public $name;
-            
+
             protected static function getEndpoint(): string
             {
                 return 'test';
             }
-            
+
             public static function find(int $id, array $params = []): self
             {
                 return new self(['id' => $id, 'name' => 'Test Item']);
             }
-            
+
             public static function get(array $params = []): array
             {
                 self::checkApiClient();
-                
+
                 $response = self::$apiClient->get('/test', ['query' => $params]);
                 $data = json_decode($response->getBody()->getContents(), true);
-                
+
                 return array_map(function ($item) {
                     return new self($item);
                 }, $data);
@@ -347,7 +358,7 @@ class AbstractBaseApiTest extends TestCase
         $data = [
             'id' => 123,
             'name' => 'Test Name',
-            'non_existent_property' => 'should be ignored'
+            'non_existent_property' => 'should be ignored',
         ];
 
         $instance = new $this->testApiClass($data);
@@ -364,20 +375,19 @@ class AbstractBaseApiTest extends TestCase
     {
         // Use anonymous class instead of eval()
         // We need to pass empty array to constructor to avoid the error
-        $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
-        {
+        $testClass = new class ([]) extends \CanvasLMS\Api\AbstractBaseApi {
             public $someProperty;
-            
+
             protected static function getEndpoint(): string
             {
                 return 'test';
             }
-            
+
             public static function find(int $id, array $params = []): self
             {
                 return new self(['id' => $id]);
             }
-            
+
             public static function get(array $params = []): array
             {
                 return [];
@@ -385,7 +395,7 @@ class AbstractBaseApiTest extends TestCase
         };
 
         $data = [
-            'some_property' => 'test value'
+            'some_property' => 'test value',
         ];
 
         $className = get_class($testClass);
@@ -400,61 +410,327 @@ class AbstractBaseApiTest extends TestCase
     public function testPopulateHandlesCamelCaseProperties(): void
     {
         // Create a test class with camelCase properties
-        $testClass = new class([]) extends \CanvasLMS\Api\AbstractBaseApi
-        {
+        $testClass = new class ([]) extends \CanvasLMS\Api\AbstractBaseApi {
             public ?string $firstName = null;
+
             public ?string $lastName = null;
+
             public ?int $userId = null;
+
             public ?bool $isActive = null;
-            
+
             protected static function getEndpoint(): string
             {
                 return 'test';
             }
-            
+
             public static function find(int $id, array $params = []): self
             {
                 return new self(['id' => $id]);
             }
-            
+
             // Make populate method public for testing
             public function testPopulate(array $data): void
             {
                 $this->populate($data);
             }
         };
-        
+
         $className = get_class($testClass);
         $instance = new $className([]);
-        
+
         // Test with snake_case input data
         $snakeCaseData = [
             'first_name' => 'John',
             'last_name' => 'Doe',
             'user_id' => 123,
-            'is_active' => true
+            'is_active' => true,
         ];
-        
+
         $instance->testPopulate($snakeCaseData);
-        
+
         $this->assertEquals('John', $instance->firstName);
         $this->assertEquals('Doe', $instance->lastName);
         $this->assertEquals(123, $instance->userId);
         $this->assertTrue($instance->isActive);
-        
+
         // Test with camelCase input data (should also work)
         $camelCaseData = [
             'firstName' => 'Jane',
             'lastName' => 'Smith',
             'userId' => 456,
-            'isActive' => false
+            'isActive' => false,
         ];
-        
+
         $instance->testPopulate($camelCaseData);
-        
+
         $this->assertEquals('Jane', $instance->firstName);
         $this->assertEquals('Smith', $instance->lastName);
         $this->assertEquals(456, $instance->userId);
         $this->assertFalse($instance->isActive);
+    }
+
+    /**
+     * Test parseJsonResponse method with valid JSON
+     */
+    public function testParseJsonResponseWithValidJson(): void
+    {
+        $mockResponse = $this->createMock(ResponseInterface::class);
+        $mockStream = $this->createMock(StreamInterface::class);
+
+        $responseData = [
+            'id' => 123,
+            'name' => 'Test Item',
+            'status' => 'active',
+        ];
+
+        $mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn(json_encode($responseData));
+
+        $mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($mockStream);
+
+        $result = $this->testApiClass::testParseJsonResponse($mockResponse);
+
+        $this->assertIsArray($result);
+        $this->assertEquals($responseData, $result);
+    }
+
+    /**
+     * Test parseJsonResponse method with invalid JSON
+     */
+    public function testParseJsonResponseWithInvalidJson(): void
+    {
+        $mockResponse = $this->createMock(ResponseInterface::class);
+        $mockStream = $this->createMock(StreamInterface::class);
+
+        $mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn('{"invalid json"');
+
+        $mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($mockStream);
+
+        $result = $this->testApiClass::testParseJsonResponse($mockResponse);
+
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * Test parseJsonResponse method with empty response
+     */
+    public function testParseJsonResponseWithEmptyResponse(): void
+    {
+        $mockResponse = $this->createMock(ResponseInterface::class);
+        $mockStream = $this->createMock(StreamInterface::class);
+
+        $mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn('');
+
+        $mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($mockStream);
+
+        $result = $this->testApiClass::testParseJsonResponse($mockResponse);
+
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * Test parseJsonResponse method with null response
+     */
+    public function testParseJsonResponseWithNullString(): void
+    {
+        $mockResponse = $this->createMock(ResponseInterface::class);
+        $mockStream = $this->createMock(StreamInterface::class);
+
+        $mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn('null');
+
+        $mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($mockStream);
+
+        $result = $this->testApiClass::testParseJsonResponse($mockResponse);
+
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * Test parseJsonResponse method with array response
+     */
+    public function testParseJsonResponseWithArrayResponse(): void
+    {
+        $mockResponse = $this->createMock(ResponseInterface::class);
+        $mockStream = $this->createMock(StreamInterface::class);
+
+        $responseData = [
+            ['id' => 1, 'name' => 'Item 1'],
+            ['id' => 2, 'name' => 'Item 2'],
+            ['id' => 3, 'name' => 'Item 3'],
+        ];
+
+        $mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn(json_encode($responseData));
+
+        $mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($mockStream);
+
+        $result = $this->testApiClass::testParseJsonResponse($mockResponse);
+
+        $this->assertIsArray($result);
+        $this->assertCount(3, $result);
+        $this->assertEquals($responseData, $result);
+    }
+
+    /**
+     * Test parseJsonResponse method properly handles StreamInterface
+     */
+    public function testParseJsonResponseHandlesStreamInterface(): void
+    {
+        $mockResponse = $this->createMock(ResponseInterface::class);
+        $mockStream = $this->createMock(StreamInterface::class);
+
+        $responseData = ['success' => true, 'data' => 'test'];
+
+        // Verify that getContents() is called on the StreamInterface object
+        $mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn(json_encode($responseData));
+
+        $mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($mockStream);
+
+        $result = $this->testApiClass::testParseJsonResponse($mockResponse);
+
+        $this->assertEquals($responseData, $result);
+    }
+
+    /**
+     * Test castValue method correctly casts date fields to DateTime
+     */
+    public function testCastValueConvertsDateFieldsToDateTime(): void
+    {
+        $testInstance = new $this->testApiClass([]);
+
+        $dateFields = [
+            'startAt' => '2024-01-15T10:00:00Z',
+            'endAt' => '2024-01-20T18:00:00Z',
+            'createdAt' => '2024-01-01T00:00:00Z',
+            'updatedAt' => '2024-01-10T12:30:00Z',
+            'deletedAt' => '2024-01-25T15:00:00Z',
+            'publishedAt' => '2024-01-05T08:00:00Z',
+            'postedAt' => '2024-01-07T09:00:00Z',
+            'dueAt' => '2024-01-30T23:59:59Z',
+            'lockAt' => '2024-02-01T00:00:00Z',
+            'unlockAt' => '2024-01-02T06:00:00Z',
+            'submittedAt' => '2024-01-29T22:00:00Z',
+            'gradedAt' => '2024-01-31T14:00:00Z',
+        ];
+
+        foreach ($dateFields as $field => $dateString) {
+            $result = $testInstance->testCastValue($field, $dateString);
+            $this->assertInstanceOf(\DateTime::class, $result, "Field '$field' should be cast to DateTime");
+            $this->assertEquals($dateString, $result->format('Y-m-d\TH:i:s\Z'));
+        }
+    }
+
+    /**
+     * Test castValue method does not cast non-date fields
+     */
+    public function testCastValueDoesNotCastNonDateFields(): void
+    {
+        $testInstance = new $this->testApiClass([]);
+
+        // Test various non-date fields
+        $nonDateFields = [
+            'id' => 123,
+            'name' => 'Test Name',
+            'isPublished' => true,
+            'score' => 95.5,
+            'gradeMatchesCurrentSubmission' => true,  // This is the field we fixed!
+            'someRandomField' => 'some value',
+        ];
+
+        foreach ($nonDateFields as $field => $value) {
+            $result = $testInstance->testCastValue($field, $value);
+            $this->assertNotInstanceOf(\DateTime::class, $result, "Field '$field' should not be cast to DateTime");
+            $this->assertEquals($value, $result, "Field '$field' should remain unchanged");
+        }
+    }
+
+    /**
+     * Test castValue specifically for gradeMatchesCurrentSubmission boolean field
+     */
+    public function testCastValueHandlesGradeMatchesCurrentSubmissionAsBoolean(): void
+    {
+        $testInstance = new $this->testApiClass([]);
+
+        // Test with boolean true
+        $result = $testInstance->testCastValue('gradeMatchesCurrentSubmission', true);
+        $this->assertIsBool($result);
+        $this->assertTrue($result);
+
+        // Test with boolean false
+        $result = $testInstance->testCastValue('gradeMatchesCurrentSubmission', false);
+        $this->assertIsBool($result);
+        $this->assertFalse($result);
+
+        // Test with string that looks like a date but should not be converted
+        $result = $testInstance->testCastValue('gradeMatchesCurrentSubmission', '2024-01-01T00:00:00Z');
+        $this->assertIsString($result);
+        $this->assertEquals('2024-01-01T00:00:00Z', $result);
+        $this->assertNotInstanceOf(\DateTime::class, $result);
+    }
+
+    /**
+     * Test castValue handles empty and null date values
+     */
+    public function testCastValueHandlesEmptyDateValues(): void
+    {
+        $testInstance = new $this->testApiClass([]);
+
+        // Empty string should not be converted
+        $result = $testInstance->testCastValue('createdAt', '');
+        $this->assertEquals('', $result);
+        $this->assertNotInstanceOf(\DateTime::class, $result);
+
+        // Null should remain null
+        $result = $testInstance->testCastValue('createdAt', null);
+        $this->assertNull($result);
+
+        // Non-string date values should not be converted
+        $result = $testInstance->testCastValue('createdAt', 12345);
+        $this->assertEquals(12345, $result);
+        $this->assertNotInstanceOf(\DateTime::class, $result);
+    }
+
+    /**
+     * Test castValue preserves non-string values even for date fields
+     */
+    public function testCastValuePreservesNonStringDateFieldValues(): void
+    {
+        $testInstance = new $this->testApiClass([]);
+
+        // Integer value for a date field should not be converted
+        $result = $testInstance->testCastValue('startAt', 1234567890);
+        $this->assertEquals(1234567890, $result);
+        $this->assertNotInstanceOf(\DateTime::class, $result);
+
+        // Array value for a date field should not be converted
+        $result = $testInstance->testCastValue('endAt', ['some' => 'array']);
+        $this->assertEquals(['some' => 'array'], $result);
+        $this->assertNotInstanceOf(\DateTime::class, $result);
     }
 }

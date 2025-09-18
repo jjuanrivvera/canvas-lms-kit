@@ -6,10 +6,9 @@ namespace Tests\Api\Files;
 
 use CanvasLMS\Api\Files\File;
 use CanvasLMS\Config;
-use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -30,7 +29,7 @@ class FileContextTest extends TestCase
         $mockBody = $this->createMock(StreamInterface::class);
         $mockBody->method('getContents')->willReturn(json_encode([
             ['id' => 1, 'filename' => 'file1.pdf', 'display_name' => 'File 1'],
-            ['id' => 2, 'filename' => 'file2.docx', 'display_name' => 'File 2']
+            ['id' => 2, 'filename' => 'file2.docx', 'display_name' => 'File 2'],
         ]));
 
         $mockResponse = $this->createMock(ResponseInterface::class);
@@ -56,7 +55,7 @@ class FileContextTest extends TestCase
         $mockPaginatedResponse->expects($this->once())
             ->method('getJsonData')
             ->willReturn([
-                ['id' => 3, 'filename' => 'syllabus.pdf', 'display_name' => 'Course Syllabus']
+                ['id' => 3, 'filename' => 'syllabus.pdf', 'display_name' => 'Course Syllabus'],
             ]);
         $mockPaginatedResponse->expects($this->once())
             ->method('getNext')
@@ -81,7 +80,7 @@ class FileContextTest extends TestCase
         $mockPaginatedResponse->expects($this->once())
             ->method('getJsonData')
             ->willReturn([
-                ['id' => 4, 'filename' => 'group_project.zip', 'display_name' => 'Group Project']
+                ['id' => 4, 'filename' => 'group_project.zip', 'display_name' => 'Group Project'],
             ]);
         $mockPaginatedResponse->expects($this->once())
             ->method('getNext')
@@ -106,7 +105,7 @@ class FileContextTest extends TestCase
         $mockPaginatedResponse->expects($this->once())
             ->method('getJsonData')
             ->willReturn([
-                ['id' => 5, 'filename' => 'lecture.pdf', 'display_name' => 'Lecture Notes']
+                ['id' => 5, 'filename' => 'lecture.pdf', 'display_name' => 'Lecture Notes'],
             ]);
         $mockPaginatedResponse->expects($this->once())
             ->method('getNext')
@@ -133,7 +132,7 @@ class FileContextTest extends TestCase
 
         $mockUploadResponse = $this->createMockResponseWithBody([
             'upload_url' => 'https://canvas.example.com/upload',
-            'upload_params' => ['key' => 'value']
+            'upload_params' => ['key' => 'value'],
         ]);
 
         // Mock for Step 2 - Upload to external storage (with Location header)
@@ -148,13 +147,13 @@ class FileContextTest extends TestCase
         $mockFileResponse = $this->createMockResponseWithBody([
             'id' => 100,
             'filename' => 'uploaded.pdf',
-            'display_name' => 'Uploaded File'
+            'display_name' => 'Uploaded File',
         ]);
 
         $this->mockClient->expects($this->once())
             ->method('post')
             ->willReturn($mockUploadResponse);
-        
+
         $this->mockClient->expects($this->exactly(2))
             ->method('rawRequest')
             ->willReturnOnConsecutiveCalls(
@@ -166,7 +165,7 @@ class FileContextTest extends TestCase
             'name' => 'uploaded.pdf',
             'size' => 1024,
             'content_type' => 'application/pdf',
-            'file' => $tempFile
+            'file' => $tempFile,
         ]);
 
         $this->assertEquals(100, $file->id);
@@ -186,7 +185,7 @@ class FileContextTest extends TestCase
 
         $mockUploadResponse = $this->createMockResponseWithBody([
             'upload_url' => 'https://canvas.example.com/upload',
-            'upload_params' => ['key' => 'value']
+            'upload_params' => ['key' => 'value'],
         ]);
 
         // Mock for Step 2 - Upload to external storage (with Location header)
@@ -201,13 +200,13 @@ class FileContextTest extends TestCase
         $mockFileResponse = $this->createMockResponseWithBody([
             'id' => 200,
             'filename' => 'course_doc.pdf',
-            'display_name' => 'Course Document'
+            'display_name' => 'Course Document',
         ]);
 
         $this->mockClient->expects($this->once())
             ->method('post')
             ->willReturn($mockUploadResponse);
-        
+
         $this->mockClient->expects($this->exactly(2))
             ->method('rawRequest')
             ->willReturnOnConsecutiveCalls(
@@ -219,7 +218,7 @@ class FileContextTest extends TestCase
             'name' => 'course_doc.pdf',
             'size' => 2048,
             'content_type' => 'application/pdf',
-            'file' => $tempFile
+            'file' => $tempFile,
         ]);
 
         $this->assertEquals(200, $file->id);
@@ -239,7 +238,7 @@ class FileContextTest extends TestCase
         $firstPageBody->method('getContents')->willReturn(json_encode($firstPageData));
         $firstPageResponse = $this->createMock(ResponseInterface::class);
         $firstPageResponse->method('getBody')->willReturn($firstPageBody);
-        
+
         // Create mock for paginated response with no next page
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->method('getJsonData')->willReturn($firstPageData);
@@ -260,6 +259,7 @@ class FileContextTest extends TestCase
     {
         $mockBody = $this->createMock(StreamInterface::class);
         $mockBody->method('__toString')->willReturn(json_encode($data));
+        $mockBody->method('getContents')->willReturn(json_encode($data));
 
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockResponse->method('getBody')->willReturn($mockBody);

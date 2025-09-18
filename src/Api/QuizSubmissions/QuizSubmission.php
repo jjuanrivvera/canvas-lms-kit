@@ -10,7 +10,6 @@ use CanvasLMS\Api\Quizzes\Quiz;
 use CanvasLMS\Dto\QuizSubmissions\CreateQuizSubmissionDTO;
 use CanvasLMS\Dto\QuizSubmissions\UpdateQuizSubmissionDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
 
 /**
@@ -66,6 +65,7 @@ use CanvasLMS\Pagination\PaginationResult;
 class QuizSubmission extends AbstractBaseApi
 {
     protected static ?Course $course = null;
+
     protected static ?Quiz $quiz = null;
 
     /**
@@ -170,18 +170,21 @@ class QuizSubmission extends AbstractBaseApi
 
     /**
      * Associated submission data (when included)
+     *
      * @var mixed[]|null
      */
     public ?array $submission = null;
 
     /**
      * Associated quiz data (when included)
+     *
      * @var mixed[]|null
      */
     public ?array $quizData = null;
 
     /**
      * Associated user data (when included)
+     *
      * @var mixed[]|null
      */
     public ?array $user = null;
@@ -209,8 +212,9 @@ class QuizSubmission extends AbstractBaseApi
     /**
      * Check if course context is set
      *
-     * @return bool True if course is set
      * @throws CanvasApiException If course is not set
+     *
+     * @return bool True if course is set
      */
     protected static function checkCourse(): bool
     {
@@ -220,14 +224,16 @@ class QuizSubmission extends AbstractBaseApi
                 'Use QuizSubmission::setCourse($course)'
             );
         }
+
         return true;
     }
 
     /**
      * Check if quiz context is set
      *
-     * @return bool True if quiz is set
      * @throws CanvasApiException If quiz is not set
+     *
+     * @return bool True if quiz is set
      */
     protected static function checkQuiz(): bool
     {
@@ -236,19 +242,22 @@ class QuizSubmission extends AbstractBaseApi
                 'Quiz must be set before performing quiz submission operations. Use QuizSubmission::setQuiz($quiz)'
             );
         }
+
         return true;
     }
 
     /**
      * Check if both course and quiz contexts are set
      *
-     * @return bool True if both are set
      * @throws CanvasApiException If course or quiz is not set
+     *
+     * @return bool True if both are set
      */
     protected static function checkContext(): bool
     {
         self::checkCourse();
         self::checkQuiz();
+
         return true;
     }
 
@@ -574,6 +583,7 @@ class QuizSubmission extends AbstractBaseApi
 
     /**
      * Get associated submission data
+     *
      * @return mixed[]|null
      */
     public function getSubmission(): ?array
@@ -583,6 +593,7 @@ class QuizSubmission extends AbstractBaseApi
 
     /**
      * Set associated submission data
+     *
      * @param mixed[]|null $submission
      */
     public function setSubmission(?array $submission): void
@@ -592,6 +603,7 @@ class QuizSubmission extends AbstractBaseApi
 
     /**
      * Get associated quiz data
+     *
      * @return mixed[]|null
      */
     public function getQuizData(): ?array
@@ -601,6 +613,7 @@ class QuizSubmission extends AbstractBaseApi
 
     /**
      * Set associated quiz data
+     *
      * @param mixed[]|null $quizData
      */
     public function setQuizData(?array $quizData): void
@@ -610,6 +623,7 @@ class QuizSubmission extends AbstractBaseApi
 
     /**
      * Get associated user data
+     *
      * @return mixed[]|null
      */
     public function getUser(): ?array
@@ -619,6 +633,7 @@ class QuizSubmission extends AbstractBaseApi
 
     /**
      * Set associated user data
+     *
      * @param mixed[]|null $user
      */
     public function setUser(?array $user): void
@@ -631,8 +646,10 @@ class QuizSubmission extends AbstractBaseApi
      *
      * @param int $id Quiz submission ID
      * @param array<string, mixed> $params Optional query parameters
-     * @return self Quiz submission instance
+     *
      * @throws CanvasApiException If course/quiz not set or API error
+     *
+     * @return self Quiz submission instance
      */
     public static function find(int $id, array $params = []): self
     {
@@ -647,7 +664,7 @@ class QuizSubmission extends AbstractBaseApi
             $id
         );
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         $data = $responseData['quiz_submissions'][0] ?? $responseData;
 
@@ -657,8 +674,9 @@ class QuizSubmission extends AbstractBaseApi
     /**
      * Get current user's submission for the quiz
      *
-     * @return self|null Quiz submission instance or null if no submission
      * @throws CanvasApiException If course/quiz not set or API error
+     *
+     * @return self|null Quiz submission instance or null if no submission
      */
     public static function getCurrentUserSubmission(): ?self
     {
@@ -673,7 +691,7 @@ class QuizSubmission extends AbstractBaseApi
                 self::$quiz->getId()
             );
             $response = self::$apiClient->get($endpoint);
-            $responseData = json_decode($response->getBody()->getContents(), true);
+            $responseData = self::parseJsonResponse($response);
 
             $data = $responseData['quiz_submissions'][0] ?? $responseData;
 
@@ -683,6 +701,7 @@ class QuizSubmission extends AbstractBaseApi
             if (str_contains($e->getMessage(), '404')) {
                 return null;
             }
+
             throw $e;
         }
     }
@@ -691,8 +710,10 @@ class QuizSubmission extends AbstractBaseApi
      * Fetch all quiz submissions for the quiz
      *
      * @param mixed[] $params Optional parameters for filtering
-     * @return self[] Array of quiz submission instances
+     *
      * @throws CanvasApiException If course/quiz not set or API error
+     *
+     * @return self[] Array of quiz submission instances
      */
     public static function get(array $params = []): array
     {
@@ -706,7 +727,7 @@ class QuizSubmission extends AbstractBaseApi
             self::$quiz->getId()
         );
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         $submissions = [];
         foreach ($responseData['quiz_submissions'] as $submissionData) {
@@ -716,14 +737,14 @@ class QuizSubmission extends AbstractBaseApi
         return $submissions;
     }
 
-
-
     /**
      * Get paginated quiz submissions
      *
      * @param mixed[] $params Optional parameters for filtering
-     * @return PaginationResult Pagination result with submissions
+     *
      * @throws CanvasApiException If course/quiz not set or API error
+     *
+     * @return PaginationResult Pagination result with submissions
      */
     public static function paginate(array $params = []): PaginationResult
     {
@@ -735,6 +756,7 @@ class QuizSubmission extends AbstractBaseApi
             self::$quiz->getId()
         );
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+
         return self::createPaginationResult($paginatedResponse);
     }
 
@@ -742,8 +764,10 @@ class QuizSubmission extends AbstractBaseApi
      * Fetch all pages of quiz submissions
      *
      * @param mixed[] $params Optional parameters for filtering
-     * @return self[] Array of all quiz submission instances
+     *
      * @throws CanvasApiException If course/quiz not set or API error
+     *
+     * @return self[] Array of all quiz submission instances
      */
     public static function all(array $params = []): array
     {
@@ -776,9 +800,12 @@ class QuizSubmission extends AbstractBaseApi
      * Start a new quiz submission or create one
      *
      * @param array|CreateQuizSubmissionDTO $data Submission data
-     * @return self Created quiz submission instance
+     *
      * @throws CanvasApiException If course/quiz not set or API error
+     *
+     * @return self Created quiz submission instance
      */
+
     /**
      * @param mixed[]|CreateQuizSubmissionDTO $data
      */
@@ -793,7 +820,7 @@ class QuizSubmission extends AbstractBaseApi
             foreach ($data as $key => $value) {
                 $requestData[] = [
                     'name' => $key,
-                    'contents' => $value
+                    'contents' => $value,
                 ];
             }
         }
@@ -806,7 +833,7 @@ class QuizSubmission extends AbstractBaseApi
             self::$quiz->getId()
         );
         $response = self::$apiClient->post($endpoint, ['multipart' => $requestData]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         $submissionData = $responseData['quiz_submissions'][0] ?? $responseData;
 
@@ -817,8 +844,10 @@ class QuizSubmission extends AbstractBaseApi
      * Start a quiz submission (alias for create)
      *
      * @param mixed[] $params Optional parameters like access_code
-     * @return self Created quiz submission instance
+     *
      * @throws CanvasApiException If course/quiz not set or API error
+     *
+     * @return self Created quiz submission instance
      */
     public static function start(array $params = []): self
     {
@@ -830,9 +859,12 @@ class QuizSubmission extends AbstractBaseApi
      *
      * @param int $id Quiz submission ID
      * @param array|UpdateQuizSubmissionDTO $data Update data
-     * @return self Updated quiz submission instance
+     *
      * @throws CanvasApiException If course/quiz not set or API error
+     *
+     * @return self Updated quiz submission instance
      */
+
     /**
      * @param mixed[]|UpdateQuizSubmissionDTO $data
      */
@@ -847,7 +879,7 @@ class QuizSubmission extends AbstractBaseApi
             foreach ($data as $key => $value) {
                 $requestData[] = [
                     'name' => $key,
-                    'contents' => is_array($value) ? json_encode($value) : (string)$value
+                    'contents' => is_array($value) ? json_encode($value) : (string) $value,
                 ];
             }
         }
@@ -861,7 +893,7 @@ class QuizSubmission extends AbstractBaseApi
             $id
         );
         $response = self::$apiClient->put($endpoint, ['multipart' => $requestData]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         $submissionData = $responseData['quiz_submissions'][0] ?? $responseData;
 
@@ -871,8 +903,9 @@ class QuizSubmission extends AbstractBaseApi
     /**
      * Complete a quiz submission
      *
-     * @return self
      * @throws CanvasApiException If no ID set
+     *
+     * @return self
      */
     public function complete(): self
     {
@@ -886,13 +919,13 @@ class QuizSubmission extends AbstractBaseApi
         if ($this->validationToken) {
             $requestData[] = [
                 'name' => 'validation_token',
-                'contents' => $this->validationToken
+                'contents' => $this->validationToken,
             ];
         }
         if ($this->attempt) {
             $requestData[] = [
                 'name' => 'attempt',
-                'contents' => (string)$this->attempt
+                'contents' => (string) $this->attempt,
             ];
         }
 
@@ -905,7 +938,7 @@ class QuizSubmission extends AbstractBaseApi
             $this->id
         );
         $response = self::$apiClient->post($endpoint, ['multipart' => $requestData]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         $submissionData = $responseData['quiz_submissions'][0] ?? $responseData;
 
@@ -920,8 +953,9 @@ class QuizSubmission extends AbstractBaseApi
     /**
      * Save the quiz submission (update if exists)
      *
-     * @return self
      * @throws CanvasApiException If no ID set or validation fails
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -1046,7 +1080,7 @@ class QuizSubmission extends AbstractBaseApi
             'validationToken' => $this->validationToken,
             'submission' => $this->submission,
             'quizData' => $this->quizData,
-            'user' => $this->user
+            'user' => $this->user,
         ];
     }
 
@@ -1076,19 +1110,22 @@ class QuizSubmission extends AbstractBaseApi
             'manually_unlocked' => $this->manuallyUnlocked,
             'has_seen_results' => $this->hasSeenResults,
             'overdue_and_needs_submission' => $this->overdueAndNeedsSubmission,
-            'validation_token' => $this->validationToken
+            'validation_token' => $this->validationToken,
         ];
     }
 
     /**
      * Get the API endpoint for this resource
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
         self::checkQuiz();
+
         return sprintf('courses/%d/quizzes/%d/submissions', self::$course->getId(), self::$quiz->getId());
     }
 }

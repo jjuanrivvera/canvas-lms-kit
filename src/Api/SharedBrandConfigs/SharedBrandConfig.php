@@ -85,8 +85,10 @@ class SharedBrandConfig
      * API Endpoint: POST /api/v1/accounts/:account_id/shared_brand_configs
      *
      * @param array<string, mixed>|CreateSharedBrandConfigDTO $data The shared brand config data
-     * @return self The created SharedBrandConfig object
+     *
      * @throws CanvasApiException If the API request fails
+     *
+     * @return self The created SharedBrandConfig object
      *
      * @example
      * ```php
@@ -145,8 +147,10 @@ class SharedBrandConfig
      *
      * @param int $id The ID of the shared brand config to update
      * @param array<string, mixed>|UpdateSharedBrandConfigDTO $data The update data
-     * @return self The updated SharedBrandConfig object
+     *
      * @throws CanvasApiException If the API request fails
+     *
+     * @return self The updated SharedBrandConfig object
      *
      * @example
      * ```php
@@ -206,8 +210,10 @@ class SharedBrandConfig
      * API Endpoint: DELETE /api/v1/shared_brand_configs/:id
      *
      * @param int $id The ID of the shared brand config to delete
-     * @return self The deleted SharedBrandConfig object
+     *
      * @throws CanvasApiException If the API request fails
+     *
+     * @return self The deleted SharedBrandConfig object
      *
      * @example
      * ```php
@@ -251,8 +257,9 @@ class SharedBrandConfig
      *
      * Deletes the current SharedBrandConfig instance.
      *
-     * @return self The deleted SharedBrandConfig object
      * @throws CanvasApiException If the config has no ID or the API request fails
+     *
+     * @return self The deleted SharedBrandConfig object
      *
      * @example
      * ```php

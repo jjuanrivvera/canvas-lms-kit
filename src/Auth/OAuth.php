@@ -39,8 +39,10 @@ class OAuth
      *   - purpose: Token description for user identification
      *   - force_login: Set to '1' to force re-authentication
      *   - unique_id: Pre-populate login form
-     * @return string The authorization URL to redirect the user to
+     *
      * @throws CanvasApiException If client_id or redirect_uri are not configured
+     *
+     * @return string The authorization URL to redirect the user to
      */
     public static function getAuthorizationUrl(array $params = []): string
     {
@@ -58,7 +60,7 @@ class OAuth
             'has_state' => isset($params['state']),
             'has_scope' => isset($params['scope']),
             'has_purpose' => isset($params['purpose']),
-            'force_login' => $params['force_login'] ?? false
+            'force_login' => $params['force_login'] ?? false,
         ]);
 
         if (empty($params['client_id']) || empty($params['redirect_uri'])) {
@@ -82,15 +84,17 @@ class OAuth
      * @param string $code The authorization code from Canvas callback
      * @param array<string, mixed> $options Optional parameters including:
      *   - replace_tokens: Set to '1' to replace existing tokens
-     * @return array<string, mixed> Token data including access_token, refresh_token, expires_in, user
+     *
      * @throws CanvasApiException On exchange failure
+     *
+     * @return array<string, mixed> Token data including access_token, refresh_token, expires_in, user
      */
     public static function exchangeCode(string $code, array $options = []): array
     {
         $logger = Config::getLogger();
         $logger->info('OAuth: Starting authorization code exchange', [
             'has_code' => !empty($code),
-            'replace_tokens' => $options['replace_tokens'] ?? false
+            'replace_tokens' => $options['replace_tokens'] ?? false,
         ]);
 
         $params = array_merge([
@@ -98,7 +102,7 @@ class OAuth
             'client_id' => Config::getOAuthClientId(),
             'client_secret' => Config::getOAuthClientSecret(),
             'redirect_uri' => Config::getOAuthRedirectUri(),
-            'code' => $code
+            'code' => $code,
         ], $options);
 
         if (empty($params['client_id']) || empty($params['client_secret']) || empty($params['redirect_uri'])) {
@@ -115,7 +119,7 @@ class OAuth
             // HttpClient now handles OAuth URLs properly - no need to manipulate URL
             $response = $client->request('POST', '/login/oauth2/token', [
                 'form_params' => $params,
-                'skipAuth' => true
+                'skipAuth' => true,
             ]);
 
             $body = $response->getBody()->getContents();
@@ -149,14 +153,14 @@ class OAuth
                 'has_refresh_token' => isset($data['refresh_token']),
                 'expires_in' => $data['expires_in'] ?? null,
                 'user_id' => $data['user']['id'] ?? null,
-                'scopes' => $data['scope'] ?? null
+                'scopes' => $data['scope'] ?? null,
             ]);
 
             return $data;
         } catch (RequestException $e) {
             $logger->error('OAuth: Failed to exchange authorization code', [
                 'error' => $e->getMessage(),
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ]);
             $response = $e->getResponse();
             if ($response) {
@@ -164,6 +168,7 @@ class OAuth
             } else {
                 $error = $e->getMessage();
             }
+
             throw new CanvasApiException('OAuth code exchange failed: ' . $error);
         }
     }
@@ -173,9 +178,10 @@ class OAuth
      *
      * Note: Canvas does not return a new refresh token
      *
-     * @return array<string, mixed> Updated token data with new access_token and expires_in
      * @throws OAuthRefreshFailedException On refresh failure
      * @throws MissingOAuthTokenException If no refresh token is available
+     *
+     * @return array<string, mixed> Updated token data with new access_token and expires_in
      */
     public static function refreshToken(): array
     {
@@ -185,6 +191,7 @@ class OAuth
         $refreshToken = Config::getOAuthRefreshToken();
         if (!$refreshToken) {
             $logger->error('OAuth: No refresh token available for refresh');
+
             throw new MissingOAuthTokenException('No refresh token available');
         }
 
@@ -208,9 +215,9 @@ class OAuth
                     'grant_type' => 'refresh_token',
                     'client_id' => $clientId,
                     'client_secret' => $clientSecret,
-                    'refresh_token' => $refreshToken
+                    'refresh_token' => $refreshToken,
                 ],
-                'skipAuth' => true
+                'skipAuth' => true,
             ]);
 
             $body = $response->getBody()->getContents();
@@ -233,7 +240,7 @@ class OAuth
 
             $logger->info('OAuth: Successfully refreshed access token', [
                 'expires_in' => $data['expires_in'] ?? null,
-                'scopes' => $data['scope'] ?? null
+                'scopes' => $data['scope'] ?? null,
             ]);
 
             return $data;
@@ -247,7 +254,7 @@ class OAuth
 
             $logger->error('OAuth: Failed to refresh token', [
                 'error' => $error,
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ]);
 
             throw new OAuthRefreshFailedException('Token refresh failed: ' . $error);
@@ -258,20 +265,23 @@ class OAuth
      * Revoke the current access token
      *
      * @param bool $expireSessions Set to true to end all Canvas web sessions
-     * @return array<string, mixed> Response data, may contain forward_url for SSO logout
+     *
      * @throws MissingOAuthTokenException If no token is available
      * @throws CanvasApiException On revocation failure
+     *
+     * @return array<string, mixed> Response data, may contain forward_url for SSO logout
      */
     public static function revokeToken(bool $expireSessions = false): array
     {
         $logger = Config::getLogger();
         $logger->info('OAuth: Starting token revocation', [
-            'expire_sessions' => $expireSessions
+            'expire_sessions' => $expireSessions,
         ]);
 
         $token = Config::getOAuthToken();
         if (!$token) {
             $logger->error('OAuth: No token available to revoke');
+
             throw new MissingOAuthTokenException('No OAuth token to revoke');
         }
 
@@ -286,8 +296,8 @@ class OAuth
             // Note: This endpoint requires authentication, so no skipAuth
             $options = [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $token
-                ]
+                    'Authorization' => 'Bearer ' . $token,
+                ],
             ];
 
             if ($expireSessions) {
@@ -301,15 +311,16 @@ class OAuth
             Config::clearOAuthTokens();
 
             $logger->info('OAuth: Successfully revoked token', [
-                'expire_sessions' => $expireSessions
+                'expire_sessions' => $expireSessions,
             ]);
 
             $body = $response->getBody()->getContents();
+
             return $body ? json_decode($body, true) ?? [] : [];
         } catch (RequestException $e) {
             $logger->error('OAuth: Failed to revoke token', [
                 'error' => $e->getMessage(),
-                'code' => $e->getCode()
+                'code' => $e->getCode(),
             ]);
             $response = $e->getResponse();
             if ($response) {
@@ -317,6 +328,7 @@ class OAuth
             } else {
                 $error = $e->getMessage();
             }
+
             throw new CanvasApiException('Token revocation failed: ' . $error);
         }
     }
@@ -325,9 +337,11 @@ class OAuth
      * Get a session token for web-based features not available via API
      *
      * @param string|null $returnTo Optional URL to begin the web session at
-     * @return string The session URL
+     *
      * @throws MissingOAuthTokenException If no token is available
      * @throws CanvasApiException On session creation failure
+     *
+     * @return string The session URL
      */
     public static function getSessionToken(?string $returnTo = null): string
     {
@@ -347,9 +361,9 @@ class OAuth
             // Note: This endpoint requires authentication, so no skipAuth
             $options = [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $token
+                    'Authorization' => 'Bearer ' . $token,
                 ],
-                'json' => []
+                'json' => [],
             ];
 
             if ($returnTo) {
@@ -379,6 +393,7 @@ class OAuth
             } else {
                 $error = $e->getMessage();
             }
+
             throw new CanvasApiException('Session token creation failed: ' . $error);
         }
     }

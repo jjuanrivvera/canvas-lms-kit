@@ -18,7 +18,7 @@ class UpdateEnrollmentDTOTest extends TestCase
             'limitPrivilegesToCourseSection' => true,
             'startAt' => '2023-01-01T00:00:00Z',
             'endAt' => '2023-06-01T00:00:00Z',
-            'notify' => false
+            'notify' => false,
         ];
 
         $dto = new UpdateEnrollmentDTO($data);
@@ -61,7 +61,7 @@ class UpdateEnrollmentDTOTest extends TestCase
             'roleId' => '789',
             'limitPrivilegesToCourseSection' => true,
             'startAt' => '2023-01-01T00:00:00Z',
-            'notify' => true
+            'notify' => true,
         ];
 
         $dto = new UpdateEnrollmentDTO($data);
@@ -81,7 +81,7 @@ class UpdateEnrollmentDTOTest extends TestCase
             'enrollmentState' => 'completed',
             'courseSectionId' => '456',
             'roleId' => '789',
-            'notify' => true
+            'notify' => true,
         ];
 
         $dto = new UpdateEnrollmentDTO($data);
@@ -115,7 +115,7 @@ class UpdateEnrollmentDTOTest extends TestCase
         // Test with boolean true
         $dto1 = new UpdateEnrollmentDTO([
             'limitPrivilegesToCourseSection' => true,
-            'notify' => true
+            'notify' => true,
         ]);
 
         $this->assertTrue($dto1->isLimitPrivilegesToCourseSection());
@@ -124,7 +124,7 @@ class UpdateEnrollmentDTOTest extends TestCase
         // Test with boolean false
         $dto2 = new UpdateEnrollmentDTO([
             'limitPrivilegesToCourseSection' => false,
-            'notify' => false
+            'notify' => false,
         ]);
 
         $this->assertFalse($dto2->isLimitPrivilegesToCourseSection());
@@ -177,7 +177,7 @@ class UpdateEnrollmentDTOTest extends TestCase
 
         $dto = new UpdateEnrollmentDTO([
             'startAt' => $startDate,
-            'endAt' => $endDate
+            'endAt' => $endDate,
         ]);
 
         $this->assertEquals($startDate, $dto->getStartAt());
@@ -209,7 +209,7 @@ class UpdateEnrollmentDTOTest extends TestCase
     {
         // Test that only specified fields are updated
         $dto = new UpdateEnrollmentDTO([
-            'enrollmentState' => 'completed'
+            'enrollmentState' => 'completed',
             // Other fields intentionally left null
         ]);
 

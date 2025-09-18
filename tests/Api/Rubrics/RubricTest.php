@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Rubrics;
 
-use GuzzleHttp\Psr7\Response;
-use CanvasLMS\Http\HttpClient;
-use PHPUnit\Framework\TestCase;
+use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Rubrics\Rubric;
 use CanvasLMS\Api\Rubrics\RubricAssociation;
-use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Config;
 use CanvasLMS\Dto\Rubrics\CreateRubricDTO;
 use CanvasLMS\Dto\Rubrics\UpdateRubricDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Objects\RubricCriterion;
-use CanvasLMS\Config;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 class RubricTest extends TestCase
 {
@@ -32,18 +34,19 @@ class RubricTest extends TestCase
     protected function setUp(): void
     {
         $this->markTestSkipped('This test uses the old setCourse() pattern. See RubricAccountContextTest for current tests.');
-        
+
         $this->httpClientMock = $this->createMock(HttpClient::class);
         Rubric::setApiClient($this->httpClientMock);
-        
+
         // Set default account ID in config
         Config::setAccountId(1);
-        
+
         $this->rubric = new Rubric([]);
     }
 
     /**
      * Rubric data provider
+     *
      * @return array
      */
     public static function rubricDataProvider(): array
@@ -61,10 +64,10 @@ class RubricTest extends TestCase
                             'ratings' => [
                                 ['description' => 'Excellent', 'points' => 20],
                                 ['description' => 'Good', 'points' => 15],
-                                ['description' => 'Satisfactory', 'points' => 10]
-                            ]
-                        ]
-                    ]
+                                ['description' => 'Satisfactory', 'points' => 10],
+                            ],
+                        ],
+                    ],
                 ],
                 [
                     'id' => 123,
@@ -84,11 +87,11 @@ class RubricTest extends TestCase
                             'ratings' => [
                                 ['id' => 'rating_1', 'description' => 'Excellent', 'points' => 20],
                                 ['id' => 'rating_2', 'description' => 'Good', 'points' => 15],
-                                ['id' => 'rating_3', 'description' => 'Satisfactory', 'points' => 10]
-                            ]
-                        ]
-                    ]
-                ]
+                                ['id' => 'rating_3', 'description' => 'Satisfactory', 'points' => 10],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             'rubric_with_association' => [
                 [
@@ -96,14 +99,14 @@ class RubricTest extends TestCase
                     'criteria' => [
                         [
                             'description' => 'Research',
-                            'points' => 30
-                        ]
+                            'points' => 30,
+                        ],
                     ],
                     'association' => [
                         'association_id' => 789,
                         'association_type' => 'Assignment',
-                        'use_for_grading' => true
-                    ]
+                        'use_for_grading' => true,
+                    ],
                 ],
                 [
                     'rubric' => [
@@ -114,24 +117,25 @@ class RubricTest extends TestCase
                             [
                                 'id' => 'criterion_2',
                                 'description' => 'Research',
-                                'points' => 30
-                            ]
-                        ]
+                                'points' => 30,
+                            ],
+                        ],
                     ],
                     'rubric_association' => [
                         'id' => 999,
                         'rubric_id' => 124,
                         'association_id' => 789,
                         'association_type' => 'Assignment',
-                        'use_for_grading' => true
-                    ]
-                ]
-            ]
+                        'use_for_grading' => true,
+                    ],
+                ],
+            ],
         ];
     }
 
     /**
      * Test the create rubric method in course context
+     *
      * @dataProvider rubricDataProvider
      */
     public function testCreateRubricInCourse(array $rubricData, array $expectedResult): void
@@ -153,7 +157,7 @@ class RubricTest extends TestCase
         $dto->freeFormCriterionComments = $rubricData['freeFormCriterionComments'] ?? null;
         $dto->hideScoreTotal = $rubricData['hideScoreTotal'] ?? null;
         $dto->association = $rubricData['association'] ?? null;
-        
+
         $rubric = Rubric::createInContext('courses', 456, $dto);
 
         // Check if response has nested format
@@ -177,7 +181,7 @@ class RubricTest extends TestCase
     {
         // Reset course context
         Rubric::setCourse(null);
-        
+
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course context is required');
 
@@ -211,7 +215,7 @@ class RubricTest extends TestCase
         Rubric::setCourse(null);
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Course context is required for course-scoped rubric operations");
+        $this->expectExceptionMessage('Course context is required for course-scoped rubric operations');
 
         $dto = new CreateRubricDTO();
         Rubric::create($dto);
@@ -232,12 +236,12 @@ class RubricTest extends TestCase
                     'ratings' => [
                         ['description' => 'Excellent', 'points' => 5],
                         ['description' => 'Good', 'points' => 3],
-                        ['description' => 'Poor', 'points' => 1]
-                    ]
-                ]
+                        ['description' => 'Poor', 'points' => 1],
+                    ],
+                ],
             ],
             'freeFormCriterionComments' => true,
-            'hideScoreTotal' => false
+            'hideScoreTotal' => false,
         ];
 
         $expectedResult = [
@@ -245,7 +249,7 @@ class RubricTest extends TestCase
             'title' => 'Array Input Rubric',
             'points_possible' => 5.0,
             'free_form_criterion_comments' => true,
-            'hide_score_total' => false
+            'hide_score_total' => false,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -262,7 +266,7 @@ class RubricTest extends TestCase
         // Set course context
         $course = new Course(['id' => 789]);
         Rubric::setCourse($course);
-        
+
         $rubric = Rubric::create($rubricData);
 
         $this->assertEquals(128, $rubric->id);
@@ -281,8 +285,8 @@ class RubricTest extends TestCase
             'id' => 127,
             'title' => 'Found Rubric',
             'data' => [
-                ['id' => 'criterion_1', 'description' => 'Test', 'points' => 5]
-            ]
+                ['id' => 'criterion_1', 'description' => 'Test', 'points' => 5],
+            ],
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -299,7 +303,7 @@ class RubricTest extends TestCase
         // Set course context
         $course = new Course(['id' => 100]);
         Rubric::setCourse($course);
-        
+
         $rubric = Rubric::find(127, ['include' => ['assessments']]);
 
         $this->assertEquals(127, $rubric->id);
@@ -317,12 +321,12 @@ class RubricTest extends TestCase
         $expectedResult = [
             'rubric' => [
                 'id' => 128,
-                'title' => 'Updated Rubric'
+                'title' => 'Updated Rubric',
             ],
             'rubric_association' => [
                 'id' => 1001,
-                'rubric_id' => 128
-            ]
+                'rubric_id' => 128,
+            ],
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -342,7 +346,7 @@ class RubricTest extends TestCase
         // Set course context
         $course = new Course(['id' => 200]);
         Rubric::setCourse($course);
-        
+
         $rubric = Rubric::update(128, $dto);
 
         $this->assertEquals(128, $rubric->id);
@@ -358,7 +362,7 @@ class RubricTest extends TestCase
         $updateData = [
             'title' => 'Updated Array Rubric',
             'freeFormCriterionComments' => false,
-            'hideScoreTotal' => true
+            'hideScoreTotal' => true,
         ];
 
         $expectedResult = [
@@ -366,8 +370,8 @@ class RubricTest extends TestCase
                 'id' => 129,
                 'title' => 'Updated Array Rubric',
                 'free_form_criterion_comments' => false,
-                'hide_score_total' => true
-            ]
+                'hide_score_total' => true,
+            ],
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -384,7 +388,7 @@ class RubricTest extends TestCase
         // Set course context
         $course = new Course(['id' => 201]);
         Rubric::setCourse($course);
-        
+
         $rubric = Rubric::update(129, $updateData);
 
         $this->assertEquals(129, $rubric->id);
@@ -401,7 +405,7 @@ class RubricTest extends TestCase
         // Set course context
         $course = new Course(['id' => 300]);
         Rubric::setCourse($course);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('delete')
@@ -423,7 +427,7 @@ class RubricTest extends TestCase
         $rubric = new Rubric([]);
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Cannot delete rubric without ID");
+        $this->expectExceptionMessage('Cannot delete rubric without ID');
 
         $rubric->delete();
     }
@@ -434,11 +438,11 @@ class RubricTest extends TestCase
     public function testDeleteWithoutContextThrowsException(): void
     {
         Rubric::setCourse(null);
-        
+
         $rubric = new Rubric(['id' => 130]);
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Course context is required for course-scoped rubric operations");
+        $this->expectExceptionMessage('Course context is required for course-scoped rubric operations');
 
         $rubric->delete();
     }
@@ -451,7 +455,7 @@ class RubricTest extends TestCase
         // Set course context
         $course = new Course(['id' => 400]);
         Rubric::setCourse($course);
-        
+
         $expectedResult = ['id' => 131, 'title' => 'Saved Rubric'];
         $response = new Response(200, [], json_encode($expectedResult));
 
@@ -466,7 +470,7 @@ class RubricTest extends TestCase
 
         $rubric = new Rubric([
             'id' => 131,
-            'title' => 'Saved Rubric'
+            'title' => 'Saved Rubric',
         ]);
 
         $savedRubric = $rubric->save();
@@ -483,7 +487,7 @@ class RubricTest extends TestCase
         // Set course context
         $course = new Course(['id' => 500]);
         Rubric::setCourse($course);
-        
+
         $expectedResult = ['id' => 132, 'title' => 'New Rubric'];
         $response = new Response(200, [], json_encode($expectedResult));
 
@@ -511,14 +515,14 @@ class RubricTest extends TestCase
         // Testing that fetchAll method works with context parameters
         // Due to pagination complexity, we'll just test that the method exists and handles context
         $this->assertTrue(method_exists(Rubric::class, 'fetchAll'));
-        
+
         // Reset account ID to force exception
         Config::setAccountId(0);
-        
+
         // Test that it throws exception without context
         Rubric::setCourse(null);
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Course context is required for course-scoped rubric operations");
+        $this->expectExceptionMessage('Course context is required for course-scoped rubric operations');
         Rubric::get([]);
     }
 
@@ -530,14 +534,14 @@ class RubricTest extends TestCase
         // Set course context
         $course = new Course(['id' => 600]);
         Rubric::setCourse($course);
-        
+
         $expectedResult = [
             'assignments' => [
-                ['id' => 1, 'name' => 'Essay Assignment']
+                ['id' => 1, 'name' => 'Essay Assignment'],
             ],
             'courses' => [
-                ['id' => 100, 'name' => 'English 101']
-            ]
+                ['id' => 100, 'name' => 'English 101'],
+            ],
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -572,7 +576,7 @@ class RubricTest extends TestCase
         // Set course context
         $course = new Course(['id' => 700]);
         Rubric::setCourse($course);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('post')
@@ -603,12 +607,12 @@ class RubricTest extends TestCase
     public function testUploadCsvWithNonExistentFileThrowsException(): void
     {
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("CSV file not found");
+        $this->expectExceptionMessage('CSV file not found');
 
         // Set course context first
         $course = new Course(['id' => 123]);
         Rubric::setCourse($course);
-        
+
         Rubric::uploadCsv('/non/existent/file.csv');
     }
 
@@ -639,7 +643,7 @@ class RubricTest extends TestCase
         $expectedResult = [
             'import_id' => 1002,
             'status' => 'completed',
-            'created_count' => 5
+            'created_count' => 5,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -653,7 +657,7 @@ class RubricTest extends TestCase
         // Set course context
         $course = new Course(['id' => 700]);
         Rubric::setCourse($course);
-        
+
         $status = Rubric::getUploadStatus(1002);
 
         $this->assertEquals('completed', $status['status']);
@@ -671,7 +675,7 @@ class RubricTest extends TestCase
         // Set course context
         $course = new Course(['id' => 800]);
         Rubric::setCourse($course);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')

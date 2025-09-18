@@ -55,12 +55,14 @@ class UpdateQuizSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Quiz submissions array for bulk updates
+     *
      * @var mixed[]|null
      */
     public ?array $quizSubmissions = null;
 
     /**
      * Questions array for manual scoring
+     *
      * @var mixed[]|null
      */
     public ?array $questions = null;
@@ -108,6 +110,7 @@ class UpdateQuizSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get quiz submissions array
+     *
      * @return mixed[]|null
      */
     public function getQuizSubmissions(): ?array
@@ -127,6 +130,7 @@ class UpdateQuizSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get questions array
+     *
      * @return mixed[]|null
      */
     public function getQuestions(): ?array

@@ -14,14 +14,14 @@ class Version
      *
      * @var string
      */
-    public const VERSION = '1.0.0';
+    public const VERSION = '1.5.3';
 
     /**
      * Release date of current version
      *
      * @var string
      */
-    public const RELEASE_DATE = '2025-01-31';
+    public const RELEASE_DATE = '2025-09-18';
 
     /**
      * Minimum PHP version required
@@ -97,11 +97,13 @@ class Version
      * Check if a version is pre-release
      *
      * @param string|null $version Version to check (defaults to current)
+     *
      * @return bool
      */
     public static function isPreRelease(?string $version = null): bool
     {
         $version = $version ?? self::VERSION;
+
         return str_contains($version, '-alpha')
             || str_contains($version, '-beta')
             || str_contains($version, '-rc');

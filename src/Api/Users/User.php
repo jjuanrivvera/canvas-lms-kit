@@ -1,31 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Api\Users;
 
-use Exception;
-use CanvasLMS\Config;
 use CanvasLMS\Api\AbstractBaseApi;
+use CanvasLMS\Api\Assignments\Assignment;
+use CanvasLMS\Api\CalendarEvents\CalendarEvent;
+use CanvasLMS\Api\ContentMigrations\ContentMigration;
+use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Enrollments\Enrollment;
+use CanvasLMS\Api\Files\File;
 use CanvasLMS\Api\Groups\Group;
 use CanvasLMS\Api\Logins\Login;
-use CanvasLMS\Dto\Users\UpdateUserDTO;
+use CanvasLMS\Config;
+use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
+use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 use CanvasLMS\Dto\Users\CreateUserDTO;
+use CanvasLMS\Dto\Users\UpdateUserDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Objects\ActivityStreamItem;
 use CanvasLMS\Objects\ActivityStreamSummary;
-use CanvasLMS\Objects\TodoItem;
-use CanvasLMS\Objects\UpcomingEvent;
-use CanvasLMS\Api\Assignments\Assignment;
-use CanvasLMS\Api\Files\File;
-use CanvasLMS\Api\Courses\Course;
-use CanvasLMS\Objects\Profile;
 use CanvasLMS\Objects\Avatar;
 use CanvasLMS\Objects\CourseNickname;
 use CanvasLMS\Objects\PageView;
-use CanvasLMS\Api\CalendarEvents\CalendarEvent;
-use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
-use CanvasLMS\Api\ContentMigrations\ContentMigration;
-use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
+use CanvasLMS\Objects\Profile;
+use CanvasLMS\Objects\TodoItem;
+use CanvasLMS\Objects\UpcomingEvent;
+use Exception;
 
 /**
  * User Class
@@ -93,12 +95,14 @@ class User extends AbstractBaseApi
 {
     /**
      * The ID of the user.
+     *
      * @var int
      */
     public int $id;
 
     /**
      * The name of the user.
+     *
      * @var string
      */
     public string $name;
@@ -106,18 +110,21 @@ class User extends AbstractBaseApi
     /**
      * The name of the user that it should be used for sorting groups of users, such
      * as in the gradebook.
+     *
      * @var string
      */
     public string $sortableName;
 
     /**
      * The last name of the user.
+     *
      * @var string
      */
     public string $lastName;
 
     /**
      * The first name of the user.
+     *
      * @var string
      */
     public string $firstName;
@@ -125,6 +132,7 @@ class User extends AbstractBaseApi
     /**
      * A short name the user has selected, for use in conversations or other less
      * formal places through the site.
+     *
      * @var string
      */
     public string $shortName;
@@ -132,6 +140,7 @@ class User extends AbstractBaseApi
     /**
      * The SIS ID associated with the user. This field is only included if the user
      * came from a SIS import and has permissions to view SIS information.
+     *
      * @var string|null
      */
     public ?string $sisUserId;
@@ -139,6 +148,7 @@ class User extends AbstractBaseApi
     /**
      * The id of the SIS import. This field is only included if the user came from
      * a SIS import and has permissions to manage SIS information.
+     *
      * @var int|null
      */
     public ?int $sisImportId;
@@ -146,6 +156,7 @@ class User extends AbstractBaseApi
     /**
      * The integration_id associated with the user. This field is only included if
      * the user came from a SIS import and has permissions to view SIS information.
+     *
      * @var string|null
      */
     public ?string $integrationId;
@@ -153,6 +164,7 @@ class User extends AbstractBaseApi
     /**
      * The unique login id for the user. This is what the user uses to log in to
      * Canvas.
+     *
      * @var string
      */
     public string $loginId;
@@ -160,6 +172,7 @@ class User extends AbstractBaseApi
     /**
      * If avatars are enabled, this field will be included and contain a url to
      * retrieve the user's avatar.
+     *
      * @var string|null
      */
     public ?string $avatarUrl;
@@ -167,6 +180,7 @@ class User extends AbstractBaseApi
     /**
      * Optional: If avatars are enabled and caller is admin, this field can be
      * requested and will contain the current state of the user's avatar.
+     *
      * @var string|null
      */
     public ?string $avatarState;
@@ -175,6 +189,7 @@ class User extends AbstractBaseApi
      * Optional: This field can be requested with certain API calls, and will return
      * a list of the users active enrollments. See the List enrollments API for more
      * details about the format of these records.
+     *
      * @var mixed[]|null
      */
     public ?array $enrollments;
@@ -182,6 +197,7 @@ class User extends AbstractBaseApi
     /**
      * Optional: This field can be requested with certain API calls, and will return
      * the users primary email address.
+     *
      * @var string|null
      */
     public ?string $email;
@@ -189,6 +205,7 @@ class User extends AbstractBaseApi
     /**
      * Optional: This field can be requested with certain API calls, and will return
      * the users locale in RFC 5646 format.
+     *
      * @var string|null
      */
     public ?string $locale;
@@ -196,6 +213,7 @@ class User extends AbstractBaseApi
     /**
      * Optional: This field is only returned in certain API calls, and will return a
      * timestamp representing the last time the user logged in to canvas.
+     *
      * @var string|null
      */
     public ?string $lastLogin;
@@ -203,18 +221,21 @@ class User extends AbstractBaseApi
     /**
      * Optional: This field is only returned in certain API calls, and will return
      * the IANA time zone name of the user's preferred timezone.
+     *
      * @var string|null
      */
     public ?string $timeZone;
 
     /**
      * Optional: The user's bio.
+     *
      * @var string|null
      */
     public ?string $bio;
 
     /**
      * The user's effective locale.
+     *
      * @var string|null
      */
     public ?string $effectiveLocale = null;
@@ -223,6 +244,7 @@ class User extends AbstractBaseApi
      * Optional: This field is only returned in certain API calls, and will
      * return a boolean value indicating whether or not the user can update their
      * name.
+     *
      * @var bool|null
      */
     public ?bool $canUpdateName = null;
@@ -264,6 +286,7 @@ class User extends AbstractBaseApi
     public static function self(): self
     {
         $instance = new self([]);
+
         // Don't set the id property - let it remain uninitialized
         // Methods that support 'self' will use it when id is not set
         return $instance;
@@ -292,22 +315,27 @@ class User extends AbstractBaseApi
      * $profile = $currentUser->profile();
      * ```
      *
-     * @return self A fully populated User instance with all user data
      * @throws CanvasApiException If the API request fails
+     *
+     * @return self A fully populated User instance with all user data
      */
     public static function fetchSelf(): self
     {
         self::checkApiClient();
 
         $response = self::$apiClient->get('/users/self');
-        return new self(json_decode($response->getBody()->getContents(), true));
+
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
      * Create a new User instance.
+     *
      * @param mixed[]|CreateUserDTO $userData
-     * @return self
+     *
      * @throws Exception
+     *
+     * @return self
      */
     public static function create(array | CreateUserDTO $userData): self
     {
@@ -320,41 +348,52 @@ class User extends AbstractBaseApi
 
     /**
      * Create a User from a CreateUserDTO.
+     *
      * @param CreateUserDTO $dto
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     private static function createFromDTO(CreateUserDTO $dto): self
     {
         self::checkApiClient();
 
         $response = self::$apiClient->post('/accounts/' . Config::getAccountId() . '/users', [
-            'multipart' => $dto->toApiArray()
+            'multipart' => $dto->toApiArray(),
         ]);
-        return new self(json_decode($response->getBody(), true));
+
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
      * Find a single user by ID.
+     *
      * @param int $id
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
         self::checkApiClient();
 
         $response = self::$apiClient->get("/users/{$id}");
-        return new self(json_decode($response->getBody()->getContents(), true));
+
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
      * Update an existing user.
+     *
      * @param int $id
      * @param UpdateUserDTO|mixed[] $userData
-     * @return self
+     *
      * @throws CanvasApiException
      * @throws Exception
+     *
+     * @return self
      */
     public static function update(int $id, array | UpdateUserDTO $userData): self
     {
@@ -365,36 +404,43 @@ class User extends AbstractBaseApi
 
     /**
      * Update a user from a UpdateUserDTO.
+     *
      * @param int $id
      * @param UpdateUserDTO $dto
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     private static function updateFromDTO(int $id, UpdateUserDTO $dto): self
     {
         self::checkApiClient();
 
         $response = self::$apiClient->put("/users/{$id}", [
-            'multipart' => $dto->toApiArray()
+            'multipart' => $dto->toApiArray(),
         ]);
 
-        return new self(json_decode($response->getBody(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
      * Get the API endpoint for this resource
+     *
      * @return string
      */
     protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
+
         return sprintf('accounts/%d/users', $accountId);
     }
 
     /**
      * Save the user to the Canvas LMS.
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -409,10 +455,10 @@ class User extends AbstractBaseApi
         $method = $this->id ? 'PUT' : 'POST';
 
         $response = self::$apiClient->request($method, $path, [
-            'multipart' => $dto->toApiArray()
+            'multipart' => $dto->toApiArray(),
         ]);
 
-        $updatedUserData = json_decode($response->getBody(), true);
+        $updatedUserData = self::parseJsonResponse($response);
         $this->populate($updatedUserData);
 
         return $this;
@@ -420,9 +466,12 @@ class User extends AbstractBaseApi
 
     /**
      * Merge current user into another one
+     *
      * @param int $destinationUserId The ID of the user to merge into
-     * @return bool
+     *
      * @throws Exception
+     *
+     * @return bool
      */
     public function mergeInto(int $destinationUserId): bool
     {
@@ -431,7 +480,7 @@ class User extends AbstractBaseApi
         try {
             $response = self::$apiClient->put("/users/{$this->id}/merge_into/{$destinationUserId}");
 
-            $this->populate(json_decode($response->getBody(), true));
+            $this->populate(self::parseJsonResponse($response));
         } catch (CanvasApiException $e) {
             return false;
         }
@@ -476,8 +525,10 @@ class User extends AbstractBaseApi
      *   - role[]: Filter by enrollment role
      *   - state[]: Filter by enrollment state (e.g., ['active', 'invited', 'completed'])
      *   - include[]: Include additional data (e.g., ['course', 'avatar_url'])
-     * @return Enrollment[] Array of Enrollment objects
+     *
      * @throws CanvasApiException If the user ID is not set or API request fails
+     *
+     * @return Enrollment[] Array of Enrollment objects
      */
     public function enrollments(array $params = []): array
     {
@@ -490,7 +541,6 @@ class User extends AbstractBaseApi
 
     // Enrollment Relationship Methods
 
-
     /**
      * Get enrollments for this user in a specific course
      *
@@ -499,8 +549,10 @@ class User extends AbstractBaseApi
      *
      * @param int $courseId The course ID to filter enrollments by
      * @param mixed[] $params Additional query parameters
-     * @return Enrollment[] Array of Enrollment objects for the specified course
+     *
      * @throws CanvasApiException If user ID is not set or API request fails
+     *
+     * @return Enrollment[] Array of Enrollment objects for the specified course
      */
     public function getEnrollmentsInCourse(int $courseId, array $params = []): array
     {
@@ -520,12 +572,15 @@ class User extends AbstractBaseApi
      * Convenience method to get only active enrollments across all courses.
      *
      * @param mixed[] $params Additional query parameters
-     * @return Enrollment[] Array of active Enrollment objects
+     *
      * @throws CanvasApiException If user ID is not set or API request fails
+     *
+     * @return Enrollment[] Array of active Enrollment objects
      */
     public function getActiveEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['state[]' => ['active']]);
+
         return $this->enrollments($params);
     }
 
@@ -535,12 +590,15 @@ class User extends AbstractBaseApi
      * Convenience method to get only student enrollments across all courses.
      *
      * @param mixed[] $params Additional query parameters
-     * @return Enrollment[] Array of student Enrollment objects
+     *
      * @throws CanvasApiException If user ID is not set or API request fails
+     *
+     * @return Enrollment[] Array of student Enrollment objects
      */
     public function getStudentEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['StudentEnrollment']]);
+
         return $this->enrollments($params);
     }
 
@@ -550,12 +608,15 @@ class User extends AbstractBaseApi
      * Convenience method to get only teacher enrollments across all courses.
      *
      * @param mixed[] $params Additional query parameters
-     * @return Enrollment[] Array of teacher Enrollment objects
+     *
      * @throws CanvasApiException If user ID is not set or API request fails
+     *
+     * @return Enrollment[] Array of teacher Enrollment objects
      */
     public function getTeacherEnrollments(array $params = []): array
     {
         $params = array_merge($params, ['type[]' => ['TeacherEnrollment']]);
+
         return $this->enrollments($params);
     }
 
@@ -564,8 +625,10 @@ class User extends AbstractBaseApi
      *
      * @param int $courseId The course ID to check enrollment in
      * @param string|null $enrollmentType Optional: specific enrollment type to check for
-     * @return bool True if user is enrolled in the course (with optional type filter)
+     *
      * @throws CanvasApiException If user ID is not set or API request fails
+     *
+     * @return bool True if user is enrolled in the course (with optional type filter)
      */
     public function isEnrolledInCourse(int $courseId, ?string $enrollmentType = null): bool
     {
@@ -575,6 +638,7 @@ class User extends AbstractBaseApi
         }
 
         $enrollments = $this->getEnrollmentsInCourse($courseId, $params);
+
         return count($enrollments) > 0;
     }
 
@@ -582,8 +646,10 @@ class User extends AbstractBaseApi
      * Check if this user is a student in a specific course
      *
      * @param int $courseId The course ID to check
-     * @return bool True if user has a student enrollment in the course
+     *
      * @throws CanvasApiException If user ID is not set or API request fails
+     *
+     * @return bool True if user has a student enrollment in the course
      */
     public function isStudentInCourse(int $courseId): bool
     {
@@ -594,8 +660,10 @@ class User extends AbstractBaseApi
      * Check if this user is a teacher in a specific course
      *
      * @param int $courseId The course ID to check
-     * @return bool True if user has a teacher enrollment in the course
+     *
      * @throws CanvasApiException If user ID is not set or API request fails
+     *
+     * @return bool True if user has a teacher enrollment in the course
      */
     public function isTeacherInCourse(int $courseId): bool
     {
@@ -945,8 +1013,10 @@ class User extends AbstractBaseApi
      * Use 'self' as the user ID to get the current authenticated user's stream.
      *
      * @param array<string, mixed> $params Optional parameters
-     * @return ActivityStreamItem[]
+     *
      * @throws CanvasApiException
+     *
+     * @return ActivityStreamItem[]
      */
     public function getActivityStream(array $params = []): array
     {
@@ -954,10 +1024,10 @@ class User extends AbstractBaseApi
 
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->get("/users/{$userId}/activity_stream", [
-            'query' => $params
+            'query' => $params,
         ]);
 
-        $items = json_decode($response->getBody(), true);
+        $items = self::parseJsonResponse($response);
         $activityItems = [];
 
         foreach ($items as $item) {
@@ -978,8 +1048,9 @@ class User extends AbstractBaseApi
      * Returns a summary of the current user's global activity stream.
      * Use 'self' as the user ID to get the current authenticated user's summary.
      *
-     * @return ActivityStreamSummary[]
      * @throws CanvasApiException
+     *
+     * @return ActivityStreamSummary[]
      */
     public function getActivityStreamSummary(): array
     {
@@ -988,7 +1059,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->get("/users/{$userId}/activity_stream/summary");
 
-        $summaries = json_decode($response->getBody(), true);
+        $summaries = self::parseJsonResponse($response);
 
         return array_map(function ($summary) {
             return new ActivityStreamSummary($summary);
@@ -1002,8 +1073,10 @@ class User extends AbstractBaseApi
      * Use 'self' as the user ID for the current authenticated user.
      *
      * @param int $streamItemId The ID of the stream item to hide
-     * @return bool True if successful
+     *
      * @throws CanvasApiException
+     *
+     * @return bool True if successful
      */
     public function hideStreamItem(int $streamItemId): bool
     {
@@ -1013,6 +1086,7 @@ class User extends AbstractBaseApi
 
         try {
             self::$apiClient->delete("/users/{$userId}/activity_stream/{$streamItemId}");
+
             return true;
         } catch (CanvasApiException $e) {
             return false;
@@ -1025,8 +1099,9 @@ class User extends AbstractBaseApi
      * Hide all stream items for the user.
      * Use 'self' as the user ID for the current authenticated user.
      *
-     * @return bool True if successful
      * @throws CanvasApiException
+     *
+     * @return bool True if successful
      */
     public function hideAllStreamItems(): bool
     {
@@ -1036,6 +1111,7 @@ class User extends AbstractBaseApi
 
         try {
             self::$apiClient->delete("/users/{$userId}/activity_stream");
+
             return true;
         } catch (CanvasApiException $e) {
             return false;
@@ -1052,8 +1128,10 @@ class User extends AbstractBaseApi
      *
      * @param array<string, mixed> $params Optional parameters:
      *   - include[]: 'ungraded_quizzes' to include ungraded quizzes
-     * @return TodoItem[]
+     *
      * @throws CanvasApiException
+     *
+     * @return TodoItem[]
      */
     public function getTodoItems(array $params = []): array
     {
@@ -1061,10 +1139,10 @@ class User extends AbstractBaseApi
 
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->get("/users/{$userId}/todo", [
-            'query' => $params
+            'query' => $params,
         ]);
 
-        $items = json_decode($response->getBody(), true);
+        $items = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new TodoItem($item);
@@ -1078,8 +1156,10 @@ class User extends AbstractBaseApi
      * Returns the list of todo items for this user.
      *
      * @param array<string, mixed> $params Query parameters
-     * @return TodoItem[]
+     *
      * @throws CanvasApiException
+     *
+     * @return TodoItem[]
      */
     public function getTodo(array $params = []): array
     {
@@ -1091,8 +1171,9 @@ class User extends AbstractBaseApi
      *
      * Get a paginated list of the current user's upcoming events.
      *
-     * @return UpcomingEvent[]
      * @throws CanvasApiException
+     *
+     * @return UpcomingEvent[]
      */
     public function getUpcomingEvents(): array
     {
@@ -1101,7 +1182,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->get("/users/{$userId}/upcoming_events");
 
-        $events = json_decode($response->getBody(), true);
+        $events = self::parseJsonResponse($response);
 
         return array_map(function ($event) {
             return new UpcomingEvent($event);
@@ -1123,8 +1204,10 @@ class User extends AbstractBaseApi
      *   - include[]: Array of additional fields to include: ['planner_overrides', 'course']
      *   - filter[submittable_types][]: Only return assignments that the user can submit online.
      *     Excludes assignments with no submission type.
-     * @return Assignment[]
+     *
      * @throws CanvasApiException
+     *
+     * @return Assignment[]
      */
     public function getMissingSubmissions(array $params = []): array
     {
@@ -1135,10 +1218,10 @@ class User extends AbstractBaseApi
         }
 
         $response = self::$apiClient->get("/users/{$this->id}/missing_submissions", [
-            'query' => $params
+            'query' => $params,
         ]);
 
-        $assignments = json_decode($response->getBody(), true);
+        $assignments = self::parseJsonResponse($response);
 
         return array_map(function ($assignment) {
             return new Assignment($assignment);
@@ -1161,8 +1244,10 @@ class User extends AbstractBaseApi
      *   - file: Path to local file to upload
      *   - url: URL to download and upload (alternative to 'file')
      *   - on_duplicate: What to do if file already exists ('overwrite' or 'rename', defaults to 'overwrite')
-     * @return File The uploaded File object
+     *
      * @throws CanvasApiException
+     *
+     * @return File The uploaded File object
      */
     public function uploadFile(array $fileData): File
     {
@@ -1181,8 +1266,9 @@ class User extends AbstractBaseApi
      * Returns the full profile information for the user.
      * This includes extended information beyond the basic User object.
      *
-     * @return Profile The user's profile
      * @throws CanvasApiException
+     *
+     * @return Profile The user's profile
      */
     public function profile(): Profile
     {
@@ -1191,7 +1277,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->get("/users/{$userId}/profile");
 
-        $profileData = json_decode($response->getBody(), true);
+        $profileData = self::parseJsonResponse($response);
 
         return new Profile($profileData);
     }
@@ -1202,8 +1288,9 @@ class User extends AbstractBaseApi
      * Retrieve the possible user avatar options that can be set for the user.
      * This includes uploaded files, Gravatar, and social media avatars.
      *
-     * @return Avatar[] Array of Avatar objects
      * @throws CanvasApiException
+     *
+     * @return Avatar[] Array of Avatar objects
      */
     public function getAvatarOptions(): array
     {
@@ -1212,7 +1299,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->get("/users/{$userId}/avatars");
 
-        $avatars = json_decode($response->getBody(), true);
+        $avatars = self::parseJsonResponse($response);
 
         return array_map(function ($avatar) {
             return new Avatar($avatar);
@@ -1231,8 +1318,10 @@ class User extends AbstractBaseApi
      * @param string $namespace Namespace to store the data under
      * @param array<string, mixed> $data Arbitrary data to store
      * @param string|null $scope Optional scope for additional data segmentation
-     * @return array<string, mixed> The stored data
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> The stored data
      */
     public function setCustomData(string $namespace, array $data, ?string $scope = null): array
     {
@@ -1250,11 +1339,11 @@ class User extends AbstractBaseApi
         $response = self::$apiClient->put($path, [
             'form_params' => [
                 'ns' => $namespace,
-                'data' => json_encode($data)
-            ]
+                'data' => json_encode($data),
+            ],
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1266,8 +1355,10 @@ class User extends AbstractBaseApi
      *
      * @param string $namespace Namespace to retrieve data from
      * @param string|null $scope Optional scope that was used when storing
-     * @return array<string, mixed> The stored data
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> The stored data
      */
     public function getCustomData(string $namespace, ?string $scope = null): array
     {
@@ -1283,10 +1374,10 @@ class User extends AbstractBaseApi
         }
 
         $response = self::$apiClient->get($path, [
-            'query' => ['ns' => $namespace]
+            'query' => ['ns' => $namespace],
         ]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -1298,8 +1389,10 @@ class User extends AbstractBaseApi
      *
      * @param string $namespace Namespace to delete data from
      * @param string|null $scope Optional scope that was used when storing
-     * @return bool True if successful
+     *
      * @throws CanvasApiException
+     *
+     * @return bool True if successful
      */
     public function deleteCustomData(string $namespace, ?string $scope = null): bool
     {
@@ -1316,8 +1409,9 @@ class User extends AbstractBaseApi
 
         try {
             self::$apiClient->delete($path, [
-                'query' => ['ns' => $namespace]
+                'query' => ['ns' => $namespace],
             ]);
+
             return true;
         } catch (CanvasApiException $e) {
             return false;
@@ -1331,8 +1425,9 @@ class User extends AbstractBaseApi
      *
      * Returns a list of all course nicknames set by the user.
      *
-     * @return CourseNickname[] Array of CourseNickname objects
      * @throws CanvasApiException
+     *
+     * @return CourseNickname[] Array of CourseNickname objects
      */
     public function getCourseNicknames(): array
     {
@@ -1341,7 +1436,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->get("/users/{$userId}/course_nicknames");
 
-        $nicknames = json_decode($response->getBody(), true);
+        $nicknames = self::parseJsonResponse($response);
 
         return array_map(function ($nickname) {
             return new CourseNickname($nickname);
@@ -1354,8 +1449,10 @@ class User extends AbstractBaseApi
      * Returns the nickname for the specified course, or null if no nickname is set.
      *
      * @param int $courseId Course ID to get nickname for
-     * @return CourseNickname|null The course nickname or null
+     *
      * @throws CanvasApiException
+     *
+     * @return CourseNickname|null The course nickname or null
      */
     public function courseNickname(int $courseId): ?CourseNickname
     {
@@ -1365,13 +1462,15 @@ class User extends AbstractBaseApi
 
         try {
             $response = self::$apiClient->get("/users/{$userId}/course_nicknames/{$courseId}");
-            $nicknameData = json_decode($response->getBody(), true);
+            $nicknameData = self::parseJsonResponse($response);
+
             return new CourseNickname($nicknameData);
         } catch (CanvasApiException $e) {
             // Return null if no nickname is set (404 response)
             if ($e->getCode() === 404) {
                 return null;
             }
+
             throw $e;
         }
     }
@@ -1383,8 +1482,10 @@ class User extends AbstractBaseApi
      *
      * @param int $courseId Course ID to set nickname for
      * @param string $nickname The nickname to set
-     * @return CourseNickname The updated course nickname
+     *
      * @throws CanvasApiException
+     *
+     * @return CourseNickname The updated course nickname
      */
     public function setCourseNickname(int $courseId, string $nickname): CourseNickname
     {
@@ -1393,11 +1494,12 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
         $response = self::$apiClient->put("/users/{$userId}/course_nicknames/{$courseId}", [
             'form_params' => [
-                'nickname' => $nickname
-            ]
+                'nickname' => $nickname,
+            ],
         ]);
 
-        $nicknameData = json_decode($response->getBody(), true);
+        $nicknameData = self::parseJsonResponse($response);
+
         return new CourseNickname($nicknameData);
     }
 
@@ -1407,8 +1509,10 @@ class User extends AbstractBaseApi
      * Remove the nickname for the specified course, reverting to the original course name.
      *
      * @param int $courseId Course ID to remove nickname for
-     * @return bool True if successful
+     *
      * @throws CanvasApiException
+     *
+     * @return bool True if successful
      */
     public function removeCourseNickname(int $courseId): bool
     {
@@ -1418,6 +1522,7 @@ class User extends AbstractBaseApi
 
         try {
             self::$apiClient->delete("/users/{$userId}/course_nicknames/{$courseId}");
+
             return true;
         } catch (CanvasApiException $e) {
             return false;
@@ -1429,8 +1534,9 @@ class User extends AbstractBaseApi
      *
      * Remove all course nicknames set by the user, reverting all courses to their original names.
      *
-     * @return bool True if successful
      * @throws CanvasApiException
+     *
+     * @return bool True if successful
      */
     public function clearAllCourseNicknames(): bool
     {
@@ -1440,6 +1546,7 @@ class User extends AbstractBaseApi
 
         try {
             self::$apiClient->delete("/users/{$userId}/course_nicknames");
+
             return true;
         } catch (CanvasApiException $e) {
             return false;
@@ -1456,8 +1563,10 @@ class User extends AbstractBaseApi
      * this endpoint to self register.
      *
      * @param array<string, mixed> $userData User registration data
-     * @return self The newly registered user
+     *
      * @throws CanvasApiException
+     *
+     * @return self The newly registered user
      */
     public static function selfRegister(array $userData): self
     {
@@ -1465,10 +1574,11 @@ class User extends AbstractBaseApi
 
         $accountId = Config::getAccountId();
         $response = self::$apiClient->post("/accounts/{$accountId}/self_registration", [
-            'form_params' => $userData
+            'form_params' => $userData,
         ]);
 
-        $newUserData = json_decode($response->getBody(), true);
+        $newUserData = self::parseJsonResponse($response);
+
         return new self($newUserData);
     }
 
@@ -1478,8 +1588,9 @@ class User extends AbstractBaseApi
      * Split a merged user into separate user accounts.
      * This operation is typically used to reverse a user merge operation.
      *
-     * @return array<self> Array of User objects created from the split
      * @throws CanvasApiException
+     *
+     * @return array<self> Array of User objects created from the split
      */
     public function split(): array
     {
@@ -1490,7 +1601,7 @@ class User extends AbstractBaseApi
         }
 
         $response = self::$apiClient->post("/users/{$this->id}/split");
-        $splitUsers = json_decode($response->getBody(), true);
+        $splitUsers = self::parseJsonResponse($response);
 
         return array_map(function ($userData) {
             return new self($userData);
@@ -1503,8 +1614,9 @@ class User extends AbstractBaseApi
      * Terminate all active sessions for the user.
      * This will force the user to log in again on all devices.
      *
-     * @return bool True if successful
      * @throws CanvasApiException
+     *
+     * @return bool True if successful
      */
     public function terminateAllSessions(): bool
     {
@@ -1516,6 +1628,7 @@ class User extends AbstractBaseApi
 
         try {
             self::$apiClient->delete("/users/{$this->id}/sessions");
+
             return true;
         } catch (CanvasApiException $e) {
             return false;
@@ -1533,8 +1646,10 @@ class User extends AbstractBaseApi
      * @param array<string, mixed> $params Optional parameters:
      *   - start_time: DateTime to start the search from (ISO 8601 format)
      *   - end_time: DateTime to end the search at (ISO 8601 format)
-     * @return PageView[] Array of PageView objects
+     *
      * @throws CanvasApiException
+     *
+     * @return PageView[] Array of PageView objects
      */
     public function getPageViews(array $params = []): array
     {
@@ -1545,10 +1660,10 @@ class User extends AbstractBaseApi
         }
 
         $response = self::$apiClient->get("/users/{$this->id}/page_views", [
-            'query' => $params
+            'query' => $params,
         ]);
 
-        $pageViews = json_decode($response->getBody(), true);
+        $pageViews = self::parseJsonResponse($response);
 
         return array_map(function ($pageView) {
             return new PageView($pageView);
@@ -1561,8 +1676,9 @@ class User extends AbstractBaseApi
      * Return the user's pandata events token.
      * This token is used for analytics and tracking purposes.
      *
-     * @return array<string, mixed> The pandata events token data
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> The pandata events token data
      */
     public function getPandataEventsToken(): array
     {
@@ -1574,15 +1690,17 @@ class User extends AbstractBaseApi
 
         $response = self::$apiClient->get("/users/{$this->id}/pandata_events_token");
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
      * Get calendar events for this user
      *
      * @param array<string, mixed> $params Query parameters
-     * @return CalendarEvent[]
+     *
      * @throws CanvasApiException
+     *
+     * @return CalendarEvent[]
      */
     public function getCalendarEvents(array $params = []): array
     {
@@ -1594,20 +1712,21 @@ class User extends AbstractBaseApi
 
         $endpoint = sprintf('users/%d/calendar_events', $this->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new CalendarEvent($item);
         }, $data);
     }
 
-
     /**
      * Create a calendar event for this user
      *
      * @param CreateCalendarEventDTO|array<string, mixed> $data
-     * @return CalendarEvent
+     *
      * @throws CanvasApiException
+     *
+     * @return CalendarEvent
      */
     public function createCalendarEvent($data): CalendarEvent
     {
@@ -1617,11 +1736,11 @@ class User extends AbstractBaseApi
 
         $dto = $data instanceof CreateCalendarEventDTO ? $data : new CreateCalendarEventDTO($data);
         $dto->contextCode = sprintf('user_%d', $this->id);
+
         return CalendarEvent::create($dto);
     }
 
     // Additional Relationship Methods
-
 
     /**
      * Get groups for this user
@@ -1630,8 +1749,10 @@ class User extends AbstractBaseApi
      * when called on an instance returned by User::self().
      *
      * @param array<string, mixed> $params Query parameters
-     * @return Group[]
+     *
      * @throws CanvasApiException
+     *
+     * @return Group[]
      */
     public function groups(array $params = []): array
     {
@@ -1658,8 +1779,10 @@ class User extends AbstractBaseApi
      * when called on an instance returned by User::self().
      *
      * @param array<string, mixed> $params Query parameters
-     * @return Login[]
+     *
      * @throws CanvasApiException
+     *
+     * @return Login[]
      */
     public function logins(array $params = []): array
     {
@@ -1683,8 +1806,10 @@ class User extends AbstractBaseApi
      * Get courses for this user
      *
      * @param array<string, mixed> $params Query parameters
-     * @return Course[]
+     *
      * @throws CanvasApiException
+     *
+     * @return Course[]
      */
     public function courses(array $params = []): array
     {
@@ -1706,13 +1831,14 @@ class User extends AbstractBaseApi
         return $courses;
     }
 
-
     /**
      * Get files for this user
      *
      * @param array<string, mixed> $params Query parameters
-     * @return File[]
+     *
      * @throws CanvasApiException
+     *
+     * @return File[]
      */
     public function files(array $params = []): array
     {
@@ -1727,8 +1853,10 @@ class User extends AbstractBaseApi
      * Get content migrations for this user
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<ContentMigration>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<ContentMigration>
      */
     public function contentMigrations(array $params = []): array
     {
@@ -1743,8 +1871,10 @@ class User extends AbstractBaseApi
      * Get all feature flags for this user.
      *
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<int, \CanvasLMS\Api\FeatureFlags\FeatureFlag> Array of FeatureFlag objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, \CanvasLMS\Api\FeatureFlags\FeatureFlag> Array of FeatureFlag objects
      */
     public function featureFlags(array $params = []): array
     {
@@ -1759,8 +1889,10 @@ class User extends AbstractBaseApi
      * Get a specific feature flag for this user.
      *
      * @param string $featureName The symbolic name of the feature
-     * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
+     *
      * @throws CanvasApiException
+     *
+     * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
      */
     public function featureFlag(string $featureName): \CanvasLMS\Api\FeatureFlags\FeatureFlag
     {
@@ -1776,8 +1908,10 @@ class User extends AbstractBaseApi
      *
      * @param string $featureName The symbolic name of the feature
      * @param array<string, mixed>|\CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO $data Update data
-     * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
+     *
      * @throws CanvasApiException
+     *
+     * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
      */
     public function setFeatureFlag(
         string $featureName,
@@ -1794,8 +1928,10 @@ class User extends AbstractBaseApi
      * Remove a feature flag for this user.
      *
      * @param string $featureName The symbolic name of the feature
-     * @return bool
+     *
      * @throws CanvasApiException
+     *
+     * @return bool
      */
     public function removeFeatureFlag(string $featureName): bool
     {
@@ -1810,8 +1946,10 @@ class User extends AbstractBaseApi
      * Get a specific content migration for this user
      *
      * @param int $migrationId Content migration ID
-     * @return ContentMigration
+     *
      * @throws CanvasApiException
+     *
+     * @return ContentMigration
      */
     public function contentMigration(int $migrationId): ContentMigration
     {
@@ -1826,8 +1964,10 @@ class User extends AbstractBaseApi
      * Create a content migration for this user
      *
      * @param array<string, mixed>|CreateContentMigrationDTO $data Migration data
-     * @return ContentMigration
+     *
      * @throws CanvasApiException
+     *
+     * @return ContentMigration
      */
     public function createContentMigration(array|CreateContentMigrationDTO $data): ContentMigration
     {
@@ -1843,8 +1983,10 @@ class User extends AbstractBaseApi
      *
      * @param string $filePath Path to the .imscc file
      * @param array<string, mixed> $options Additional options
-     * @return ContentMigration
+     *
      * @throws CanvasApiException
+     *
+     * @return ContentMigration
      */
     public function importCommonCartridge(string $filePath, array $options = []): ContentMigration
     {
@@ -1856,8 +1998,8 @@ class User extends AbstractBaseApi
             'migration_type' => ContentMigration::TYPE_COMMON_CARTRIDGE,
             'pre_attachment' => [
                 'name' => basename($filePath),
-                'size' => filesize($filePath)
-            ]
+                'size' => filesize($filePath),
+            ],
         ]));
 
         if ($migration->isFileUploadPending()) {
@@ -1872,8 +2014,10 @@ class User extends AbstractBaseApi
      *
      * @param string $filePath Path to the .zip file
      * @param array<string, mixed> $options Additional options
-     * @return ContentMigration
+     *
      * @throws CanvasApiException
+     *
+     * @return ContentMigration
      */
     public function importZipFile(string $filePath, array $options = []): ContentMigration
     {
@@ -1885,8 +2029,8 @@ class User extends AbstractBaseApi
             'migration_type' => ContentMigration::TYPE_ZIP_FILE,
             'pre_attachment' => [
                 'name' => basename($filePath),
-                'size' => filesize($filePath)
-            ]
+                'size' => filesize($filePath),
+            ],
         ]));
 
         if ($migration->isFileUploadPending()) {
@@ -1901,8 +2045,10 @@ class User extends AbstractBaseApi
      *
      * @param int $courseId The course ID
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<string, array<string, mixed>> Analytics data for the user in the course
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, array<string, mixed>> Analytics data for the user in the course
      */
     public function courseAnalytics(int $courseId, array $params = []): array
     {
@@ -1925,7 +2071,7 @@ class User extends AbstractBaseApi
                 $courseId,
                 $this->id,
                 $params
-            )
+            ),
         ];
     }
 }

@@ -1,15 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Logins;
 
-use GuzzleHttp\Psr7\Response;
-use CanvasLMS\Http\HttpClient;
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Logins\Login;
-use CanvasLMS\Dto\Logins\CreateLoginDTO;
-use CanvasLMS\Dto\Logins\UpdateLoginDTO;
-use CanvasLMS\Dto\Logins\PasswordResetDTO;
 use CanvasLMS\Config;
+use CanvasLMS\Dto\Logins\CreateLoginDTO;
+use CanvasLMS\Http\HttpClient;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 class LoginTest extends TestCase
 {
@@ -19,7 +19,7 @@ class LoginTest extends TestCase
     {
         // Set up test configuration
         Config::setAccountId(1);
-        
+
         $this->httpClientMock = $this->createMock(HttpClient::class);
         Login::setApiClient($this->httpClientMock);
     }
@@ -41,14 +41,15 @@ class LoginTest extends TestCase
                     'authentication_provider_type' => 'facebook',
                     'workflow_state' => 'active',
                     'declared_user_type' => null,
-                    'created_at' => '2024-01-01T00:00:00Z'
-                ]
-            ]
+                    'created_at' => '2024-01-01T00:00:00Z',
+                ],
+            ],
         ];
     }
 
     /**
      * Test the get method (account context)
+     *
      * @dataProvider loginDataProvider
      */
     public function testGet(array $loginData): void
@@ -71,6 +72,7 @@ class LoginTest extends TestCase
 
     /**
      * Test the find method
+     *
      * @dataProvider loginDataProvider
      */
     public function testFind(array $loginData): void
@@ -108,6 +110,7 @@ class LoginTest extends TestCase
 
     /**
      * Test fetchByContext method for accounts
+     *
      * @dataProvider loginDataProvider
      */
     public function testFetchByContextAccounts(array $loginData): void
@@ -128,6 +131,7 @@ class LoginTest extends TestCase
 
     /**
      * Test fetchByContext method for users
+     *
      * @dataProvider loginDataProvider
      */
     public function testFetchByContextUsers(array $loginData): void
@@ -148,6 +152,7 @@ class LoginTest extends TestCase
 
     /**
      * Test create method with array data
+     *
      * @dataProvider loginDataProvider
      */
     public function testCreateWithArray(array $loginData): void
@@ -156,7 +161,7 @@ class LoginTest extends TestCase
             'userId' => 2,
             'uniqueId' => 'belieber@example.com',
             'password' => 'secret123',
-            'authenticationProviderId' => 'facebook'
+            'authenticationProviderId' => 'facebook',
         ];
 
         $response = new Response(200, [], json_encode($loginData));
@@ -174,6 +179,7 @@ class LoginTest extends TestCase
 
     /**
      * Test create method with DTO
+     *
      * @dataProvider loginDataProvider
      */
     public function testCreateWithDTO(array $loginData): void
@@ -181,7 +187,7 @@ class LoginTest extends TestCase
         $createData = new CreateLoginDTO([
             'userId' => 2,
             'uniqueId' => 'belieber@example.com',
-            'password' => 'secret123'
+            'password' => 'secret123',
         ]);
 
         $response = new Response(200, [], json_encode($loginData));
@@ -199,6 +205,7 @@ class LoginTest extends TestCase
 
     /**
      * Test update method
+     *
      * @dataProvider loginDataProvider
      */
     public function testUpdate(array $loginData): void
@@ -223,6 +230,7 @@ class LoginTest extends TestCase
 
     /**
      * Test delete method
+     *
      * @dataProvider loginDataProvider
      */
     public function testDelete(array $loginData): void
@@ -234,7 +242,7 @@ class LoginTest extends TestCase
             'sis_user_id' => null,
             'account_id' => 1,
             'id' => 2,
-            'user_id' => 2
+            'user_id' => 2,
         ];
 
         $response = new Response(200, [], json_encode($deleteResponse));
@@ -290,6 +298,7 @@ class LoginTest extends TestCase
 
     /**
      * Test helper methods
+     *
      * @dataProvider loginDataProvider
      */
     public function testHelperMethods(array $loginData): void

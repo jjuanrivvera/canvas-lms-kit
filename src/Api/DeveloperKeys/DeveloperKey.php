@@ -36,9 +36,13 @@ class DeveloperKey extends AbstractBaseApi
 
     // Core properties
     public ?int $id = null;
+
     public ?string $name = null;
+
     public ?string $createdAt = null;
+
     public ?string $updatedAt = null;
+
     public ?string $workflowState = null;
 
     // LTI identification
@@ -46,38 +50,59 @@ class DeveloperKey extends AbstractBaseApi
 
     // Contact and display
     public ?string $email = null;
+
     public ?string $iconUrl = null;
+
     public ?string $notes = null;
+
     public ?string $vendorCode = null;
+
     public ?string $accountName = null;
+
     public ?bool $visible = null;
 
     // OAuth properties
+
     /** @var array<string>|null */
     public ?array $scopes = null;
+
     public ?string $redirectUri = null; // Deprecated
+
     /** @var array<string>|null */
     public ?array $redirectUris = null;
+
     public ?int $accessTokenCount = null;
+
     public ?string $lastUsedAt = null;
+
     public ?bool $testClusterOnly = null;
+
     public ?bool $allowIncludes = null;
+
     public ?bool $requireScopes = null;
+
     public ?string $clientCredentialsAudience = null;
+
     public ?string $apiKey = null;
 
     // LTI properties
+
     /** @var array<string, mixed>|null */
     public ?array $toolConfiguration = null;
+
     /** @var array<string, mixed>|null */
     public ?array $publicJwk = null;
+
     public ?string $publicJwkUrl = null;
+
     /** @var array<string, mixed>|null */
     public ?array $ltiRegistration = null;
+
     public ?bool $isLtiRegistration = null;
 
     // Unused properties (maintained for API compatibility)
     public ?string $userName = null;
+
     public ?string $userId = null;
 
     /**
@@ -88,6 +113,7 @@ class DeveloperKey extends AbstractBaseApi
     protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
+
         return "accounts/{$accountId}/developer_keys";
     }
 
@@ -96,8 +122,10 @@ class DeveloperKey extends AbstractBaseApi
      * Uses account-scoped endpoint: POST /api/v1/accounts/:account_id/developer_keys
      *
      * @param array<string, mixed>|CreateDeveloperKeyDTO $data Developer key creation data
-     * @return self The created DeveloperKey instance
+     *
      * @throws CanvasApiException If creation fails
+     *
+     * @return self The created DeveloperKey instance
      */
     public static function create(array|CreateDeveloperKeyDTO $data): self
     {
@@ -109,9 +137,9 @@ class DeveloperKey extends AbstractBaseApi
 
         $endpoint = self::getEndpoint();
         $response = self::$apiClient->post($endpoint, [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
         ]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -122,8 +150,10 @@ class DeveloperKey extends AbstractBaseApi
      *
      * @param int $id The developer key ID
      * @param array<string, mixed>|UpdateDeveloperKeyDTO $data Update data
-     * @return self The updated DeveloperKey instance
+     *
      * @throws CanvasApiException If update fails
+     *
+     * @return self The updated DeveloperKey instance
      */
     public static function update(int $id, array|UpdateDeveloperKeyDTO $data): self
     {
@@ -136,9 +166,9 @@ class DeveloperKey extends AbstractBaseApi
         // Use direct ID endpoint (not account-scoped)
         $endpoint = "developer_keys/{$id}";
         $response = self::$apiClient->put($endpoint, [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
         ]);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -148,8 +178,10 @@ class DeveloperKey extends AbstractBaseApi
      * Uses direct ID endpoint: DELETE /api/v1/developer_keys/:id
      *
      * @param int $id The developer key ID
-     * @return array<string, mixed> The deleted developer key data
+     *
      * @throws CanvasApiException If deletion fails
+     *
+     * @return array<string, mixed> The deleted developer key data
      */
     public static function delete(int $id): array
     {
@@ -159,7 +191,7 @@ class DeveloperKey extends AbstractBaseApi
         $endpoint = "developer_keys/{$id}";
         $response = self::$apiClient->delete($endpoint);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -168,8 +200,10 @@ class DeveloperKey extends AbstractBaseApi
      * This method fetches all keys and filters by ID
      *
      * @param int $id The developer key ID
-     * @return self The DeveloperKey instance
+     *
      * @throws CanvasApiException If key not found
+     *
+     * @return self The DeveloperKey instance
      */
     public static function find(int $id, array $params = []): self
     {
@@ -189,6 +223,7 @@ class DeveloperKey extends AbstractBaseApi
      * Uses account-scoped endpoint: GET /api/v1/accounts/:account_id/developer_keys
      *
      * @param array<string, mixed> $params Query parameters (e.g., 'inherited' => true)
+     *
      * @return array<self> Array of DeveloperKey instances
      */
     public static function get(array $params = []): array
@@ -197,20 +232,22 @@ class DeveloperKey extends AbstractBaseApi
 
         $endpoint = self::getEndpoint();
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
-        return array_map(fn(array $item) => new self($item), $data);
+        return array_map(fn (array $item) => new self($item), $data);
     }
 
     /**
      * Get paginated developer keys
      *
      * @param array<string, mixed> $params Query parameters
+     *
      * @return PaginatedResponse
      */
     public static function getPaginated(array $params = []): PaginatedResponse
     {
         $endpoint = self::getEndpoint();
+
         return self::getPaginatedResponse($endpoint, $params);
     }
 
@@ -228,8 +265,10 @@ class DeveloperKey extends AbstractBaseApi
      * Update this developer key instance
      *
      * @param array<string, mixed>|UpdateDeveloperKeyDTO $data Update data
-     * @return self The updated DeveloperKey instance
+     *
      * @throws CanvasApiException If update fails or key has no ID
+     *
+     * @return self The updated DeveloperKey instance
      */
     public function save(array|UpdateDeveloperKeyDTO $data): self
     {
@@ -252,8 +291,9 @@ class DeveloperKey extends AbstractBaseApi
     /**
      * Delete this developer key instance
      *
-     * @return array<string, mixed> The deleted developer key data
      * @throws CanvasApiException If key has no ID
+     *
+     * @return array<string, mixed> The deleted developer key data
      */
     public function remove(): array
     {

@@ -19,11 +19,11 @@ class CreateConferenceDTOTest extends TestCase
             'duration' => 60,
             'settings' => [
                 'enable_recording' => true,
-                'mute_on_join' => false
+                'mute_on_join' => false,
             ],
             'long_running' => false,
             'users' => [1, 2, 3],
-            'has_advanced_settings' => true
+            'has_advanced_settings' => true,
         ];
 
         $dto = new CreateConferenceDTO($data);
@@ -44,13 +44,13 @@ class CreateConferenceDTOTest extends TestCase
     {
         $dto = new CreateConferenceDTO([
             'title' => 'Basic Conference',
-            'conference_type' => 'Zoom'
+            'conference_type' => 'Zoom',
         ]);
 
         $apiArray = $dto->toApiArray();
 
         $this->assertIsArray($apiArray);
-        
+
         $titleField = $this->findFieldInApiArray($apiArray, 'web_conference[title]');
         $this->assertNotNull($titleField);
         $this->assertEquals('Basic Conference', $titleField['contents']);
@@ -70,11 +70,11 @@ class CreateConferenceDTOTest extends TestCase
             'settings' => [
                 'enable_recording' => true,
                 'enable_waiting_room' => false,
-                'mute_on_join' => true
+                'mute_on_join' => true,
             ],
             'long_running' => true,
             'users' => [10, 20, 30],
-            'has_advanced_settings' => false
+            'has_advanced_settings' => false,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -111,7 +111,7 @@ class CreateConferenceDTOTest extends TestCase
     public function testToApiArrayWithoutTitleThrowsException(): void
     {
         $dto = new CreateConferenceDTO([
-            'conference_type' => 'Zoom'
+            'conference_type' => 'Zoom',
         ]);
 
         $this->expectException(InvalidArgumentException::class);
@@ -123,7 +123,7 @@ class CreateConferenceDTOTest extends TestCase
     public function testToApiArrayWithoutConferenceTypeThrowsException(): void
     {
         $dto = new CreateConferenceDTO([
-            'title' => 'Test Conference'
+            'title' => 'Test Conference',
         ]);
 
         $this->expectException(InvalidArgumentException::class);
@@ -142,8 +142,8 @@ class CreateConferenceDTOTest extends TestCase
                 'max_participants' => 100,
                 'meeting_id' => 'ABC-123-XYZ',
                 'auto_recording' => 'cloud',
-                'registration_required' => false
-            ]
+                'registration_required' => false,
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -169,7 +169,7 @@ class CreateConferenceDTOTest extends TestCase
         $dto = new CreateConferenceDTO([
             'title' => 'No Users Conference',
             'conference_type' => 'BigBlueButton',
-            'users' => []
+            'users' => [],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -186,7 +186,7 @@ class CreateConferenceDTOTest extends TestCase
             'description' => null,
             'duration' => null,
             'settings' => null,
-            'users' => null
+            'users' => null,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -206,6 +206,7 @@ class CreateConferenceDTOTest extends TestCase
                 return $field;
             }
         }
+
         return null;
     }
 
@@ -217,6 +218,7 @@ class CreateConferenceDTOTest extends TestCase
                 $fields[] = $field;
             }
         }
+
         return $fields;
     }
 }

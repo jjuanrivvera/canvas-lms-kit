@@ -50,6 +50,7 @@ class UpdateGroupDTO extends AbstractBaseDto
 
     /**
      * An array of user IDs to add as group members
+     *
      * @var array<int>|null
      */
     public ?array $members = null;
@@ -85,7 +86,7 @@ class UpdateGroupDTO extends AbstractBaseDto
         }
 
         if ($this->storageQuotaMb !== null) {
-            $data[] = ['name' => 'storage_quota_mb', 'contents' => (string)$this->storageQuotaMb];
+            $data[] = ['name' => 'storage_quota_mb', 'contents' => (string) $this->storageQuotaMb];
         }
 
         if ($this->sisGroupId !== null) {
@@ -93,19 +94,19 @@ class UpdateGroupDTO extends AbstractBaseDto
         }
 
         if ($this->avatarId !== null) {
-            $data[] = ['name' => 'avatar_id', 'contents' => (string)$this->avatarId];
+            $data[] = ['name' => 'avatar_id', 'contents' => (string) $this->avatarId];
         }
 
         if ($this->members !== null) {
             foreach ($this->members as $memberId) {
-                $data[] = ['name' => 'members[]', 'contents' => (string)$memberId];
+                $data[] = ['name' => 'members[]', 'contents' => (string) $memberId];
             }
         }
 
         if ($this->overrideSisStickiness !== null) {
             $data[] = [
                 'name' => 'override_sis_stickiness',
-                'contents' => $this->overrideSisStickiness ? 'true' : 'false'
+                'contents' => $this->overrideSisStickiness ? 'true' : 'false',
             ];
         }
 

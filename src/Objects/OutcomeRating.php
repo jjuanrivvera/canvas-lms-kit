@@ -13,9 +13,13 @@ namespace CanvasLMS\Objects;
 class OutcomeRating
 {
     public ?int $id = null;
+
     public ?string $description = null;
+
     public ?float $points = null;
+
     public ?string $color = null;
+
     public ?bool $mastery = null;
 
     /**
@@ -48,6 +52,7 @@ class OutcomeRating
      * @param string $description
      * @param float $points
      * @param bool $mastery
+     *
      * @return self
      */
     public static function create(string $description, float $points, bool $mastery = false): self
@@ -55,7 +60,7 @@ class OutcomeRating
         return new self([
             'description' => $description,
             'points' => $points,
-            'mastery' => $mastery
+            'mastery' => $mastery,
         ]);
     }
 
@@ -70,7 +75,7 @@ class OutcomeRating
             'description' => $this->description,
             'points' => $this->points,
             'color' => $this->color,
-            'mastery' => $this->mastery
-        ], fn($value) => $value !== null);
+            'mastery' => $this->mastery,
+        ], fn ($value) => $value !== null);
     }
 }

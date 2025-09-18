@@ -23,7 +23,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
     {
         $data = [
             'title' => 'Updated Group Title',
-            'description' => 'Updated description'
+            'description' => 'Updated description',
         ];
 
         $dto = new UpdateOutcomeGroupDTO($data);
@@ -38,7 +38,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
     {
         $data = [
             'vendor_guid' => 'updated-vendor-guid',
-            'parent_outcome_group_id' => 456
+            'parent_outcome_group_id' => 456,
         ];
 
         $dto = new UpdateOutcomeGroupDTO($data);
@@ -58,8 +58,8 @@ class UpdateOutcomeGroupDTOTest extends TestCase
         $expected = [
             [
                 'name' => 'title',
-                'contents' => 'New Title'
-            ]
+                'contents' => 'New Title',
+            ],
         ];
 
         $this->assertEquals($expected, $result);
@@ -70,7 +70,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
         $dto = new UpdateOutcomeGroupDTO([
             'title' => 'Updated Title',
             'description' => 'Updated description',
-            'vendorGuid' => 'new-guid'
+            'vendorGuid' => 'new-guid',
         ]);
 
         $result = $dto->toArray();
@@ -90,7 +90,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
             'title' => 'Complete Update',
             'description' => 'Complete description update',
             'vendorGuid' => 'complete-guid',
-            'parentOutcomeGroupId' => 789
+            'parentOutcomeGroupId' => 789,
         ]);
 
         $result = $dto->toArray();
@@ -115,7 +115,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
         $dto = new UpdateOutcomeGroupDTO([
             'title' => 'Updated Title',
             'description' => null,
-            'vendorGuid' => null
+            'vendorGuid' => null,
         ]);
 
         $result = $dto->toArray();
@@ -186,7 +186,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
         $fields = [
             'title' => 'Fields Title',
             'vendorGuid' => 'fields-guid',
-            'description' => 'Fields Description'
+            'description' => 'Fields Description',
         ];
 
         $dto = UpdateOutcomeGroupDTO::withFields($fields);
@@ -202,7 +202,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
         $fields = [
             'title' => 'Valid Title',
             'invalidProperty' => 'Should be ignored',
-            'anotherInvalid' => 456
+            'anotherInvalid' => 456,
         ];
 
         $dto = UpdateOutcomeGroupDTO::withFields($fields);
@@ -246,7 +246,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
     {
         $dto = UpdateOutcomeGroupDTO::withFields([
             'title' => 'Multiple Fields',
-            'description' => 'Multiple Description'
+            'description' => 'Multiple Description',
         ]);
 
         $this->assertTrue($dto->hasUpdates());
@@ -255,7 +255,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
     public function testNumericCasting(): void
     {
         $dto = new UpdateOutcomeGroupDTO([
-            'parentOutcomeGroupId' => '999'  // String should be cast to int
+            'parentOutcomeGroupId' => '999',  // String should be cast to int
         ]);
 
         $this->assertSame(999, $dto->parentOutcomeGroupId);
@@ -302,7 +302,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
             'title' => 'Complex Updated Group',
             'description' => 'This group has been significantly updated with new content',
             'vendorGuid' => 'complex-update-v2',
-            'parentOutcomeGroupId' => 888
+            'parentOutcomeGroupId' => 888,
         ]);
 
         $this->assertEquals('Complex Updated Group', $dto->title);
@@ -326,7 +326,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
         $apiResult = $dto->toApiArray();
         $this->assertIsArray($apiResult);
         $this->assertNotEmpty($apiResult);
-        
+
         // Check that API fields are properly formatted with outcome_group[] prefix
         $apiFields = array_column($apiResult, 'name');
         $this->assertContains('outcome_group[title]', $apiFields);
@@ -348,7 +348,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
 
         $result = $dto->toArray();
 
-        $parentField = array_filter($result, fn($item) => $item['name'] === 'parent_outcome_group_id');
+        $parentField = array_filter($result, fn ($item) => $item['name'] === 'parent_outcome_group_id');
         $parentValue = array_values($parentField)[0]['contents'];
 
         $this->assertIsString($parentValue);
@@ -366,7 +366,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
     public function testUpdateSequence(): void
     {
         // Test a sequence of updates that might happen in practice
-        
+
         // 1. Update title
         $dto = UpdateOutcomeGroupDTO::updateTitle('Initial Title Update');
         $this->assertTrue($dto->hasUpdates());
@@ -380,7 +380,7 @@ class UpdateOutcomeGroupDTOTest extends TestCase
         // 3. Create combined update
         $dto3 = UpdateOutcomeGroupDTO::withFields([
             'title' => 'Combined Title',
-            'description' => 'Combined Description'
+            'description' => 'Combined Description',
         ]);
         $this->assertTrue($dto3->hasUpdates());
         $this->assertCount(2, $dto3->toArray());

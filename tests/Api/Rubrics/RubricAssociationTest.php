@@ -1,16 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Rubrics;
 
-use GuzzleHttp\Psr7\Response;
-use CanvasLMS\Http\HttpClient;
-use PHPUnit\Framework\TestCase;
+use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Rubrics\RubricAssociation;
 use CanvasLMS\Dto\Rubrics\CreateRubricAssociationDTO;
 use CanvasLMS\Dto\Rubrics\UpdateRubricAssociationDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Config;
-use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Http\HttpClient;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 class RubricAssociationTest extends TestCase
 {
@@ -31,7 +32,7 @@ class RubricAssociationTest extends TestCase
     {
         $this->httpClientMock = $this->createMock(HttpClient::class);
         RubricAssociation::setApiClient($this->httpClientMock);
-        
+
         $this->rubricAssociation = new RubricAssociation([]);
     }
 
@@ -50,7 +51,7 @@ class RubricAssociationTest extends TestCase
         // Set course context
         $course = new Course(['id' => 100]);
         RubricAssociation::setCourse($course);
-        
+
         $expectedResult = [
             'id' => 1,
             'rubric_id' => 123,
@@ -66,7 +67,7 @@ class RubricAssociationTest extends TestCase
             'context_id' => 100,
             'context_type' => 'Course',
             'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-01T00:00:00Z'
+            'updated_at' => '2024-01-01T00:00:00Z',
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -109,7 +110,7 @@ class RubricAssociationTest extends TestCase
         // Set course context
         $course = new Course(['id' => 101]);
         RubricAssociation::setCourse($course);
-        
+
         $associationData = [
             'rubricId' => 125,
             'associationId' => 458,
@@ -117,7 +118,7 @@ class RubricAssociationTest extends TestCase
             'useForGrading' => true,
             'purpose' => 'grading',
             'hideScoreTotal' => false,
-            'bookmarked' => false
+            'bookmarked' => false,
         ];
 
         $expectedResult = [
@@ -128,7 +129,7 @@ class RubricAssociationTest extends TestCase
             'use_for_grading' => true,
             'purpose' => 'grading',
             'hide_score_total' => false,
-            'bookmarked' => false
+            'bookmarked' => false,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -161,9 +162,9 @@ class RubricAssociationTest extends TestCase
     {
         // Ensure course context is null
         RubricAssociation::setCourse(null);
-        
+
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Course context must be set for RubricAssociation operations");
+        $this->expectExceptionMessage('Course context must be set for RubricAssociation operations');
 
         $dto = new CreateRubricAssociationDTO();
         RubricAssociation::create($dto);
@@ -175,7 +176,7 @@ class RubricAssociationTest extends TestCase
     public function testFindThrowsException(): void
     {
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Finding individual rubric associations is not supported");
+        $this->expectExceptionMessage('Finding individual rubric associations is not supported');
 
         RubricAssociation::find(1);
     }
@@ -186,7 +187,7 @@ class RubricAssociationTest extends TestCase
     public function testGetThrowsException(): void
     {
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Fetching all rubric associations is not supported");
+        $this->expectExceptionMessage('Fetching all rubric associations is not supported');
 
         RubricAssociation::get();
     }
@@ -199,7 +200,7 @@ class RubricAssociationTest extends TestCase
         // Set course context
         $course = new Course(['id' => 100]);
         RubricAssociation::setCourse($course);
-        
+
         $expectedResult = [
             'id' => 2,
             'rubric_id' => 124,
@@ -207,7 +208,7 @@ class RubricAssociationTest extends TestCase
             'association_type' => 'Assignment',
             'use_for_grading' => false,
             'purpose' => 'bookmark',
-            'hide_score_total' => true
+            'hide_score_total' => true,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -242,13 +243,13 @@ class RubricAssociationTest extends TestCase
         // Set course context
         $course = new Course(['id' => 102]);
         RubricAssociation::setCourse($course);
-        
+
         $updateData = [
             'rubricId' => 126,
             'useForGrading' => false,
             'purpose' => 'bookmark',
             'hideScoreTotal' => true,
-            'bookmarked' => true
+            'bookmarked' => true,
         ];
 
         $expectedResult = [
@@ -257,7 +258,7 @@ class RubricAssociationTest extends TestCase
             'use_for_grading' => false,
             'purpose' => 'bookmark',
             'hide_score_total' => true,
-            'bookmarked' => true
+            'bookmarked' => true,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -309,7 +310,7 @@ class RubricAssociationTest extends TestCase
         $association = new RubricAssociation([]);
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Cannot delete rubric association without ID");
+        $this->expectExceptionMessage('Cannot delete rubric association without ID');
 
         $association->delete();
     }
@@ -321,11 +322,11 @@ class RubricAssociationTest extends TestCase
     {
         // Set course context to null to test the exception
         RubricAssociation::setCourse(null);
-        
+
         $association = new RubricAssociation(['id' => 4]);
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Course context must be set for delete operation");
+        $this->expectExceptionMessage('Course context must be set for delete operation');
 
         $association->delete();
     }
@@ -341,7 +342,7 @@ class RubricAssociationTest extends TestCase
         $expectedResult = [
             'id' => 5,
             'rubric_id' => 125,
-            'use_for_grading' => true
+            'use_for_grading' => true,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -358,7 +359,7 @@ class RubricAssociationTest extends TestCase
         $association = new RubricAssociation([
             'id' => 5,
             'rubric_id' => 125,
-            'use_for_grading' => true
+            'use_for_grading' => true,
         ]);
 
         $savedAssociation = $association->save();
@@ -380,7 +381,7 @@ class RubricAssociationTest extends TestCase
             'rubric_id' => 126,
             'association_id' => 458,
             'association_type' => 'Discussion',
-            'use_for_grading' => false
+            'use_for_grading' => false,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -398,7 +399,7 @@ class RubricAssociationTest extends TestCase
             'rubric_id' => 126,
             'association_id' => 458,
             'association_type' => 'Discussion',
-            'use_for_grading' => false
+            'use_for_grading' => false,
         ]);
 
         $savedAssociation = $association->save();
@@ -415,11 +416,10 @@ class RubricAssociationTest extends TestCase
      */
     public function testSaveWithoutRequiredFieldsThrowsException(): void
     {
-
         $association = new RubricAssociation([]);
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Rubric ID is required for creating a new association");
+        $this->expectExceptionMessage('Rubric ID is required for creating a new association');
 
         $association->save(500);
     }
@@ -444,7 +444,7 @@ class RubricAssociationTest extends TestCase
             'context_id' => 600,
             'context_type' => 'Course',
             'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-02T00:00:00Z'
+            'updated_at' => '2024-01-02T00:00:00Z',
         ];
 
         $association = new RubricAssociation($data);

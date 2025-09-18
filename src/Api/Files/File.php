@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Api\Files;
 
-use Exception;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Config;
 use CanvasLMS\Dto\Files\UploadFileDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginationResult;
+use Exception;
 
 /**
  * File Class
@@ -60,120 +62,140 @@ class File extends AbstractBaseApi
 {
     /**
      * The unique identifier for the file
+     *
      * @var int|null
      */
     public ?int $id = null;
 
     /**
      * The UUID of the file
+     *
      * @var string|null
      */
     public ?string $uuid = null;
 
     /**
      * The folder_id of the folder containing the file
+     *
      * @var int|null
      */
     public ?int $folderId = null;
 
     /**
      * The display name of the file
+     *
      * @var string|null
      */
     public ?string $displayName = null;
 
     /**
      * The filename of the file
+     *
      * @var string|null
      */
     public ?string $filename = null;
 
     /**
      * The content-type of the file
+     *
      * @var string|null
      */
     public ?string $contentType = null;
 
     /**
      * The URL to download the file (not present for file upload requests)
+     *
      * @var string|null
      */
     public ?string $url = null;
 
     /**
      * The file size in bytes
+     *
      * @var int|null
      */
     public ?int $size = null;
 
     /**
      * The datetime the file was created
+     *
      * @var string|null
      */
     public ?string $createdAt = null;
 
     /**
      * The datetime the file was last updated
+     *
      * @var string|null
      */
     public ?string $updatedAt = null;
 
     /**
      * The datetime the file will be deleted (not present for file upload requests)
+     *
      * @var string|null
      */
     public ?string $unlockAt = null;
 
     /**
      * Whether the file is locked
+     *
      * @var bool
      */
     public bool $locked = false;
 
     /**
      * Whether the file is hidden
+     *
      * @var bool
      */
     public bool $hidden = false;
 
     /**
      * The datetime the file was locked at
+     *
      * @var string|null
      */
     public ?string $lockAt = null;
 
     /**
      * Whether the file is locked for the user
+     *
      * @var bool
      */
     public bool $lockedForUser = false;
 
     /**
      * Explanation of why the file is locked
+     *
      * @var string|null
      */
     public ?string $lockExplanation = null;
 
     /**
      * A URL to the file preview
+     *
      * @var string|null
      */
     public ?string $previewUrl = null;
 
     /**
      * An abbreviated URL to the file that can be inserted into the rich content editor
+     *
      * @var string|null
      */
     public ?string $thumbnailUrl = null;
 
     /**
      * Context type where the file belongs
+     *
      * @var string|null
      */
     protected ?string $contextType = null;
 
     /**
      * Context ID where the file belongs
+     *
      * @var int|null
      */
     protected ?int $contextId = null;
@@ -192,6 +214,7 @@ class File extends AbstractBaseApi
      * Set the context type
      *
      * @param string|null $contextType
+     *
      * @return void
      */
     public function setContextType(?string $contextType): void
@@ -213,6 +236,7 @@ class File extends AbstractBaseApi
      * Set the context ID
      *
      * @param int|null $contextId
+     *
      * @return void
      */
     public function setContextId(?int $contextId): void
@@ -226,8 +250,10 @@ class File extends AbstractBaseApi
      * @param string $contextType Context type ('courses', 'groups', 'users')
      * @param int $contextId Context ID
      * @param array<string, mixed>|UploadFileDTO $fileData File data to upload
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function uploadToContext(
         string $contextType,
@@ -248,10 +274,13 @@ class File extends AbstractBaseApi
 
     /**
      * Upload a file to a course
+     *
      * @param int $courseId
      * @param UploadFileDTO|mixed[] $fileData
-     * @return self
+     *
      * @throws Exception
+     *
+     * @return self
      */
     public static function uploadToCourse(int $courseId, array | UploadFileDTO $fileData): self
     {
@@ -260,10 +289,13 @@ class File extends AbstractBaseApi
 
     /**
      * Upload a file to a user
+     *
      * @param int $userId
      * @param UploadFileDTO|mixed[] $fileData
-     * @return self
+     *
      * @throws Exception
+     *
+     * @return self
      */
     public static function uploadToUser(int $userId, array | UploadFileDTO $fileData): self
     {
@@ -272,10 +304,13 @@ class File extends AbstractBaseApi
 
     /**
      * Upload a file to a group
+     *
      * @param int $groupId
      * @param UploadFileDTO|mixed[] $fileData
-     * @return self
+     *
      * @throws Exception
+     *
+     * @return self
      */
     public static function uploadToGroup(int $groupId, array | UploadFileDTO $fileData): self
     {
@@ -284,11 +319,14 @@ class File extends AbstractBaseApi
 
     /**
      * Upload a file for an assignment submission
+     *
      * @param int $courseId
      * @param int $assignmentId
      * @param UploadFileDTO|mixed[] $fileData
-     * @return self
+     *
      * @throws Exception
+     *
+     * @return self
      */
     public static function uploadToAssignmentSubmission(
         int $courseId,
@@ -305,10 +343,13 @@ class File extends AbstractBaseApi
 
     /**
      * Perform the 3-step Canvas file upload process
+     *
      * @param string $endpoint
      * @param UploadFileDTO $dto
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     private static function performUpload(string $endpoint, UploadFileDTO $dto): self
     {
@@ -319,16 +360,16 @@ class File extends AbstractBaseApi
             'endpoint' => $endpoint,
             'file_name' => $dto->name ?? 'unknown',
             'file_size' => $dto->size ?? null,
-            'content_type' => $dto->contentType ?? null
+            'content_type' => $dto->contentType ?? null,
         ]);
 
         // Step 1: Initialize upload
         $logger->debug('File Upload: Step 1 - Initializing upload with Canvas API');
         $response = self::$apiClient->post($endpoint, [
-            'multipart' => $dto->toApiArray()
+            'multipart' => $dto->toApiArray(),
         ]);
 
-        $uploadData = json_decode($response->getBody(), true);
+        $uploadData = self::parseJsonResponse($response);
         $logger->debug('File Upload: Step 1 complete - Received upload URL and parameters');
 
         // Step 2: Upload file data
@@ -344,7 +385,7 @@ class File extends AbstractBaseApi
         foreach ($uploadParams as $key => $value) {
             $multipartData[] = [
                 'name' => $key,
-                'contents' => $value
+                'contents' => $value,
             ];
         }
 
@@ -354,18 +395,19 @@ class File extends AbstractBaseApi
         // Ensure we have a valid filename
         if (empty($dto->name)) {
             $logger->error('File Upload: File name is required for upload');
+
             throw new CanvasApiException('File name is required for upload');
         }
 
         $multipartData[] = [
             'name' => 'file',
             'contents' => $fileResource,
-            'filename' => $dto->name
+            'filename' => $dto->name,
         ];
 
         try {
             $logger->debug('File Upload: Step 2 - Uploading file to external storage', [
-                'upload_url_host' => parse_url($uploadUrl, PHP_URL_HOST)
+                'upload_url_host' => parse_url($uploadUrl, PHP_URL_HOST),
             ]);
 
             $startTime = microtime(true);
@@ -373,7 +415,7 @@ class File extends AbstractBaseApi
             $uploadResponse = self::$apiClient->rawRequest($uploadUrl, 'POST', [
                 'multipart' => $multipartData,
                 'skipAuth' => true,  // Don't send Canvas Bearer token to external storage
-                'skipDomainValidation' => true  // Allow external storage URLs
+                'skipDomainValidation' => true,  // Allow external storage URLs
             ]);
             $uploadDuration = microtime(true) - $startTime;
 
@@ -382,8 +424,9 @@ class File extends AbstractBaseApi
             if ($statusCode >= 400) {
                 $logger->error('File Upload: External storage upload failed', [
                     'status_code' => $statusCode,
-                    'reason' => $uploadResponse->getReasonPhrase()
+                    'reason' => $uploadResponse->getReasonPhrase(),
                 ]);
+
                 throw new CanvasApiException(
                     "External storage upload failed with status {$statusCode}: " .
                     $uploadResponse->getReasonPhrase()
@@ -392,7 +435,7 @@ class File extends AbstractBaseApi
 
             $logger->debug('File Upload: Step 2 complete - File uploaded to external storage', [
                 'duration_ms' => round($uploadDuration * 1000, 2),
-                'status_code' => $statusCode
+                'status_code' => $statusCode,
             ]);
         } finally {
             // Close file resource if it was opened by getFileResource()
@@ -408,29 +451,32 @@ class File extends AbstractBaseApi
             // Use rawRequest with skipAuth and skipDomainValidation for external redirect URLs
             $confirmResponse = self::$apiClient->rawRequest($location, 'GET', [
                 'skipAuth' => true,  // Don't send Canvas Bearer token to external location
-                'skipDomainValidation' => true  // Allow external redirect URLs
+                'skipDomainValidation' => true,  // Allow external redirect URLs
             ]);
-            $fileData = json_decode($confirmResponse->getBody(), true);
+            $fileData = self::parseJsonResponse($confirmResponse);
         } else {
             $logger->debug('File Upload: Step 3 - Processing upload response directly');
-            $fileData = json_decode($uploadResponse->getBody(), true);
+            $fileData = self::parseJsonResponse($uploadResponse);
         }
 
         $logger->info('File Upload: Successfully completed 3-step upload process', [
             'file_id' => $fileData['id'] ?? null,
             'file_name' => $fileData['display_name'] ?? $fileData['filename'] ?? null,
             'file_size' => $fileData['size'] ?? null,
-            'content_type' => $fileData['content-type'] ?? null
+            'content_type' => $fileData['content-type'] ?? null,
         ]);
 
-        return new self($fileData ?? []);
+        return new self($fileData);
     }
 
     /**
      * Find a file by ID
+     *
      * @param int $id
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -438,7 +484,7 @@ class File extends AbstractBaseApi
 
         $response = self::$apiClient->get("/files/{$id}");
 
-        $fileData = json_decode($response->getBody(), true);
+        $fileData = self::parseJsonResponse($response);
 
         return new self($fileData);
     }
@@ -459,6 +505,7 @@ class File extends AbstractBaseApi
      * Overrides base to set context information.
      *
      * @param array<string, mixed> $params Query parameters
+     *
      * @return array<static>
      */
     public static function get(array $params = []): array
@@ -479,6 +526,7 @@ class File extends AbstractBaseApi
      * Overrides base to set context information.
      *
      * @param array<string, mixed> $params Query parameters
+     *
      * @return PaginationResult
      */
     public static function paginate(array $params = []): PaginationResult
@@ -502,6 +550,7 @@ class File extends AbstractBaseApi
      * Overrides base to set context information.
      *
      * @param array<string, mixed> $params Query parameters
+     *
      * @return array<static>
      */
     public static function all(array $params = []): array
@@ -517,17 +566,16 @@ class File extends AbstractBaseApi
         return $files;
     }
 
-
-
-
     /**
      * Fetch files from a specific context
      *
      * @param string $contextType Context type ('courses', 'groups', 'users', 'folders')
      * @param int $contextId Context ID (course_id, group_id, user_id, or folder_id)
      * @param array<string, mixed> $params Query parameters
-     * @return array<self>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<self>
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
@@ -543,7 +591,7 @@ class File extends AbstractBaseApi
             $paginatedResponse = $paginatedResponse->getNext();
         } while ($paginatedResponse !== null);
 
-        $files = array_map(fn($data) => new self($data), $allData);
+        $files = array_map(fn ($data) => new self($data), $allData);
 
         // Set context information on each file
         $singularContext = rtrim($contextType, 's');
@@ -557,10 +605,13 @@ class File extends AbstractBaseApi
 
     /**
      * Fetch files for a course
+     *
      * @param int $courseId
      * @param mixed[] $params
-     * @return File[]
+     *
      * @throws CanvasApiException
+     *
+     * @return File[]
      */
     public static function fetchCourseFiles(int $courseId, array $params = []): array
     {
@@ -569,10 +620,13 @@ class File extends AbstractBaseApi
 
     /**
      * Fetch files for a user
+     *
      * @param int $userId
      * @param mixed[] $params
-     * @return File[]
+     *
      * @throws CanvasApiException
+     *
+     * @return File[]
      */
     public static function fetchUserFiles(int $userId, array $params = []): array
     {
@@ -581,10 +635,13 @@ class File extends AbstractBaseApi
 
     /**
      * Fetch files for a group
+     *
      * @param int $groupId
      * @param mixed[] $params
-     * @return File[]
+     *
      * @throws CanvasApiException
+     *
+     * @return File[]
      */
     public static function fetchGroupFiles(int $groupId, array $params = []): array
     {
@@ -593,8 +650,10 @@ class File extends AbstractBaseApi
 
     /**
      * Get file download URL
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     public function getDownloadUrl(): string
     {
@@ -602,24 +661,27 @@ class File extends AbstractBaseApi
 
         $response = self::$apiClient->get("/files/{$this->id}");
 
-        $fileData = json_decode($response->getBody(), true);
+        $fileData = self::parseJsonResponse($response);
 
         return $fileData['url'] ?? '';
     }
 
     /**
      * Delete the file
+     *
      * @return self
      */
     public function delete(): self
     {
         self::checkApiClient();
         self::$apiClient->delete("/files/{$this->id}");
+
         return $this;
     }
 
     /**
      * Get the file ID
+     *
      * @return int
      */
     public function getId(): int
@@ -629,6 +691,7 @@ class File extends AbstractBaseApi
 
     /**
      * Set the file ID
+     *
      * @param int $id
      */
     public function setId(int $id): void
@@ -638,6 +701,7 @@ class File extends AbstractBaseApi
 
     /**
      * Get the file UUID
+     *
      * @return string
      */
     public function getUuid(): string
@@ -647,6 +711,7 @@ class File extends AbstractBaseApi
 
     /**
      * Set the file UUID
+     *
      * @param string $uuid
      */
     public function setUuid(string $uuid): void
@@ -656,6 +721,7 @@ class File extends AbstractBaseApi
 
     /**
      * Get the folder ID
+     *
      * @return int
      */
     public function getFolderId(): int
@@ -665,6 +731,7 @@ class File extends AbstractBaseApi
 
     /**
      * Set the folder ID
+     *
      * @param int $folderId
      */
     public function setFolderId(int $folderId): void
@@ -674,6 +741,7 @@ class File extends AbstractBaseApi
 
     /**
      * Get the display name
+     *
      * @return string
      */
     public function getDisplayName(): string
@@ -683,6 +751,7 @@ class File extends AbstractBaseApi
 
     /**
      * Set the display name
+     *
      * @param string $displayName
      */
     public function setDisplayName(string $displayName): void
@@ -692,6 +761,7 @@ class File extends AbstractBaseApi
 
     /**
      * Get the filename
+     *
      * @return string
      */
     public function getFilename(): string
@@ -701,6 +771,7 @@ class File extends AbstractBaseApi
 
     /**
      * Set the filename
+     *
      * @param string $filename
      */
     public function setFilename(string $filename): void
@@ -710,6 +781,7 @@ class File extends AbstractBaseApi
 
     /**
      * Get the content type
+     *
      * @return string
      */
     public function getContentType(): string
@@ -719,6 +791,7 @@ class File extends AbstractBaseApi
 
     /**
      * Set the content type
+     *
      * @param string $contentType
      */
     public function setContentType(string $contentType): void
@@ -728,6 +801,7 @@ class File extends AbstractBaseApi
 
     /**
      * Get the file URL
+     *
      * @return string|null
      */
     public function getUrl(): ?string
@@ -737,6 +811,7 @@ class File extends AbstractBaseApi
 
     /**
      * Set the file URL
+     *
      * @param string|null $url
      */
     public function setUrl(?string $url): void
@@ -746,6 +821,7 @@ class File extends AbstractBaseApi
 
     /**
      * Get the file size
+     *
      * @return int
      */
     public function getSize(): int
@@ -755,6 +831,7 @@ class File extends AbstractBaseApi
 
     /**
      * Set the file size
+     *
      * @param int $size
      */
     public function setSize(int $size): void
@@ -764,6 +841,7 @@ class File extends AbstractBaseApi
 
     /**
      * Get the created at timestamp
+     *
      * @return string
      */
     public function getCreatedAt(): string
@@ -773,6 +851,7 @@ class File extends AbstractBaseApi
 
     /**
      * Set the created at timestamp
+     *
      * @param string $createdAt
      */
     public function setCreatedAt(string $createdAt): void
@@ -782,6 +861,7 @@ class File extends AbstractBaseApi
 
     /**
      * Get the updated at timestamp
+     *
      * @return string
      */
     public function getUpdatedAt(): string
@@ -791,6 +871,7 @@ class File extends AbstractBaseApi
 
     /**
      * Set the updated at timestamp
+     *
      * @param string $updatedAt
      */
     public function setUpdatedAt(string $updatedAt): void
@@ -800,6 +881,7 @@ class File extends AbstractBaseApi
 
     /**
      * Check if the file is locked
+     *
      * @return bool
      */
     public function isLocked(): bool
@@ -809,6 +891,7 @@ class File extends AbstractBaseApi
 
     /**
      * Set the locked status
+     *
      * @param bool $locked
      */
     public function setLocked(bool $locked): void
@@ -818,6 +901,7 @@ class File extends AbstractBaseApi
 
     /**
      * Check if the file is hidden
+     *
      * @return bool
      */
     public function isHidden(): bool
@@ -827,6 +911,7 @@ class File extends AbstractBaseApi
 
     /**
      * Set the hidden status
+     *
      * @param bool $hidden
      */
     public function setHidden(bool $hidden): void

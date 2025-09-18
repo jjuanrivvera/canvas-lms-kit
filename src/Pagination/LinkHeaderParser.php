@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Pagination;
 
 /**
@@ -28,6 +30,7 @@ class LinkHeaderParser
      * Parse Link header string into associative array
      *
      * @param string $linkHeader The Link header string from HTTP response
+     *
      * @return string[] Associative array with rel values as keys and URLs as values
      */
     public function parse(string $linkHeader): array
@@ -63,11 +66,13 @@ class LinkHeaderParser
      *
      * @param string $linkHeader The Link header string
      * @param string $relation The relation to extract (next, prev, first, last, current)
+     *
      * @return string|null The URL for the relation or null if not found
      */
     public function extractRelation(string $linkHeader, string $relation): ?string
     {
         $links = $this->parse($linkHeader);
+
         return $links[$relation] ?? null;
     }
 
@@ -76,11 +81,13 @@ class LinkHeaderParser
      *
      * @param string $linkHeader The Link header string
      * @param string $relation The relation to check for
+     *
      * @return bool True if relation exists, false otherwise
      */
     public function hasRelation(string $linkHeader, string $relation): bool
     {
         $links = $this->parse($linkHeader);
+
         return isset($links[$relation]);
     }
 
@@ -88,11 +95,13 @@ class LinkHeaderParser
      * Get all available relations from Link header
      *
      * @param string $linkHeader The Link header string
+     *
      * @return string[] Array of relation names
      */
     public function getRelations(string $linkHeader): array
     {
         $links = $this->parse($linkHeader);
+
         return array_keys($links);
     }
 
@@ -100,6 +109,7 @@ class LinkHeaderParser
      * Extract page number from a paginated URL
      *
      * @param string $url The paginated URL
+     *
      * @return int|null The page number or null if not found
      */
     public function extractPageNumber(string $url): ?int
@@ -123,6 +133,7 @@ class LinkHeaderParser
      * Extract per_page parameter from a paginated URL
      *
      * @param string $url The paginated URL
+     *
      * @return int|null The per_page value or null if not found
      */
     public function extractPerPage(string $url): ?int

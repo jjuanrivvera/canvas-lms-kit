@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace CanvasLMS\Api\GradebookHistory;
 
 use CanvasLMS\Api\AbstractBaseApi;
-use CanvasLMS\Config;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Http\HttpClientInterface;
 use CanvasLMS\Objects\GradebookHistoryDay;
 use CanvasLMS\Objects\GradebookHistoryGrader;
 use CanvasLMS\Objects\SubmissionHistory;
@@ -64,6 +62,7 @@ class GradebookHistory extends AbstractBaseApi
 {
     /**
      * The course ID context for gradebook history operations
+     *
      * @var int|null
      */
     protected static ?int $courseId = null;
@@ -72,6 +71,7 @@ class GradebookHistory extends AbstractBaseApi
      * Set the course context for gradebook history operations.
      *
      * @param int $courseId The ID of the course
+     *
      * @return void
      */
     public static function setCourse(int $courseId): void
@@ -93,6 +93,7 @@ class GradebookHistory extends AbstractBaseApi
      * Check if course context is set and throw exception if not.
      *
      * @throws CanvasApiException
+     *
      * @return void
      */
     protected static function checkCourse(): void
@@ -118,12 +119,14 @@ class GradebookHistory extends AbstractBaseApi
     /**
      * Get the base endpoint for gradebook history operations.
      *
-     * @return string
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
+
         return 'courses/' . self::$courseId . '/gradebook_history';
     }
 
@@ -134,8 +137,10 @@ class GradebookHistory extends AbstractBaseApi
      * The response is ordered by date, descending (newest first).
      *
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<GradebookHistoryDay>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<GradebookHistoryDay>
      */
     public static function fetchDays(array $params = []): array
     {
@@ -143,14 +148,14 @@ class GradebookHistory extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseBody = json_decode($response->getBody()->getContents(), true);
+        $responseBody = self::parseJsonResponse($response);
 
         if (!is_array($responseBody)) {
             return [];
         }
 
         return array_map(
-            fn($dayData) => new GradebookHistoryDay($dayData),
+            fn ($dayData) => new GradebookHistoryDay($dayData),
             $responseBody
         );
     }
@@ -164,8 +169,10 @@ class GradebookHistory extends AbstractBaseApi
      *
      * @param string $date The date in YYYY-MM-DD format
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<GradebookHistoryGrader>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<GradebookHistoryGrader>
      */
     public static function fetchDay(string $date, array $params = []): array
     {
@@ -178,14 +185,14 @@ class GradebookHistory extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseBody = json_decode($response->getBody()->getContents(), true);
+        $responseBody = self::parseJsonResponse($response);
 
         if (!is_array($responseBody)) {
             return [];
         }
 
         return array_map(
-            fn($graderData) => new GradebookHistoryGrader($graderData),
+            fn ($graderData) => new GradebookHistoryGrader($graderData),
             $responseBody
         );
     }
@@ -201,8 +208,10 @@ class GradebookHistory extends AbstractBaseApi
      * @param int $graderId The ID of the grader
      * @param int $assignmentId The ID of the assignment
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<SubmissionHistory>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<SubmissionHistory>
      */
     public static function fetchSubmissions(
         string $date,
@@ -220,14 +229,14 @@ class GradebookHistory extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseBody = json_decode($response->getBody()->getContents(), true);
+        $responseBody = self::parseJsonResponse($response);
 
         if (!is_array($responseBody)) {
             return [];
         }
 
         return array_map(
-            fn($historyData) => new SubmissionHistory($historyData),
+            fn ($historyData) => new SubmissionHistory($historyData),
             $responseBody
         );
     }
@@ -244,8 +253,10 @@ class GradebookHistory extends AbstractBaseApi
      *   - assignment_id (int): Filter by assignment ID
      *   - user_id (int): Filter by user ID
      *   - ascending (bool): Return in ascending date order (oldest first)
-     * @return array<SubmissionVersion>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<SubmissionVersion>
      */
     public static function fetchFeed(array $params = []): array
     {
@@ -253,14 +264,14 @@ class GradebookHistory extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $responseBody = json_decode($response->getBody()->getContents(), true);
+        $responseBody = self::parseJsonResponse($response);
 
         if (!is_array($responseBody)) {
             return [];
         }
 
         return array_map(
-            fn($versionData) => new SubmissionVersion($versionData),
+            fn ($versionData) => new SubmissionVersion($versionData),
             $responseBody
         );
     }
@@ -276,8 +287,10 @@ class GradebookHistory extends AbstractBaseApi
      *   - user_id (int): Filter by user ID
      *   - ascending (bool): Return in ascending date order (oldest first)
      *   - per_page (int): Number of items per page (default: 10, max: 100)
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public static function fetchFeedPaginated(array $params = []): PaginatedResponse
     {
@@ -286,7 +299,7 @@ class GradebookHistory extends AbstractBaseApi
         self::checkApiClient();
 
         return self::$apiClient->getPaginated($endpoint, [
-            'query' => $params
+            'query' => $params,
         ]);
     }
 
@@ -297,8 +310,10 @@ class GradebookHistory extends AbstractBaseApi
      * on large datasets as it loads all results into memory.
      *
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<SubmissionVersion>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<SubmissionVersion>
      */
     public static function fetchAllFeed(array $params = []): array
     {
@@ -311,7 +326,7 @@ class GradebookHistory extends AbstractBaseApi
 
         do {
             $response = self::$apiClient->get($nextUrl, $nextParams);
-            $responseBody = json_decode($response->getBody()->getContents(), true);
+            $responseBody = self::parseJsonResponse($response);
 
             if (is_array($responseBody)) {
                 foreach ($responseBody as $versionData) {
@@ -347,8 +362,10 @@ class GradebookHistory extends AbstractBaseApi
      * This method is required by the interface but not applicable for this resource.
      *
      * @param int $id The ID to search for
-     * @return static
+     *
      * @throws CanvasApiException
+     *
+     * @return static
      */
     public static function find(int $id, array $params = []): static
     {

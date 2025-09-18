@@ -1,16 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\DiscussionTopics;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
 use CanvasLMS\Dto\DiscussionTopics\CreateDiscussionTopicDTO;
 use CanvasLMS\Dto\DiscussionTopics\UpdateDiscussionTopicDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -20,6 +20,7 @@ use Psr\Http\Message\StreamInterface;
 class DiscussionTopicTest extends TestCase
 {
     private HttpClientInterface $httpClientMock;
+
     private Course $course;
 
     protected function setUp(): void
@@ -85,7 +86,7 @@ class DiscussionTopicTest extends TestCase
             'group_topic' => false,
             'group_category_id' => null,
             'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-01T00:00:00Z'
+            'updated_at' => '2024-01-01T00:00:00Z',
         ];
 
         $discussionTopic = new DiscussionTopic($data);
@@ -199,7 +200,7 @@ class DiscussionTopicTest extends TestCase
             'title' => 'Test Discussion Topic',
             'message' => 'Test discussion message',
             'course_id' => 123,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -236,15 +237,15 @@ class DiscussionTopicTest extends TestCase
                 'title' => 'Discussion Topic 1',
                 'message' => 'First discussion',
                 'course_id' => 123,
-                'published' => true
+                'published' => true,
             ],
             [
                 'id' => 2,
                 'title' => 'Discussion Topic 2',
                 'message' => 'Second discussion',
                 'course_id' => 123,
-                'published' => false
-            ]
+                'published' => false,
+            ],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -279,7 +280,7 @@ class DiscussionTopicTest extends TestCase
             'title' => 'New Discussion Topic',
             'message' => 'New discussion message',
             'discussion_type' => 'threaded',
-            'published' => true
+            'published' => true,
         ];
 
         $responseData = [
@@ -288,7 +289,7 @@ class DiscussionTopicTest extends TestCase
             'message' => 'New discussion message',
             'discussion_type' => 'threaded',
             'course_id' => 123,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -325,7 +326,7 @@ class DiscussionTopicTest extends TestCase
             'title' => 'New Discussion Topic',
             'message' => 'New discussion message',
             'discussion_type' => 'threaded',
-            'published' => true
+            'published' => true,
         ]);
 
         $responseData = [
@@ -334,7 +335,7 @@ class DiscussionTopicTest extends TestCase
             'message' => 'New discussion message',
             'discussion_type' => 'threaded',
             'course_id' => 123,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -366,7 +367,7 @@ class DiscussionTopicTest extends TestCase
     {
         $updateData = [
             'title' => 'Updated Discussion Topic',
-            'pinned' => true
+            'pinned' => true,
         ];
 
         $responseData = [
@@ -375,7 +376,7 @@ class DiscussionTopicTest extends TestCase
             'message' => 'Original message',
             'pinned' => true,
             'course_id' => 123,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -408,7 +409,7 @@ class DiscussionTopicTest extends TestCase
     {
         $updateDTO = new UpdateDiscussionTopicDTO([
             'title' => 'Updated Discussion Topic',
-            'pinned' => true
+            'pinned' => true,
         ]);
 
         $responseData = [
@@ -417,7 +418,7 @@ class DiscussionTopicTest extends TestCase
             'message' => 'Original message',
             'pinned' => true,
             'course_id' => 123,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -453,7 +454,7 @@ class DiscussionTopicTest extends TestCase
             'title' => 'New Discussion Topic',
             'message' => 'New discussion message',
             'course_id' => 123,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -544,7 +545,7 @@ class DiscussionTopicTest extends TestCase
             'id' => 1,
             'title' => 'Test Discussion Topic',
             'locked' => true,
-            'course_id' => 123
+            'course_id' => 123,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -578,7 +579,7 @@ class DiscussionTopicTest extends TestCase
             'id' => 1,
             'title' => 'Test Discussion Topic',
             'locked' => false,
-            'course_id' => 123
+            'course_id' => 123,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -612,7 +613,7 @@ class DiscussionTopicTest extends TestCase
             'id' => 1,
             'title' => 'Test Discussion Topic',
             'pinned' => true,
-            'course_id' => 123
+            'course_id' => 123,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -646,7 +647,7 @@ class DiscussionTopicTest extends TestCase
             'id' => 1,
             'title' => 'Test Discussion Topic',
             'pinned' => false,
-            'course_id' => 123
+            'course_id' => 123,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -699,7 +700,7 @@ class DiscussionTopicTest extends TestCase
             'group_topic' => false,
             'group_category_id' => null,
             'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-01T00:00:00Z'
+            'updated_at' => '2024-01-01T00:00:00Z',
         ];
 
         $discussionTopic = new DiscussionTopic($data);
@@ -761,100 +762,100 @@ class DiscussionTopicTest extends TestCase
     public function testNewCanvasApiPropertiesGettersAndSetters(): void
     {
         $topic = new DiscussionTopic([]);
-        
+
         // Test lastReplyAt
         $lastReplyAt = '2023-12-25T10:00:00Z';
         $topic->setLastReplyAt($lastReplyAt);
         $this->assertEquals($lastReplyAt, $topic->getLastReplyAt());
-        
+
         // Test userCanSeePosts
         $topic->setUserCanSeePosts(true);
         $this->assertTrue($topic->getUserCanSeePosts());
-        
+
         // Test discussionSubentryCount
         $topic->setDiscussionSubentryCount(15);
         $this->assertEquals(15, $topic->getDiscussionSubentryCount());
-        
+
         // Test readState
         $topic->setReadState('read');
         $this->assertEquals('read', $topic->getReadState());
-        
+
         // Test unreadCount
         $topic->setUnreadCount(3);
         $this->assertEquals(3, $topic->getUnreadCount());
-        
+
         // Test subscribed
         $topic->setSubscribed(true);
         $this->assertTrue($topic->getSubscribed());
-        
+
         // Test subscriptionHold
         $topic->setSubscriptionHold('topic_is_announcement');
         $this->assertEquals('topic_is_announcement', $topic->getSubscriptionHold());
-        
+
         // Test lockedForUser
         $topic->setLockedForUser(false);
         $this->assertFalse($topic->getLockedForUser());
-        
+
         // Test lockInfo
         $lockInfo = ['locked_at' => '2023-12-31T23:59:59Z'];
         $topic->setLockInfo($lockInfo);
         $this->assertEquals($lockInfo, $topic->getLockInfo());
-        
+
         // Test lockExplanation
         $topic->setLockExplanation('This discussion is locked until the due date');
         $this->assertEquals('This discussion is locked until the due date', $topic->getLockExplanation());
-        
+
         // Test userName
         $topic->setUserName('John Instructor');
         $this->assertEquals('John Instructor', $topic->getUserName());
-        
+
         // Test topicChildren
         $topicChildren = [['id' => 1], ['id' => 2]];
         $topic->setTopicChildren($topicChildren);
         $this->assertEquals($topicChildren, $topic->getTopicChildren());
-        
+
         // Test groupTopicChildren
         $groupTopicChildren = [['id' => 3], ['id' => 4]];
         $topic->setGroupTopicChildren($groupTopicChildren);
         $this->assertEquals($groupTopicChildren, $topic->getGroupTopicChildren());
-        
+
         // Test rootTopicId
         $topic->setRootTopicId(456);
         $this->assertEquals(456, $topic->getRootTopicId());
-        
+
         // Test podcastUrl
         $topic->setPodcastUrl('https://example.com/podcast.xml');
         $this->assertEquals('https://example.com/podcast.xml', $topic->getPodcastUrl());
-        
+
         // Test attachments
         $attachments = [['filename' => 'test.pdf'], ['filename' => 'image.jpg']];
         $topic->setAttachments($attachments);
         $this->assertEquals($attachments, $topic->getAttachments());
-        
+
         // Test permissions
         $permissions = ['attach' => true, 'update' => false];
         $topic->setPermissions($permissions);
         $this->assertEquals($permissions, $topic->getPermissions());
-        
+
         // Test sortByRating
         $topic->setSortByRating(true);
         $this->assertTrue($topic->getSortByRating());
-        
+
         // Test sortOrder
         $topic->setSortOrder('asc');
         $this->assertEquals('asc', $topic->getSortOrder());
-        
+
         $topic->setSortOrder('desc');
         $this->assertEquals('desc', $topic->getSortOrder());
-        
+
         // Test sortOrderLocked
         $topic->setSortOrderLocked(true);
         $this->assertTrue($topic->getSortOrderLocked());
-        
+
         // Test expand
         $topic->setExpand(false);
         $this->assertFalse($topic->getExpand());
-        
+
         // Test expandLocked
         $topic->setExpandLocked(true);
         $this->assertTrue($topic->getExpandLocked());
@@ -863,17 +864,17 @@ class DiscussionTopicTest extends TestCase
     public function testMarkAsReadSuccess(): void
     {
         $topic = new DiscussionTopic(['id' => 123]);
-        
+
         $responseMock = $this->createMock(ResponseInterface::class);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
             ->with('courses/123/discussion_topics/123/read')
             ->willReturn($responseMock);
-        
+
         $result = $topic->markAsRead();
-        
+
         $this->assertTrue($result);
         $this->assertEquals('read', $topic->getReadState());
         $this->assertEquals(0, $topic->getUnreadCount());
@@ -882,42 +883,42 @@ class DiscussionTopicTest extends TestCase
     public function testMarkAsReadFailure(): void
     {
         $topic = new DiscussionTopic(['id' => 123]);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
             ->with('courses/123/discussion_topics/123/read')
             ->willThrowException(new CanvasApiException('Network error'));
-        
+
         $result = $topic->markAsRead();
-        
+
         $this->assertFalse($result);
     }
 
     public function testMarkAsReadWithoutId(): void
     {
         $topic = new DiscussionTopic([]);
-        
+
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Discussion topic ID is required');
-        
+
         $topic->markAsRead();
     }
 
     public function testMarkAsUnreadSuccess(): void
     {
         $topic = new DiscussionTopic(['id' => 123]);
-        
+
         $responseMock = $this->createMock(ResponseInterface::class);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('delete')
             ->with('courses/123/discussion_topics/123/read')
             ->willReturn($responseMock);
-        
+
         $result = $topic->markAsUnread();
-        
+
         $this->assertTrue($result);
         $this->assertEquals('unread', $topic->getReadState());
     }
@@ -925,17 +926,17 @@ class DiscussionTopicTest extends TestCase
     public function testSubscribeSuccess(): void
     {
         $topic = new DiscussionTopic(['id' => 123]);
-        
+
         $responseMock = $this->createMock(ResponseInterface::class);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
             ->with('courses/123/discussion_topics/123/subscribed')
             ->willReturn($responseMock);
-        
+
         $result = $topic->subscribe();
-        
+
         $this->assertTrue($result);
         $this->assertTrue($topic->getSubscribed());
     }
@@ -943,17 +944,17 @@ class DiscussionTopicTest extends TestCase
     public function testUnsubscribeSuccess(): void
     {
         $topic = new DiscussionTopic(['id' => 123]);
-        
+
         $responseMock = $this->createMock(ResponseInterface::class);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('delete')
             ->with('courses/123/discussion_topics/123/subscribed')
             ->willReturn($responseMock);
-        
+
         $result = $topic->unsubscribe();
-        
+
         $this->assertTrue($result);
         $this->assertFalse($topic->getSubscribed());
     }
@@ -961,30 +962,30 @@ class DiscussionTopicTest extends TestCase
     public function testMarkAllAsReadSuccess(): void
     {
         $responseMock = $this->createMock(ResponseInterface::class);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('put')
             ->with('courses/123/discussion_topics/read_all')
             ->willReturn($responseMock);
-        
+
         $result = DiscussionTopic::markAllAsRead();
-        
+
         $this->assertTrue($result);
     }
 
     public function testMarkAllAsUnreadSuccess(): void
     {
         $responseMock = $this->createMock(ResponseInterface::class);
-        
+
         $this->httpClientMock
             ->expects($this->once())
             ->method('delete')
             ->with('courses/123/discussion_topics/read_all')
             ->willReturn($responseMock);
-        
+
         $result = DiscussionTopic::markAllAsUnread();
-        
+
         $this->assertTrue($result);
     }
 
@@ -1003,11 +1004,11 @@ class DiscussionTopicTest extends TestCase
             'sortOrder' => 'asc',
             'sortOrderLocked' => true,
             'expand' => false,
-            'expandLocked' => true
+            'expandLocked' => true,
         ]);
-        
+
         $array = $topic->toArray();
-        
+
         $this->assertEquals(123, $array['id']);
         $this->assertEquals('Test Discussion', $array['title']);
         $this->assertEquals('2023-12-25T10:00:00Z', $array['last_reply_at']);

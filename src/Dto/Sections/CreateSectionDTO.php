@@ -6,8 +6,7 @@ namespace CanvasLMS\Dto\Sections;
 
 use CanvasLMS\Dto\AbstractBaseDto;
 use CanvasLMS\Interfaces\DTOInterface;
-
-use function str_to_snake_case;
+use CanvasLMS\Utilities\Str;
 
 /**
  * Data Transfer Object for creating Canvas sections.
@@ -80,7 +79,7 @@ class CreateSectionDTO extends AbstractBaseDto implements DTOInterface
                 throw new \Exception('The API property name must be set in the DTO');
             }
 
-            $propertyName = $this->apiPropertyName . '[' . str_to_snake_case($property) . ']';
+            $propertyName = $this->apiPropertyName . '[' . Str::toSnakeCase($property) . ']';
 
             // Skip null values
             if (is_null($value)) {
@@ -90,8 +89,8 @@ class CreateSectionDTO extends AbstractBaseDto implements DTOInterface
             // Handle DateTime objects
             if ($value instanceof \DateTimeInterface) {
                 $modifiedProperties[] = [
-                    "name" => $propertyName,
-                    "contents" => $value->format(\DateTimeInterface::ATOM)
+                    'name' => $propertyName,
+                    'contents' => $value->format(\DateTimeInterface::ATOM),
                 ];
                 continue;
             }
@@ -100,8 +99,8 @@ class CreateSectionDTO extends AbstractBaseDto implements DTOInterface
             if (is_array($value)) {
                 foreach ($value as $arrayValue) {
                     $modifiedProperties[] = [
-                        "name" => $propertyName . '[]',
-                        "contents" => $arrayValue
+                        'name' => $propertyName . '[]',
+                        'contents' => $arrayValue,
                     ];
                 }
                 continue;
@@ -109,16 +108,16 @@ class CreateSectionDTO extends AbstractBaseDto implements DTOInterface
 
             // Handle regular values
             $modifiedProperties[] = [
-                "name" => $propertyName,
-                "contents" => $value
+                'name' => $propertyName,
+                'contents' => $value,
             ];
         }
 
         // Handle enable_sis_reactivation separately (not part of course_section)
         if ($this->enableSisReactivation !== null) {
             $modifiedProperties[] = [
-                "name" => 'enable_sis_reactivation',
-                "contents" => $this->enableSisReactivation
+                'name' => 'enable_sis_reactivation',
+                'contents' => $this->enableSisReactivation,
             ];
         }
 

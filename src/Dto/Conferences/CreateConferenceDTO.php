@@ -44,6 +44,7 @@ class CreateConferenceDTO extends AbstractBaseDto
      * - enable_recording: true
      * - mute_on_join: true
      */
+
     /** @var array<string, mixed>|null */
     public ?array $settings = null;
 
@@ -55,6 +56,7 @@ class CreateConferenceDTO extends AbstractBaseDto
     /**
      * Array of user IDs to invite to the conference.
      */
+
     /** @var array<int>|null */
     public ?array $users = null;
 
@@ -80,8 +82,9 @@ class CreateConferenceDTO extends AbstractBaseDto
     /**
      * Convert DTO to API array format.
      *
-     * @return array<array{name: string, contents: string}>
      * @throws InvalidArgumentException if required fields are missing
+     *
+     * @return array<array{name: string, contents: string}>
      */
     public function toApiArray(): array
     {
@@ -97,39 +100,39 @@ class CreateConferenceDTO extends AbstractBaseDto
 
         $data[] = [
             'name' => 'web_conference[title]',
-            'contents' => $this->title
+            'contents' => $this->title,
         ];
 
         $data[] = [
             'name' => 'web_conference[conference_type]',
-            'contents' => $this->conference_type
+            'contents' => $this->conference_type,
         ];
 
         if ($this->description !== null) {
             $data[] = [
                 'name' => 'web_conference[description]',
-                'contents' => $this->description
+                'contents' => $this->description,
             ];
         }
 
         if ($this->duration !== null) {
             $data[] = [
                 'name' => 'web_conference[duration]',
-                'contents' => (string)$this->duration
+                'contents' => (string) $this->duration,
             ];
         }
 
         if ($this->long_running !== null) {
             $data[] = [
                 'name' => 'web_conference[long_running]',
-                'contents' => $this->long_running ? '1' : '0'
+                'contents' => $this->long_running ? '1' : '0',
             ];
         }
 
         if ($this->has_advanced_settings !== null) {
             $data[] = [
                 'name' => 'web_conference[has_advanced_settings]',
-                'contents' => $this->has_advanced_settings ? '1' : '0'
+                'contents' => $this->has_advanced_settings ? '1' : '0',
             ];
         }
 
@@ -137,7 +140,7 @@ class CreateConferenceDTO extends AbstractBaseDto
             foreach ($this->settings as $key => $value) {
                 $data[] = [
                     'name' => sprintf('web_conference[settings][%s]', $key),
-                    'contents' => is_bool($value) ? ($value ? '1' : '0') : (string)$value
+                    'contents' => is_bool($value) ? ($value ? '1' : '0') : (string) $value,
                 ];
             }
         }
@@ -146,7 +149,7 @@ class CreateConferenceDTO extends AbstractBaseDto
             foreach ($this->users as $userId) {
                 $data[] = [
                     'name' => 'web_conference[users][]',
-                    'contents' => (string)$userId
+                    'contents' => (string) $userId,
                 ];
             }
         }

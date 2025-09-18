@@ -1,16 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Rubrics;
 
-use GuzzleHttp\Psr7\Response;
-use CanvasLMS\Http\HttpClient;
-use PHPUnit\Framework\TestCase;
+use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Rubrics\RubricAssessment;
 use CanvasLMS\Dto\Rubrics\CreateRubricAssessmentDTO;
 use CanvasLMS\Dto\Rubrics\UpdateRubricAssessmentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Config;
-use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Http\HttpClient;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 class RubricAssessmentTest extends TestCase
 {
@@ -31,7 +32,7 @@ class RubricAssessmentTest extends TestCase
     {
         $this->httpClientMock = $this->createMock(HttpClient::class);
         RubricAssessment::setApiClient($this->httpClientMock);
-        
+
         $this->rubricAssessment = new RubricAssessment([]);
     }
 
@@ -42,7 +43,7 @@ class RubricAssessmentTest extends TestCase
     {
         // Set course context
         RubricAssessment::setCourse(new Course(['id' => 100]));
-        
+
         $expectedResult = [
             'id' => 1,
             'rubric_id' => 123,
@@ -53,14 +54,14 @@ class RubricAssessmentTest extends TestCase
                     'id' => 'criterion_1',
                     'points' => 9.5,
                     'description' => 'Good',
-                    'comments' => 'Nice work on this criterion'
+                    'comments' => 'Nice work on this criterion',
                 ],
                 [
                     'id' => 'criterion_2',
                     'points' => 9.0,
                     'description' => 'Excellent',
-                    'comments' => 'Outstanding performance'
-                ]
+                    'comments' => 'Outstanding performance',
+                ],
             ],
             'comments' => 'Overall good work',
             'user_id' => 789,
@@ -69,7 +70,7 @@ class RubricAssessmentTest extends TestCase
             'artifact_id' => 111,
             'assessment_type' => 'grading',
             'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-01T00:00:00Z'
+            'updated_at' => '2024-01-01T00:00:00Z',
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -88,7 +89,7 @@ class RubricAssessmentTest extends TestCase
         $dto->assessmentType = 'grading';
         $dto->criterionData = [
             'criterion_1' => ['points' => 9.5, 'comments' => 'Nice work on this criterion'],
-            'criterion_2' => ['points' => 9.0, 'comments' => 'Outstanding performance']
+            'criterion_2' => ['points' => 9.0, 'comments' => 'Outstanding performance'],
         ];
 
         $assessment = RubricAssessment::create($dto, 456);
@@ -114,12 +115,12 @@ class RubricAssessmentTest extends TestCase
     {
         // Set course context
         RubricAssessment::setCourse(new Course(['id' => 100]));
-        
+
         $expectedResult = [
             'id' => 2,
             'rubric_id' => 124,
             'assessment_type' => 'provisional_grade',
-            'provisional_grade_id' => 222
+            'provisional_grade_id' => 222,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -152,23 +153,23 @@ class RubricAssessmentTest extends TestCase
     {
         // Set course context
         RubricAssessment::setCourse(new Course(['id' => 100]));
-        
+
         $assessmentData = [
             'userId' => 789,
             'assessmentType' => 'grading',
             'criterionData' => [
                 'criterion_1' => [
                     'points' => 9.5,
-                    'comments' => 'Nice work on this criterion'
+                    'comments' => 'Nice work on this criterion',
                 ],
                 'criterion_2' => [
                     'points' => 9.0,
-                    'comments' => 'Outstanding performance'
-                ]
+                    'comments' => 'Outstanding performance',
+                ],
             ],
             'provisional' => false,
             'final' => false,
-            'gradedAnonymously' => false
+            'gradedAnonymously' => false,
         ];
 
         $expectedResult = [
@@ -177,7 +178,7 @@ class RubricAssessmentTest extends TestCase
             'rubric_association_id' => 457,
             'score' => 18.5,
             'user_id' => 789,
-            'assessment_type' => 'grading'
+            'assessment_type' => 'grading',
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -220,7 +221,7 @@ class RubricAssessmentTest extends TestCase
         RubricAssessment::setCourse(null);
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Course context must be set for RubricAssessment operations");
+        $this->expectExceptionMessage('Course context must be set for RubricAssessment operations');
 
         $dto = new CreateRubricAssessmentDTO();
         RubricAssessment::create($dto, 1);
@@ -232,7 +233,7 @@ class RubricAssessmentTest extends TestCase
     public function testFindThrowsException(): void
     {
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Finding individual rubric assessments is not supported");
+        $this->expectExceptionMessage('Finding individual rubric assessments is not supported');
 
         RubricAssessment::find(1);
     }
@@ -243,7 +244,7 @@ class RubricAssessmentTest extends TestCase
     public function testGetThrowsException(): void
     {
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Fetching all rubric assessments is not supported");
+        $this->expectExceptionMessage('Fetching all rubric assessments is not supported');
 
         RubricAssessment::get();
     }
@@ -255,14 +256,14 @@ class RubricAssessmentTest extends TestCase
     {
         // Set course context
         RubricAssessment::setCourse(new Course(['id' => 100]));
-        
+
         $expectedResult = [
             'id' => 3,
             'rubric_id' => 125,
             'score' => 20.0,
             'data' => [
-                ['id' => 'criterion_1', 'points' => 10.0]
-            ]
+                ['id' => 'criterion_1', 'points' => 10.0],
+            ],
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -278,7 +279,7 @@ class RubricAssessmentTest extends TestCase
 
         $dto = new UpdateRubricAssessmentDTO();
         $dto->criterionData = [
-            'criterion_1' => ['points' => 10.0]
+            'criterion_1' => ['points' => 10.0],
         ];
 
         $assessment = RubricAssessment::update(3, $dto, 457);
@@ -295,11 +296,11 @@ class RubricAssessmentTest extends TestCase
     {
         // Set course context
         RubricAssessment::setCourse(new Course(['id' => 100]));
-        
+
         $expectedResult = [
             'id' => 4,
             'assessment_type' => 'provisional_grade',
-            'provisional_grade_id' => 444
+            'provisional_grade_id' => 444,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -331,16 +332,16 @@ class RubricAssessmentTest extends TestCase
     {
         // Set course context
         RubricAssessment::setCourse(new Course(['id' => 100]));
-        
+
         $updateData = [
             'userId' => 790,
             'assessmentType' => 'grading',
             'criterionData' => [
-                'criterion_1' => ['points' => 10.0, 'comments' => 'Perfect!']
+                'criterion_1' => ['points' => 10.0, 'comments' => 'Perfect!'],
             ],
             'provisional' => false,
             'final' => false,
-            'gradedAnonymously' => true
+            'gradedAnonymously' => true,
         ];
 
         $expectedResult = [
@@ -348,7 +349,7 @@ class RubricAssessmentTest extends TestCase
             'rubric_id' => 126,
             'score' => 10.0,
             'user_id' => 790,
-            'assessment_type' => 'grading'
+            'assessment_type' => 'grading',
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -386,7 +387,7 @@ class RubricAssessmentTest extends TestCase
 
         $assessment = new RubricAssessment([
             'id' => 5,
-            'rubric_association_id' => 458
+            'rubric_association_id' => 458,
         ]);
 
         $result = $assessment->delete();
@@ -412,7 +413,7 @@ class RubricAssessmentTest extends TestCase
             'rubric_association_id' => 460,
             'artifact_type' => 'ModeratedGrading',
             'artifact_id' => 666,
-            'provisional_grade_id' => 555
+            'provisional_grade_id' => 555,
         ]);
 
         $result = $assessment->delete();
@@ -428,7 +429,7 @@ class RubricAssessmentTest extends TestCase
         $assessment = new RubricAssessment([]);
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Cannot delete rubric assessment without ID");
+        $this->expectExceptionMessage('Cannot delete rubric assessment without ID');
 
         $assessment->delete();
     }
@@ -441,7 +442,7 @@ class RubricAssessmentTest extends TestCase
         $assessment = new RubricAssessment(['id' => 7]);
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Cannot delete rubric assessment without association ID");
+        $this->expectExceptionMessage('Cannot delete rubric assessment without association ID');
 
         $assessment->delete();
     }
@@ -468,7 +469,7 @@ class RubricAssessmentTest extends TestCase
         $assessment = new RubricAssessment([
             'id' => 8,
             'rubric_association_id' => 459,
-            'criterion_data' => ['criterion_1' => ['points' => 7.5]]
+            'criterion_data' => ['criterion_1' => ['points' => 7.5]],
         ]);
 
         $savedAssessment = $assessment->save();
@@ -487,7 +488,7 @@ class RubricAssessmentTest extends TestCase
         $expectedResult = [
             'id' => 9,
             'rubric_id' => 126,
-            'user_id' => 888
+            'user_id' => 888,
         ];
 
         $response = new Response(200, [], json_encode($expectedResult));
@@ -504,7 +505,7 @@ class RubricAssessmentTest extends TestCase
         $assessment = new RubricAssessment([
             'rubric_association_id' => 460,
             'user_id' => 888,
-            'assessment_type' => 'grading'
+            'assessment_type' => 'grading',
         ]);
 
         $savedAssessment = $assessment->save();
@@ -524,7 +525,7 @@ class RubricAssessmentTest extends TestCase
         $assessment = new RubricAssessment([]);
 
         $this->expectException(CanvasApiException::class);
-        $this->expectExceptionMessage("Rubric association ID required for create");
+        $this->expectExceptionMessage('Rubric association ID required for create');
 
         $assessment->save();
     }
@@ -541,7 +542,7 @@ class RubricAssessmentTest extends TestCase
             'score' => 25.5,
             'data' => [
                 ['id' => 'criterion_1', 'points' => 15.5],
-                ['id' => 'criterion_2', 'points' => 10.0]
+                ['id' => 'criterion_2', 'points' => 10.0],
             ],
             'comments' => 'Great work overall',
             'user_id' => 999,
@@ -551,7 +552,7 @@ class RubricAssessmentTest extends TestCase
             'assessment_type' => 'peer_review',
             'provisional_grade_id' => 333,
             'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-02T00:00:00Z'
+            'updated_at' => '2024-01-02T00:00:00Z',
         ];
 
         $assessment = new RubricAssessment($data);
@@ -581,8 +582,8 @@ class RubricAssessmentTest extends TestCase
         $data = [
             'id' => 11,
             'criterion_data' => [
-                'criterion_1' => ['points' => 5.0]
-            ]
+                'criterion_1' => ['points' => 5.0],
+            ],
         ];
 
         $assessment = new RubricAssessment($data);

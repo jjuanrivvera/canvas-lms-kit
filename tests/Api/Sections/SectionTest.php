@@ -6,7 +6,6 @@ namespace CanvasLMS\Tests\Api\Sections;
 
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Sections\Section;
-use CanvasLMS\Config;
 use CanvasLMS\Dto\Sections\CreateSectionDTO;
 use CanvasLMS\Dto\Sections\UpdateSectionDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -19,15 +18,16 @@ use PHPUnit\Framework\TestCase;
 class SectionTest extends TestCase
 {
     private HttpClientInterface $mockClient;
+
     private Course $course;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->mockClient = $this->createMock(HttpClientInterface::class);
         Section::setApiClient($this->mockClient);
-        
+
         // Set up course context
         $this->course = new Course(['id' => 123, 'name' => 'Test Course']);
         Section::setCourse($this->course);
@@ -36,7 +36,7 @@ class SectionTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        
+
         // Clean up static properties
         $reflection = new \ReflectionClass(Section::class);
         $property = $reflection->getProperty('course');
@@ -48,13 +48,13 @@ class SectionTest extends TestCase
     {
         // With course context set
         $this->assertTrue(Section::checkCourse());
-        
+
         // Clean course context and test exception
         $reflection = new \ReflectionClass(Section::class);
         $property = $reflection->getProperty('course');
         $property->setAccessible(true);
         $property->setValue(null);
-        
+
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course context is required');
         Section::checkCourse();
@@ -65,7 +65,7 @@ class SectionTest extends TestCase
         // Set course without ID
         $invalidCourse = new Course(['name' => 'Test Course']);
         Section::setCourse($invalidCourse);
-        
+
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Course context is required');
         Section::checkCourse();
@@ -82,7 +82,7 @@ class SectionTest extends TestCase
             'start_at' => '2012-06-01T00:00:00-06:00',
             'end_at' => null,
             'restrict_enrollments_to_section_dates' => true,
-            'total_students' => 25
+            'total_students' => 25,
         ];
 
         $this->mockClient->expects($this->once())
@@ -112,7 +112,7 @@ class SectionTest extends TestCase
             'id' => 456,
             'name' => 'Section A',
             'course_id' => 789,
-            'sis_section_id' => 's34643'
+            'sis_section_id' => 's34643',
         ];
 
         $this->mockClient->expects($this->once())
@@ -136,8 +136,8 @@ class SectionTest extends TestCase
             'total_students' => 25,
             'students' => [
                 ['id' => 1, 'name' => 'Student 1'],
-                ['id' => 2, 'name' => 'Student 2']
-            ]
+                ['id' => 2, 'name' => 'Student 2'],
+            ],
         ];
 
         $params = ['include' => ['students', 'total_students']];
@@ -158,7 +158,7 @@ class SectionTest extends TestCase
     {
         $sectionsData = [
             ['id' => 1, 'name' => 'Section A', 'course_id' => 123],
-            ['id' => 2, 'name' => 'Section B', 'course_id' => 123]
+            ['id' => 2, 'name' => 'Section B', 'course_id' => 123],
         ];
 
         $this->mockClient->expects($this->once())
@@ -178,7 +178,7 @@ class SectionTest extends TestCase
     public function testGetWithSearchTerm(): void
     {
         $sectionsData = [
-            ['id' => 1, 'name' => 'Lab Section', 'course_id' => 123]
+            ['id' => 1, 'name' => 'Lab Section', 'course_id' => 123],
         ];
 
         $params = ['search_term' => 'Lab'];
@@ -220,11 +220,11 @@ class SectionTest extends TestCase
     {
         $paginatedResponse = $this->createMock(PaginatedResponse::class);
         $paginationResult = $this->createMock(PaginationResult::class);
-        
+
         $paginatedResponse->expects($this->once())
             ->method('getJsonData')
             ->willReturn([['id' => 1, 'name' => 'Section 1']]);
-            
+
         $paginatedResponse->expects($this->once())
             ->method('toPaginationResult')
             ->willReturn($paginationResult);
@@ -247,13 +247,13 @@ class SectionTest extends TestCase
             'start_at' => '2024-01-15T08:00:00Z',
             'end_at' => '2024-05-15T17:00:00Z',
             'restrict_enrollments_to_section_dates' => true,
-            'enable_sis_reactivation' => true
+            'enable_sis_reactivation' => true,
         ];
 
         $responseData = array_merge($createData, [
             'id' => 789,
             'course_id' => 123,
-            'created_at' => '2024-01-01T00:00:00Z'
+            'created_at' => '2024-01-01T00:00:00Z',
         ]);
 
         $dto = new CreateSectionDTO($createData);
@@ -281,7 +281,7 @@ class SectionTest extends TestCase
             'id' => 890,
             'name' => 'DTO Section',
             'course_id' => 123,
-            'sis_section_id' => 'DTO-001'
+            'sis_section_id' => 'DTO-001',
         ];
 
         $this->mockClient->expects($this->once())
@@ -299,14 +299,14 @@ class SectionTest extends TestCase
         $updateData = [
             'name' => 'Updated Section',
             'end_at' => '2024-06-30T17:00:00Z',
-            'override_sis_stickiness' => false
+            'override_sis_stickiness' => false,
         ];
 
         $responseData = [
             'id' => 456,
             'name' => 'Updated Section',
             'course_id' => 123,
-            'end_at' => '2024-06-30T17:00:00Z'
+            'end_at' => '2024-06-30T17:00:00Z',
         ];
 
         $dto = new UpdateSectionDTO($updateData);
@@ -328,14 +328,14 @@ class SectionTest extends TestCase
             'id' => 456,
             'name' => 'Section A',
             'course_id' => 999,
-            'nonxlist_course_id' => 123
+            'nonxlist_course_id' => 123,
         ];
 
         $expectedParams = [
             [
                 'name' => 'override_sis_stickiness',
-                'contents' => 'true'
-            ]
+                'contents' => 'true',
+            ],
         ];
 
         $this->mockClient->expects($this->once())
@@ -355,7 +355,7 @@ class SectionTest extends TestCase
             'id' => 456,
             'name' => 'Section A',
             'course_id' => 123,
-            'nonxlist_course_id' => null
+            'nonxlist_course_id' => null,
         ];
 
         $this->mockClient->expects($this->once())
@@ -379,7 +379,7 @@ class SectionTest extends TestCase
             'id' => 1001,
             'name' => 'New Section',
             'course_id' => 123,
-            'sis_section_id' => 'NEW-002'
+            'sis_section_id' => 'NEW-002',
         ];
 
         $this->mockClient->expects($this->once())
@@ -400,7 +400,7 @@ class SectionTest extends TestCase
         $responseData = [
             'id' => 456,
             'name' => 'Updated Name',
-            'course_id' => 123
+            'course_id' => 123,
         ];
 
         $this->mockClient->expects($this->once())
@@ -430,10 +430,10 @@ class SectionTest extends TestCase
     public function testDeleteWithoutId(): void
     {
         $section = new Section([]);
-        
+
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Section ID is required for deletion');
-        
+
         $section->delete();
     }
 
@@ -448,7 +448,7 @@ class SectionTest extends TestCase
             'end_at' => '2024-05-15T17:00:00Z',
             'restrict_enrollments_to_section_dates' => true,
             'course_id' => 123,
-            'total_students' => 25
+            'total_students' => 25,
         ]);
 
         $dtoArray = $section->toDtoArray();
@@ -459,7 +459,7 @@ class SectionTest extends TestCase
             'integration_id' => '3452342345',
             'start_at' => '2024-01-15T08:00:00Z',
             'end_at' => '2024-05-15T17:00:00Z',
-            'restrict_enrollments_to_section_dates' => true
+            'restrict_enrollments_to_section_dates' => true,
         ];
 
         $this->assertEquals($expectedArray, $dtoArray);
@@ -472,14 +472,14 @@ class SectionTest extends TestCase
     {
         $firstPageData = [
             ['id' => 1, 'name' => 'Section A', 'course_id' => 123],
-            ['id' => 2, 'name' => 'Section B', 'course_id' => 123]
+            ['id' => 2, 'name' => 'Section B', 'course_id' => 123],
         ];
         $secondPageData = [
-            ['id' => 3, 'name' => 'Section C', 'course_id' => 123]
+            ['id' => 3, 'name' => 'Section C', 'course_id' => 123],
         ];
 
         $allData = array_merge($firstPageData, $secondPageData);
-        
+
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
         $mockPaginatedResponse->expects($this->once())
             ->method('all')

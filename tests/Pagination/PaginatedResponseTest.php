@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Tests\Pagination;
 
-use PHPUnit\Framework\TestCase;
+use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
-use CanvasLMS\Interfaces\HttpClientInterface;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -23,30 +25,35 @@ class PaginatedResponseTest extends TestCase
 {
     /**
      * Mock HTTP client
+     *
      * @var HttpClientInterface
      */
     private HttpClientInterface $mockHttpClient;
 
     /**
      * Mock HTTP response
+     *
      * @var ResponseInterface
      */
     private ResponseInterface $mockResponse;
 
     /**
      * Mock response stream
+     *
      * @var StreamInterface
      */
     private StreamInterface $mockStream;
 
     /**
      * Sample response data
+     *
      * @var mixed[]
      */
     private array $sampleData;
 
     /**
      * Sample Link header
+     *
      * @var string
      */
     private string $sampleLinkHeader;

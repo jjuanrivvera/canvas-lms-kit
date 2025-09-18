@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Dto\CalendarEvents;
 
 use CanvasLMS\Dto\AbstractBaseDto;
@@ -18,12 +20,14 @@ class CreateReservationDTO extends AbstractBaseDto
      * User or group id for whom you are making the reservation
      * Depends on the participant type of the appointment group
      * Defaults to the current user (or user's candidate group)
+     *
      * @var int|null
      */
     public ?int $participantId = null;
 
     /**
      * Comments to associate with this reservation
+     *
      * @var string|null
      */
     public ?string $comments = null;
@@ -31,6 +35,7 @@ class CreateReservationDTO extends AbstractBaseDto
     /**
      * Defaults to false
      * If true, cancel any previous reservation(s) for this participant and appointment group
+     *
      * @var bool|null
      */
     public ?bool $cancelExisting = null;
@@ -49,21 +54,21 @@ class CreateReservationDTO extends AbstractBaseDto
         if ($this->participantId !== null) {
             $data[] = [
                 'name' => 'participant_id',
-                'contents' => (string)$this->participantId
+                'contents' => (string) $this->participantId,
             ];
         }
 
         if ($this->comments !== null) {
             $data[] = [
                 'name' => 'comments',
-                'contents' => $this->comments
+                'contents' => $this->comments,
             ];
         }
 
         if ($this->cancelExisting !== null) {
             $data[] = [
                 'name' => 'cancel_existing',
-                'contents' => $this->cancelExisting ? '1' : '0'
+                'contents' => $this->cancelExisting ? '1' : '0',
             ];
         }
 

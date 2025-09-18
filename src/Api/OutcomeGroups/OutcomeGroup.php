@@ -6,9 +6,9 @@ namespace CanvasLMS\Api\OutcomeGroups;
 
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Config;
-use CanvasLMS\Dto\Outcomes\CreateOutcomeDTO;
 use CanvasLMS\Dto\OutcomeGroups\CreateOutcomeGroupDTO;
 use CanvasLMS\Dto\OutcomeGroups\UpdateOutcomeGroupDTO;
+use CanvasLMS\Dto\Outcomes\CreateOutcomeDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Objects\OutcomeLink;
 use CanvasLMS\Pagination\PaginatedResponse;
@@ -21,44 +21,61 @@ use CanvasLMS\Pagination\PaginationResult;
  * allowing for categorization and management of related outcomes.
  *
  * @package CanvasLMS\Api\OutcomeGroups
+ *
  * @see https://canvas.instructure.com/doc/api/outcome_groups.html
  */
 class OutcomeGroup extends AbstractBaseApi
 {
     public ?int $id = null;
+
     public ?string $title = null;
+
     public ?string $description = null;
+
     public ?string $vendorGuid = null;
+
     public ?int $parentOutcomeGroupId = null;
+
     public ?string $contextType = null;
+
     public ?int $contextId = null;
+
     public ?string $url = null;
+
     public ?string $subgroupsUrl = null;
+
     public ?string $outcomesUrl = null;
+
     public ?string $importsUrl = null;
+
     public ?bool $canEdit = null;
+
     public ?int $outcomesCount = null;
+
     public ?int $subgroupsCount = null;
 
     /**
      * Get first page of outcome groups (defaults to Account context).
      *
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<int, OutcomeGroup> Array of OutcomeGroup objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, OutcomeGroup> Array of OutcomeGroup objects
      */
     public static function get(array $params = []): array
     {
         return parent::get($params);
     }
 
-
     /**
      * Get paginated outcome groups (defaults to Account context).
      *
      * @param array<string, mixed> $params Optional query parameters
-     * @return PaginationResult Paginated result with metadata
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginationResult Paginated result with metadata
      */
     public static function paginate(array $params = []): PaginationResult
     {
@@ -75,15 +92,18 @@ class OutcomeGroup extends AbstractBaseApi
      * Fetch global outcome groups.
      *
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<int, OutcomeGroup> Array of OutcomeGroup objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, OutcomeGroup> Array of OutcomeGroup objects
      */
     public static function fetchGlobal(array $params = []): array
     {
         $endpoint = 'global/outcome_groups';
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
-        return array_map(fn($data) => new self($data), $allData);
+
+        return array_map(fn ($data) => new self($data), $allData);
     }
 
     /**
@@ -92,15 +112,18 @@ class OutcomeGroup extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses)
      * @param int $contextId Context ID
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<int, OutcomeGroup> Array of OutcomeGroup objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, OutcomeGroup> Array of OutcomeGroup objects
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
         $endpoint = sprintf('%s/%d/outcome_groups', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
-        return array_map(fn($data) => new self($data), $allData);
+
+        return array_map(fn ($data) => new self($data), $allData);
     }
 
     /**
@@ -109,8 +132,10 @@ class OutcomeGroup extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses)
      * @param int $contextId Context ID
      * @param array<string, mixed> $params Optional query parameters
-     * @return PaginationResult
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginationResult
      */
     public static function fetchByContextPaginated(
         string $contextType,
@@ -119,6 +144,7 @@ class OutcomeGroup extends AbstractBaseApi
     ): PaginationResult {
         $endpoint = sprintf('%s/%d/outcome_groups', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+
         return self::createPaginationResult($paginatedResponse);
     }
 
@@ -126,8 +152,10 @@ class OutcomeGroup extends AbstractBaseApi
      * Find a specific outcome group by ID (defaults to Account context).
      *
      * @param int $id Outcome group ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -146,8 +174,10 @@ class OutcomeGroup extends AbstractBaseApi
      * @param string|null $contextType Context type (accounts, courses) or null for global
      * @param int|null $contextId Context ID or null for global
      * @param int $id Outcome group ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function findByContext(?string $contextType, ?int $contextId, int $id): self
     {
@@ -157,21 +187,25 @@ class OutcomeGroup extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/outcome_groups/%d', $contextType, $contextId, $id);
         $response = self::$apiClient->get($endpoint);
-        return new self(json_decode($response->getBody()->getContents(), true));
+
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
      * Find a specific global outcome group by ID.
      *
      * @param int $id Outcome group ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function findGlobal(int $id): self
     {
         $endpoint = sprintf('global/outcome_groups/%d', $id);
         $response = self::$apiClient->get($endpoint);
-        return new self(json_decode($response->getBody()->getContents(), true));
+
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -179,26 +213,31 @@ class OutcomeGroup extends AbstractBaseApi
      *
      * @param string $contextType Context type (accounts, courses)
      * @param int $contextId Context ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function getRootGroup(string $contextType, int $contextId): self
     {
         $endpoint = sprintf('%s/%d/root_outcome_group', $contextType, $contextId);
         $response = self::$apiClient->get($endpoint);
-        return new self(json_decode($response->getBody()->getContents(), true));
+
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
      * Get the global root outcome group.
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function getGlobalRootGroup(): self
     {
         $response = self::$apiClient->get('global/root_outcome_group');
-        return new self(json_decode($response->getBody()->getContents(), true));
+
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -206,8 +245,10 @@ class OutcomeGroup extends AbstractBaseApi
      *
      * @param array<string, mixed>|CreateOutcomeGroupDTO $data Outcome group data
      * @param int|null $parentGroupId Parent group ID (null for root level)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function create(array|CreateOutcomeGroupDTO $data, ?int $parentGroupId = null): self
     {
@@ -225,8 +266,10 @@ class OutcomeGroup extends AbstractBaseApi
      *
      * @param array<string, mixed>|CreateOutcomeGroupDTO $data Outcome group data
      * @param int|null $parentGroupId Parent group ID (null for root level)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function createGlobal(array|CreateOutcomeGroupDTO $data, ?int $parentGroupId = null): self
     {
@@ -234,14 +277,14 @@ class OutcomeGroup extends AbstractBaseApi
             $data = new CreateOutcomeGroupDTO($data);
         }
 
-        $parentPath = $parentGroupId ? (string)$parentGroupId : 'global';
+        $parentPath = $parentGroupId ? (string) $parentGroupId : 'global';
         $endpoint = sprintf('global/outcome_groups/%s/subgroups', $parentPath);
 
         $response = self::$apiClient->post($endpoint, [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
         ]);
 
-        return new self(json_decode($response->getBody()->getContents(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
@@ -251,8 +294,10 @@ class OutcomeGroup extends AbstractBaseApi
      * @param int $contextId Context ID
      * @param array<string, mixed>|CreateOutcomeGroupDTO $data Outcome group data
      * @param int|null $parentGroupId Parent group ID (null for root level)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function createInContext(
         string $contextType,
@@ -264,22 +309,24 @@ class OutcomeGroup extends AbstractBaseApi
             $data = new CreateOutcomeGroupDTO($data);
         }
 
-        $parentPath = $parentGroupId ? (string)$parentGroupId : 'global';
+        $parentPath = $parentGroupId ? (string) $parentGroupId : 'global';
         $endpoint = sprintf('%s/%d/outcome_groups/%s/subgroups', $contextType, $contextId, $parentPath);
 
         $response = self::$apiClient->post($endpoint, [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
         ]);
 
-        return new self(json_decode($response->getBody()->getContents(), true));
+        return new self(self::parseJsonResponse($response));
     }
 
     /**
      * Update an existing outcome group.
      *
      * @param array<string, mixed>|UpdateOutcomeGroupDTO $data Update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function update(array|UpdateOutcomeGroupDTO $data): self
     {
@@ -299,10 +346,10 @@ class OutcomeGroup extends AbstractBaseApi
         );
 
         $response = self::$apiClient->put($endpoint, [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
         ]);
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Update current instance with response data
         foreach ($responseData as $key => $value) {
@@ -318,8 +365,9 @@ class OutcomeGroup extends AbstractBaseApi
     /**
      * Delete an outcome group.
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
@@ -343,8 +391,10 @@ class OutcomeGroup extends AbstractBaseApi
      * Get subgroups of this outcome group.
      *
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<int, OutcomeGroup> Array of OutcomeGroup objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, OutcomeGroup> Array of OutcomeGroup objects
      */
     public function subgroups(array $params = []): array
     {
@@ -362,15 +412,17 @@ class OutcomeGroup extends AbstractBaseApi
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
 
-        return array_map(fn($data) => new self($data), $allData);
+        return array_map(fn ($data) => new self($data), $allData);
     }
 
     /**
      * Get outcomes in this outcome group.
      *
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<int, OutcomeLink> Array of OutcomeLink objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, OutcomeLink> Array of OutcomeLink objects
      */
     public function outcomes(array $params = []): array
     {
@@ -394,7 +446,7 @@ class OutcomeGroup extends AbstractBaseApi
         $allData = $paginatedResponse->all();
 
         // Canvas returns OutcomeLink objects from this endpoint
-        return array_map(fn($data) => new OutcomeLink($data), $allData);
+        return array_map(fn ($data) => new OutcomeLink($data), $allData);
     }
 
     /**
@@ -402,8 +454,10 @@ class OutcomeGroup extends AbstractBaseApi
      *
      * @param int $outcomeId Outcome ID to link
      * @param int|null $moveFrom Optional group ID to move the outcome from
-     * @return OutcomeLink
+     *
      * @throws CanvasApiException
+     *
+     * @return OutcomeLink
      */
     public function linkOutcome(int $outcomeId, ?int $moveFrom = null): OutcomeLink
     {
@@ -426,7 +480,7 @@ class OutcomeGroup extends AbstractBaseApi
 
         $response = self::$apiClient->put($endpoint, $options);
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Canvas returns an OutcomeLink object
         return new OutcomeLink($responseData);
@@ -436,8 +490,10 @@ class OutcomeGroup extends AbstractBaseApi
      * Create a new outcome in this group.
      *
      * @param array<string, mixed>|CreateOutcomeDTO $data Outcome data
-     * @return OutcomeLink
+     *
      * @throws CanvasApiException
+     *
+     * @return OutcomeLink
      */
     public function createOutcome(array|CreateOutcomeDTO $data): OutcomeLink
     {
@@ -457,10 +513,10 @@ class OutcomeGroup extends AbstractBaseApi
         );
 
         $response = self::$apiClient->post($endpoint, [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
         ]);
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Canvas returns an OutcomeLink object
         return new OutcomeLink($responseData);
@@ -470,8 +526,10 @@ class OutcomeGroup extends AbstractBaseApi
      * Unlink an outcome from this group.
      *
      * @param int $outcomeId Outcome ID to unlink
-     * @return bool
+     *
      * @throws CanvasApiException
+     *
+     * @return bool
      */
     public function unlinkOutcome(int $outcomeId): bool
     {
@@ -496,8 +554,10 @@ class OutcomeGroup extends AbstractBaseApi
      * Import outcomes from external source.
      *
      * @param array<string, mixed> $importData Import configuration
-     * @return array<string, mixed> Import status
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Import status
      */
     public function importOutcomes(array $importData): array
     {
@@ -517,23 +577,25 @@ class OutcomeGroup extends AbstractBaseApi
         foreach ($importData as $key => $value) {
             $multipartData[] = [
                 'name' => $key,
-                'contents' => $value
+                'contents' => $value,
             ];
         }
 
         $response = self::$apiClient->post($endpoint, [
-            'multipart' => $multipartData
+            'multipart' => $multipartData,
         ]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
      * Create a subgroup within this group.
      *
      * @param array<string, mixed>|CreateOutcomeGroupDTO $data Subgroup data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function createSubgroup(array|CreateOutcomeGroupDTO $data): self
     {
@@ -559,8 +621,10 @@ class OutcomeGroup extends AbstractBaseApi
      * Returns ALL outcome links across ALL groups in the context.
      *
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<int, OutcomeLink> Array of OutcomeLink objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, OutcomeLink> Array of OutcomeLink objects
      */
     public static function fetchAllLinks(array $params = []): array
     {
@@ -580,8 +644,10 @@ class OutcomeGroup extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses)
      * @param int $contextId Context ID
      * @param array<string, mixed> $params Optional query parameters
-     * @return array<int, OutcomeLink> Array of OutcomeLink objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, OutcomeLink> Array of OutcomeLink objects
      */
     public static function fetchAllLinksByContext(string $contextType, int $contextId, array $params = []): array
     {
@@ -589,15 +655,17 @@ class OutcomeGroup extends AbstractBaseApi
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
 
-        return array_map(fn($data) => new OutcomeLink($data), $allData);
+        return array_map(fn ($data) => new OutcomeLink($data), $allData);
     }
 
     /**
      * Fetch paginated outcome links (defaults to Account context).
      *
      * @param array<string, mixed> $params Optional query parameters
-     * @return PaginationResult
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginationResult
      */
     public static function fetchAllLinksPaginated(array $params = []): PaginationResult
     {
@@ -608,6 +676,7 @@ class OutcomeGroup extends AbstractBaseApi
         }
 
         $paginatedResponse = self::fetchAllLinksByContextPaginated('accounts', $accountId, $params);
+
         return self::createPaginationResult($paginatedResponse);
     }
 
@@ -617,8 +686,10 @@ class OutcomeGroup extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses)
      * @param int $contextId Context ID
      * @param array<string, mixed> $params Optional query parameters
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     private static function fetchAllLinksByContextPaginated(
         string $contextType,
@@ -626,14 +697,16 @@ class OutcomeGroup extends AbstractBaseApi
         array $params = []
     ): PaginatedResponse {
         $endpoint = sprintf('%s/%d/outcome_group_links', $contextType, $contextId);
+
         return self::getPaginatedResponse($endpoint, $params);
     }
 
     /**
      * Get the full hierarchy path from root to this group.
      *
-     * @return array<int, OutcomeGroup> Array of parent groups
      * @throws CanvasApiException
+     *
+     * @return array<int, OutcomeGroup> Array of parent groups
      */
     public function getHierarchyPath(): array
     {
@@ -655,14 +728,16 @@ class OutcomeGroup extends AbstractBaseApi
 
     /**
      * Get the API endpoint for this resource
+     *
      * @return string
      */
     protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
         if (empty($accountId)) {
-            throw new CanvasApiException("Account ID must be set in Config for OutcomeGroup operations");
+            throw new CanvasApiException('Account ID must be set in Config for OutcomeGroup operations');
         }
+
         return "accounts/{$accountId}/outcome_groups";
     }
 }

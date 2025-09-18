@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\DiscussionTopics;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\DiscussionTopics\CreateDiscussionTopicDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\DiscussionTopics\CreateDiscussionTopicDTO
@@ -43,7 +45,7 @@ class CreateDiscussionTopicDTOTest extends TestCase
             'only_graders_can_rate' => false,
             'group_category_id' => 456,
             'read_only' => false,
-            'posted_at' => '2024-01-01T00:00:00Z'
+            'posted_at' => '2024-01-01T00:00:00Z',
         ];
 
         $dto = new CreateDiscussionTopicDTO($data);
@@ -205,14 +207,14 @@ class CreateDiscussionTopicDTOTest extends TestCase
         $podcastSettings = [
             'enabled' => true,
             'feed_code' => 'test123',
-            'url' => 'https://example.com/feed'
+            'url' => 'https://example.com/feed',
         ];
         $dto->setPodcastSettings($podcastSettings);
         $this->assertEquals($podcastSettings, $dto->getPodcastSettings());
 
         $attachment = [
             'uploaded_file' => 'file123',
-            'display_name' => 'Test File'
+            'display_name' => 'Test File',
         ];
         $dto->setAttachment($attachment);
         $this->assertEquals($attachment, $dto->getAttachment());
@@ -358,107 +360,107 @@ class CreateDiscussionTopicDTOTest extends TestCase
     public function testNewCanvasApiProperties(): void
     {
         $dto = new CreateDiscussionTopicDTO([]);
-        
+
         // Test isAnnouncement
         $dto->setIsAnnouncement(true);
         $this->assertTrue($dto->getIsAnnouncement());
-        
+
         $dto->setIsAnnouncement(false);
         $this->assertFalse($dto->getIsAnnouncement());
-        
+
         $dto->setIsAnnouncement(null);
         $this->assertNull($dto->getIsAnnouncement());
-        
+
         // Test positionAfter
         $dto->setPositionAfter('123');
         $this->assertEquals('123', $dto->getPositionAfter());
-        
+
         $dto->setPositionAfter(null);
         $this->assertNull($dto->getPositionAfter());
-        
+
         // Test podcastEnabled (boolean)
         $dto->setPodcastEnabled(true);
         $this->assertTrue($dto->getPodcastEnabled());
-        
+
         $dto->setPodcastEnabled(false);
         $this->assertFalse($dto->getPodcastEnabled());
-        
+
         $dto->setPodcastEnabled(null);
         $this->assertNull($dto->getPodcastEnabled());
-        
+
         // Test podcastHasStudentPosts
         $dto->setPodcastHasStudentPosts(false);
         $this->assertFalse($dto->getPodcastHasStudentPosts());
-        
+
         $dto->setPodcastHasStudentPosts(true);
         $this->assertTrue($dto->getPodcastHasStudentPosts());
-        
+
         $dto->setPodcastHasStudentPosts(null);
         $this->assertNull($dto->getPodcastHasStudentPosts());
-        
+
         // Test assignment array
         $assignment = ['points_possible' => 25, 'due_at' => '2023-12-31T23:59:59Z'];
         $dto->setAssignment($assignment);
         $this->assertEquals($assignment, $dto->getAssignment());
-        
+
         $dto->setAssignment(null);
         $this->assertNull($dto->getAssignment());
-        
+
         // Test podcastSettings array (renamed from podcastEnabled array)
         $podcastSettings = ['feed_code' => 'abc123', 'enabled' => true];
         $dto->setPodcastSettings($podcastSettings);
         $this->assertEquals($podcastSettings, $dto->getPodcastSettings());
-        
+
         $dto->setPodcastSettings(null);
         $this->assertNull($dto->getPodcastSettings());
-        
+
         // Test sortOrder
         $dto->setSortOrder('asc');
         $this->assertEquals('asc', $dto->getSortOrder());
-        
+
         $dto->setSortOrder('desc');
         $this->assertEquals('desc', $dto->getSortOrder());
-        
+
         $dto->setSortOrder(null);
         $this->assertNull($dto->getSortOrder());
-        
+
         // Test sortOrderLocked
         $dto->setSortOrderLocked(true);
         $this->assertTrue($dto->getSortOrderLocked());
-        
+
         $dto->setSortOrderLocked(false);
         $this->assertFalse($dto->getSortOrderLocked());
-        
+
         $dto->setSortOrderLocked(null);
         $this->assertNull($dto->getSortOrderLocked());
-        
+
         // Test expanded
         $dto->setExpanded(true);
         $this->assertTrue($dto->getExpanded());
-        
+
         $dto->setExpanded(false);
         $this->assertFalse($dto->getExpanded());
-        
+
         $dto->setExpanded(null);
         $this->assertNull($dto->getExpanded());
-        
+
         // Test expandedLocked
         $dto->setExpandedLocked(true);
         $this->assertTrue($dto->getExpandedLocked());
-        
+
         $dto->setExpandedLocked(false);
         $this->assertFalse($dto->getExpandedLocked());
-        
+
         $dto->setExpandedLocked(null);
         $this->assertNull($dto->getExpandedLocked());
-        
+
         // Test lockComment
         $dto->setLockComment(true);
         $this->assertTrue($dto->getLockComment());
-        
+
         $dto->setLockComment(false);
         $this->assertFalse($dto->getLockComment());
-        
+
         $dto->setLockComment(null);
         $this->assertNull($dto->getLockComment());
     }

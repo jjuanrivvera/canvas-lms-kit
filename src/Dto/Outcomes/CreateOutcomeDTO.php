@@ -23,25 +23,32 @@ class CreateOutcomeDTO extends AbstractBaseDto
         $this->description = $data['description'] ?? null;
         $this->vendorGuid = $data['vendorGuid'] ?? $data['vendor_guid'] ?? null;
         $this->masteryPoints = isset($data['masteryPoints'])
-            ? (float)$data['masteryPoints']
-            : (isset($data['mastery_points']) ? (float)$data['mastery_points'] : null);
+            ? (float) $data['masteryPoints']
+            : (isset($data['mastery_points']) ? (float) $data['mastery_points'] : null);
         $this->ratings = $data['ratings'] ?? null;
         $this->calculationMethod = $data['calculationMethod'] ?? $data['calculation_method'] ?? null;
         $this->calculationInt = isset($data['calculationInt'])
-            ? (int)$data['calculationInt']
-            : (isset($data['calculation_int']) ? (int)$data['calculation_int'] : null);
+            ? (int) $data['calculationInt']
+            : (isset($data['calculation_int']) ? (int) $data['calculation_int'] : null);
 
         parent::__construct($data);
     }
 
     public ?string $title = null;
+
     public ?string $displayName = null;
+
     public ?string $description = null;
+
     public ?string $vendorGuid = null;
+
     public ?float $masteryPoints = null;
+
     /** @var array<int, array{description: string, points: float}>|null */
     public ?array $ratings = null;
+
     public ?string $calculationMethod = null;
+
     public ?int $calculationInt = null;
 
     /**
@@ -56,35 +63,35 @@ class CreateOutcomeDTO extends AbstractBaseDto
         if ($this->title !== null) {
             $data[] = [
                 'name' => 'title',
-                'contents' => $this->title
+                'contents' => $this->title,
             ];
         }
 
         if ($this->displayName !== null) {
             $data[] = [
                 'name' => 'display_name',
-                'contents' => $this->displayName
+                'contents' => $this->displayName,
             ];
         }
 
         if ($this->description !== null) {
             $data[] = [
                 'name' => 'description',
-                'contents' => $this->description
+                'contents' => $this->description,
             ];
         }
 
         if ($this->vendorGuid !== null) {
             $data[] = [
                 'name' => 'vendor_guid',
-                'contents' => $this->vendorGuid
+                'contents' => $this->vendorGuid,
             ];
         }
 
         if ($this->masteryPoints !== null) {
             $data[] = [
                 'name' => 'mastery_points',
-                'contents' => (string)$this->masteryPoints
+                'contents' => (string) $this->masteryPoints,
             ];
         }
 
@@ -92,11 +99,11 @@ class CreateOutcomeDTO extends AbstractBaseDto
             foreach ($this->ratings as $index => $rating) {
                 $data[] = [
                     'name' => sprintf('ratings[%d][description]', $index),
-                    'contents' => $rating['description']
+                    'contents' => $rating['description'],
                 ];
                 $data[] = [
                     'name' => sprintf('ratings[%d][points]', $index),
-                    'contents' => (string)$rating['points']
+                    'contents' => (string) $rating['points'],
                 ];
             }
         }
@@ -104,14 +111,14 @@ class CreateOutcomeDTO extends AbstractBaseDto
         if ($this->calculationMethod !== null) {
             $data[] = [
                 'name' => 'calculation_method',
-                'contents' => $this->calculationMethod
+                'contents' => $this->calculationMethod,
             ];
         }
 
         if ($this->calculationInt !== null) {
             $data[] = [
                 'name' => 'calculation_int',
-                'contents' => (string)$this->calculationInt
+                'contents' => (string) $this->calculationInt,
             ];
         }
 
@@ -130,7 +137,7 @@ class CreateOutcomeDTO extends AbstractBaseDto
             'n_mastery',
             'latest',
             'highest',
-            'average'
+            'average',
         ];
 
         if ($this->calculationMethod === null) {
@@ -156,7 +163,7 @@ class CreateOutcomeDTO extends AbstractBaseDto
         if ($this->masteryPoints !== null) {
             $masteryFound = false;
             foreach ($this->ratings as $rating) {
-                if ((float)$rating['points'] === $this->masteryPoints) {
+                if ((float) $rating['points'] === $this->masteryPoints) {
                     $masteryFound = true;
                     break;
                 }
@@ -174,11 +181,13 @@ class CreateOutcomeDTO extends AbstractBaseDto
      * Set ratings with builder pattern.
      *
      * @param array<int, array{description: string, points: float}> $ratings
+     *
      * @return self
      */
     public function withRatings(array $ratings): self
     {
         $this->ratings = $ratings;
+
         return $this;
     }
 
@@ -187,6 +196,7 @@ class CreateOutcomeDTO extends AbstractBaseDto
      *
      * @param string $description
      * @param float $points
+     *
      * @return self
      */
     public function addRating(string $description, float $points): self
@@ -197,7 +207,7 @@ class CreateOutcomeDTO extends AbstractBaseDto
 
         $this->ratings[] = [
             'description' => $description,
-            'points' => $points
+            'points' => $points,
         ];
 
         return $this;
@@ -208,8 +218,10 @@ class CreateOutcomeDTO extends AbstractBaseDto
      *
      * @param string $method
      * @param int|null $calculationInt
-     * @return self
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return self
      */
     public function withCalculationMethod(string $method, ?int $calculationInt = null): self
     {

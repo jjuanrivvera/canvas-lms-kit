@@ -62,6 +62,7 @@ class UpdateRubricAssessmentDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Convert the DTO to an array for API requests
+     *
      * @return array<int, array<string, mixed>>
      */
     public function toApiArray(): array
@@ -72,35 +73,35 @@ class UpdateRubricAssessmentDTO extends AbstractBaseDto implements DTOInterface
         if ($this->userId !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_assessment[user_id]',
-                'contents' => (string) $this->userId
+                'contents' => (string) $this->userId,
             ];
         }
 
         if ($this->assessmentType !== null) {
             $modifiedProperties[] = [
                 'name' => 'rubric_assessment[assessment_type]',
-                'contents' => $this->assessmentType
+                'contents' => $this->assessmentType,
             ];
         }
 
         if ($this->provisional !== null) {
             $modifiedProperties[] = [
                 'name' => 'provisional',
-                'contents' => $this->provisional ? 'true' : 'false'
+                'contents' => $this->provisional ? 'true' : 'false',
             ];
         }
 
         if ($this->final !== null) {
             $modifiedProperties[] = [
                 'name' => 'final',
-                'contents' => $this->final ? 'true' : 'false'
+                'contents' => $this->final ? 'true' : 'false',
             ];
         }
 
         if ($this->gradedAnonymously !== null) {
             $modifiedProperties[] = [
                 'name' => 'graded_anonymously',
-                'contents' => $this->gradedAnonymously ? 'true' : 'false'
+                'contents' => $this->gradedAnonymously ? 'true' : 'false',
             ];
         }
 
@@ -110,14 +111,14 @@ class UpdateRubricAssessmentDTO extends AbstractBaseDto implements DTOInterface
                 if (isset($data['points'])) {
                     $modifiedProperties[] = [
                         'name' => "rubric_assessment[criterion_$criterionId][points]",
-                        'contents' => (string) $data['points']
+                        'contents' => (string) $data['points'],
                     ];
                 }
 
                 if (isset($data['comments'])) {
                     $modifiedProperties[] = [
                         'name' => "rubric_assessment[criterion_$criterionId][comments]",
-                        'contents' => $data['comments']
+                        'contents' => $data['comments'],
                     ];
                 }
 
@@ -125,7 +126,7 @@ class UpdateRubricAssessmentDTO extends AbstractBaseDto implements DTOInterface
                 if (isset($data['rating_id'])) {
                     $modifiedProperties[] = [
                         'name' => "rubric_assessment[criterion_$criterionId][rating_id]",
-                        'contents' => $data['rating_id']
+                        'contents' => $data['rating_id'],
                     ];
                 }
 
@@ -133,7 +134,7 @@ class UpdateRubricAssessmentDTO extends AbstractBaseDto implements DTOInterface
                 if (isset($data['save_comment'])) {
                     $modifiedProperties[] = [
                         'name' => "rubric_assessment[criterion_$criterionId][save_comment]",
-                        'contents' => $data['save_comment'] ? '1' : '0'
+                        'contents' => $data['save_comment'] ? '1' : '0',
                     ];
                 }
             }

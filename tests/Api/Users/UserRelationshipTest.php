@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\Users;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\Users\User;
-use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Enrollments\Enrollment;
 use CanvasLMS\Api\Groups\Group;
-use CanvasLMS\Api\Submissions\Submission;
-use CanvasLMS\Api\Assignments\Assignment;
-use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Api\Users\User;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 class UserRelationshipTest extends TestCase
 {
     private HttpClientInterface $mockHttpClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
 
     protected function setUp(): void
@@ -48,21 +46,21 @@ class UserRelationshipTest extends TestCase
                 'user_id' => 100,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
+                'enrollment_state' => 'active',
             ],
             [
                 'id' => 2,
                 'user_id' => 100,
                 'course_id' => 456,
                 'type' => 'TeacherEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($enrollmentsData));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode($enrollmentsData));
 
@@ -92,13 +90,13 @@ class UserRelationshipTest extends TestCase
 
         // Mock response data
         $enrollmentsData = [
-            ['id' => 1, 'user_id' => 100, 'course_id' => 123]
+            ['id' => 1, 'user_id' => 100, 'course_id' => 123],
         ];
 
         // Set up mock expectations
         $this->mockStream->method('getContents')
             ->willReturn(json_encode($enrollmentsData));
-        
+
         $this->mockStream->method('__toString')
             ->willReturn(json_encode($enrollmentsData));
 
@@ -131,14 +129,14 @@ class UserRelationshipTest extends TestCase
                 'id' => 10,
                 'name' => 'Study Group 1',
                 'description' => 'A study group',
-                'group_category_id' => 1
+                'group_category_id' => 1,
             ],
             [
                 'id' => 20,
                 'name' => 'Project Team',
                 'description' => 'Project collaboration',
-                'group_category_id' => 2
-            ]
+                'group_category_id' => 2,
+            ],
         ];
 
         // Mock paginated response
@@ -164,19 +162,15 @@ class UserRelationshipTest extends TestCase
         $this->assertEquals('Study Group 1', $groups[0]->name);
     }
 
-
-
-
     public function testAllMethodsThrowExceptionWhenUserIdMissing(): void
     {
         // Skip this test since User class requires id to be set and is typed as int
         $this->markTestSkipped('User class id property is typed as int and cannot be null');
     }
-    
+
     public function testGroupsThrowsExceptionWhenUserIdMissing(): void
     {
         // Skip this test since User class requires id to be set and is typed as int
         $this->markTestSkipped('User class id property is typed as int and cannot be null');
     }
-    
 }

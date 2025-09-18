@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Api\Modules;
 
-use Exception;
-use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\AbstractBaseApi;
+use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Dto\Modules\CreateModuleItemDTO;
 use CanvasLMS\Dto\Modules\UpdateModuleItemDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Objects\CompletionRequirement;
 use CanvasLMS\Objects\ContentDetails;
-use CanvasLMS\Pagination\PaginationResult;
+use Exception;
 
 /**
  * Module Item Class
@@ -85,7 +83,7 @@ class ModuleItem extends AbstractBaseApi
         'Quiz',
         'SubHeader',
         'ExternalUrl',
-        'ExternalTool'
+        'ExternalTool',
     ];
 
     /**
@@ -96,17 +94,19 @@ class ModuleItem extends AbstractBaseApi
         'must_contribute',   // Assignment, Discussion, Page
         'must_submit',       // Assignment, Quiz
         'min_score',        // Assignment, Quiz
-        'must_mark_done'    // Assignment, Page
+        'must_mark_done',    // Assignment, Page
     ];
 
     /**
      * Course context (required)
+     *
      * @var Course
      */
     protected static ?Course $course = null;
 
     /**
      * Module context (required)
+     *
      * @var Module
      */
     protected static ?Module $module = null;
@@ -228,7 +228,9 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Set the course context
+     *
      * @param Course $course
+     *
      * @return void
      */
     public static function setCourse(Course $course): void
@@ -238,7 +240,9 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Set the module context
+     *
      * @param Module $module
+     *
      * @return void
      */
     public static function setModule(Module $module): void
@@ -248,8 +252,10 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Check if course exists and has id
-     * @return bool
+     *
      * @throws CanvasApiException
+     *
+     * @return bool
      */
     public static function checkCourse(): bool
     {
@@ -262,8 +268,10 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Check if module exists and has id
-     * @return bool
+     *
      * @throws CanvasApiException
+     *
+     * @return bool
      */
     public static function checkModule(): bool
     {
@@ -276,6 +284,7 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Constructor
+     *
      * @param mixed[] $data
      */
     public function __construct(array $data)
@@ -297,6 +306,7 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Convert the object to an array for DTO operations
+     *
      * @return mixed[]
      */
     protected function toDtoArray(): array
@@ -317,10 +327,13 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Create a new module item
+     *
      * @param CreateModuleItemDTO|mixed[] $data
-     * @return self
+     *
      * @throws CanvasApiException
      * @throws Exception
+     *
+     * @return self
      */
     public static function create(array | CreateModuleItemDTO $data): self
     {
@@ -334,21 +347,24 @@ class ModuleItem extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id);
         $response = self::$apiClient->post($endpoint, [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
             ]);
 
-        $moduleItemData = json_decode($response->getBody()->getContents(), true);
+        $moduleItemData = self::parseJsonResponse($response);
 
         return new self($moduleItemData);
     }
 
     /**
      * Update a module item
+     *
      * @param int $id
      * @param UpdateModuleItemDTO|mixed[] $data
-     * @return self
+     *
      * @throws CanvasApiException
      * @throws Exception
+     *
+     * @return self
      */
     public static function update(int $id, array | UpdateModuleItemDTO $data): self
     {
@@ -362,20 +378,23 @@ class ModuleItem extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $id);
         $response = self::$apiClient->put($endpoint, [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
             ]);
 
-        $moduleItemData = json_decode($response->getBody()->getContents(), true);
+        $moduleItemData = self::parseJsonResponse($response);
 
         return new self($moduleItemData);
     }
 
     /**
      * Find a module item by its ID.
+     *
      * @param int $id
      * @param array<string, mixed> $params Optional query parameters
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -386,16 +405,19 @@ class ModuleItem extends AbstractBaseApi
         $endpoint = sprintf('courses/%d/modules/%d/items/%d', self::$course->id, self::$module->id, $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
 
-        $moduleItemData = json_decode($response->getBody()->getContents(), true);
+        $moduleItemData = self::parseJsonResponse($response);
 
         return new self($moduleItemData);
     }
 
     /**
      * Get all module items for a module.
+     *
      * @param mixed[] $params
-     * @return mixed[]
+     *
      * @throws CanvasApiException
+     *
+     * @return mixed[]
      */
     public static function get(array $params = []): array
     {
@@ -405,10 +427,10 @@ class ModuleItem extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/modules/%d/items', self::$course->id, self::$module->id);
         $response = self::$apiClient->get($endpoint, [
-            'query' => $params
+            'query' => $params,
             ]);
 
-        $moduleItemsData = json_decode($response->getBody()->getContents(), true);
+        $moduleItemsData = self::parseJsonResponse($response);
 
         $moduleItems = [];
         foreach ($moduleItemsData as $moduleItemData) {
@@ -418,13 +440,14 @@ class ModuleItem extends AbstractBaseApi
         return $moduleItems;
     }
 
-
-
     /**
      * Fetch all module items from all pages
+     *
      * @param mixed[] $params Query parameters for the request
-     * @return ModuleItem[]
+     *
      * @throws CanvasApiException
+     *
+     * @return ModuleItem[]
      */
     public static function all(array $params = []): array
     {
@@ -445,8 +468,10 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Save the module item
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -463,10 +488,10 @@ class ModuleItem extends AbstractBaseApi
         $method = isset($data['id']) ? 'PUT' : 'POST';
 
         $response = self::$apiClient->request($method, $path, [
-            'multipart' => $dto->toApiArray()
+            'multipart' => $dto->toApiArray(),
         ]);
 
-        $moduleItemData = json_decode($response->getBody()->getContents(), true);
+        $moduleItemData = self::parseJsonResponse($response);
         $this->populate($moduleItemData);
 
         return $this;
@@ -474,8 +499,10 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Delete a module item
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
@@ -492,8 +519,10 @@ class ModuleItem extends AbstractBaseApi
     /**
      * Mark module item as read (fulfills must_view completion requirement)
      * Cannot be used on locked or unpublished items
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function markAsRead(): self
     {
@@ -508,13 +537,16 @@ class ModuleItem extends AbstractBaseApi
             $this->id
         );
         self::$apiClient->post($endpoint);
+
         return $this;
     }
 
     /**
      * Mark module item as done (manual completion marking)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function markAsDone(): self
     {
@@ -524,13 +556,16 @@ class ModuleItem extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/modules/%d/items/%d/done', self::$course->id, self::$module->id, $this->id);
         self::$apiClient->put($endpoint);
+
         return $this;
     }
 
     /**
      * Mark module item as not done (removes manual completion marking)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function markAsNotDone(): self
     {
@@ -540,6 +575,7 @@ class ModuleItem extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/modules/%d/items/%d/done', self::$course->id, self::$module->id, $this->id);
         self::$apiClient->delete($endpoint);
+
         return $this;
     }
 
@@ -801,13 +837,16 @@ class ModuleItem extends AbstractBaseApi
 
     /**
      * Get the API endpoint for this resource
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
         self::checkModule();
-        return sprintf("courses/%d/modules/%d/items", self::$course->getId(), self::$module->getId());
+
+        return sprintf('courses/%d/modules/%d/items', self::$course->getId(), self::$module->getId());
     }
 }

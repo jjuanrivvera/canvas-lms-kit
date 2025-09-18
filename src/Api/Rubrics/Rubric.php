@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Api\Rubrics;
 
 use CanvasLMS\Api\AbstractBaseApi;
@@ -185,12 +187,15 @@ class Rubric extends AbstractBaseApi
      * Create a new rubric in the default account context
      *
      * @param array<string, mixed>|CreateRubricDTO $data The rubric data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function create(array|CreateRubricDTO $data): self
     {
         $accountId = Config::getAccountId();
+
         return self::createInContext('accounts', $accountId, $data);
     }
 
@@ -200,8 +205,10 @@ class Rubric extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses)
      * @param int $contextId Context ID
      * @param array<string, mixed>|CreateRubricDTO $data The rubric data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function createInContext(
         string $contextType,
@@ -216,7 +223,7 @@ class Rubric extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/rubrics', $contextType, $contextId);
         $response = self::$apiClient->post($endpoint, $data->toApiArray());
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Handle non-standard response format
         if (isset($responseData['rubric'])) {
@@ -224,6 +231,7 @@ class Rubric extends AbstractBaseApi
             if (isset($responseData['rubric_association'])) {
                 $rubric->association = new RubricAssociation($responseData['rubric_association']);
             }
+
             return $rubric;
         }
 
@@ -236,12 +244,15 @@ class Rubric extends AbstractBaseApi
      *
      * @param int $id The rubric ID
      * @param array<string, mixed> $params Query parameters
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
         $accountId = Config::getAccountId();
+
         return self::findByContext('accounts', $accountId, $id, $params);
     }
 
@@ -252,8 +263,10 @@ class Rubric extends AbstractBaseApi
      * @param int $contextId Context ID
      * @param int $id The rubric ID
      * @param array<string, mixed> $params Query parameters
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function findByContext(
         string $contextType,
@@ -265,7 +278,7 @@ class Rubric extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/rubrics/%d', $contextType, $contextId, $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -275,12 +288,15 @@ class Rubric extends AbstractBaseApi
      *
      * @param int $id The rubric ID
      * @param array<string, mixed>|UpdateRubricDTO $data The update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function update(int $id, array|UpdateRubricDTO $data): self
     {
         $accountId = Config::getAccountId();
+
         return self::updateInContext('accounts', $accountId, $id, $data);
     }
 
@@ -291,8 +307,10 @@ class Rubric extends AbstractBaseApi
      * @param int $contextId Context ID
      * @param int $id The rubric ID
      * @param array<string, mixed>|UpdateRubricDTO $data The update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function updateInContext(
         string $contextType,
@@ -308,7 +326,7 @@ class Rubric extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/rubrics/%d', $contextType, $contextId, $id);
         $response = self::$apiClient->put($endpoint, $data->toApiArray());
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Handle non-standard response format
         if (isset($responseData['rubric'])) {
@@ -316,6 +334,7 @@ class Rubric extends AbstractBaseApi
             if (isset($responseData['rubric_association'])) {
                 $rubric->association = new RubricAssociation($responseData['rubric_association']);
             }
+
             return $rubric;
         }
 
@@ -326,17 +345,18 @@ class Rubric extends AbstractBaseApi
     /**
      * Delete a rubric
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
         if (!$this->id) {
-            throw new CanvasApiException("Cannot delete rubric without ID");
+            throw new CanvasApiException('Cannot delete rubric without ID');
         }
 
         if (!$this->contextType || !$this->contextId) {
-            throw new CanvasApiException("Cannot delete rubric without context information");
+            throw new CanvasApiException('Cannot delete rubric without context information');
         }
 
         self::checkApiClient();
@@ -350,15 +370,16 @@ class Rubric extends AbstractBaseApi
     /**
      * Save the rubric (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
         if ($this->id) {
             // Update existing
             if (!$this->contextType || !$this->contextId) {
-                throw new CanvasApiException("Context information required for update");
+                throw new CanvasApiException('Context information required for update');
             }
 
             $dto = new UpdateRubricDTO();
@@ -391,11 +412,13 @@ class Rubric extends AbstractBaseApi
 
     /**
      * Get the API endpoint for this resource
+     *
      * @return string
      */
     protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
+
         return sprintf('accounts/%d/rubrics', $accountId);
     }
 
@@ -405,8 +428,10 @@ class Rubric extends AbstractBaseApi
      * @param string $contextType 'accounts' or 'courses'
      * @param int $contextId Account or Course ID
      * @param array<string, mixed> $params Query parameters
-     * @return array<self>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<self>
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
@@ -422,9 +447,8 @@ class Rubric extends AbstractBaseApi
             $paginatedResponse = $paginatedResponse->getNext();
         } while ($paginatedResponse !== null);
 
-        return array_map(fn($data) => new self($data), $allData);
+        return array_map(fn ($data) => new self($data), $allData);
     }
-
 
     /**
      * Get paginated rubrics for a specific context
@@ -432,8 +456,10 @@ class Rubric extends AbstractBaseApi
      * @param string $contextType 'accounts' or 'courses'
      * @param int $contextId Account or Course ID
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public static function fetchByContextPaginated(
         string $contextType,
@@ -446,17 +472,18 @@ class Rubric extends AbstractBaseApi
     /**
      * Get the courses and assignments where this rubric is used
      *
-     * @return array<string, mixed>
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed>
      */
     public function getUsedLocations(): array
     {
         if (!$this->id) {
-            throw new CanvasApiException("Cannot get used locations without rubric ID");
+            throw new CanvasApiException('Cannot get used locations without rubric ID');
         }
 
         if (!$this->contextType || !$this->contextId) {
-            throw new CanvasApiException("Context information required for getting used locations");
+            throw new CanvasApiException('Context information required for getting used locations');
         }
 
         self::checkApiClient();
@@ -464,19 +491,22 @@ class Rubric extends AbstractBaseApi
         $endpoint = sprintf('%ss/%d/rubrics/%d/used_locations', $this->contextType, $this->contextId, $this->id);
         $response = self::$apiClient->get($endpoint);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
      * Upload a rubric via CSV file to account context
      *
      * @param string $filePath Path to the CSV file
-     * @return array<string, mixed> Import status information
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Import status information
      */
     public static function uploadCsv(string $filePath): array
     {
         $accountId = Config::getAccountId();
+
         return self::uploadCsvToContext('accounts', $accountId, $filePath);
     }
 
@@ -486,8 +516,10 @@ class Rubric extends AbstractBaseApi
      * @param string $contextType 'accounts' or 'courses'
      * @param int $contextId Context ID
      * @param string $filePath Path to the CSV file
-     * @return array<string, mixed> Import status information
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed> Import status information
      */
     public static function uploadCsvToContext(string $contextType, int $contextId, string $filePath): array
     {
@@ -503,38 +535,44 @@ class Rubric extends AbstractBaseApi
             [
                 'name' => 'attachment',
                 'contents' => fopen($filePath, 'r'),
-                'filename' => basename($filePath)
-            ]
+                'filename' => basename($filePath),
+            ],
         ];
 
         $response = self::$apiClient->post($endpoint, $multipart);
-        return json_decode($response->getBody(), true);
+
+        return self::parseJsonResponse($response);
     }
 
     /**
      * Get CSV template for rubric import
      *
-     * @return string CSV content
      * @throws CanvasApiException
+     *
+     * @return string CSV content
      */
     public static function getUploadTemplate(): string
     {
         self::checkApiClient();
 
         $response = self::$apiClient->get('rubrics/upload_template');
-        return $response->getBody();
+
+        return $response->getBody()->getContents();
     }
 
     /**
      * Get the status of a rubric import in account context
      *
      * @param int|null $importId The import ID (optional, returns latest if not provided)
-     * @return array<string, mixed>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed>
      */
     public static function getUploadStatus(?int $importId = null): array
     {
         $accountId = Config::getAccountId();
+
         return self::getUploadStatusInContext('accounts', $accountId, $importId);
     }
 
@@ -544,8 +582,10 @@ class Rubric extends AbstractBaseApi
      * @param string $contextType 'accounts' or 'courses'
      * @param int $contextId Context ID
      * @param int|null $importId The import ID (optional, returns latest if not provided)
-     * @return array<string, mixed>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed>
      */
     public static function getUploadStatusInContext(
         string $contextType,
@@ -560,6 +600,7 @@ class Rubric extends AbstractBaseApi
         }
 
         $response = self::$apiClient->get($endpoint);
-        return json_decode($response->getBody(), true);
+
+        return self::parseJsonResponse($response);
     }
 }

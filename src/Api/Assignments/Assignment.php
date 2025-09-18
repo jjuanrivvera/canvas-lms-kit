@@ -6,12 +6,12 @@ namespace CanvasLMS\Api\Assignments;
 
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Rubrics\Rubric;
+use CanvasLMS\Api\Rubrics\RubricAssociation;
+use CanvasLMS\Api\Submissions\Submission;
 use CanvasLMS\Dto\Assignments\CreateAssignmentDTO;
 use CanvasLMS\Dto\Assignments\UpdateAssignmentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Api\Submissions\Submission;
-use CanvasLMS\Api\Rubrics\Rubric;
-use CanvasLMS\Api\Rubrics\RubricAssociation;
 
 /**
  * Canvas LMS Assignments API
@@ -117,12 +117,14 @@ class Assignment extends AbstractBaseApi
 
     /**
      * Allowed submission types
+     *
      * @var array<string>|null
      */
     public ?array $submissionTypes = null;
 
     /**
      * Allowed file extensions for submissions
+     *
      * @var array<string>|null
      */
     public ?array $allowedExtensions = null;
@@ -149,6 +151,7 @@ class Assignment extends AbstractBaseApi
 
     /**
      * All date variations for the assignment
+     *
      * @var array<string, mixed>|null
      */
     public ?array $allDates = null;
@@ -240,6 +243,7 @@ class Assignment extends AbstractBaseApi
 
     /**
      * Turnitin settings object
+     *
      * @var array<string, mixed>|null
      */
     public ?array $turnitinSettings = null;
@@ -251,6 +255,7 @@ class Assignment extends AbstractBaseApi
 
     /**
      * External tool tag attributes
+     *
      * @var array<string, mixed>|null
      */
     public ?array $externalToolTagAttributes = null;
@@ -282,6 +287,7 @@ class Assignment extends AbstractBaseApi
 
     /**
      * Grading count by section
+     *
      * @var array<array<string, mixed>>|null
      */
     public ?array $needsGradingCountBySection = null;
@@ -298,6 +304,7 @@ class Assignment extends AbstractBaseApi
 
     /**
      * Third-party integration data
+     *
      * @var array<string, mixed>|null
      */
     public ?array $integrationData = null;
@@ -319,6 +326,7 @@ class Assignment extends AbstractBaseApi
 
     /**
      * Lock information object
+     *
      * @var array<string, mixed>|null
      */
     public ?array $lockInfo = null;
@@ -340,6 +348,7 @@ class Assignment extends AbstractBaseApi
 
     /**
      * Associated discussion topic
+     *
      * @var array<string, mixed>|null
      */
     public ?array $discussionTopic = null;
@@ -356,12 +365,14 @@ class Assignment extends AbstractBaseApi
 
     /**
      * Array of frozen attributes
+     *
      * @var array<string>|null
      */
     public ?array $frozenAttributes = null;
 
     /**
      * Current user's submission
+     *
      * @var array<string, mixed>|null
      */
     public ?array $submission = null;
@@ -373,24 +384,28 @@ class Assignment extends AbstractBaseApi
 
     /**
      * Rubric settings
+     *
      * @var array<string, mixed>|null
      */
     public ?array $rubricSettings = null;
 
     /**
      * Rubric criteria and ratings
+     *
      * @var array<string, mixed>|null
      */
     public ?array $rubric = null;
 
     /**
      * Array of student IDs who can see assignment
+     *
      * @var array<int>|null
      */
     public ?array $assignmentVisibility = null;
 
     /**
      * Array of assignment override objects
+     *
      * @var array<array<string, mixed>>|null
      */
     public ?array $overrides = null;
@@ -437,6 +452,7 @@ class Assignment extends AbstractBaseApi
 
     /**
      * Score statistics
+     *
      * @var array<string, mixed>|null
      */
     public ?array $scoreStatistics = null;
@@ -448,6 +464,7 @@ class Assignment extends AbstractBaseApi
 
     /**
      * Academic benchmark GUIDs
+     *
      * @var array<string>|null
      */
     public ?array $abGuid = null;
@@ -546,6 +563,7 @@ class Assignment extends AbstractBaseApi
      * Set the course context for assignment operations
      *
      * @param Course $course The course to operate on
+     *
      * @return void
      */
     public static function setCourse(Course $course): void
@@ -556,14 +574,16 @@ class Assignment extends AbstractBaseApi
     /**
      * Check if course context is set
      *
-     * @return bool
      * @throws CanvasApiException If course is not set
+     *
+     * @return bool
      */
     public static function checkCourse(): bool
     {
         if (!isset(self::$course) || !isset(self::$course->id)) {
             throw new CanvasApiException('Course is required');
         }
+
         return true;
     }
 
@@ -581,6 +601,7 @@ class Assignment extends AbstractBaseApi
      * Set assignment ID
      *
      * @param int|null $id
+     *
      * @return void
      */
     public function setId(?int $id): void
@@ -602,6 +623,7 @@ class Assignment extends AbstractBaseApi
      * Set assignment name
      *
      * @param string|null $name
+     *
      * @return void
      */
     public function setName(?string $name): void
@@ -623,6 +645,7 @@ class Assignment extends AbstractBaseApi
      * Set course ID
      *
      * @param int|null $courseId
+     *
      * @return void
      */
     public function setCourseId(?int $courseId): void
@@ -644,6 +667,7 @@ class Assignment extends AbstractBaseApi
      * Set assignment group ID
      *
      * @param int|null $assignmentGroupId
+     *
      * @return void
      */
     public function setAssignmentGroupId(?int $assignmentGroupId): void
@@ -665,6 +689,7 @@ class Assignment extends AbstractBaseApi
      * Set assignment description
      *
      * @param string|null $description
+     *
      * @return void
      */
     public function setDescription(?string $description): void
@@ -686,6 +711,7 @@ class Assignment extends AbstractBaseApi
      * Set assignment position
      *
      * @param int|null $position
+     *
      * @return void
      */
     public function setPosition(?int $position): void
@@ -707,6 +733,7 @@ class Assignment extends AbstractBaseApi
      * Set points possible
      *
      * @param float|null $pointsPossible
+     *
      * @return void
      */
     public function setPointsPossible(?float $pointsPossible): void
@@ -728,6 +755,7 @@ class Assignment extends AbstractBaseApi
      * Set grading type
      *
      * @param string|null $gradingType
+     *
      * @return void
      */
     public function setGradingType(?string $gradingType): void
@@ -749,6 +777,7 @@ class Assignment extends AbstractBaseApi
      * Set submission types
      *
      * @param array<string>|null $submissionTypes
+     *
      * @return void
      */
     public function setSubmissionTypes(?array $submissionTypes): void
@@ -770,6 +799,7 @@ class Assignment extends AbstractBaseApi
      * Set allowed extensions
      *
      * @param array<string>|null $allowedExtensions
+     *
      * @return void
      */
     public function setAllowedExtensions(?array $allowedExtensions): void
@@ -791,6 +821,7 @@ class Assignment extends AbstractBaseApi
      * Set allowed attempts
      *
      * @param int|null $allowedAttempts
+     *
      * @return void
      */
     public function setAllowedAttempts(?int $allowedAttempts): void
@@ -812,6 +843,7 @@ class Assignment extends AbstractBaseApi
      * Set due date
      *
      * @param string|null $dueAt
+     *
      * @return void
      */
     public function setDueAt(?string $dueAt): void
@@ -833,6 +865,7 @@ class Assignment extends AbstractBaseApi
      * Set lock date
      *
      * @param string|null $lockAt
+     *
      * @return void
      */
     public function setLockAt(?string $lockAt): void
@@ -854,6 +887,7 @@ class Assignment extends AbstractBaseApi
      * Set unlock date
      *
      * @param string|null $unlockAt
+     *
      * @return void
      */
     public function setUnlockAt(?string $unlockAt): void
@@ -875,6 +909,7 @@ class Assignment extends AbstractBaseApi
      * Set all dates
      *
      * @param array<string, mixed>|null $allDates
+     *
      * @return void
      */
     public function setAllDates(?array $allDates): void
@@ -896,6 +931,7 @@ class Assignment extends AbstractBaseApi
      * Set published status
      *
      * @param bool|null $published
+     *
      * @return void
      */
     public function setPublished(?bool $published): void
@@ -917,6 +953,7 @@ class Assignment extends AbstractBaseApi
      * Set workflow state
      *
      * @param string|null $workflowState
+     *
      * @return void
      */
     public function setWorkflowState(?string $workflowState): void
@@ -938,6 +975,7 @@ class Assignment extends AbstractBaseApi
      * Set locked for user status
      *
      * @param bool|null $lockedForUser
+     *
      * @return void
      */
     public function setLockedForUser(?bool $lockedForUser): void
@@ -959,6 +997,7 @@ class Assignment extends AbstractBaseApi
      * Set only visible to overrides status
      *
      * @param bool|null $onlyVisibleToOverrides
+     *
      * @return void
      */
     public function setOnlyVisibleToOverrides(?bool $onlyVisibleToOverrides): void
@@ -980,6 +1019,7 @@ class Assignment extends AbstractBaseApi
      * Set peer reviews status
      *
      * @param bool|null $peerReviews
+     *
      * @return void
      */
     public function setPeerReviews(?bool $peerReviews): void
@@ -1001,6 +1041,7 @@ class Assignment extends AbstractBaseApi
      * Set anonymous grading status
      *
      * @param bool|null $anonymousGrading
+     *
      * @return void
      */
     public function setAnonymousGrading(?bool $anonymousGrading): void
@@ -1022,6 +1063,7 @@ class Assignment extends AbstractBaseApi
      * Set moderated grading status
      *
      * @param bool|null $moderatedGrading
+     *
      * @return void
      */
     public function setModeratedGrading(?bool $moderatedGrading): void
@@ -1043,6 +1085,7 @@ class Assignment extends AbstractBaseApi
      * Set group category ID
      *
      * @param int|null $groupCategoryId
+     *
      * @return void
      */
     public function setGroupCategoryId(?int $groupCategoryId): void
@@ -1064,6 +1107,7 @@ class Assignment extends AbstractBaseApi
      * Set HTML URL
      *
      * @param string|null $htmlUrl
+     *
      * @return void
      */
     public function setHtmlUrl(?string $htmlUrl): void
@@ -1085,6 +1129,7 @@ class Assignment extends AbstractBaseApi
      * Set has overrides status
      *
      * @param bool|null $hasOverrides
+     *
      * @return void
      */
     public function setHasOverrides(?bool $hasOverrides): void
@@ -1106,6 +1151,7 @@ class Assignment extends AbstractBaseApi
      * Set created at timestamp
      *
      * @param string|null $createdAt
+     *
      * @return void
      */
     public function setCreatedAt(?string $createdAt): void
@@ -1127,6 +1173,7 @@ class Assignment extends AbstractBaseApi
      * Set updated at timestamp
      *
      * @param string|null $updatedAt
+     *
      * @return void
      */
     public function setUpdatedAt(?string $updatedAt): void
@@ -1259,15 +1306,17 @@ class Assignment extends AbstractBaseApi
             'anonymous_grading' => $this->anonymousGrading,
             'moderated_grading' => $this->moderatedGrading,
             'group_category_id' => $this->groupCategoryId,
-        ], fn($value) => $value !== null);
+        ], fn ($value) => $value !== null);
     }
 
     /**
      * Find a single assignment by ID
      *
      * @param int $id Assignment ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -1276,7 +1325,7 @@ class Assignment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/assignments/%d', self::$course->id, $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $assignmentData = json_decode($response->getBody()->getContents(), true);
+        $assignmentData = self::parseJsonResponse($response);
 
         return new self($assignmentData);
     }
@@ -1285,8 +1334,10 @@ class Assignment extends AbstractBaseApi
      * Create a new assignment
      *
      * @param array<string, mixed>|CreateAssignmentDTO $data Assignment data
-     * @return self Created Assignment object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Created Assignment object
      */
     public static function create(array|CreateAssignmentDTO $data): self
     {
@@ -1299,7 +1350,7 @@ class Assignment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/assignments', self::$course->id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $assignmentData = json_decode($response->getBody()->getContents(), true);
+        $assignmentData = self::parseJsonResponse($response);
 
         return new self($assignmentData);
     }
@@ -1309,8 +1360,10 @@ class Assignment extends AbstractBaseApi
      *
      * @param int $id Assignment ID
      * @param array<string, mixed>|UpdateAssignmentDTO $data Assignment data
-     * @return self Updated Assignment object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Updated Assignment object
      */
     public static function update(int $id, array|UpdateAssignmentDTO $data): self
     {
@@ -1323,7 +1376,7 @@ class Assignment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/assignments/%d', self::$course->id, $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $assignmentData = json_decode($response->getBody()->getContents(), true);
+        $assignmentData = self::parseJsonResponse($response);
 
         return new self($assignmentData);
     }
@@ -1331,8 +1384,9 @@ class Assignment extends AbstractBaseApi
     /**
      * Save the current assignment (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -1361,7 +1415,7 @@ class Assignment extends AbstractBaseApi
             $validSubmissionTypes = [
                 'discussion_topic', 'online_quiz', 'on_paper', 'none', 'external_tool',
                 'online_text_entry', 'online_url', 'online_upload', 'media_recording',
-                'student_annotation'
+                'student_annotation',
             ];
             foreach ($this->submissionTypes as $type) {
                 if (!in_array($type, $validSubmissionTypes, true)) {
@@ -1403,8 +1457,9 @@ class Assignment extends AbstractBaseApi
     /**
      * Delete the assignment
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
@@ -1426,8 +1481,10 @@ class Assignment extends AbstractBaseApi
      *
      * @param int $id Assignment ID to duplicate
      * @param array<string, mixed> $options Duplication options
-     * @return self Duplicated Assignment object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Duplicated Assignment object
      */
     public static function duplicate(int $id, array $options = []): self
     {
@@ -1436,7 +1493,7 @@ class Assignment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/assignments/%d/duplicate', self::$course->id, $id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $options]);
-        $assignmentData = json_decode($response->getBody()->getContents(), true);
+        $assignmentData = self::parseJsonResponse($response);
 
         return new self($assignmentData);
     }
@@ -1447,8 +1504,10 @@ class Assignment extends AbstractBaseApi
      * Get submissions for this assignment
      *
      * @param array<string, mixed> $params Query parameters
-     * @return Submission[]
+     *
      * @throws CanvasApiException
+     *
+     * @return Submission[]
      */
     public function submissions(array $params = []): array
     {
@@ -1460,16 +1519,18 @@ class Assignment extends AbstractBaseApi
 
         Submission::setCourse(self::$course);
         Submission::setAssignment($this);
+
         return Submission::all($params);
     }
-
 
     /**
      * Get submission for a specific user
      *
      * @param int $userId User ID
-     * @return Submission|null
+     *
      * @throws CanvasApiException
+     *
+     * @return Submission|null
      */
     public function submissionForUser(int $userId): ?Submission
     {
@@ -1483,7 +1544,7 @@ class Assignment extends AbstractBaseApi
         try {
             $endpoint = sprintf('courses/%d/assignments/%d/submissions/%d', self::$course->id, $this->id, $userId);
             $response = self::$apiClient->get($endpoint);
-            $submissionData = json_decode($response->getBody()->getContents(), true);
+            $submissionData = self::parseJsonResponse($response);
 
             return new Submission($submissionData);
         } catch (CanvasApiException $e) {
@@ -1492,6 +1553,7 @@ class Assignment extends AbstractBaseApi
                 return null;
             }
             $msg = "Failed to get submission for user {$userId} on assignment {$this->id}: ";
+
             throw new CanvasApiException($msg . $e->getMessage());
         }
     }
@@ -1499,8 +1561,9 @@ class Assignment extends AbstractBaseApi
     /**
      * Get count of submissions for this assignment
      *
-     * @return int
      * @throws CanvasApiException
+     *
+     * @return int
      */
     public function getSubmissionCount(): int
     {
@@ -1511,14 +1574,16 @@ class Assignment extends AbstractBaseApi
         // In a real implementation, we would use the Link header to get total count
         // For now, we'll fetch all and count (not optimal for large datasets)
         $allSubmissions = $this->submissions(['per_page' => 100]);
+
         return count($allSubmissions);
     }
 
     /**
      * Get rubric associated with this assignment
      *
-     * @return Rubric|null
      * @throws CanvasApiException
+     *
+     * @return Rubric|null
      */
     public function rubric(): ?Rubric
     {
@@ -1539,8 +1604,9 @@ class Assignment extends AbstractBaseApi
     /**
      * Get assignment overrides
      *
-     * @return array<mixed>
      * @throws CanvasApiException
+     *
+     * @return array<mixed>
      */
     public function overrides(): array
     {
@@ -1553,7 +1619,7 @@ class Assignment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/assignments/%d/overrides', self::$course->id, $this->id);
         $response = self::$apiClient->get($endpoint);
-        $overridesData = json_decode($response->getBody()->getContents(), true);
+        $overridesData = self::parseJsonResponse($response);
 
         // Return raw override data for now, could create Override objects in future
         return $overridesData;
@@ -1562,8 +1628,9 @@ class Assignment extends AbstractBaseApi
     /**
      * Get rubric association for this assignment
      *
-     * @return RubricAssociation|null
      * @throws CanvasApiException
+     *
+     * @return RubricAssociation|null
      */
     public function rubricAssociation(): ?RubricAssociation
     {
@@ -1581,11 +1648,11 @@ class Assignment extends AbstractBaseApi
                 'query' => [
                     'include' => ['association_object'],
                     'association_type' => 'Assignment',
-                    'association_id' => $this->id
-                ]
+                    'association_id' => $this->id,
+                ],
             ]);
 
-            $associations = json_decode($response->getBody()->getContents(), true);
+            $associations = self::parseJsonResponse($response);
 
             // Find the association for this assignment
             foreach ($associations as $assocData) {
@@ -1597,18 +1664,22 @@ class Assignment extends AbstractBaseApi
             return null;
         } catch (CanvasApiException $e) {
             $msg = "Failed to get rubric association for assignment {$this->id}: ";
+
             throw new CanvasApiException($msg . $e->getMessage());
         }
     }
 
     /**
      * Get the API endpoint for this resource
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
+
         return sprintf('courses/%d/assignments', self::$course->getId());
     }
 }

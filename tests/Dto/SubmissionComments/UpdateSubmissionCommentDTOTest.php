@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\SubmissionComments;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\SubmissionComments\UpdateSubmissionCommentDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\SubmissionComments\UpdateSubmissionCommentDTO
@@ -13,7 +15,7 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testConstructorWithValidData(): void
     {
         $data = [
-            'text_comment' => 'Updated comment text with more details'
+            'text_comment' => 'Updated comment text with more details',
         ];
 
         $dto = new UpdateSubmissionCommentDTO($data);
@@ -48,7 +50,7 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testSettersWithNullValues(): void
     {
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => 'Initial comment text'
+            'text_comment' => 'Initial comment text',
         ]);
 
         // Verify initial value
@@ -62,7 +64,7 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testToApiArrayWithTextComment(): void
     {
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => 'Revised feedback after review'
+            'text_comment' => 'Revised feedback after review',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -84,7 +86,7 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testToApiArrayExcludesNullValues(): void
     {
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => null
+            'text_comment' => null,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -96,7 +98,7 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testToArrayWithTextComment(): void
     {
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => 'Updated comment for array conversion'
+            'text_comment' => 'Updated comment for array conversion',
         ]);
 
         $array = $dto->toArray();
@@ -117,7 +119,7 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testSnakeCaseToApiPropertyConversion(): void
     {
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => 'Testing snake case conversion'
+            'text_comment' => 'Testing snake case conversion',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -130,7 +132,7 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testEmptyStringTextComment(): void
     {
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => ''
+            'text_comment' => '',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -142,7 +144,7 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testWhitespaceOnlyTextComment(): void
     {
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => '   '
+            'text_comment' => '   ',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -154,9 +156,9 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testLongTextComment(): void
     {
         $longComment = str_repeat('This is a long comment. ', 100);
-        
+
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => $longComment
+            'text_comment' => $longComment,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -168,9 +170,9 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testSpecialCharactersInTextComment(): void
     {
         $specialComment = 'Comment with special chars: @#$%^&*()_+{}|:"<>?[];\'\\,./~`';
-        
+
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => $specialComment
+            'text_comment' => $specialComment,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -182,9 +184,9 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testUnicodeCharactersInTextComment(): void
     {
         $unicodeComment = 'Comment with unicode: 🎉📚✅ español française 中文';
-        
+
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => $unicodeComment
+            'text_comment' => $unicodeComment,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -196,9 +198,9 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testHtmlInTextComment(): void
     {
         $htmlComment = '<p>This is <strong>HTML</strong> content with <em>formatting</em></p>';
-        
+
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => $htmlComment
+            'text_comment' => $htmlComment,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -210,9 +212,9 @@ class UpdateSubmissionCommentDTOTest extends TestCase
     public function testNewlinesInTextComment(): void
     {
         $multilineComment = "First line\nSecond line\r\nThird line\n\nFifth line";
-        
+
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => $multilineComment
+            'text_comment' => $multilineComment,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -226,19 +228,19 @@ class UpdateSubmissionCommentDTOTest extends TestCase
         // Simulate updating a comment
         $originalComment = 'Original comment text';
         $updatedComment = 'This is the updated comment with corrections';
-        
+
         // Create DTO with original text
         $dto = new UpdateSubmissionCommentDTO([
-            'text_comment' => $originalComment
+            'text_comment' => $originalComment,
         ]);
-        
+
         $this->assertEquals($originalComment, $dto->getTextComment());
-        
+
         // Update the comment
         $dto->setTextComment($updatedComment);
-        
+
         $this->assertEquals($updatedComment, $dto->getTextComment());
-        
+
         // Verify API array has updated content
         $apiArray = $dto->toApiArray();
         $this->assertContains(['name' => 'comment[text_comment]', 'contents' => $updatedComment], $apiArray);

@@ -46,6 +46,7 @@ class ContentDetails
 
     /**
      * Additional lock information
+     *
      * @var mixed[]|null
      */
     public ?array $lockInfo = null;
@@ -57,6 +58,7 @@ class ContentDetails
 
     /**
      * Constructor
+     *
      * @param mixed[] $data
      */
     public function __construct(array $data = [])
@@ -167,6 +169,7 @@ class ContentDetails
 
     /**
      * Get lock info
+     *
      * @return mixed[]|null
      */
     public function getLockInfo(): ?array
@@ -176,6 +179,7 @@ class ContentDetails
 
     /**
      * Set lock info
+     *
      * @param mixed[]|null $lockInfo
      */
     public function setLockInfo(?array $lockInfo): void
@@ -249,6 +253,7 @@ class ContentDetails
 
     /**
      * Convert to array
+     *
      * @return mixed[]
      */
     public function toArray(): array

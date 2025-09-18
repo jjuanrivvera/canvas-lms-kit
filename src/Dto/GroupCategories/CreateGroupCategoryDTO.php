@@ -48,6 +48,7 @@ class CreateGroupCategoryDTO extends AbstractBaseDto
 
     /**
      * (Deprecated) Create groups and evenly distribute students
+     *
      * @deprecated Use assign_unassigned_members endpoint instead
      */
     public ?string $splitGroupCount = null;
@@ -85,7 +86,7 @@ class CreateGroupCategoryDTO extends AbstractBaseDto
         }
 
         if ($this->groupLimit !== null) {
-            $data[] = ['name' => 'group_limit', 'contents' => (string)$this->groupLimit];
+            $data[] = ['name' => 'group_limit', 'contents' => (string) $this->groupLimit];
         }
 
         if ($this->sisGroupCategoryId !== null) {
@@ -93,7 +94,7 @@ class CreateGroupCategoryDTO extends AbstractBaseDto
         }
 
         if ($this->createGroupCount !== null) {
-            $data[] = ['name' => 'create_group_count', 'contents' => (string)$this->createGroupCount];
+            $data[] = ['name' => 'create_group_count', 'contents' => (string) $this->createGroupCount];
         }
 
         if ($this->splitGroupCount !== null) {
@@ -105,7 +106,7 @@ class CreateGroupCategoryDTO extends AbstractBaseDto
         }
 
         if ($this->courseId !== null) {
-            $data[] = ['name' => 'course_id', 'contents' => (string)$this->courseId];
+            $data[] = ['name' => 'course_id', 'contents' => (string) $this->courseId];
         }
 
         return $data;

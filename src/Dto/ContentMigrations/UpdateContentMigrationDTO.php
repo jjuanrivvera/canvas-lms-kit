@@ -26,6 +26,7 @@ class UpdateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Pre-attachment array for file uploads (if retrying upload)
+     *
      * @var array<string, mixed>|null
      */
     public ?array $preAttachment = null;
@@ -33,24 +34,28 @@ class UpdateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Copy parameters for selective import
      * Format: copy[resource_type][resource_id] = 1
+     *
      * @var array<string, mixed>|null
      */
     public ?array $copy = null;
 
     /**
      * Migration settings (limited effect after migration starts)
+     *
      * @var array<string, mixed>|null
      */
     public ?array $settings = null;
 
     /**
      * Date shift options (if updating)
+     *
      * @var array<string, mixed>|null
      */
     public ?array $dateShiftOptions = null;
 
     /**
      * Constructor
+     *
      * @param array<string, mixed> $data
      */
     public function __construct(array $data = [])
@@ -72,7 +77,7 @@ class UpdateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
             foreach ($this->preAttachment as $key => $value) {
                 $result[] = [
                     'name' => 'pre_attachment[' . $key . ']',
-                    'contents' => (string) $value
+                    'contents' => (string) $value,
                 ];
             }
         }
@@ -89,13 +94,13 @@ class UpdateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
                     foreach ($value as $subKey => $subValue) {
                         $result[] = [
                             'name' => 'settings[' . $key . '][' . $subKey . ']',
-                            'contents' => (string) $subValue
+                            'contents' => (string) $subValue,
                         ];
                     }
                 } else {
                     $result[] = [
                         'name' => 'settings[' . $key . ']',
-                        'contents' => is_bool($value) ? ($value ? '1' : '0') : (string) $value
+                        'contents' => is_bool($value) ? ($value ? '1' : '0') : (string) $value,
                     ];
                 }
             }
@@ -108,13 +113,13 @@ class UpdateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
                     foreach ($value as $day => $substitution) {
                         $result[] = [
                             'name' => 'date_shift_options[day_substitutions][' . $day . ']',
-                            'contents' => (string) $substitution
+                            'contents' => (string) $substitution,
                         ];
                     }
                 } else {
                     $result[] = [
                         'name' => 'date_shift_options[' . $key . ']',
-                        'contents' => is_bool($value) ? ($value ? '1' : '0') : (string) $value
+                        'contents' => is_bool($value) ? ($value ? '1' : '0') : (string) $value,
                     ];
                 }
             }
@@ -138,7 +143,7 @@ class UpdateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
             } else {
                 $result[] = [
                     'name' => $prefix . '[' . $key . ']',
-                    'contents' => (string) $value
+                    'contents' => (string) $value,
                 ];
             }
         }
@@ -235,7 +240,7 @@ class UpdateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
     {
         $this->preAttachment = [
             'name' => $fileName,
-            'size' => $fileSize
+            'size' => $fileSize,
         ];
 
         if ($contentType !== null) {

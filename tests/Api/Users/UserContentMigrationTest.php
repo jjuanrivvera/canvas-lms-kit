@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Api\Users;
 
-use CanvasLMS\Api\Users\User;
 use CanvasLMS\Api\ContentMigrations\ContentMigration;
-use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
+use CanvasLMS\Api\Users\User;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use PHPUnit\Framework\TestCase;
@@ -16,7 +15,9 @@ use Psr\Http\Message\StreamInterface;
 class UserContentMigrationTest extends TestCase
 {
     private HttpClientInterface $mockClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
 
     protected function setUp(): void
@@ -34,15 +35,15 @@ class UserContentMigrationTest extends TestCase
     public function testContentMigrations(): void
     {
         $user = new User(['id' => 123]);
-        
+
         $migrationsData = [
             ['id' => 1, 'workflow_state' => 'completed'],
-            ['id' => 2, 'workflow_state' => 'running']
+            ['id' => 2, 'workflow_state' => 'running'],
         ];
 
         $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
         $mockPaginatedResponse->method('all')->willReturn($migrationsData);
-        
+
         $this->mockClient->method('getPaginated')
             ->with('users/123/content_migrations', ['query' => []])
             ->willReturn($mockPaginatedResponse);
@@ -66,11 +67,11 @@ class UserContentMigrationTest extends TestCase
     public function testContentMigration(): void
     {
         $user = new User(['id' => 123]);
-        
+
         $migrationData = [
             'id' => 456,
             'workflow_state' => 'completed',
-            'migration_type' => 'common_cartridge_importer'
+            'migration_type' => 'common_cartridge_importer',
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($migrationData));
@@ -98,15 +99,15 @@ class UserContentMigrationTest extends TestCase
     public function testCreateContentMigration(): void
     {
         $user = new User(['id' => 123]);
-        
+
         $migrationData = [
             'migration_type' => 'zip_file_importer',
-            'settings' => ['folder_id' => 456]
+            'settings' => ['folder_id' => 456],
         ];
 
         $responseData = array_merge($migrationData, [
             'id' => 789,
-            'workflow_state' => 'pre_processing'
+            'workflow_state' => 'pre_processing',
         ]);
 
         $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
@@ -133,14 +134,14 @@ class UserContentMigrationTest extends TestCase
     public function testImportCommonCartridge(): void
     {
         $user = new User(['id' => 123]);
-        
+
         $tempFile = tempnam(sys_get_temp_dir(), 'test') . '.imscc';
         file_put_contents($tempFile, 'test content');
 
         $responseData = [
             'id' => 789,
             'workflow_state' => 'pre_processing',
-            'migration_type' => 'common_cartridge_importer'
+            'migration_type' => 'common_cartridge_importer',
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
@@ -169,7 +170,7 @@ class UserContentMigrationTest extends TestCase
     public function testImportCommonCartridgeWithFileUpload(): void
     {
         $user = new User(['id' => 123]);
-        
+
         $tempFile = tempnam(sys_get_temp_dir(), 'test') . '.imscc';
         file_put_contents($tempFile, 'test content');
 
@@ -180,8 +181,8 @@ class UserContentMigrationTest extends TestCase
             'migration_issues_url' => 'https://canvas.test/api/v1/users/123/content_migrations/789/migration_issues',
             'pre_attachment' => [
                 'upload_url' => 'https://canvas.test/upload',
-                'upload_params' => ['key' => 'value']
-            ]
+                'upload_params' => ['key' => 'value'],
+            ],
         ];
 
         // Mock the initial create response
@@ -198,7 +199,7 @@ class UserContentMigrationTest extends TestCase
         $refreshedData = $responseData;
         $refreshedData['workflow_state'] = 'running';
         unset($refreshedData['pre_attachment']);
-        
+
         $refreshResponse = $this->createMock(ResponseInterface::class);
         $refreshStream = $this->createMock(StreamInterface::class);
         $refreshStream->method('getContents')->willReturn(json_encode($refreshedData));
@@ -224,14 +225,14 @@ class UserContentMigrationTest extends TestCase
     public function testImportZipFile(): void
     {
         $user = new User(['id' => 123]);
-        
+
         $tempFile = tempnam(sys_get_temp_dir(), 'test') . '.zip';
         file_put_contents($tempFile, 'test content');
 
         $responseData = [
             'id' => 789,
             'workflow_state' => 'pre_processing',
-            'migration_type' => 'zip_file_importer'
+            'migration_type' => 'zip_file_importer',
         ];
 
         $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
@@ -266,7 +267,7 @@ class UserContentMigrationTest extends TestCase
         // Attempting to call content migrations should throw an exception
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('User ID is required to fetch content migrations');
-        
+
         $currentUser->contentMigrations();
     }
 }

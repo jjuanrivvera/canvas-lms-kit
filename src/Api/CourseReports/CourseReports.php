@@ -61,6 +61,7 @@ class CourseReports extends AbstractBaseApi
 
     /**
      * Parameters used to generate the report
+     *
      * @var array<string, mixed>|null
      */
     public ?array $parameters = null;
@@ -83,8 +84,9 @@ class CourseReports extends AbstractBaseApi
     /**
      * Check if course context is set and valid
      *
-     * @return bool True if course context is valid
      * @throws CanvasApiException If course context is not set or invalid
+     *
+     * @return bool True if course context is valid
      */
     public static function checkCourse(): bool
     {
@@ -100,8 +102,10 @@ class CourseReports extends AbstractBaseApi
      *
      * @param string $reportType Type of report to generate (e.g., 'grade_export', 'student_assignment_data')
      * @param array<string, mixed> $parameters Additional parameters for report generation
-     * @return self New CourseReports instance with report details
+     *
      * @throws CanvasApiException If course context not set or API call fails
+     *
+     * @return self New CourseReports instance with report details
      */
     public static function create(string $reportType, array $parameters = []): self
     {
@@ -112,10 +116,10 @@ class CourseReports extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->post($endpoint, [
-            'form_params' => $parameters
+            'form_params' => $parameters,
         ]);
 
-        $reportData = json_decode($response->getBody()->getContents(), true);
+        $reportData = self::parseJsonResponse($response);
 
         return new self($reportData);
     }
@@ -125,8 +129,10 @@ class CourseReports extends AbstractBaseApi
      * Use getReport() method instead with report type and ID
      *
      * @param int $id Report ID (not used)
-     * @return static Never returns, always throws exception
+     *
      * @throws CanvasApiException Always thrown - use getReport() instead
+     *
+     * @return static Never returns, always throws exception
      */
     public static function find(int $id, array $params = []): static
     {
@@ -140,8 +146,10 @@ class CourseReports extends AbstractBaseApi
      *
      * @param string $reportType Type of report to check
      * @param int $reportId ID of the specific report
-     * @return self CourseReports instance with report status
+     *
      * @throws CanvasApiException If course context not set or API call fails
+     *
+     * @return self CourseReports instance with report status
      */
     public static function getReport(string $reportType, int $reportId): self
     {
@@ -152,7 +160,7 @@ class CourseReports extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get($endpoint);
-        $reportData = json_decode($response->getBody()->getContents(), true);
+        $reportData = self::parseJsonResponse($response);
 
         return new self($reportData);
     }
@@ -161,8 +169,10 @@ class CourseReports extends AbstractBaseApi
      * Get the status of the last report of the specified type
      *
      * @param string $reportType Type of report to check
-     * @return self CourseReports instance with last report status
+     *
      * @throws CanvasApiException If course context not set or API call fails
+     *
+     * @return self CourseReports instance with last report status
      */
     public static function last(string $reportType): self
     {
@@ -173,7 +183,7 @@ class CourseReports extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get($endpoint);
-        $reportData = json_decode($response->getBody()->getContents(), true);
+        $reportData = self::parseJsonResponse($response);
 
         return new self($reportData);
     }
@@ -294,8 +304,10 @@ class CourseReports extends AbstractBaseApi
 
     /**
      * @param array<string, mixed> $params
-     * @return array<static>
+     *
      * @throws CanvasApiException Always thrown
+     *
+     * @return array<static>
      */
     public static function get(array $params = []): array
     {

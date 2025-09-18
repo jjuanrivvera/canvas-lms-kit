@@ -21,33 +21,53 @@ use DateTime;
  * and support multiple conferencing providers like BigBlueButton, Zoom, etc.
  *
  * @package CanvasLMS\Api\Conferences
+ *
  * @see https://canvas.instructure.com/doc/api/conferences.html
  */
 class Conference extends AbstractBaseApi
 {
     public ?int $id = null;
+
     public ?string $title = null;
+
     public ?string $conferenceType = null;
+
     public ?string $description = null;
+
     public ?int $duration = null;
+
     /** @var array<string, mixed>|null */
     public ?array $settings = null;
+
     public ?bool $longRunning = null;
+
     /** @var array<int>|null */
     public ?array $users = null;
+
     public ?bool $hasAdvancedSettings = null;
+
     public ?string $url = null;
+
     public ?string $joinUrl = null;
+
     public ?string $status = null;
+
     public ?DateTime $startedAt = null;
+
     public ?DateTime $endedAt = null;
+
     /** @var array<ConferenceRecording>|null */
     public ?array $recordings = null;
+
     /** @var array<mixed>|null */
     public ?array $attendees = null;
+
     public ?int $contextId = null;
+
     public ?string $contextType = null;
+
     public ?DateTime $createdAt = null;
+
     public ?DateTime $updatedAt = null;
 
     /**
@@ -100,6 +120,7 @@ class Conference extends AbstractBaseApi
      * Fetch all conferences (not implemented - conferences require context).
      *
      * @param array<string, mixed> $params Optional query parameters
+     *
      * @return array<Conference> Empty array
      */
     public static function get(array $params = []): array
@@ -114,6 +135,7 @@ class Conference extends AbstractBaseApi
      *
      * @param int $courseId The course ID
      * @param array<string, mixed> $params Optional query parameters
+     *
      * @return array<Conference> Array of Conference objects
      */
     public static function fetchByCourse(int $courseId, array $params = []): array
@@ -125,7 +147,7 @@ class Conference extends AbstractBaseApi
             ['query' => $params]
         );
 
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
         $conferences = [];
 
         foreach ($data['conferences'] ?? [] as $conferenceData) {
@@ -142,6 +164,7 @@ class Conference extends AbstractBaseApi
      *
      * @param int $groupId The group ID
      * @param array<string, mixed> $params Optional query parameters
+     *
      * @return array<Conference> Array of Conference objects
      */
     public static function fetchByGroup(int $groupId, array $params = []): array
@@ -153,7 +176,7 @@ class Conference extends AbstractBaseApi
             ['query' => $params]
         );
 
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
         $conferences = [];
 
         foreach ($data['conferences'] ?? [] as $conferenceData) {
@@ -169,6 +192,7 @@ class Conference extends AbstractBaseApi
      * Find a specific conference by ID.
      *
      * @param int $id The conference ID
+     *
      * @return self The Conference object
      */
     public static function find(int $id, array $params = []): self
@@ -176,7 +200,7 @@ class Conference extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get(sprintf('conferences/%d', $id));
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         $conference = new self($data);
         $conference->processRecordings($data);
@@ -189,6 +213,7 @@ class Conference extends AbstractBaseApi
      *
      * @param int $courseId The course ID
      * @param array<string, mixed>|CreateConferenceDTO $data Conference data
+     *
      * @return self The created Conference object
      */
     public static function createForCourse(int $courseId, array|CreateConferenceDTO $data): self
@@ -202,11 +227,11 @@ class Conference extends AbstractBaseApi
         $response = self::$apiClient->post(
             sprintf('courses/%d/conferences', $courseId),
             [
-                'multipart' => $data->toApiArray()
+                'multipart' => $data->toApiArray(),
             ]
         );
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
         $conference = new self($responseData);
         $conference->processRecordings($responseData);
 
@@ -218,6 +243,7 @@ class Conference extends AbstractBaseApi
      *
      * @param int $groupId The group ID
      * @param array<string, mixed>|CreateConferenceDTO $data Conference data
+     *
      * @return self The created Conference object
      */
     public static function createForGroup(int $groupId, array|CreateConferenceDTO $data): self
@@ -231,11 +257,11 @@ class Conference extends AbstractBaseApi
         $response = self::$apiClient->post(
             sprintf('groups/%d/conferences', $groupId),
             [
-                'multipart' => $data->toApiArray()
+                'multipart' => $data->toApiArray(),
             ]
         );
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
         $conference = new self($responseData);
         $conference->processRecordings($responseData);
 
@@ -246,6 +272,7 @@ class Conference extends AbstractBaseApi
      * Update the conference.
      *
      * @param array<string, mixed>|UpdateConferenceDTO $data Update data
+     *
      * @return self
      */
     public function update(array|UpdateConferenceDTO $data): self
@@ -263,19 +290,19 @@ class Conference extends AbstractBaseApi
         $response = self::$apiClient->put(
             sprintf('conferences/%d', $this->id),
             [
-                'multipart' => $data->toApiArray()
+                'multipart' => $data->toApiArray(),
             ]
         );
 
         if ($response->getStatusCode() === 200) {
-            $responseData = json_decode($response->getBody()->getContents(), true);
+            $responseData = self::parseJsonResponse($response);
 
             // Update current instance with response data - use same logic as constructor
             $dateFields = ['started_at', 'ended_at', 'created_at', 'updated_at'];
             $dateData = [];
 
             foreach ($responseData as $key => $value) {
-                if (in_array($key, $dateFields) && !empty($value)) {
+                if (in_array($key, $dateFields, true) && !empty($value)) {
                     $dateData[$key] = $value;
                 } else {
                     // Convert snake_case to camelCase for non-date fields
@@ -294,6 +321,7 @@ class Conference extends AbstractBaseApi
             }
 
             $this->processRecordings($responseData);
+
             return $this;
         }
 
@@ -336,7 +364,8 @@ class Conference extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->post(sprintf('conferences/%d/join', $this->id));
-        return json_decode($response->getBody()->getContents(), true);
+
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -353,7 +382,7 @@ class Conference extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get(sprintf('conferences/%d/recording', $this->id));
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         $recordings = [];
         foreach ($data as $recordingData) {
@@ -381,8 +410,10 @@ class Conference extends AbstractBaseApi
     /**
      * Get the API endpoint for this resource
      * Note: Conference endpoints are context-specific and this should not be used directly
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {

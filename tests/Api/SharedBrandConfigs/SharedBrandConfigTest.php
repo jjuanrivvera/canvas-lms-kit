@@ -11,19 +11,18 @@ use CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
 
 class SharedBrandConfigTest extends TestCase
 {
     private HttpClientInterface $mockHttpClient;
+
     private int $originalAccountId;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->mockHttpClient = $this->createMock(HttpClientInterface::class);
-        
+
         // Store original account ID to restore later
         $this->originalAccountId = Config::getAccountId() ?? 1;
         Config::setAccountId(1);
@@ -70,7 +69,7 @@ class SharedBrandConfigTest extends TestCase
         ];
 
         $dto = new CreateSharedBrandConfigDTO($data);
-        
+
         $this->assertEquals('Test Theme', $dto->name);
         $this->assertEquals('abc123def456', $dto->brandConfigMd5);
     }
@@ -96,7 +95,7 @@ class SharedBrandConfigTest extends TestCase
         ];
 
         $dto = new UpdateSharedBrandConfigDTO($data);
-        
+
         $this->assertEquals('Updated Theme', $dto->name);
         $this->assertNull($dto->brandConfigMd5);
     }
@@ -151,7 +150,7 @@ class SharedBrandConfigTest extends TestCase
         $this->assertArrayHasKey('name', $array);
         $this->assertArrayHasKey('created_at', $array);
         $this->assertArrayHasKey('updated_at', $array);
-        
+
         $this->assertEquals(123, $array['id']);
         $this->assertEquals('456', $array['account_id']);
         $this->assertEquals('hash123', $array['brand_config_md5']);

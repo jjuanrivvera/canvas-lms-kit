@@ -31,6 +31,7 @@ class PageRevision
 
     /**
      * The User who saved this revision
+     *
      * @var array<string, mixed>|null
      */
     public ?array $editedBy = null;
@@ -79,6 +80,7 @@ class PageRevision
      * Set revision ID
      *
      * @param int|null $revisionId
+     *
      * @return void
      */
     public function setRevisionId(?int $revisionId): void
@@ -100,6 +102,7 @@ class PageRevision
      * Set updated at timestamp
      *
      * @param string|null $updatedAt
+     *
      * @return void
      */
     public function setUpdatedAt(?string $updatedAt): void
@@ -121,6 +124,7 @@ class PageRevision
      * Set latest status
      *
      * @param bool|null $latest
+     *
      * @return void
      */
     public function setLatest(?bool $latest): void
@@ -142,6 +146,7 @@ class PageRevision
      * Set edited by user
      *
      * @param array<string, mixed>|null $editedBy
+     *
      * @return void
      */
     public function setEditedBy(?array $editedBy): void
@@ -163,6 +168,7 @@ class PageRevision
      * Set URL
      *
      * @param string|null $url
+     *
      * @return void
      */
     public function setUrl(?string $url): void
@@ -184,6 +190,7 @@ class PageRevision
      * Set title
      *
      * @param string|null $title
+     *
      * @return void
      */
     public function setTitle(?string $title): void
@@ -205,6 +212,7 @@ class PageRevision
      * Set body
      *
      * @param string|null $body
+     *
      * @return void
      */
     public function setBody(?string $body): void

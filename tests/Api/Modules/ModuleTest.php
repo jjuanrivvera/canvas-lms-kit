@@ -4,24 +4,23 @@ declare(strict_types=1);
 
 namespace Tests\Api\Modules;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\Modules\Module;
-use CanvasLMS\Api\Modules\ModuleItem;
-use CanvasLMS\Api\Modules\ModuleAssignmentOverride;
 use CanvasLMS\Api\Courses\Course;
-use CanvasLMS\Dto\Modules\CreateModuleDTO;
-use CanvasLMS\Dto\Modules\UpdateModuleDTO;
-use CanvasLMS\Dto\Modules\CreateModuleItemDTO;
+use CanvasLMS\Api\Modules\Module;
+use CanvasLMS\Api\Modules\ModuleAssignmentOverride;
+use CanvasLMS\Api\Modules\ModuleItem;
 use CanvasLMS\Dto\Modules\BulkUpdateModuleAssignmentOverridesDTO;
-use CanvasLMS\Interfaces\HttpClientInterface;
+use CanvasLMS\Dto\Modules\CreateModuleDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 class ModuleTest extends TestCase
 {
     private HttpClientInterface $httpClient;
+
     private Course $course;
 
     protected function setUp(): void
@@ -29,7 +28,7 @@ class ModuleTest extends TestCase
         parent::setUp();
         $this->httpClient = $this->createMock(HttpClientInterface::class);
         Module::setApiClient($this->httpClient);
-        
+
         $this->course = new Course(['id' => 1]);
         Module::setCourse($this->course);
     }
@@ -38,7 +37,7 @@ class ModuleTest extends TestCase
     {
         $course = new Course(['id' => 123]);
         Module::setCourse($course);
-        
+
         // Test that course is required for operations
         $this->expectNotToPerformAssertions();
     }
@@ -65,7 +64,7 @@ class ModuleTest extends TestCase
             'state' => 'unlocked',
             'completed_at' => null,
             'publish_final_grade' => false,
-            'published' => true
+            'published' => true,
         ];
 
         $module = new Module($data);
@@ -143,15 +142,15 @@ class ModuleTest extends TestCase
             'id' => 123,
             'name' => 'Test Module',
             'workflow_state' => 'active',
-            'position' => 1
+            'position' => 1,
         ];
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($moduleData));
         $response->method('getBody')->willReturn($stream);
-        
+
         $this->httpClient->expects($this->once())
             ->method('get')
             ->with('courses/1/modules/123', ['query' => []])
@@ -169,17 +168,17 @@ class ModuleTest extends TestCase
         $moduleData = [
             'id' => 123,
             'name' => 'Test Module',
-            'items' => [['id' => 1], ['id' => 2]]
+            'items' => [['id' => 1], ['id' => 2]],
         ];
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($moduleData));
         $response->method('getBody')->willReturn($stream);
-        
+
         $params = ['include' => ['items']];
-        
+
         $this->httpClient->expects($this->once())
             ->method('get')
             ->with('courses/1/modules/123', ['query' => $params])
@@ -195,15 +194,15 @@ class ModuleTest extends TestCase
     {
         $modulesData = [
             ['id' => 1, 'name' => 'Module 1'],
-            ['id' => 2, 'name' => 'Module 2']
+            ['id' => 2, 'name' => 'Module 2'],
         ];
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($modulesData));
         $response->method('getBody')->willReturn($stream);
-        
+
         $this->httpClient->expects($this->once())
             ->method('get')
             ->with('courses/1/modules', ['query' => []])
@@ -220,21 +219,21 @@ class ModuleTest extends TestCase
     public function testGetWithParams(): void
     {
         $modulesData = [
-            ['id' => 1, 'name' => 'Introduction Module']
+            ['id' => 1, 'name' => 'Introduction Module'],
         ];
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($modulesData));
         $response->method('getBody')->willReturn($stream);
-        
+
         $params = [
             'include' => ['items', 'content_details'],
             'search_term' => 'Introduction',
-            'student_id' => '123'
+            'student_id' => '123',
         ];
-        
+
         $this->httpClient->expects($this->once())
             ->method('get')
             ->with('courses/1/modules', ['query' => $params])
@@ -250,15 +249,15 @@ class ModuleTest extends TestCase
     {
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode([['id' => 1, 'name' => 'Module 1']]));
         $response->method('getBody')->willReturn($stream);
         $response->method('getHeader')
             ->with('Link')
             ->willReturn(['<https://canvas.example.com/api/v1/courses/1/modules?page=2>; rel="next"']);
-        
+
         $paginatedResponse = new PaginatedResponse($response, $this->httpClient);
-        
+
         $this->httpClient->expects($this->once())
             ->method('getPaginated')
             ->with('courses/1/modules', ['query' => ['per_page' => 10]])
@@ -278,15 +277,15 @@ class ModuleTest extends TestCase
             'position' => 1,
             'requireSequentialProgress' => true,
             'prerequisiteModuleIds' => [1, 2],
-            'publishFinalGrade' => false
+            'publishFinalGrade' => false,
         ];
 
         // Mock the fetchAll request for prerequisite validation
         $existingModules = [
             ['id' => 1, 'position' => 0],
-            ['id' => 2, 'position' => 0]
+            ['id' => 2, 'position' => 0],
         ];
-        
+
         $fetchResponse = $this->createMock(ResponseInterface::class);
         $fetchStream = $this->createMock(StreamInterface::class);
         $fetchStream->method('getContents')->willReturn(json_encode($existingModules));
@@ -296,7 +295,7 @@ class ModuleTest extends TestCase
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($responseData));
         $response->method('getBody')->willReturn($stream);
 
@@ -305,13 +304,14 @@ class ModuleTest extends TestCase
             ->method('get')
             ->with('courses/1/modules', ['query' => []])
             ->willReturn($fetchResponse);
-            
+
         $this->httpClient->expects($this->once())
             ->method('post')
             ->with(
                 'courses/1/modules',
                 $this->callback(function ($options) {
                     $this->assertArrayHasKey('multipart', $options);
+
                     return true;
                 })
             )
@@ -328,14 +328,14 @@ class ModuleTest extends TestCase
     {
         $dto = new CreateModuleDTO([
             'name' => 'New Module',
-            'position' => 1
+            'position' => 1,
         ]);
 
         $responseData = ['id' => 123, 'name' => 'New Module', 'position' => 1];
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($responseData));
         $response->method('getBody')->willReturn($stream);
 
@@ -354,12 +354,12 @@ class ModuleTest extends TestCase
         // First, mock fetching existing modules for validation
         $existingModules = [
             ['id' => 1, 'position' => 1],
-            ['id' => 2, 'position' => 2]
+            ['id' => 2, 'position' => 2],
         ];
 
         $fetchResponse = $this->createMock(ResponseInterface::class);
         $fetchStream = $this->createMock(StreamInterface::class);
-        
+
         $fetchStream->method('getContents')->willReturn(json_encode($existingModules));
         $fetchResponse->method('getBody')->willReturn($fetchStream);
 
@@ -375,7 +375,7 @@ class ModuleTest extends TestCase
         Module::create([
             'name' => 'New Module',
             'position' => 1,
-            'prerequisiteModuleIds' => [2]
+            'prerequisiteModuleIds' => [2],
         ]);
     }
 
@@ -384,14 +384,14 @@ class ModuleTest extends TestCase
         $updateData = [
             'name' => 'Updated Module',
             'position' => 2,
-            'published' => true
+            'published' => true,
         ];
 
         $responseData = array_merge(['id' => 123], $updateData);
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($responseData));
         $response->method('getBody')->willReturn($stream);
 
@@ -401,6 +401,7 @@ class ModuleTest extends TestCase
                 'courses/1/modules/123',
                 $this->callback(function ($options) {
                     $this->assertArrayHasKey('multipart', $options);
+
                     return true;
                 })
             )
@@ -417,18 +418,18 @@ class ModuleTest extends TestCase
     {
         $module = new Module([
             'name' => 'New Module',
-            'position' => 1
+            'position' => 1,
         ]);
 
         $responseData = [
             'id' => 123,
             'name' => 'New Module',
-            'position' => 1
+            'position' => 1,
         ];
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($responseData));
         $response->method('getBody')->willReturn($stream);
 
@@ -448,18 +449,18 @@ class ModuleTest extends TestCase
         $module = new Module([
             'id' => 123,
             'name' => 'Updated Module',
-            'position' => 2
+            'position' => 2,
         ]);
 
         $responseData = [
             'id' => 123,
             'name' => 'Updated Module',
-            'position' => 2
+            'position' => 2,
         ];
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($responseData));
         $response->method('getBody')->willReturn($stream);
 
@@ -491,7 +492,7 @@ class ModuleTest extends TestCase
         $module = new Module(['id' => 123]);
 
         $response = $this->createMock(ResponseInterface::class);
-        
+
         $this->httpClient->expects($this->once())
             ->method('delete')
             ->with('courses/1/modules/123')
@@ -522,12 +523,12 @@ class ModuleTest extends TestCase
         $responseData = [
             'id' => 123,
             'name' => 'Test Module',
-            'state' => 'locked'
+            'state' => 'locked',
         ];
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($responseData));
         $response->method('getBody')->willReturn($stream);
 
@@ -561,7 +562,7 @@ class ModuleTest extends TestCase
 
         $itemsData = [
             ['id' => 1, 'title' => 'Item 1'],
-            ['id' => 2, 'title' => 'Item 2']
+            ['id' => 2, 'title' => 'Item 2'],
         ];
 
         // Mock paginated response
@@ -586,7 +587,7 @@ class ModuleTest extends TestCase
         $module = new Module(['id' => 123]);
 
         $itemsData = [
-            ['id' => 1, 'title' => 'Item 1', 'content_details' => ['points_possible' => 10]]
+            ['id' => 1, 'title' => 'Item 1', 'content_details' => ['points_possible' => 10]],
         ];
 
         $params = ['include' => ['content_details']];
@@ -614,14 +615,14 @@ class ModuleTest extends TestCase
         $itemData = [
             'title' => 'New Assignment',
             'type' => 'Assignment',
-            'content_id' => 456
+            'content_id' => 456,
         ];
 
         $responseData = array_merge(['id' => 789], $itemData);
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($responseData));
         $response->method('getBody')->willReturn($stream);
 
@@ -641,12 +642,12 @@ class ModuleTest extends TestCase
 
         $overridesData = [
             ['id' => 1, 'title' => 'Section Override', 'course_section' => ['id' => 10]],
-            ['id' => 2, 'title' => 'Student Override', 'students' => [['id' => 20]]]
+            ['id' => 2, 'title' => 'Student Override', 'students' => [['id' => 20]]],
         ];
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($overridesData));
         $response->method('getBody')->willReturn($stream);
 
@@ -680,6 +681,7 @@ class ModuleTest extends TestCase
                     $this->assertArrayHasKey('json', $options);
                     $this->assertArrayHasKey('overrides', $options['json']);
                     $this->assertCount(2, $options['json']['overrides']);
+
                     return true;
                 })
             )
@@ -696,7 +698,7 @@ class ModuleTest extends TestCase
 
         $overrides = [
             ['course_section_id' => 10],
-            ['student_ids' => [20, 30], 'title' => 'Special Students']
+            ['student_ids' => [20, 30], 'title' => 'Special Students'],
         ];
 
         $response = $this->createMock(ResponseInterface::class);
@@ -709,6 +711,7 @@ class ModuleTest extends TestCase
                     $this->assertArrayHasKey('json', $options);
                     $this->assertArrayHasKey('overrides', $options['json']);
                     $this->assertCount(2, $options['json']['overrides']);
+
                     return true;
                 })
             )
@@ -742,7 +745,7 @@ class ModuleTest extends TestCase
             'requireSequentialProgress' => true,
             'prerequisiteModuleIds' => [1, 2],
             'publishFinalGrade' => false,
-            'published' => true
+            'published' => true,
         ]);
 
         // Use reflection to access protected method
@@ -759,7 +762,7 @@ class ModuleTest extends TestCase
             'requireSequentialProgress' => true,
             'prerequisiteModuleIds' => [1, 2],
             'publishFinalGrade' => false,
-            'published' => true
+            'published' => true,
         ], $dtoArray);
     }
 }

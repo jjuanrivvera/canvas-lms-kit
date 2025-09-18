@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Courses;
 
-use GuzzleHttp\Psr7\Response;
-use CanvasLMS\Http\HttpClient;
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Enrollments\Enrollment;
+use CanvasLMS\Config;
 use CanvasLMS\Dto\Courses\CreateCourseDTO;
 use CanvasLMS\Dto\Courses\UpdateCourseDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Config;
+use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Pagination\PaginatedResponse;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 class CourseTest extends TestCase
 {
@@ -32,11 +34,11 @@ class CourseTest extends TestCase
     {
         // Set up test configuration
         Config::setAccountId(1);
-        
+
         $this->httpClientMock = $this->createMock(HttpClient::class);
         Course::setApiClient($this->httpClientMock);
         Enrollment::setApiClient($this->httpClientMock);
-        
+
         // Set up a test course for enrollments if needed
         $testCourse = new Course(['id' => 123, 'name' => 'Test Course']);
         Course::setApiClient($this->httpClientMock);
@@ -45,6 +47,7 @@ class CourseTest extends TestCase
 
     /**
      * Course data provider
+     *
      * @return array
      */
     public static function courseDataProvider(): array
@@ -59,16 +62,19 @@ class CourseTest extends TestCase
                     'id' => 1,
                     'name' => 'Test Course',
                     'courseCode' => 'TC101',
-                ]
+                ],
             ],
         ];
     }
 
     /**
      * Test the create course method
+     *
      * @dataProvider courseDataProvider
+     *
      * @param array $courseData
      * @param array $expectedResult
+     *
      * @return void
      */
     public function testCreateCourse(array $courseData, array $expectedResult): void
@@ -87,9 +93,12 @@ class CourseTest extends TestCase
 
     /**
      * Test the create course method with DTO
+     *
      * @dataProvider courseDataProvider
+     *
      * @param array $courseData
      * @param array $expectedResult
+     *
      * @return void
      */
     public function testCreateCourseWithDto(array $courseData, array $expectedResult): void
@@ -118,16 +127,17 @@ class CourseTest extends TestCase
 
     /**
      * Test that Course::create uses the configured account ID
+     *
      * @return void
      */
     public function testCreateCourseUsesConfiguredAccountId(): void
     {
         // Set a custom account ID
         Config::setAccountId(456);
-        
+
         $courseData = [
             'name' => 'Test Course',
-            'course_code' => 'TC101'
+            'course_code' => 'TC101',
         ];
 
         $dto = new CreateCourseDTO($courseData);
@@ -151,23 +161,24 @@ class CourseTest extends TestCase
 
         $this->assertInstanceOf(Course::class, $course);
         $this->assertEquals('Test Course', $course->getName());
-        
+
         // Reset to default for other tests
         Config::setAccountId(1);
     }
 
     /**
      * Test that Course::create uses default account ID when none is configured
+     *
      * @return void
      */
     public function testCreateCourseUsesDefaultAccountId(): void
     {
         // Reset config to ensure we're using defaults
         Config::resetContext(Config::getContext());
-        
+
         $courseData = [
             'name' => 'Test Course',
-            'course_code' => 'TC101'
+            'course_code' => 'TC101',
         ];
 
         $dto = new CreateCourseDTO($courseData);
@@ -192,13 +203,14 @@ class CourseTest extends TestCase
 
         $this->assertInstanceOf(Course::class, $course);
         $this->assertEquals('Test Course', $course->getName());
-        
+
         // Restore configured account ID for other tests
         Config::setAccountId(1);
     }
 
     /**
      * Test the find course method
+     *
      * @return void
      */
     public function testFindCourse(): void
@@ -217,6 +229,7 @@ class CourseTest extends TestCase
 
     /**
      * Test the update course method
+     *
      * @return void
      */
     public function testUpdateCourse(): void
@@ -238,6 +251,7 @@ class CourseTest extends TestCase
 
     /**
      * Test the update course method with DTO
+     *
      * @return void
      */
     public function testUpdateCourseWithDto(): void
@@ -258,6 +272,7 @@ class CourseTest extends TestCase
 
     /**
      * Test the save course method
+     *
      * @return void
      */
     public function testSaveCourse(): void
@@ -288,6 +303,7 @@ class CourseTest extends TestCase
 
     /**
      * Test the save course method
+     *
      * @return void
      */
     public function testSaveCourseShouldThrowExceptionWhenApiFails(): void
@@ -307,6 +323,7 @@ class CourseTest extends TestCase
 
     /**
      * Test the delete course method
+     *
      * @return void
      */
     public function testDeleteCourse(): void
@@ -329,9 +346,9 @@ class CourseTest extends TestCase
         $this->assertInstanceOf(Course::class, $course->delete());
     }
 
-
     /**
      * Test the conclude course method
+     *
      * @return void
      */
     public function testConcludeCourse(): void
@@ -354,9 +371,9 @@ class CourseTest extends TestCase
         $this->assertInstanceOf(Course::class, $course->conclude());
     }
 
-
     /**
      * Test the reset course method
+     *
      * @return void
      */
     public function testResetCourse(): void
@@ -398,15 +415,15 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
+                'enrollment_state' => 'active',
             ],
             [
                 'id' => 2,
                 'user_id' => 102,
                 'course_id' => 123,
                 'type' => 'TeacherEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -446,8 +463,8 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -484,8 +501,8 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -522,8 +539,8 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'TeacherEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -560,8 +577,8 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'TaEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -598,8 +615,8 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'ObserverEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -636,8 +653,8 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'DesignerEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -674,8 +691,8 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -711,8 +728,8 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -775,8 +792,8 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -812,8 +829,8 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'TeacherEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -849,15 +866,15 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
+                'enrollment_state' => 'active',
             ],
             [
                 'id' => 2,
                 'user_id' => 102,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -893,8 +910,8 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'TeacherEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -930,15 +947,15 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
+                'enrollment_state' => 'active',
             ],
             [
                 'id' => 2,
                 'user_id' => 102,
                 'course_id' => 123,
                 'type' => 'TeacherEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -967,7 +984,7 @@ class CourseTest extends TestCase
     {
         $enrollmentsData = [
             ['id' => 1, 'user_id' => 101, 'type' => 'StudentEnrollment'],
-            ['id' => 2, 'user_id' => 102, 'type' => 'TeacherEnrollment']
+            ['id' => 2, 'user_id' => 102, 'type' => 'TeacherEnrollment'],
         ];
 
         $courseData = ['id' => 123, 'name' => 'Test Course', 'enrollments' => $enrollmentsData];
@@ -1007,8 +1024,8 @@ class CourseTest extends TestCase
                 'user_id' => 101,
                 'course_id' => 123,
                 'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active'
-            ]
+                'enrollment_state' => 'active',
+            ],
         ];
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
@@ -1044,15 +1061,15 @@ class CourseTest extends TestCase
         $fileParams = [
             'name' => 'test.pdf',
             'size' => 1024,
-            'content_type' => 'application/pdf'
+            'content_type' => 'application/pdf',
         ];
 
         $responseData = [
             'upload_url' => 'https://canvas.example.com/upload',
             'upload_params' => [
                 'key' => 'test-key',
-                'policy' => 'test-policy'
-            ]
+                'policy' => 'test-policy',
+            ],
         ];
 
         $response = new Response(200, [], json_encode($responseData));
@@ -1130,7 +1147,7 @@ class CourseTest extends TestCase
             'progress' => 100,
             'workflow_state' => 'completed',
             'created_at' => '2023-01-01T00:00:00Z',
-            'status_url' => '/api/v1/courses/123/course_copy/456'
+            'status_url' => '/api/v1/courses/123/course_copy/456',
         ];
 
         $response = new Response(200, [], json_encode($responseData));
@@ -1171,14 +1188,14 @@ class CourseTest extends TestCase
         $options = ['except' => ['assignments', 'quizzes']];
         $expectedParams = [
             'source_course' => '789',
-            'except' => ['assignments', 'quizzes']
+            'except' => ['assignments', 'quizzes'],
         ];
 
         $responseData = [
             'id' => 101,
             'progress' => null,
             'workflow_state' => 'created',
-            'created_at' => '2023-01-01T00:00:00Z'
+            'created_at' => '2023-01-01T00:00:00Z',
         ];
 
         $response = new Response(200, [], json_encode($responseData));
@@ -1208,7 +1225,7 @@ class CourseTest extends TestCase
         $responseData = [
             'id' => 102,
             'progress' => null,
-            'workflow_state' => 'created'
+            'workflow_state' => 'created',
         ];
 
         $response = new Response(200, [], json_encode($responseData));

@@ -4,20 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Api\Modules;
 
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Modules\Module;
 use CanvasLMS\Api\Modules\ModuleItem;
-use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Dto\Modules\CreateModuleItemDTO;
-use CanvasLMS\Dto\Modules\UpdateModuleItemDTO;
-use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
+use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Objects\CompletionRequirement;
+use CanvasLMS\Pagination\PaginatedResponse;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * @covers \CanvasLMS\Api\Modules\ModuleItem
@@ -25,9 +22,13 @@ use CanvasLMS\Objects\CompletionRequirement;
 class ModuleItemTest extends TestCase
 {
     private HttpClient|MockObject $httpClientMock;
+
     private ResponseInterface|MockObject $mockResponse;
+
     private StreamInterface|MockObject $mockStream;
+
     private Course $course;
+
     private Module $module;
 
     protected function setUp(): void
@@ -35,13 +36,13 @@ class ModuleItemTest extends TestCase
         $this->httpClientMock = $this->createMock(HttpClient::class);
         $this->mockResponse = $this->createMock(ResponseInterface::class);
         $this->mockStream = $this->createMock(StreamInterface::class);
-        
+
         ModuleItem::setApiClient($this->httpClientMock);
 
         // Set up course and module context
         $this->course = new Course(['id' => 1, 'name' => 'Test Course']);
         $this->module = new Module(['id' => 2, 'name' => 'Test Module']);
-        
+
         ModuleItem::setCourse($this->course);
         ModuleItem::setModule($this->module);
     }
@@ -68,8 +69,8 @@ class ModuleItemTest extends TestCase
                     'position' => 1,
                     'indent' => 0,
                     'html_url' => 'https://canvas.example.com/courses/1/modules/items/1',
-                    'published' => true
-                ]
+                    'published' => true,
+                ],
             ],
             'page_item' => [
                 [
@@ -81,8 +82,8 @@ class ModuleItemTest extends TestCase
                     'indent' => 0,
                     'page_url' => 'course-introduction',
                     'html_url' => 'https://canvas.example.com/courses/1/modules/items/2',
-                    'published' => true
-                ]
+                    'published' => true,
+                ],
             ],
             'external_tool_item' => [
                 [
@@ -96,9 +97,9 @@ class ModuleItemTest extends TestCase
                     'new_tab' => true,
                     'html_url' => 'https://canvas.example.com/courses/1/modules/items/3',
                     'iframe' => ['width' => 800, 'height' => 600],
-                    'published' => true
-                ]
-            ]
+                    'published' => true,
+                ],
+            ],
         ];
     }
 
@@ -106,7 +107,7 @@ class ModuleItemTest extends TestCase
     {
         $course = new Course(['id' => 5, 'name' => 'Another Course']);
         ModuleItem::setCourse($course);
-        
+
         $this->assertTrue(ModuleItem::checkCourse());
     }
 
@@ -114,7 +115,7 @@ class ModuleItemTest extends TestCase
     {
         $module = new Module(['id' => 6, 'name' => 'Another Module']);
         ModuleItem::setModule($module);
-        
+
         $this->assertTrue(ModuleItem::checkModule());
     }
 
@@ -128,7 +129,7 @@ class ModuleItemTest extends TestCase
     {
         $this->mockStream->method('getContents')->willReturn(json_encode($moduleItemData));
         $this->mockResponse->method('getBody')->willReturn($this->mockStream);
-        
+
         $this->httpClientMock->expects($this->once())
             ->method('post')
             ->with(
@@ -140,7 +141,7 @@ class ModuleItemTest extends TestCase
             ->willReturn($this->mockResponse);
 
         $moduleItem = ModuleItem::create($moduleItemData);
-        
+
         $this->assertInstanceOf(ModuleItem::class, $moduleItem);
         $this->assertEquals($moduleItemData['id'], $moduleItem->getId());
         $this->assertEquals($moduleItemData['type'], $moduleItem->getType());
@@ -155,26 +156,26 @@ class ModuleItemTest extends TestCase
             'type' => 'Assignment',
             'content_id' => 123,
             'title' => 'Test Assignment',
-            'position' => 1
+            'position' => 1,
         ];
-        
+
         $dto = new CreateModuleItemDTO([
             'type' => 'Assignment',
             'content_id' => 123,
             'title' => 'Test Assignment',
-            'position' => 1
+            'position' => 1,
         ]);
-        
+
         $this->mockStream->method('getContents')->willReturn(json_encode($moduleItemData));
         $this->mockResponse->method('getBody')->willReturn($this->mockStream);
-        
+
         $this->httpClientMock->expects($this->once())
             ->method('post')
             ->with('courses/1/modules/2/items')
             ->willReturn($this->mockResponse);
 
         $moduleItem = ModuleItem::create($dto);
-        
+
         $this->assertInstanceOf(ModuleItem::class, $moduleItem);
         $this->assertEquals($moduleItemData['id'], $moduleItem->getId());
     }
@@ -186,14 +187,14 @@ class ModuleItemTest extends TestCase
     {
         $this->mockStream->method('getContents')->willReturn(json_encode($moduleItemData));
         $this->mockResponse->method('getBody')->willReturn($this->mockStream);
-        
+
         $this->httpClientMock->expects($this->once())
             ->method('get')
             ->with('courses/1/modules/2/items/' . $moduleItemData['id'])
             ->willReturn($this->mockResponse);
 
         $moduleItem = ModuleItem::find($moduleItemData['id']);
-        
+
         $this->assertInstanceOf(ModuleItem::class, $moduleItem);
         $this->assertEquals($moduleItemData['id'], $moduleItem->getId());
         $this->assertEquals($moduleItemData['type'], $moduleItem->getType());
@@ -207,20 +208,20 @@ class ModuleItemTest extends TestCase
                 'module_id' => 2,
                 'type' => 'Assignment',
                 'title' => 'Assignment 1',
-                'position' => 1
+                'position' => 1,
             ],
             [
                 'id' => 2,
                 'module_id' => 2,
                 'type' => 'Page',
                 'title' => 'Page 1',
-                'position' => 2
-            ]
+                'position' => 2,
+            ],
         ];
-        
+
         $this->mockStream->method('getContents')->willReturn(json_encode($moduleItemsData));
         $this->mockResponse->method('getBody')->willReturn($this->mockStream);
-        
+
         $this->httpClientMock->expects($this->once())
             ->method('get')
             ->with(
@@ -232,7 +233,7 @@ class ModuleItemTest extends TestCase
             ->willReturn($this->mockResponse);
 
         $moduleItems = ModuleItem::get();
-        
+
         $this->assertCount(2, $moduleItems);
         $this->assertContainsOnlyInstancesOf(ModuleItem::class, $moduleItems);
         $this->assertEquals(1, $moduleItems[0]->getId());
@@ -246,20 +247,20 @@ class ModuleItemTest extends TestCase
             'module_id' => 2,
             'type' => 'Assignment',
             'title' => 'Original Title',
-            'position' => 1
+            'position' => 1,
         ];
-        
+
         $updatedData = [
             'id' => 1,
             'module_id' => 2,
             'type' => 'Assignment',
             'title' => 'Updated Title',
-            'position' => 2
+            'position' => 2,
         ];
-        
+
         $this->mockStream->method('getContents')->willReturn(json_encode($updatedData));
         $this->mockResponse->method('getBody')->willReturn($this->mockStream);
-        
+
         $this->httpClientMock->expects($this->once())
             ->method('put')
             ->with(
@@ -271,7 +272,7 @@ class ModuleItemTest extends TestCase
             ->willReturn($this->mockResponse);
 
         $moduleItem = ModuleItem::update(1, ['title' => 'Updated Title', 'position' => 2]);
-        
+
         $this->assertInstanceOf(ModuleItem::class, $moduleItem);
         $this->assertEquals('Updated Title', $moduleItem->getTitle());
         $this->assertEquals(2, $moduleItem->getPosition());
@@ -284,14 +285,14 @@ class ModuleItemTest extends TestCase
             'module_id' => 2,
             'type' => 'Assignment',
             'title' => 'Updated Assignment',
-            'position' => 1
+            'position' => 1,
         ];
-        
+
         $moduleItem = new ModuleItem($moduleItemData);
-        
+
         $this->mockStream->method('getContents')->willReturn(json_encode($moduleItemData));
         $this->mockResponse->method('getBody')->willReturn($this->mockStream);
-        
+
         $this->httpClientMock->expects($this->once())
             ->method('request')
             ->with(
@@ -304,7 +305,7 @@ class ModuleItemTest extends TestCase
             ->willReturn($this->mockResponse);
 
         $result = $moduleItem->save();
-        
+
         $this->assertInstanceOf(ModuleItem::class, $result);
     }
 
@@ -313,16 +314,16 @@ class ModuleItemTest extends TestCase
         $moduleItemData = [
             'type' => 'Assignment',
             'title' => 'New Assignment',
-            'content_id' => 123
+            'content_id' => 123,
         ];
-        
+
         $responseData = array_merge($moduleItemData, ['id' => 1, 'module_id' => 2]);
-        
+
         $moduleItem = new ModuleItem($moduleItemData);
-        
+
         $this->mockStream->method('getContents')->willReturn(json_encode($responseData));
         $this->mockResponse->method('getBody')->willReturn($this->mockStream);
-        
+
         $this->httpClientMock->expects($this->once())
             ->method('request')
             ->with(
@@ -335,7 +336,7 @@ class ModuleItemTest extends TestCase
             ->willReturn($this->mockResponse);
 
         $result = $moduleItem->save();
-        
+
         $this->assertInstanceOf(ModuleItem::class, $result);
         $this->assertEquals(1, $moduleItem->getId());
     }
@@ -343,52 +344,52 @@ class ModuleItemTest extends TestCase
     public function testDelete(): void
     {
         $moduleItem = new ModuleItem(['id' => 1, 'module_id' => 2, 'type' => 'Assignment', 'title' => 'Test']);
-        
+
         $this->httpClientMock->expects($this->once())
             ->method('delete')
             ->with('courses/1/modules/2/items/1');
 
         $result = $moduleItem->delete();
-        
+
         $this->assertInstanceOf(ModuleItem::class, $result);
     }
 
     public function testMarkAsRead(): void
     {
         $moduleItem = new ModuleItem(['id' => 1, 'module_id' => 2, 'type' => 'Page', 'title' => 'Test Page']);
-        
+
         $this->httpClientMock->expects($this->once())
             ->method('post')
             ->with('courses/1/modules/2/items/1/mark_read');
 
         $result = $moduleItem->markAsRead();
-        
+
         $this->assertInstanceOf(ModuleItem::class, $result);
     }
 
     public function testMarkAsDone(): void
     {
         $moduleItem = new ModuleItem(['id' => 1, 'module_id' => 2, 'type' => 'Assignment', 'title' => 'Test Assignment']);
-        
+
         $this->httpClientMock->expects($this->once())
             ->method('put')
             ->with('courses/1/modules/2/items/1/done');
 
         $result = $moduleItem->markAsDone();
-        
+
         $this->assertInstanceOf(ModuleItem::class, $result);
     }
 
     public function testMarkAsNotDone(): void
     {
         $moduleItem = new ModuleItem(['id' => 1, 'module_id' => 2, 'type' => 'Assignment', 'title' => 'Test Assignment']);
-        
+
         $this->httpClientMock->expects($this->once())
             ->method('delete')
             ->with('courses/1/modules/2/items/1/done');
 
         $result = $moduleItem->markAsNotDone();
-        
+
         $this->assertInstanceOf(ModuleItem::class, $result);
     }
 
@@ -397,7 +398,7 @@ class ModuleItemTest extends TestCase
         $paginatedResponse = $this->createMock(PaginatedResponse::class);
         $paginatedResponse->method('getJsonData')->willReturn([
             ['id' => 1, 'title' => 'Item 1'],
-            ['id' => 2, 'title' => 'Item 2']
+            ['id' => 2, 'title' => 'Item 2'],
         ]);
         $paginatedResponse->method('toPaginationResult')->willReturnCallback(function ($data) {
             return new \CanvasLMS\Pagination\PaginationResult(
@@ -415,7 +416,7 @@ class ModuleItemTest extends TestCase
             ->willReturn($paginatedResponse);
 
         $result = ModuleItem::paginate();
-        
+
         $this->assertInstanceOf(\CanvasLMS\Pagination\PaginationResult::class, $result);
         $this->assertCount(2, $result->getData());
     }
@@ -430,17 +431,17 @@ class ModuleItemTest extends TestCase
             'Quiz',
             'SubHeader',
             'ExternalUrl',
-            'ExternalTool'
+            'ExternalTool',
         ];
-        
+
         $expectedCompletionTypes = [
             'must_view',
             'must_contribute',
             'must_submit',
             'min_score',
-            'must_mark_done'
+            'must_mark_done',
         ];
-        
+
         $this->assertEquals($expectedTypes, ModuleItem::VALID_TYPES);
         $this->assertEquals($expectedCompletionTypes, ModuleItem::VALID_COMPLETION_TYPES);
     }
@@ -451,20 +452,20 @@ class ModuleItemTest extends TestCase
             'id' => 1,
             'module_id' => 2,
             'type' => 'Assignment',
-            'title' => 'Test Assignment'
+            'title' => 'Test Assignment',
         ]);
-        
+
         // Test getters
         $this->assertEquals(1, $moduleItem->getId());
         $this->assertEquals(2, $moduleItem->getModuleId());
         $this->assertEquals('Assignment', $moduleItem->getType());
         $this->assertEquals('Test Assignment', $moduleItem->getTitle());
-        
+
         // Test setters
         $moduleItem->setTitle('Updated Assignment');
         $moduleItem->setPosition(3);
         $moduleItem->setIndent(1);
-        
+
         $this->assertEquals('Updated Assignment', $moduleItem->getTitle());
         $this->assertEquals(3, $moduleItem->getPosition());
         $this->assertEquals(1, $moduleItem->getIndent());
@@ -477,9 +478,9 @@ class ModuleItemTest extends TestCase
             'type' => 'ExternalTool',
             'external_url' => 'https://example.com/tool',
             'new_tab' => true,
-            'iframe' => ['width' => 800, 'height' => 600]
+            'iframe' => ['width' => 800, 'height' => 600],
         ]);
-        
+
         $this->assertEquals('https://example.com/tool', $moduleItem->getExternalUrl());
         $this->assertTrue($moduleItem->getNewTab());
         $this->assertEquals(['width' => 800, 'height' => 600], $moduleItem->getIframe());
@@ -490,19 +491,19 @@ class ModuleItemTest extends TestCase
         $completionRequirement = [
             'type' => 'min_score',
             'min_score' => 80,
-            'completed' => false
+            'completed' => false,
         ];
-        
+
         $moduleItem = new ModuleItem([
             'id' => 1,
             'type' => 'Assignment',
-            'completion_requirement' => $completionRequirement
+            'completion_requirement' => $completionRequirement,
         ]);
-        
+
         $this->assertInstanceOf(CompletionRequirement::class, $moduleItem->getCompletionRequirement());
         $this->assertEquals($completionRequirement['type'], $moduleItem->getCompletionRequirement()->getType());
         $this->assertEquals($completionRequirement['min_score'], $moduleItem->getCompletionRequirement()->getMinScore());
-        
+
         $newRequirement = new CompletionRequirement(['type' => 'must_view']);
         $moduleItem->setCompletionRequirement($newRequirement);
         $this->assertEquals('must_view', $moduleItem->getCompletionRequirement()->getType());
@@ -513,11 +514,11 @@ class ModuleItemTest extends TestCase
         $moduleItem = new ModuleItem([
             'id' => 1,
             'type' => 'Page',
-            'page_url' => 'course-introduction'
+            'page_url' => 'course-introduction',
         ]);
-        
+
         $this->assertEquals('course-introduction', $moduleItem->getPageUrl());
-        
+
         $moduleItem->setPageUrl('updated-page-slug');
         $this->assertEquals('updated-page-slug', $moduleItem->getPageUrl());
     }

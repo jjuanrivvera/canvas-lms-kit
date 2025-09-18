@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Dto\AppointmentGroups;
 
 use CanvasLMS\Dto\AbstractBaseDto;
@@ -18,6 +20,7 @@ class CreateAppointmentGroupDTO extends AbstractBaseDto
     /**
      * Array of context codes (courses, e.g. course_1) this group should be linked to
      * Users in the course(s) with appropriate permissions will be able to sign up
+     *
      * @var array<string>
      */
     public array $contextCodes = [];
@@ -25,30 +28,35 @@ class CreateAppointmentGroupDTO extends AbstractBaseDto
     /**
      * Array of sub context codes (course sections or a single group category)
      * Used to limit the appointment group to particular sections
+     *
      * @var array<string>|null
      */
     public ?array $subContextCodes = null;
 
     /**
      * Short title for the appointment group
+     *
      * @var string
      */
     public string $title = '';
 
     /**
      * Longer text description of the appointment group
+     *
      * @var string|null
      */
     public ?string $description = null;
 
     /**
      * Location name of the appointment group
+     *
      * @var string|null
      */
     public ?string $locationName = null;
 
     /**
      * Location address
+     *
      * @var string|null
      */
     public ?string $locationAddress = null;
@@ -56,6 +64,7 @@ class CreateAppointmentGroupDTO extends AbstractBaseDto
     /**
      * Whether this appointment group should be published (made available for signup)
      * Once published, an appointment group cannot be unpublished
+     *
      * @var bool|null
      */
     public ?bool $publish = null;
@@ -63,6 +72,7 @@ class CreateAppointmentGroupDTO extends AbstractBaseDto
     /**
      * Maximum number of participants that may register for each time slot
      * Defaults to null (no limit)
+     *
      * @var int|null
      */
     public ?int $participantsPerAppointment = null;
@@ -70,12 +80,14 @@ class CreateAppointmentGroupDTO extends AbstractBaseDto
     /**
      * Minimum number of time slots a user must register for
      * If not set, users do not need to sign up for any time slots
+     *
      * @var int|null
      */
     public ?int $minAppointmentsPerParticipant = null;
 
     /**
      * Maximum number of time slots a user may register for
+     *
      * @var int|null
      */
     public ?int $maxAppointmentsPerParticipant = null;
@@ -83,6 +95,7 @@ class CreateAppointmentGroupDTO extends AbstractBaseDto
     /**
      * Nested array of start time/end time pairs indicating time slots
      * Format: [['start_at' => '2012-07-19T21:00:00Z', 'end_at' => '2012-07-19T22:00:00Z'], ...]
+     *
      * @var array<int, array{start_at?: string, end_at?: string}>|null
      */
     public ?array $newAppointments = null;
@@ -90,12 +103,14 @@ class CreateAppointmentGroupDTO extends AbstractBaseDto
     /**
      * 'private' - participants cannot see who has signed up for a particular time slot
      * 'protected' - participants can see who has signed up
+     *
      * @var string|null
      */
     public ?string $participantVisibility = null;
 
     /**
      * Whether observer users can sign-up for an appointment
+     *
      * @var bool|null
      */
     public ?bool $allowObserverSignup = null;
@@ -113,13 +128,13 @@ class CreateAppointmentGroupDTO extends AbstractBaseDto
         foreach ($this->contextCodes as $index => $code) {
             $data[] = [
                 'name' => "appointment_group[context_codes][$index]",
-                'contents' => $code
+                'contents' => $code,
             ];
         }
 
         $data[] = [
             'name' => 'appointment_group[title]',
-            'contents' => $this->title
+            'contents' => $this->title,
         ];
 
         // Optional fields
@@ -127,7 +142,7 @@ class CreateAppointmentGroupDTO extends AbstractBaseDto
             foreach ($this->subContextCodes as $index => $code) {
                 $data[] = [
                     'name' => "appointment_group[sub_context_codes][$index]",
-                    'contents' => $code
+                    'contents' => $code,
                 ];
             }
         }
@@ -135,49 +150,49 @@ class CreateAppointmentGroupDTO extends AbstractBaseDto
         if ($this->description !== null) {
             $data[] = [
                 'name' => 'appointment_group[description]',
-                'contents' => $this->description
+                'contents' => $this->description,
             ];
         }
 
         if ($this->locationName !== null) {
             $data[] = [
                 'name' => 'appointment_group[location_name]',
-                'contents' => $this->locationName
+                'contents' => $this->locationName,
             ];
         }
 
         if ($this->locationAddress !== null) {
             $data[] = [
                 'name' => 'appointment_group[location_address]',
-                'contents' => $this->locationAddress
+                'contents' => $this->locationAddress,
             ];
         }
 
         if ($this->publish !== null) {
             $data[] = [
                 'name' => 'appointment_group[publish]',
-                'contents' => $this->publish ? '1' : '0'
+                'contents' => $this->publish ? '1' : '0',
             ];
         }
 
         if ($this->participantsPerAppointment !== null) {
             $data[] = [
                 'name' => 'appointment_group[participants_per_appointment]',
-                'contents' => (string)$this->participantsPerAppointment
+                'contents' => (string) $this->participantsPerAppointment,
             ];
         }
 
         if ($this->minAppointmentsPerParticipant !== null) {
             $data[] = [
                 'name' => 'appointment_group[min_appointments_per_participant]',
-                'contents' => (string)$this->minAppointmentsPerParticipant
+                'contents' => (string) $this->minAppointmentsPerParticipant,
             ];
         }
 
         if ($this->maxAppointmentsPerParticipant !== null) {
             $data[] = [
                 'name' => 'appointment_group[max_appointments_per_participant]',
-                'contents' => (string)$this->maxAppointmentsPerParticipant
+                'contents' => (string) $this->maxAppointmentsPerParticipant,
             ];
         }
 
@@ -187,13 +202,13 @@ class CreateAppointmentGroupDTO extends AbstractBaseDto
                 if (isset($appointment['start_at'])) {
                     $data[] = [
                         'name' => "appointment_group[new_appointments][$index][0]",
-                        'contents' => $appointment['start_at']
+                        'contents' => $appointment['start_at'],
                     ];
                 }
                 if (isset($appointment['end_at'])) {
                     $data[] = [
                         'name' => "appointment_group[new_appointments][$index][1]",
-                        'contents' => $appointment['end_at']
+                        'contents' => $appointment['end_at'],
                     ];
                 }
             }
@@ -202,14 +217,14 @@ class CreateAppointmentGroupDTO extends AbstractBaseDto
         if ($this->participantVisibility !== null) {
             $data[] = [
                 'name' => 'appointment_group[participant_visibility]',
-                'contents' => $this->participantVisibility
+                'contents' => $this->participantVisibility,
             ];
         }
 
         if ($this->allowObserverSignup !== null) {
             $data[] = [
                 'name' => 'appointment_group[allow_observer_signup]',
-                'contents' => $this->allowObserverSignup ? '1' : '0'
+                'contents' => $this->allowObserverSignup ? '1' : '0',
             ];
         }
 

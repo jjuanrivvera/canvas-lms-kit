@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Api\AppointmentGroups;
 
-use DateTime;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Dto\AppointmentGroups\CreateAppointmentGroupDTO;
 use CanvasLMS\Dto\AppointmentGroups\UpdateAppointmentGroupDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Pagination\PaginatedResponse;
+use DateTime;
 
 /**
  * AppointmentGroup Class
@@ -61,120 +63,140 @@ class AppointmentGroup extends AbstractBaseApi
 {
     /**
      * The ID of the appointment group
+     *
      * @var int|null
      */
     public ?int $id = null;
 
     /**
      * The title of the appointment group
+     *
      * @var string|null
      */
     public ?string $title = null;
 
     /**
      * The start of the first time slot in the appointment group
+     *
      * @var DateTime|null
      */
     public ?DateTime $startAt = null;
 
     /**
      * The end of the last time slot in the appointment group
+     *
      * @var DateTime|null
      */
     public ?DateTime $endAt = null;
 
     /**
      * The text description of the appointment group
+     *
      * @var string|null
      */
     public ?string $description = null;
 
     /**
      * The location name of the appointment group
+     *
      * @var string|null
      */
     public ?string $locationName = null;
 
     /**
      * The address of the appointment group's location
+     *
      * @var string|null
      */
     public ?string $locationAddress = null;
 
     /**
      * The number of participants who have reserved slots
+     *
      * @var int|null
      */
     public ?int $participantCount = null;
 
     /**
      * The start and end times of slots reserved by the current user
+     *
      * @var array<int, array<string, mixed>>|null
      */
     public ?array $reservedTimes = null;
 
     /**
      * Boolean indicating whether observer users should be able to sign-up for an appointment
+     *
      * @var bool|null
      */
     public ?bool $allowObserverSignup = null;
 
     /**
      * The context codes this appointment group belongs to
+     *
      * @var array<int, string>|null
      */
     public ?array $contextCodes = null;
 
     /**
      * The sub-context codes this appointment group is restricted to
+     *
      * @var array<int, string>|null
      */
     public ?array $subContextCodes = null;
 
     /**
      * Current state of the appointment group ('pending', 'active' or 'deleted')
+     *
      * @var string|null
      */
     public ?string $workflowState = null;
 
     /**
      * Boolean indicating whether the current user needs to sign up
+     *
      * @var bool|null
      */
     public ?bool $requiringAction = null;
 
     /**
      * Number of time slots in this appointment group
+     *
      * @var int|null
      */
     public ?int $appointmentsCount = null;
 
     /**
      * Calendar Events representing the time slots
+     *
      * @var array<int, array<string, mixed>>|null
      */
     public ?array $appointments = null;
 
     /**
      * Newly created time slots (only in create/update responses)
+     *
      * @var array<int, array<string, mixed>>|null
      */
     public ?array $newAppointments = null;
 
     /**
      * Maximum number of time slots a user may register for
+     *
      * @var int|null
      */
     public ?int $maxAppointmentsPerParticipant = null;
 
     /**
      * Minimum number of time slots a user must register for
+     *
      * @var int|null
      */
     public ?int $minAppointmentsPerParticipant = null;
 
     /**
      * Maximum number of participants that may register for each time slot
+     *
      * @var int|null
      */
     public ?int $participantsPerAppointment = null;
@@ -182,36 +204,42 @@ class AppointmentGroup extends AbstractBaseApi
     /**
      * 'private' means participants cannot see who has signed up
      * 'protected' means that they can
+     *
      * @var string|null
      */
     public ?string $participantVisibility = null;
 
     /**
      * How participants sign up: 'User' or 'Group'
+     *
      * @var string|null
      */
     public ?string $participantType = null;
 
     /**
      * URL for this appointment group
+     *
      * @var string|null
      */
     public ?string $url = null;
 
     /**
      * URL for a user to view this appointment group
+     *
      * @var string|null
      */
     public ?string $htmlUrl = null;
 
     /**
      * When the appointment group was created
+     *
      * @var DateTime|null
      */
     public ?DateTime $createdAt = null;
 
     /**
      * When the appointment group was last updated
+     *
      * @var DateTime|null
      */
     public ?DateTime $updatedAt = null;
@@ -237,8 +265,10 @@ class AppointmentGroup extends AbstractBaseApi
      * Create a new appointment group
      *
      * @param array<string, mixed>|CreateAppointmentGroupDTO $data The appointment group data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function create(array|CreateAppointmentGroupDTO $data): self
     {
@@ -248,7 +278,8 @@ class AppointmentGroup extends AbstractBaseApi
 
         self::checkApiClient();
         $response = self::$apiClient->post('appointment_groups', ['multipart' => $data->toApiArray()]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
+
         return new self($responseData);
     }
 
@@ -257,15 +288,18 @@ class AppointmentGroup extends AbstractBaseApi
      *
      * @param int $id The appointment group ID
      * @param array<string, mixed> $params Query parameters (include[])
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d', $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
+
         return new self($data);
     }
 
@@ -274,8 +308,10 @@ class AppointmentGroup extends AbstractBaseApi
      *
      * @param int $id The appointment group ID
      * @param array<string, mixed>|UpdateAppointmentGroupDTO $updateData The update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function update(int $id, array|UpdateAppointmentGroupDTO $updateData): self
     {
@@ -286,7 +322,8 @@ class AppointmentGroup extends AbstractBaseApi
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d', $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $updateData->toApiArray()]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
+
         return new self($responseData);
     }
 
@@ -294,13 +331,15 @@ class AppointmentGroup extends AbstractBaseApi
      * Delete an appointment group
      *
      * @param string|null $cancelReason Optional reason for deletion
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(?string $cancelReason = null): self
     {
         if (!$this->id) {
-            throw new CanvasApiException("Cannot delete appointment group without ID");
+            throw new CanvasApiException('Cannot delete appointment group without ID');
         }
 
         self::checkApiClient();
@@ -312,6 +351,7 @@ class AppointmentGroup extends AbstractBaseApi
         }
 
         self::$apiClient->delete($endpoint, $params);
+
         return $this;
     }
 
@@ -319,26 +359,28 @@ class AppointmentGroup extends AbstractBaseApi
      * List appointment groups
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<int, self>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, self>
      */
     public static function get(array $params = []): array
     {
         self::checkApiClient();
         $response = self::$apiClient->get('appointment_groups', ['query' => $params]);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
             return new self($item);
         }, $data);
     }
 
-
     /**
      * Save the appointment group (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -352,7 +394,7 @@ class AppointmentGroup extends AbstractBaseApi
                 'locationName', 'locationAddress',
                 'participantsPerAppointment', 'minAppointmentsPerParticipant',
                 'maxAppointmentsPerParticipant', 'newAppointments',
-                'participantVisibility', 'allowObserverSignup'
+                'participantVisibility', 'allowObserverSignup',
             ];
 
             foreach ($properties as $property) {
@@ -377,10 +419,10 @@ class AppointmentGroup extends AbstractBaseApi
 
             // Context codes and title are required
             if (empty($this->contextCodes)) {
-                throw new CanvasApiException("Context codes are required to create an appointment group");
+                throw new CanvasApiException('Context codes are required to create an appointment group');
             }
             if (!$this->title) {
-                throw new CanvasApiException("Title is required to create an appointment group");
+                throw new CanvasApiException('Title is required to create an appointment group');
             }
 
             // Map properties to DTO
@@ -389,7 +431,7 @@ class AppointmentGroup extends AbstractBaseApi
                 'locationName', 'locationAddress',
                 'participantsPerAppointment', 'minAppointmentsPerParticipant',
                 'maxAppointmentsPerParticipant', 'newAppointments',
-                'participantVisibility', 'allowObserverSignup'
+                'participantVisibility', 'allowObserverSignup',
             ];
 
             foreach ($properties as $property) {
@@ -417,36 +459,42 @@ class AppointmentGroup extends AbstractBaseApi
      * List user participants
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<string, mixed>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed>
      */
     public function listUsers(array $params = []): array
     {
         if (!$this->id) {
-            throw new CanvasApiException("Cannot list users without appointment group ID");
+            throw new CanvasApiException('Cannot list users without appointment group ID');
         }
 
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d/users', $this->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        return json_decode($response->getBody(), true);
+
+        return self::parseJsonResponse($response);
     }
 
     /**
      * List user participants (paginated)
      *
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public function listUsersPaginated(array $params = []): PaginatedResponse
     {
         if (!$this->id) {
-            throw new CanvasApiException("Cannot list users without appointment group ID");
+            throw new CanvasApiException('Cannot list users without appointment group ID');
         }
 
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d/users', $this->id);
+
         return self::getPaginatedResponse($endpoint, $params);
     }
 
@@ -454,49 +502,56 @@ class AppointmentGroup extends AbstractBaseApi
      * List group participants
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<string, mixed>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<string, mixed>
      */
     public function listGroups(array $params = []): array
     {
         if (!$this->id) {
-            throw new CanvasApiException("Cannot list groups without appointment group ID");
+            throw new CanvasApiException('Cannot list groups without appointment group ID');
         }
 
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d/groups', $this->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        return json_decode($response->getBody(), true);
+
+        return self::parseJsonResponse($response);
     }
 
     /**
      * List group participants (paginated)
      *
      * @param array<string, mixed> $params Query parameters
-     * @return PaginatedResponse
+     *
      * @throws CanvasApiException
+     *
+     * @return PaginatedResponse
      */
     public function listGroupsPaginated(array $params = []): PaginatedResponse
     {
         if (!$this->id) {
-            throw new CanvasApiException("Cannot list groups without appointment group ID");
+            throw new CanvasApiException('Cannot list groups without appointment group ID');
         }
 
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d/groups', $this->id);
+
         return self::getPaginatedResponse($endpoint, $params);
     }
 
     /**
      * Publish the appointment group (make it available for sign-up)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function publish(): self
     {
         if (!$this->id) {
-            throw new CanvasApiException("Cannot publish without appointment group ID");
+            throw new CanvasApiException('Cannot publish without appointment group ID');
         }
 
         $dto = new UpdateAppointmentGroupDTO([]);
@@ -520,8 +575,10 @@ class AppointmentGroup extends AbstractBaseApi
      * you should call CalendarEvent::find() with the specific appointment IDs.
      *
      * @param bool $fetchFresh Whether to fetch fresh data from API (causes N+1 queries)
-     * @return CalendarEvent[]
+     *
      * @throws CanvasApiException
+     *
+     * @return CalendarEvent[]
      */
     public function getCalendarEvents(bool $fetchFresh = false): array
     {
@@ -536,7 +593,8 @@ class AppointmentGroup extends AbstractBaseApi
             }
 
             // Otherwise, create CalendarEvent from existing data to avoid N+1 queries
-            $appointmentData = (array)$appointment;
+            $appointmentData = (array) $appointment;
+
             return new CalendarEvent($appointmentData);
         }, $this->appointments);
     }
@@ -546,13 +604,14 @@ class AppointmentGroup extends AbstractBaseApi
      *
      * @param string $key Property name
      * @param mixed $value Value to cast
+     *
      * @return mixed
      */
     protected function castValue(string $key, mixed $value): mixed
     {
         $dateTimeFields = ['startAt', 'endAt', 'createdAt', 'updatedAt'];
 
-        if (in_array($key, $dateTimeFields) && is_string($value) && !empty($value)) {
+        if (in_array($key, $dateTimeFields, true) && is_string($value) && !empty($value)) {
             try {
                 return new DateTime($value);
             } catch (\Exception $e) {
@@ -564,7 +623,7 @@ class AppointmentGroup extends AbstractBaseApi
                         'field' => $key,
                         'value' => $value,
                         'error' => $e->getMessage(),
-                        'class' => self::class
+                        'class' => self::class,
                     ]
                 );
 
@@ -589,6 +648,7 @@ class AppointmentGroup extends AbstractBaseApi
 
     /**
      * Get the API endpoint for this resource
+     *
      * @return string
      */
     protected static function getEndpoint(): string

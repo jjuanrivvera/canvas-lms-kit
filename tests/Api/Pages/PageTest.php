@@ -1,17 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Pages;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\Pages\Page;
 use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Pages\Page;
 use CanvasLMS\Dto\Pages\CreatePageDTO;
 use CanvasLMS\Dto\Pages\UpdatePageDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Objects\PageRevision;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -21,6 +21,7 @@ use Psr\Http\Message\StreamInterface;
 class PageTest extends TestCase
 {
     private HttpClientInterface $httpClientMock;
+
     private Course $course;
 
     protected function setUp(): void
@@ -79,7 +80,7 @@ class PageTest extends TestCase
             'created_at' => '2024-01-01T00:00:00Z',
             'updated_at' => '2024-01-01T00:00:00Z',
             'revision_id' => 1,
-            'page_views_count' => 42
+            'page_views_count' => 42,
         ];
 
         $page = new Page($data);
@@ -174,7 +175,7 @@ class PageTest extends TestCase
         $pagesListResponse = [
             ['page_id' => 100, 'url' => 'other-page', 'title' => 'Other Page'],
             ['page_id' => 123, 'url' => 'test-page', 'title' => 'Test Page'],
-            ['page_id' => 200, 'url' => 'another-page', 'title' => 'Another Page']
+            ['page_id' => 200, 'url' => 'another-page', 'title' => 'Another Page'],
         ];
 
         $pageDetailResponse = [
@@ -182,7 +183,7 @@ class PageTest extends TestCase
             'url' => 'test-page',
             'title' => 'Test Page',
             'body' => '<p>Test content</p>',
-            'published' => true
+            'published' => true,
         ];
 
         // Mock for list request - simplified for initial fetch
@@ -215,6 +216,7 @@ class PageTest extends TestCase
                 if (str_contains($endpoint, 'pages/test-page')) {
                     return $detailResponseMock;
                 }
+
                 return $listResponseMock;
             });
 
@@ -233,7 +235,7 @@ class PageTest extends TestCase
     {
         $pagesListResponse = [
             ['page_id' => 100, 'url' => 'other-page', 'title' => 'Other Page'],
-            ['page_id' => 200, 'url' => 'another-page', 'title' => 'Another Page']
+            ['page_id' => 200, 'url' => 'another-page', 'title' => 'Another Page'],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -270,7 +272,7 @@ class PageTest extends TestCase
             'title' => 'Test Page',
             'body' => '<p>Test content</p>',
             'published' => true,
-            'front_page' => false
+            'front_page' => false,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -305,7 +307,7 @@ class PageTest extends TestCase
             'url' => 'test-page-with-spaces',
             'title' => 'Test Page With Spaces',
             'body' => '<p>Content</p>',
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -338,14 +340,14 @@ class PageTest extends TestCase
                 'url' => 'page-1',
                 'title' => 'Page 1',
                 'published' => true,
-                'front_page' => true
+                'front_page' => true,
             ],
             [
                 'url' => 'page-2',
                 'title' => 'Page 2',
                 'published' => false,
-                'front_page' => false
-            ]
+                'front_page' => false,
+            ],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -412,7 +414,7 @@ class PageTest extends TestCase
             'title' => 'New Page',
             'body' => '<p>New content</p>',
             'published' => true,
-            'editing_roles' => 'teachers'
+            'editing_roles' => 'teachers',
         ];
 
         $responseData = [
@@ -421,7 +423,7 @@ class PageTest extends TestCase
             'body' => '<p>New content</p>',
             'published' => true,
             'editing_roles' => 'teachers',
-            'front_page' => false
+            'front_page' => false,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -455,7 +457,7 @@ class PageTest extends TestCase
             'title' => 'New Page',
             'body' => '<p>New content</p>',
             'published' => true,
-            'editing_roles' => 'teachers'
+            'editing_roles' => 'teachers',
         ]);
 
         $responseData = [
@@ -463,7 +465,7 @@ class PageTest extends TestCase
             'title' => 'New Page',
             'body' => '<p>New content</p>',
             'published' => true,
-            'editing_roles' => 'teachers'
+            'editing_roles' => 'teachers',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -494,14 +496,14 @@ class PageTest extends TestCase
         $pageUrl = 'test-page';
         $updateData = [
             'title' => 'Updated Page',
-            'body' => '<p>Updated content</p>'
+            'body' => '<p>Updated content</p>',
         ];
 
         $responseData = [
             'url' => 'test-page',
             'title' => 'Updated Page',
             'body' => '<p>Updated content</p>',
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -532,14 +534,14 @@ class PageTest extends TestCase
     {
         $updateDto = new UpdatePageDTO([
             'title' => 'Updated Page',
-            'body' => '<p>Updated content</p>'
+            'body' => '<p>Updated content</p>',
         ]);
 
         $responseData = [
             'url' => 'test-page',
             'title' => 'Updated Page',
             'body' => '<p>Updated content</p>',
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -574,7 +576,7 @@ class PageTest extends TestCase
             'url' => 'new-page',
             'title' => 'New Page',
             'body' => '<p>New content</p>',
-            'published' => false
+            'published' => false,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -607,7 +609,7 @@ class PageTest extends TestCase
             'url' => 'existing-page',
             'title' => 'Updated Title',
             'body' => '<p>Content</p>',
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -683,7 +685,7 @@ class PageTest extends TestCase
             'title' => 'Course Home',
             'body' => '<h1>Welcome</h1>',
             'published' => true,
-            'front_page' => true
+            'front_page' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -770,7 +772,7 @@ class PageTest extends TestCase
             'url' => 'test-page',
             'title' => 'Test Page',
             'published' => true,
-            'workflow_state' => 'active'
+            'workflow_state' => 'active',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -803,7 +805,7 @@ class PageTest extends TestCase
             'url' => 'test-page',
             'title' => 'Test Page',
             'published' => false,
-            'workflow_state' => 'unpublished'
+            'workflow_state' => 'unpublished',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -876,7 +878,7 @@ class PageTest extends TestCase
 
         $responseData = [
             'url' => 'new-slug',
-            'title' => 'Test Page'
+            'title' => 'Test Page',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -915,7 +917,7 @@ class PageTest extends TestCase
 
         $responseData = [
             ['revision_id' => 1, 'updated_at' => '2024-01-01T00:00:00Z'],
-            ['revision_id' => 2, 'updated_at' => '2024-01-02T00:00:00Z']
+            ['revision_id' => 2, 'updated_at' => '2024-01-02T00:00:00Z'],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -961,7 +963,7 @@ class PageTest extends TestCase
             'workflow_state' => 'active',
             'editing_roles' => 'teachers',
             'published' => true,
-            'front_page' => false
+            'front_page' => false,
         ]);
 
         $array = $page->toArray();
@@ -984,7 +986,7 @@ class PageTest extends TestCase
             'body' => '<p>Content</p>',
             'editing_roles' => 'teachers',
             'published' => true,
-            'front_page' => false
+            'front_page' => false,
         ]);
 
         $dtoArray = $page->toDtoArray();
@@ -1006,7 +1008,7 @@ class PageTest extends TestCase
             'url' => 'original-page-copy',
             'title' => 'Original Page Copy',
             'body' => '<p>Duplicated content</p>',
-            'published' => false
+            'published' => false,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -1039,7 +1041,7 @@ class PageTest extends TestCase
 
         $duplicatedData = [
             'url' => 'original-page-copy',
-            'title' => 'Original Page Copy'
+            'title' => 'Original Page Copy',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -1083,7 +1085,7 @@ class PageTest extends TestCase
             'edited_by' => ['id' => 1, 'name' => 'John Doe'],
             'url' => 'test-page',
             'title' => 'Test Page - Old Version',
-            'body' => '<p>Old content</p>'
+            'body' => '<p>Old content</p>',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -1115,7 +1117,7 @@ class PageTest extends TestCase
 
         $revisionData = [
             'revision_id' => 5,
-            'latest' => true
+            'latest' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -1147,7 +1149,7 @@ class PageTest extends TestCase
         $revisionData = [
             'revision_id' => 3,
             'updated_at' => '2024-01-15T00:00:00Z',
-            'latest' => false
+            'latest' => false,
             // Body excluded when summary=true
         ];
 
@@ -1181,7 +1183,7 @@ class PageTest extends TestCase
             'revision_id' => 6,
             'updated_at' => '2024-01-20T00:00:00Z',
             'title' => 'Reverted Page Title',
-            'body' => '<p>Reverted content</p>'
+            'body' => '<p>Reverted content</p>',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -1211,7 +1213,7 @@ class PageTest extends TestCase
     {
         $updateData = [
             'title' => 'New Front Page',
-            'body' => '<h1>Welcome!</h1>'
+            'body' => '<h1>Welcome!</h1>',
         ];
 
         $responseData = [
@@ -1219,7 +1221,7 @@ class PageTest extends TestCase
             'title' => 'New Front Page',
             'body' => '<h1>Welcome!</h1>',
             'front_page' => true,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -1252,7 +1254,7 @@ class PageTest extends TestCase
             'order' => 'desc',
             'search_term' => 'test',
             'published' => true,
-            'include' => ['body']
+            'include' => ['body'],
         ];
 
         $responseData = [
@@ -1260,14 +1262,14 @@ class PageTest extends TestCase
                 'url' => 'test-page-1',
                 'title' => 'Test Page 1',
                 'body' => '<p>Content 1</p>',
-                'published' => true
+                'published' => true,
             ],
             [
                 'url' => 'test-page-2',
                 'title' => 'Test Page 2',
                 'body' => '<p>Content 2</p>',
-                'published' => true
-            ]
+                'published' => true,
+            ],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -1314,7 +1316,7 @@ class PageTest extends TestCase
         // Test event handler removal
         $page->setBody('<p>Click me</p>');
         $this->assertEquals('<p>Click me</p>', $page->getSafeBody());
-        
+
         // Now test with event handlers - using double quotes
         $htmlWithHandlers = '<p onclick="alert(123)">Click me</p>';
         $page->setBody($htmlWithHandlers);

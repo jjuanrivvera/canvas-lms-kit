@@ -15,21 +15,31 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * or other supported formats into Canvas LMS.
  *
  * @package CanvasLMS\Api\OutcomeImports
+ *
  * @see https://canvas.instructure.com/doc/api/outcome_imports.html
  */
 class OutcomeImport extends AbstractBaseApi
 {
     public ?int $id = null;
+
     public ?int $learningOutcomeGroupId = null;
+
     public ?string $createdAt = null;
+
     public ?string $endedAt = null;
+
     public ?string $updatedAt = null;
+
     public ?string $workflowState = null;
+
     /** @var array<string, mixed>|null */
     public ?array $data = null;
+
     public ?string $progress = null;
+
     /** @var array<string, mixed>|null */
     public ?array $user = null;
+
     /** @var array<int, array{0: int, 1: string}>|null */
     public ?array $processingErrors = null;
 
@@ -39,8 +49,10 @@ class OutcomeImport extends AbstractBaseApi
      * @param string $filePath Path to the CSV file
      * @param int|null $groupId Optional outcome group ID to import into
      * @param string $importType Import type (default: 'instructure_csv')
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function import(
         string $filePath,
@@ -64,8 +76,10 @@ class OutcomeImport extends AbstractBaseApi
      * @param string $filePath Path to the CSV file
      * @param int|null $groupId Optional outcome group ID to import into
      * @param string $importType Import type (default: 'instructure_csv')
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function importToContext(
         string $contextType,
@@ -96,20 +110,21 @@ class OutcomeImport extends AbstractBaseApi
             $multipart = [
                 [
                     'name' => 'import_type',
-                    'contents' => $importType
+                    'contents' => $importType,
                 ],
                 [
                     'name' => 'attachment',
                     'contents' => $fileResource,
-                    'filename' => basename($filePath)
-                ]
+                    'filename' => basename($filePath),
+                ],
             ];
 
             $response = self::$apiClient->post($endpoint, [
-                'multipart' => $multipart
+                'multipart' => $multipart,
             ]);
 
-            $responseData = json_decode($response->getBody()->getContents(), true);
+            $responseData = self::parseJsonResponse($response);
+
             return new self($responseData);
         } finally {
             if (isset($fileResource) && is_resource($fileResource)) {
@@ -124,8 +139,10 @@ class OutcomeImport extends AbstractBaseApi
      * @param string $csvData Raw CSV data as string
      * @param int|null $groupId Optional outcome group ID to import into
      * @param string $importType Import type (default: 'instructure_csv')
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function importFromData(
         string $csvData,
@@ -149,8 +166,10 @@ class OutcomeImport extends AbstractBaseApi
      * @param string $csvData Raw CSV data as string
      * @param int|null $groupId Optional outcome group ID to import into
      * @param string $importType Import type (default: 'instructure_csv')
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function importDataToContext(
         string $contextType,
@@ -168,12 +187,13 @@ class OutcomeImport extends AbstractBaseApi
         $response = self::$apiClient->post($endpoint, [
             'query' => $queryParams,
             'headers' => [
-                'Content-Type' => 'text/csv'
+                'Content-Type' => 'text/csv',
             ],
-            'body' => $csvData
+            'body' => $csvData,
         ]);
 
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
+
         return new self($responseData);
     }
 
@@ -183,8 +203,10 @@ class OutcomeImport extends AbstractBaseApi
      * @param string $contextType Context type (accounts, courses)
      * @param int $contextId Context ID
      * @param int|string $importId Import ID or 'latest' for the most recent import
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function getStatus(
         string $contextType,
@@ -194,7 +216,7 @@ class OutcomeImport extends AbstractBaseApi
         $endpoint = sprintf('%s/%d/outcome_imports/%s', $contextType, $contextId, $importId);
 
         $response = self::$apiClient->get($endpoint);
-        $responseData = json_decode($response->getBody()->getContents(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -202,8 +224,9 @@ class OutcomeImport extends AbstractBaseApi
     /**
      * Get the latest import status for account context.
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function getLatestStatus(): self
     {
@@ -315,8 +338,10 @@ class OutcomeImport extends AbstractBaseApi
      * @param int $contextId Context ID
      * @param int $maxAttempts Maximum polling attempts (default: 60)
      * @param int $delaySeconds Delay between polls in seconds (default: 2)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function waitForCompletion(
         string $contextType,
@@ -372,7 +397,7 @@ class OutcomeImport extends AbstractBaseApi
             'calculation_int',
             'mastery_points',
             'ratings',
-            'object_type'
+            'object_type',
         ];
 
         $exampleRow = [
@@ -386,11 +411,11 @@ class OutcomeImport extends AbstractBaseApi
             '75',
             '3',
             '4:Exceeds|3:Mastery|2:Near Mastery|1:Below Mastery',
-            'outcome'
+            'outcome',
         ];
 
         $csv = implode(',', $headers) . "\n";
-        $csv .= implode(',', array_map(fn($v) => '"' . $v . '"', $exampleRow)) . "\n";
+        $csv .= implode(',', array_map(fn ($v) => '"' . $v . '"', $exampleRow)) . "\n";
 
         return $csv;
     }
@@ -399,6 +424,7 @@ class OutcomeImport extends AbstractBaseApi
      * Build CSV data from an array of outcome definitions.
      *
      * @param array<int, array<string, mixed>> $outcomes Array of outcome data
+     *
      * @return string CSV formatted string
      */
     public static function buildCsvFromArray(array $outcomes): string
@@ -414,7 +440,7 @@ class OutcomeImport extends AbstractBaseApi
             'calculation_int',
             'mastery_points',
             'ratings',
-            'object_type'
+            'object_type',
         ];
 
         $csv = implode(',', $headers) . "\n";
@@ -431,10 +457,10 @@ class OutcomeImport extends AbstractBaseApi
                 $outcome['calculation_int'] ?? '',
                 $outcome['mastery_points'] ?? '',
                 self::formatRatings($outcome['ratings'] ?? []),
-                $outcome['object_type'] ?? 'outcome'
+                $outcome['object_type'] ?? 'outcome',
             ];
 
-            $csv .= implode(',', array_map(fn($v) => '"' . str_replace('"', '""', (string)$v) . '"', $row)) . "\n";
+            $csv .= implode(',', array_map(fn ($v) => '"' . str_replace('"', '""', (string) $v) . '"', $row)) . "\n";
         }
 
         return $csv;
@@ -444,6 +470,7 @@ class OutcomeImport extends AbstractBaseApi
      * Format ratings array for CSV import.
      *
      * @param array<int, mixed> $ratings Array of rating definitions
+     *
      * @return string Formatted ratings string
      */
     protected static function formatRatings(array $ratings): string
@@ -467,8 +494,10 @@ class OutcomeImport extends AbstractBaseApi
      * Find method - not applicable for imports.
      *
      * @param int $id
-     * @return static
+     *
      * @throws CanvasApiException
+     *
+     * @return static
      */
     public static function find(int $id, array $params = []): static
     {
@@ -481,8 +510,10 @@ class OutcomeImport extends AbstractBaseApi
      * FetchAll method - not applicable for imports.
      *
      * @param array<string, mixed> $params
-     * @return array<int, static>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, static>
      */
     public static function get(array $params = []): array
     {
@@ -493,14 +524,16 @@ class OutcomeImport extends AbstractBaseApi
 
     /**
      * Get the API endpoint for this resource
+     *
      * @return string
      */
     protected static function getEndpoint(): string
     {
         $accountId = Config::getAccountId();
         if (empty($accountId)) {
-            throw new CanvasApiException("Account ID must be set in Config for OutcomeImport operations");
+            throw new CanvasApiException('Account ID must be set in Config for OutcomeImport operations');
         }
+
         return "accounts/{$accountId}/outcome_imports";
     }
 }

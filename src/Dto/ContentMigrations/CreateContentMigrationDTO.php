@@ -32,18 +32,21 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
     /**
      * Pre-attachment array for file uploads
      * Contains: name, size, content_type, etc.
+     *
      * @var array<string, mixed>|null
      */
     public ?array $preAttachment = null;
 
     /**
      * Migration settings
+     *
      * @var array<string, mixed>|null
      */
     public ?array $settings = null;
 
     /**
      * Date shift options for content migration
+     *
      * @var array<string, mixed>|null
      */
     public ?array $dateShiftOptions = null;
@@ -55,12 +58,14 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Selection parameters for course copy migrations
+     *
      * @var array<string, array<string|int>>|null
      */
     public ?array $select = null;
 
     /**
      * Constructor
+     *
      * @param array<string, mixed> $data
      */
     public function __construct(array $data = [])
@@ -81,7 +86,7 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
         if ($this->migrationType !== null) {
             $result[] = [
                 'name' => 'migration_type',
-                'contents' => $this->migrationType
+                'contents' => $this->migrationType,
             ];
         }
 
@@ -90,7 +95,7 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
             foreach ($this->preAttachment as $key => $value) {
                 $result[] = [
                     'name' => 'pre_attachment[' . $key . ']',
-                    'contents' => (string) $value
+                    'contents' => (string) $value,
                 ];
             }
         }
@@ -103,13 +108,13 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
                     foreach ($value as $subKey => $subValue) {
                         $result[] = [
                             'name' => 'settings[' . $key . '][' . $subKey . ']',
-                            'contents' => (string) $subValue
+                            'contents' => (string) $subValue,
                         ];
                     }
                 } else {
                     $result[] = [
                         'name' => 'settings[' . $key . ']',
-                        'contents' => (string) $value
+                        'contents' => (string) $value,
                     ];
                 }
             }
@@ -123,13 +128,13 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
                     foreach ($value as $day => $substitution) {
                         $result[] = [
                             'name' => 'date_shift_options[day_substitutions][' . $day . ']',
-                            'contents' => (string) $substitution
+                            'contents' => (string) $substitution,
                         ];
                     }
                 } else {
                     $result[] = [
                         'name' => 'date_shift_options[' . $key . ']',
-                        'contents' => (string) $value
+                        'contents' => (string) $value,
                     ];
                 }
             }
@@ -139,7 +144,7 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
         if ($this->selectiveImport !== null) {
             $result[] = [
                 'name' => 'selective_import',
-                'contents' => $this->selectiveImport ? '1' : '0'
+                'contents' => $this->selectiveImport ? '1' : '0',
             ];
         }
 
@@ -149,7 +154,7 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
                 foreach ($ids as $id) {
                     $result[] = [
                         'name' => 'select[' . $type . '][]',
-                        'contents' => (string) $id
+                        'contents' => (string) $id,
                     ];
                 }
             }
@@ -177,10 +182,10 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
             'course_copy_importer',
             'zip_file_importer',
             'qti_converter',
-            'moodle_converter'
+            'moodle_converter',
         ];
 
-        if (!in_array($this->migrationType, $validTypes)) {
+        if (!in_array($this->migrationType, $validTypes, true)) {
             return false;
         }
 
@@ -197,10 +202,10 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
             'common_cartridge_importer',
             'zip_file_importer',
             'qti_converter',
-            'moodle_converter'
+            'moodle_converter',
         ];
 
-        if (in_array($this->migrationType, $fileBasedTypes)) {
+        if (in_array($this->migrationType, $fileBasedTypes, true)) {
             $hasPreAttachment = !empty($this->preAttachment['name']);
             $hasFileUrl = !empty($this->settings['file_url']);
             $hasContentExportId = !empty($this->settings['content_export_id']);
@@ -310,7 +315,7 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
     {
         $this->preAttachment = [
             'name' => $fileName,
-            'size' => $fileSize
+            'size' => $fileSize,
         ];
 
         if ($contentType !== null) {
@@ -361,7 +366,7 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
         ?string $newEndDate = null
     ): void {
         $this->dateShiftOptions = [
-            'shift_dates' => $shiftDates
+            'shift_dates' => $shiftDates,
         ];
 
         if ($oldStartDate !== null) {

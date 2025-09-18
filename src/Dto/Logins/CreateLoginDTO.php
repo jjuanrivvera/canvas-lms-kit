@@ -135,7 +135,7 @@ class CreateLoginDTO extends AbstractBaseDto implements DTOInterface
 
             $modifiedProperties[] = [
                 'name' => $apiKeyName,
-                'contents' => (string) $value
+                'contents' => (string) $value,
             ];
         }
 
@@ -165,6 +165,7 @@ class CreateLoginDTO extends AbstractBaseDto implements DTOInterface
 
         if (count($userIdFields) > 1) {
             $providedFields = implode(', ', array_keys($userIdFields));
+
             throw new \InvalidArgumentException(
                 "Only one user identification method should be provided. Found: {$providedFields}"
             );
@@ -188,8 +189,9 @@ class CreateLoginDTO extends AbstractBaseDto implements DTOInterface
         // Validate declaredUserType if provided
         if ($this->declaredUserType) {
             $validTypes = ['administrative', 'observer', 'staff', 'student', 'student_other', 'teacher'];
-            if (!in_array($this->declaredUserType, $validTypes)) {
+            if (!in_array($this->declaredUserType, $validTypes, true)) {
                 $validTypesStr = implode(', ', $validTypes);
+
                 throw new \InvalidArgumentException("Invalid declaredUserType. Valid values are: {$validTypesStr}");
             }
         }

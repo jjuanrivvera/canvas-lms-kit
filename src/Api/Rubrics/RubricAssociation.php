@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Api\Rubrics;
 
 use CanvasLMS\Api\AbstractBaseApi;
@@ -176,6 +178,7 @@ class RubricAssociation extends AbstractBaseApi
      * Set the course context for rubric association operations
      *
      * @param Course|null $course
+     *
      * @return void
      */
     public static function setCourse(?Course $course): void
@@ -196,13 +199,14 @@ class RubricAssociation extends AbstractBaseApi
     /**
      * Get the resource endpoint
      *
-     * @return string
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getResourceEndpoint(): string
     {
         if (self::$course === null) {
-            throw new CanvasApiException("Course context must be set for RubricAssociation operations");
+            throw new CanvasApiException('Course context must be set for RubricAssociation operations');
         }
 
         return sprintf('courses/%d/rubric_associations', self::$course->id);
@@ -212,8 +216,10 @@ class RubricAssociation extends AbstractBaseApi
      * Create a new rubric association
      *
      * @param array<string, mixed>|CreateRubricAssociationDTO $data The association data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function create(array|CreateRubricAssociationDTO $data): self
     {
@@ -225,7 +231,7 @@ class RubricAssociation extends AbstractBaseApi
 
         $endpoint = self::getResourceEndpoint();
         $response = self::$apiClient->post($endpoint, $data->toApiArray());
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -235,8 +241,10 @@ class RubricAssociation extends AbstractBaseApi
      *
      * @param int $id The association ID
      * @param array<string, mixed>|UpdateRubricAssociationDTO $data The update data
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function update(int $id, array|UpdateRubricAssociationDTO $data): self
     {
@@ -248,7 +256,7 @@ class RubricAssociation extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d', self::getResourceEndpoint(), $id);
         $response = self::$apiClient->put($endpoint, $data->toApiArray());
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -256,37 +264,40 @@ class RubricAssociation extends AbstractBaseApi
     /**
      * Delete a rubric association
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
         if (!$this->id) {
-            throw new CanvasApiException("Cannot delete rubric association without ID");
+            throw new CanvasApiException('Cannot delete rubric association without ID');
         }
 
         if (self::$course === null) {
-            throw new CanvasApiException("Course context must be set for delete operation");
+            throw new CanvasApiException('Course context must be set for delete operation');
         }
 
         $endpoint = sprintf('%s/%d', self::getResourceEndpoint(), $this->id);
         $response = self::$apiClient->delete($endpoint);
 
-        json_decode($response->getBody(), true);
+        self::parseJsonResponse($response);
+
         return $this;
     }
 
     /**
      * Save the rubric association (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
         // Validate required fields for new associations
         if (!$this->id && !$this->rubricId) {
-            throw new CanvasApiException("Rubric ID is required for creating a new association");
+            throw new CanvasApiException('Rubric ID is required for creating a new association');
         }
 
         if ($this->id) {
@@ -321,17 +332,18 @@ class RubricAssociation extends AbstractBaseApi
     /**
      * Get the associated rubric
      *
-     * @return Rubric
      * @throws CanvasApiException
+     *
+     * @return Rubric
      */
     public function rubric(): Rubric
     {
         if (!$this->rubricId) {
-            throw new CanvasApiException("No rubric ID associated");
+            throw new CanvasApiException('No rubric ID associated');
         }
 
         if (!self::$course) {
-            throw new CanvasApiException("Course context must be set");
+            throw new CanvasApiException('Course context must be set');
         }
 
         // Use the new context-based find method
@@ -344,14 +356,16 @@ class RubricAssociation extends AbstractBaseApi
      * Note: Canvas API does not support fetching individual rubric associations
      *
      * @param int $id The association ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
         throw new CanvasApiException(
-            "Finding individual rubric associations is not supported by the Canvas API. " .
-            "Rubric associations must be fetched through rubrics or created/updated directly."
+            'Finding individual rubric associations is not supported by the Canvas API. ' .
+            'Rubric associations must be fetched through rubrics or created/updated directly.'
         );
     }
 
@@ -361,22 +375,26 @@ class RubricAssociation extends AbstractBaseApi
      * Note: Canvas API does not support listing all rubric associations directly
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<int, self>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<int, self>
      */
     public static function get(array $params = []): array
     {
         throw new CanvasApiException(
-            "Fetching all rubric associations is not supported by the Canvas API. " .
-            "Rubric associations must be accessed through rubrics."
+            'Fetching all rubric associations is not supported by the Canvas API. ' .
+            'Rubric associations must be accessed through rubrics.'
         );
     }
 
     /**
      * Get the API endpoint for this resource
      * Note: RubricAssociation is a nested resource under Rubric
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {

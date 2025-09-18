@@ -4,22 +4,25 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Tests\Api\Assignments;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Assignments\Assignment;
 use CanvasLMS\Api\Courses\Course;
-use CanvasLMS\Api\Submissions\Submission;
 use CanvasLMS\Api\Rubrics\Rubric;
 use CanvasLMS\Api\Rubrics\RubricAssociation;
+use CanvasLMS\Api\Submissions\Submission;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 class AssignmentRelationshipTest extends TestCase
 {
     private HttpClientInterface $mockHttpClient;
+
     private ResponseInterface $mockResponse;
+
     private StreamInterface $mockStream;
+
     private Course $mockCourse;
 
     protected function setUp(): void
@@ -68,7 +71,7 @@ class AssignmentRelationshipTest extends TestCase
             ->with('courses/123/assignments/456/submissions', ['query' => []])
             ->willReturn($mockPaginatedResponse);
 
-        // Test the method  
+        // Test the method
         $submissions = $assignment->submissions();
 
         // Assertions
@@ -90,7 +93,7 @@ class AssignmentRelationshipTest extends TestCase
             'user_id' => 100,
             'assignment_id' => 456,
             'score' => 95,
-            'grade' => 'A'
+            'grade' => 'A',
         ];
 
         // Set up mock expectations
@@ -170,12 +173,12 @@ class AssignmentRelationshipTest extends TestCase
             'id' => 789,
             'title' => 'Test Rubric',
             'data' => [],
-            'points_possible' => 100
+            'points_possible' => 100,
         ];
-        
+
         $assignment = new Assignment([
             'id' => 456,
-            'rubric' => $rubricData
+            'rubric' => $rubricData,
         ]);
 
         // Test the method
@@ -239,8 +242,8 @@ class AssignmentRelationshipTest extends TestCase
             'id' => 456,
             'rubric' => [
                 'id' => 789,
-                'title' => 'Test Rubric'
-            ]
+                'title' => 'Test Rubric',
+            ],
         ]);
 
         // Mock response data - returns an array of associations
@@ -249,8 +252,8 @@ class AssignmentRelationshipTest extends TestCase
                 'id' => 999,
                 'rubric_id' => 789,
                 'association_id' => 456,
-                'association_type' => 'Assignment'
-            ]
+                'association_type' => 'Assignment',
+            ],
         ];
 
         // Set up mock expectations
@@ -268,8 +271,8 @@ class AssignmentRelationshipTest extends TestCase
                     'query' => [
                         'include' => ['association_object'],
                         'association_type' => 'Assignment',
-                        'association_id' => 456
-                    ]
+                        'association_id' => 456,
+                    ],
                 ]
             )
             ->willReturn($this->mockResponse);

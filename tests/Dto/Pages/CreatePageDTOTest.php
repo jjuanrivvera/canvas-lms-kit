@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Pages;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Pages\CreatePageDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\Pages\CreatePageDTO
@@ -35,7 +37,7 @@ class CreatePageDTOTest extends TestCase
             'front_page' => false,
             'editing_roles' => 'teachers',
             'notify_of_update' => true,
-            'publish_at' => '2024-02-01T00:00:00Z'
+            'publish_at' => '2024-02-01T00:00:00Z',
         ];
 
         $dto = new CreatePageDTO($data);
@@ -83,7 +85,7 @@ class CreatePageDTOTest extends TestCase
             'published' => true,
             'front_page' => false,
             'editing_roles' => 'teachers',
-            'notify_of_update' => true
+            'notify_of_update' => true,
         ];
 
         $dto = new CreatePageDTO($data);
@@ -105,7 +107,7 @@ class CreatePageDTOTest extends TestCase
             'body' => '<p>Test content</p>',
             'published' => true,
             'front_page' => false,
-            'editing_roles' => 'teachers'
+            'editing_roles' => 'teachers',
         ];
 
         $dto = new CreatePageDTO($data);
@@ -129,7 +131,7 @@ class CreatePageDTOTest extends TestCase
             'body' => 'Some content',
             'published' => null,
             'front_page' => null,
-            'editing_roles' => 'teachers'
+            'editing_roles' => 'teachers',
         ];
 
         $dto = new CreatePageDTO($data);
@@ -150,7 +152,7 @@ class CreatePageDTOTest extends TestCase
             'body' => 'Content',
             'published' => true,
             'front_page' => false,
-            'notify_of_update' => true
+            'notify_of_update' => true,
         ]);
 
         $result = $dto->toApiArray();
@@ -168,26 +170,26 @@ class CreatePageDTOTest extends TestCase
     public function testApiPropertyName(): void
     {
         $dto = new CreatePageDTO(['title' => 'Test']);
-        
+
         $reflection = new \ReflectionClass($dto);
         $property = $reflection->getProperty('apiPropertyName');
         $property->setAccessible(true);
-        
+
         $this->assertEquals('wiki_page', $property->getValue($dto));
     }
 
     public function testMinimalRequiredData(): void
     {
         $dto = new CreatePageDTO([
-            'title' => 'Minimal Page'
+            'title' => 'Minimal Page',
         ]);
 
         $this->assertEquals('Minimal Page', $dto->getTitle());
         $this->assertEquals('', $dto->getBody());
-        
+
         $result = $dto->toApiArray();
         $resultKeys = array_column($result, 'name');
-        
+
         $this->assertContains('wiki_page[title]', $resultKeys);
         $this->assertContains('wiki_page[body]', $resultKeys);
     }
@@ -195,7 +197,7 @@ class CreatePageDTOTest extends TestCase
     public function testEditingRolesValues(): void
     {
         $validRoles = ['teachers', 'students', 'members', 'public'];
-        
+
         foreach ($validRoles as $role) {
             $dto = new CreatePageDTO(['title' => 'Test', 'editing_roles' => $role]);
             $this->assertEquals($role, $dto->getEditingRoles());

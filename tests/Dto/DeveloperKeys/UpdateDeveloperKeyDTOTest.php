@@ -13,7 +13,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
     {
         $data = [
             'name' => 'Updated Key Name',
-            'visible' => false
+            'visible' => false,
         ];
 
         $dto = UpdateDeveloperKeyDTO::fromArray($data);
@@ -28,7 +28,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
     {
         $dto = new UpdateDeveloperKeyDTO([
             'name' => 'Partial Update',
-            'email' => 'updated@example.com'
+            'email' => 'updated@example.com',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -49,7 +49,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
         $dto = new UpdateDeveloperKeyDTO([
             'name' => 'Clear Arrays Test',
             'redirectUris' => [], // Explicitly setting to empty to clear
-            'scopes' => [] // Explicitly setting to empty to clear
+            'scopes' => [], // Explicitly setting to empty to clear
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -71,7 +71,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
     public function testHasUpdatesReturnsTrueWhenFieldsSet(): void
     {
         $dto = new UpdateDeveloperKeyDTO([
-            'name' => 'Has Updates Test'
+            'name' => 'Has Updates Test',
         ]);
 
         $this->assertTrue($dto->hasUpdates());
@@ -92,7 +92,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
         $dto = new UpdateDeveloperKeyDTO([
             'name' => 'Field Test',
             'visible' => false,
-            'requireScopes' => true
+            'requireScopes' => true,
         ]);
 
         $updatedFields = $dto->getUpdatedFields();
@@ -109,7 +109,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
         $dto = new UpdateDeveloperKeyDTO([
             'name' => 'Clear Test',
             'email' => 'clear@example.com',
-            'visible' => true
+            'visible' => true,
         ]);
 
         $this->assertEquals('Clear Test', $dto->name);
@@ -126,7 +126,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
     public function testClearFieldIgnoresProtectedProperty(): void
     {
         $dto = new UpdateDeveloperKeyDTO([
-            'name' => 'Protected Test'
+            'name' => 'Protected Test',
         ]);
 
         // Try to clear the protected apiPropertyName - should be ignored
@@ -139,7 +139,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
     public function testClearFieldIgnoresNonexistentProperty(): void
     {
         $dto = new UpdateDeveloperKeyDTO([
-            'name' => 'Nonexistent Test'
+            'name' => 'Nonexistent Test',
         ]);
 
         // Try to clear a nonexistent property - should not cause error
@@ -162,21 +162,21 @@ class UpdateDeveloperKeyDTOTest extends TestCase
     public function testAddRedirectUriToExistingArray(): void
     {
         $dto = new UpdateDeveloperKeyDTO([
-            'redirectUris' => ['https://existing.com/callback']
+            'redirectUris' => ['https://existing.com/callback'],
         ]);
 
         $dto->addRedirectUri('https://new.com/callback');
 
         $this->assertEquals([
             'https://existing.com/callback',
-            'https://new.com/callback'
+            'https://new.com/callback',
         ], $dto->redirectUris);
     }
 
     public function testAddRedirectUriAvoidsDuplicates(): void
     {
         $dto = new UpdateDeveloperKeyDTO([
-            'redirectUris' => ['https://example.com/callback']
+            'redirectUris' => ['https://example.com/callback'],
         ]);
 
         $dto->addRedirectUri('https://example.com/callback'); // Duplicate
@@ -190,8 +190,8 @@ class UpdateDeveloperKeyDTOTest extends TestCase
             'redirectUris' => [
                 'https://keep.com/callback',
                 'https://remove.com/callback',
-                'https://alsokeep.com/callback'
-            ]
+                'https://alsokeep.com/callback',
+            ],
         ]);
 
         $result = $dto->removeRedirectUri('https://remove.com/callback');
@@ -199,7 +199,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
         $this->assertSame($dto, $result); // Test fluent interface
         $this->assertEquals([
             'https://keep.com/callback',
-            'https://alsokeep.com/callback'
+            'https://alsokeep.com/callback',
         ], $dto->redirectUris);
     }
 
@@ -225,21 +225,21 @@ class UpdateDeveloperKeyDTOTest extends TestCase
     public function testAddScopeToExistingArray(): void
     {
         $dto = new UpdateDeveloperKeyDTO([
-            'scopes' => ['url:GET|/api/v1/accounts']
+            'scopes' => ['url:GET|/api/v1/accounts'],
         ]);
 
         $dto->addScope('url:GET|/api/v1/courses');
 
         $this->assertEquals([
             'url:GET|/api/v1/accounts',
-            'url:GET|/api/v1/courses'
+            'url:GET|/api/v1/courses',
         ], $dto->scopes);
     }
 
     public function testAddScopeAvoidsDuplicates(): void
     {
         $dto = new UpdateDeveloperKeyDTO([
-            'scopes' => ['url:GET|/api/v1/accounts']
+            'scopes' => ['url:GET|/api/v1/accounts'],
         ]);
 
         $dto->addScope('url:GET|/api/v1/accounts'); // Duplicate
@@ -253,8 +253,8 @@ class UpdateDeveloperKeyDTOTest extends TestCase
             'scopes' => [
                 'url:GET|/api/v1/accounts',
                 'url:GET|/api/v1/courses',
-                'url:GET|/api/v1/users'
-            ]
+                'url:GET|/api/v1/users',
+            ],
         ]);
 
         $result = $dto->removeScope('url:GET|/api/v1/courses');
@@ -262,7 +262,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
         $this->assertSame($dto, $result); // Test fluent interface
         $this->assertEquals([
             'url:GET|/api/v1/accounts',
-            'url:GET|/api/v1/users'
+            'url:GET|/api/v1/users',
         ], $dto->scopes);
     }
 
@@ -279,7 +279,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
     {
         $dto = new UpdateDeveloperKeyDTO([
             'name' => 'Multipart Update',
-            'visible' => false
+            'visible' => false,
         ]);
 
         $multipart = $dto->toMultipartArray();
@@ -288,7 +288,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
         $this->assertCount(2, $multipart);
 
         // Check that only the set fields are included
-        $fieldNames = array_map(fn($field) => $field['name'], $multipart);
+        $fieldNames = array_map(fn ($field) => $field['name'], $multipart);
         $this->assertContains('developer_key[name]', $fieldNames);
         $this->assertContains('developer_key[visible]', $fieldNames);
         $this->assertNotContains('developer_key[email]', $fieldNames);
@@ -340,7 +340,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
             'allowIncludes' => true,
             'testClusterOnly' => false,
             'autoExpireTokens' => true,
-            'clientCredentialsAudience' => 'internal'
+            'clientCredentialsAudience' => 'internal',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -386,7 +386,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
         $this->assertEquals([
             'url:GET|/api/v1/accounts',
             'url:GET|/api/v1/courses',
-            'url:GET|/api/v1/users'
+            'url:GET|/api/v1/users',
         ], $dto->scopes);
 
         // Remove one scope
@@ -394,7 +394,7 @@ class UpdateDeveloperKeyDTOTest extends TestCase
 
         $this->assertEquals([
             'url:GET|/api/v1/accounts',
-            'url:GET|/api/v1/users'
+            'url:GET|/api/v1/users',
         ], $dto->scopes);
 
         // Clear a field

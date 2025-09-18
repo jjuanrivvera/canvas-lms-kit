@@ -34,6 +34,7 @@ class UpdateSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Rubric assessment data
+     *
      * @var array<string, mixed>|null
      */
     public ?array $rubricAssessment = null;
@@ -107,6 +108,7 @@ class UpdateSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Get rubric assessment
+     *
      * @return array<string, mixed>|null
      */
     public function getRubricAssessment(): ?array
@@ -116,6 +118,7 @@ class UpdateSubmissionDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Set rubric assessment
+     *
      * @param array<string, mixed>|null $rubricAssessment
      */
     public function setRubricAssessment(?array $rubricAssessment): void

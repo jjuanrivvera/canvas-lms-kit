@@ -23,13 +23,12 @@ class DeveloperKeyTest extends TestCase
         parent::setUp();
         $this->httpClientMock = $this->createMock(HttpClientInterface::class);
         DeveloperKey::setApiClient($this->httpClientMock);
-        
+
         // Set test configuration
         Config::setAccountId(1);
         Config::setApiKey('test-api-key');
         Config::setBaseUrl('https://canvas.test.com/api/v1');
     }
-
 
     public function testCreateDeveloperKeyWithArray(): void
     {
@@ -38,7 +37,7 @@ class DeveloperKeyTest extends TestCase
             'email' => 'test@example.com',
             'redirect_uris' => ['https://example.com/callback'],
             'scopes' => ['url:GET|/api/v1/accounts'],
-            'visible' => true
+            'visible' => true,
         ];
 
         $expectedResponse = [
@@ -52,7 +51,7 @@ class DeveloperKeyTest extends TestCase
             'redirect_uris' => ['https://example.com/callback'],
             'scopes' => ['url:GET|/api/v1/accounts'],
             'visible' => true,
-            'account_name' => 'Test Account'
+            'account_name' => 'Test Account',
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -64,6 +63,7 @@ class DeveloperKeyTest extends TestCase
                 $this->callback(function ($data) {
                     $this->assertIsArray($data);
                     $this->assertArrayHasKey('multipart', $data);
+
                     return true;
                 })
             )
@@ -86,7 +86,7 @@ class DeveloperKeyTest extends TestCase
             'name' => 'DTO Test Key',
             'email' => 'dto@example.com',
             'scopes' => ['url:GET|/api/v1/courses'],
-            'requireScopes' => true
+            'requireScopes' => true,
         ]);
 
         $expectedResponse = [
@@ -96,7 +96,7 @@ class DeveloperKeyTest extends TestCase
             'workflow_state' => 'active',
             'is_lti_key' => false,
             'scopes' => ['url:GET|/api/v1/courses'],
-            'require_scopes' => true
+            'require_scopes' => true,
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -118,7 +118,7 @@ class DeveloperKeyTest extends TestCase
     {
         $updateData = [
             'name' => 'Updated Key Name',
-            'visible' => false
+            'visible' => false,
         ];
 
         $expectedResponse = [
@@ -127,7 +127,7 @@ class DeveloperKeyTest extends TestCase
             'email' => 'test@example.com',
             'workflow_state' => 'active',
             'is_lti_key' => false,
-            'visible' => false
+            'visible' => false,
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -139,6 +139,7 @@ class DeveloperKeyTest extends TestCase
                 $this->callback(function ($data) {
                     $this->assertIsArray($data);
                     $this->assertArrayHasKey('multipart', $data);
+
                     return true;
                 })
             )
@@ -156,7 +157,7 @@ class DeveloperKeyTest extends TestCase
     {
         $dto = new UpdateDeveloperKeyDTO([
             'email' => 'updated@example.com',
-            'testClusterOnly' => true
+            'testClusterOnly' => true,
         ]);
 
         $expectedResponse = [
@@ -164,7 +165,7 @@ class DeveloperKeyTest extends TestCase
             'name' => 'Existing Key',
             'email' => 'updated@example.com',
             'workflow_state' => 'active',
-            'test_cluster_only' => true
+            'test_cluster_only' => true,
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -185,7 +186,7 @@ class DeveloperKeyTest extends TestCase
         $expectedResponse = [
             'id' => 123,
             'name' => 'Deleted Key',
-            'workflow_state' => 'deleted'
+            'workflow_state' => 'deleted',
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -209,14 +210,14 @@ class DeveloperKeyTest extends TestCase
                 'id' => 1,
                 'name' => 'Key 1',
                 'workflow_state' => 'active',
-                'is_lti_key' => false
+                'is_lti_key' => false,
             ],
             [
                 'id' => 2,
                 'name' => 'Key 2',
                 'workflow_state' => 'inactive',
-                'is_lti_key' => false
-            ]
+                'is_lti_key' => false,
+            ],
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -244,8 +245,8 @@ class DeveloperKeyTest extends TestCase
                 'name' => 'Inherited Key',
                 'workflow_state' => 'active',
                 'is_lti_key' => false,
-                'account_name' => 'Site Admin'
-            ]
+                'account_name' => 'Site Admin',
+            ],
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -268,13 +269,13 @@ class DeveloperKeyTest extends TestCase
             [
                 'id' => 1,
                 'name' => 'Key 1',
-                'workflow_state' => 'active'
+                'workflow_state' => 'active',
             ],
             [
                 'id' => 2,
                 'name' => 'Key 2',
-                'workflow_state' => 'active'
-            ]
+                'workflow_state' => 'active',
+            ],
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -297,8 +298,8 @@ class DeveloperKeyTest extends TestCase
             [
                 'id' => 1,
                 'name' => 'Key 1',
-                'workflow_state' => 'active'
-            ]
+                'workflow_state' => 'active',
+            ],
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -317,7 +318,7 @@ class DeveloperKeyTest extends TestCase
     {
         // Mock the static method call
         $mockResponse = $this->createMock(PaginatedResponse::class);
-        
+
         // We can't easily mock static method calls, so we'll test the method exists
         $this->assertTrue(method_exists(DeveloperKey::class, 'getPaginated'));
     }
@@ -325,12 +326,12 @@ class DeveloperKeyTest extends TestCase
     public function testSaveInstance(): void
     {
         $key = new DeveloperKey(['id' => 123, 'name' => 'Test Key']);
-        
+
         $updateData = ['name' => 'Updated Name'];
         $expectedResponse = [
             'id' => 123,
             'name' => 'Updated Name',
-            'workflow_state' => 'active'
+            'workflow_state' => 'active',
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -359,11 +360,11 @@ class DeveloperKeyTest extends TestCase
     public function testRemoveInstance(): void
     {
         $key = new DeveloperKey(['id' => 123, 'name' => 'Test Key']);
-        
+
         $expectedResponse = [
             'id' => 123,
             'name' => 'Test Key',
-            'workflow_state' => 'deleted'
+            'workflow_state' => 'deleted',
         ];
 
         $response = new Response(200, [], json_encode($expectedResponse));
@@ -427,7 +428,7 @@ class DeveloperKeyTest extends TestCase
             'test_cluster_only' => true,
             'allow_includes' => true,
             'require_scopes' => true,
-            'client_credentials_audience' => 'external'
+            'client_credentials_audience' => 'external',
         ]);
 
         $this->assertTrue($key->isTestClusterOnly());
@@ -440,7 +441,7 @@ class DeveloperKeyTest extends TestCase
     {
         $key = new DeveloperKey([
             'redirect_uris' => ['https://example.com/callback1', 'https://example.com/callback2'],
-            'scopes' => ['url:GET|/api/v1/accounts', 'url:GET|/api/v1/courses']
+            'scopes' => ['url:GET|/api/v1/accounts', 'url:GET|/api/v1/courses'],
         ]);
 
         $this->assertEquals(

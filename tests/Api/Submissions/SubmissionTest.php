@@ -1,20 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Submissions;
 
-use PHPUnit\Framework\TestCase;
-use CanvasLMS\Api\Submissions\Submission;
-use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Assignments\Assignment;
+use CanvasLMS\Api\Courses\Course;
+use CanvasLMS\Api\Submissions\Submission;
 use CanvasLMS\Dto\Submissions\CreateSubmissionDTO;
 use CanvasLMS\Dto\Submissions\UpdateSubmissionDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
+use Exception;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use Exception;
 
 /**
  * @covers \CanvasLMS\Api\Submissions\Submission
@@ -22,7 +22,9 @@ use Exception;
 class SubmissionTest extends TestCase
 {
     private HttpClientInterface $httpClientMock;
+
     private Course $course;
+
     private Assignment $assignment;
 
     protected function setUp(): void
@@ -39,11 +41,11 @@ class SubmissionTest extends TestCase
     protected function tearDown(): void
     {
         $reflection = new \ReflectionClass(Submission::class);
-        
+
         $courseProperty = $reflection->getProperty('course');
         $courseProperty->setAccessible(true);
         $courseProperty->setValue(null, null);
-        
+
         $assignmentProperty = $reflection->getProperty('assignment');
         $assignmentProperty->setAccessible(true);
         $assignmentProperty->setValue(null, null);
@@ -93,7 +95,7 @@ class SubmissionTest extends TestCase
             'late' => false,
             'excused' => false,
             'score' => 85.5,
-            'grade' => '85.5'
+            'grade' => '85.5',
         ];
 
         $submission = new Submission($data);
@@ -163,7 +165,7 @@ class SubmissionTest extends TestCase
         $submissionData = [
             'submission_type' => 'online_text_entry',
             'body' => 'My essay content for this assignment',
-            'comment' => 'Please review my work'
+            'comment' => 'Please review my work',
         ];
 
         $responseData = [
@@ -173,7 +175,7 @@ class SubmissionTest extends TestCase
             'submission_type' => 'online_text_entry',
             'body' => 'My essay content for this assignment',
             'workflow_state' => 'submitted',
-            'submitted_at' => '2024-01-15T10:30:00Z'
+            'submitted_at' => '2024-01-15T10:30:00Z',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -206,7 +208,7 @@ class SubmissionTest extends TestCase
     {
         $submissionData = [
             'submission_type' => 'online_url',
-            'url' => 'https://github.com/user/project'
+            'url' => 'https://github.com/user/project',
         ];
 
         $responseData = [
@@ -215,7 +217,7 @@ class SubmissionTest extends TestCase
             'user_id' => 789,
             'submission_type' => 'online_url',
             'url' => 'https://github.com/user/project',
-            'workflow_state' => 'submitted'
+            'workflow_state' => 'submitted',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -244,7 +246,7 @@ class SubmissionTest extends TestCase
     {
         $submissionData = [
             'submission_type' => 'online_upload',
-            'file_ids' => [123, 456, 789]
+            'file_ids' => [123, 456, 789],
         ];
 
         $responseData = [
@@ -256,8 +258,8 @@ class SubmissionTest extends TestCase
             'attachments' => [
                 ['id' => 123, 'filename' => 'document1.pdf'],
                 ['id' => 456, 'filename' => 'document2.pdf'],
-                ['id' => 789, 'filename' => 'document3.pdf']
-            ]
+                ['id' => 789, 'filename' => 'document3.pdf'],
+            ],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -286,7 +288,7 @@ class SubmissionTest extends TestCase
     {
         $dto = new CreateSubmissionDTO([
             'submission_type' => 'online_text_entry',
-            'body' => 'DTO test content'
+            'body' => 'DTO test content',
         ]);
 
         $responseData = [
@@ -295,7 +297,7 @@ class SubmissionTest extends TestCase
             'user_id' => 789,
             'submission_type' => 'online_text_entry',
             'body' => 'DTO test content',
-            'workflow_state' => 'submitted'
+            'workflow_state' => 'submitted',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -330,7 +332,7 @@ class SubmissionTest extends TestCase
             'body' => 'Found submission content',
             'workflow_state' => 'submitted',
             'score' => 92.0,
-            'grade' => 'A-'
+            'grade' => 'A-',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -363,7 +365,7 @@ class SubmissionTest extends TestCase
         $userId = 789;
         $updateData = [
             'posted_grade' => '88',
-            'comment' => 'Good work, but could be improved'
+            'comment' => 'Good work, but could be improved',
         ];
 
         $responseData = [
@@ -374,7 +376,7 @@ class SubmissionTest extends TestCase
             'workflow_state' => 'graded',
             'score' => 88.0,
             'grade' => '88',
-            'graded_at' => '2024-01-16T09:15:00Z'
+            'graded_at' => '2024-01-16T09:15:00Z',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -407,7 +409,7 @@ class SubmissionTest extends TestCase
         $dto = new UpdateSubmissionDTO([
             'posted_grade' => '95',
             'excuse' => false,
-            'comment' => 'Excellent work!'
+            'comment' => 'Excellent work!',
         ]);
 
         $responseData = [
@@ -417,7 +419,7 @@ class SubmissionTest extends TestCase
             'workflow_state' => 'graded',
             'score' => 95.0,
             'grade' => '95',
-            'excused' => false
+            'excused' => false,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -488,8 +490,8 @@ class SubmissionTest extends TestCase
             'grade_data' => [
                 ['user_id' => 123, 'posted_grade' => '90'],
                 ['user_id' => 456, 'posted_grade' => '85'],
-                ['user_id' => 789, 'posted_grade' => '92']
-            ]
+                ['user_id' => 789, 'posted_grade' => '92'],
+            ],
         ];
 
         $this->httpClientMock->expects($this->once())
@@ -505,8 +507,8 @@ class SubmissionTest extends TestCase
     {
         $gradeData = [
             'grade_data' => [
-                ['user_id' => 123, 'posted_grade' => '90']
-            ]
+                ['user_id' => 123, 'posted_grade' => '90'],
+            ],
         ];
 
         $this->httpClientMock->expects($this->once())
@@ -525,7 +527,7 @@ class SubmissionTest extends TestCase
             'id' => 123,
             'assignment_id' => 456,
             'user_id' => 789,
-            'submission_type' => 'online_text_entry'
+            'submission_type' => 'online_text_entry',
         ];
 
         $submission = new Submission($submissionData);
@@ -539,7 +541,7 @@ class SubmissionTest extends TestCase
             'submission_type' => 'online_text_entry',
             'score' => 90.0,
             'grade' => 'A-',
-            'workflow_state' => 'graded'
+            'workflow_state' => 'graded',
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -578,7 +580,7 @@ class SubmissionTest extends TestCase
         $submissionData = [
             'id' => 123,
             'assignment_id' => 456,
-            'user_id' => 789
+            'user_id' => 789,
         ];
 
         $submission = new Submission($submissionData);
@@ -600,15 +602,15 @@ class SubmissionTest extends TestCase
                 'assignment_id' => 456,
                 'user_id' => 111,
                 'submission_type' => 'online_text_entry',
-                'workflow_state' => 'submitted'
+                'workflow_state' => 'submitted',
             ],
             [
                 'id' => 124,
                 'assignment_id' => 456,
                 'user_id' => 222,
                 'submission_type' => 'online_url',
-                'workflow_state' => 'submitted'
-            ]
+                'workflow_state' => 'submitted',
+            ],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -641,17 +643,17 @@ class SubmissionTest extends TestCase
         $params = [
             'student_ids' => [111, 222],
             'workflow_state' => 'submitted',
-            'include' => ['submission_comments', 'rubric_assessment']
+            'include' => ['submission_comments', 'rubric_assessment'],
         ];
 
         $submissionsData = [
             ['id' => 1, 'user_id' => 111, 'workflow_state' => 'submitted'],
-            ['id' => 2, 'user_id' => 222, 'workflow_state' => 'submitted']
+            ['id' => 2, 'user_id' => 222, 'workflow_state' => 'submitted'],
         ];
 
         $response = $this->createMock(ResponseInterface::class);
         $stream = $this->createMock(StreamInterface::class);
-        
+
         $stream->method('getContents')->willReturn(json_encode($submissionsData));
         $response->method('getBody')->willReturn($stream);
 
@@ -661,7 +663,7 @@ class SubmissionTest extends TestCase
             ->willReturn($response);
 
         $submissions = Submission::get($params);
-        
+
         $this->assertCount(2, $submissions);
         $this->assertEquals(111, $submissions[0]->getUserId());
         $this->assertEquals(222, $submissions[1]->getUserId());

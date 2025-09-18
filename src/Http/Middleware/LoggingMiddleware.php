@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Http\Middleware;
 
-use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
+use GuzzleHttp\Promise\Create;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use GuzzleHttp\Promise\Create;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 
 /**
  * Middleware for logging HTTP requests and responses with sensitive data sanitization
@@ -105,6 +107,7 @@ class LoggingMiddleware extends AbstractMiddleware
      * @param RequestInterface $request
      * @param string $requestId
      * @param array<string, mixed> $options
+     *
      * @return void
      */
     private function logRequest(RequestInterface $request, string $requestId, array $options): void
@@ -146,6 +149,7 @@ class LoggingMiddleware extends AbstractMiddleware
      * @param ResponseInterface $response
      * @param string $requestId
      * @param float $elapsed
+     *
      * @return void
      */
     private function logResponse(ResponseInterface $response, string $requestId, float $elapsed): void
@@ -204,6 +208,7 @@ class LoggingMiddleware extends AbstractMiddleware
      * @param RequestInterface $request
      * @param string $requestId
      * @param float $elapsed
+     *
      * @return void
      */
     private function logError($reason, RequestInterface $request, string $requestId, float $elapsed): void
@@ -248,6 +253,7 @@ class LoggingMiddleware extends AbstractMiddleware
      * Sanitize headers to remove sensitive information
      *
      * @param array<string, array<string>> $headers
+     *
      * @return array<string, array<string>>
      */
     private function sanitizeHeaders(array $headers): array
@@ -281,6 +287,7 @@ class LoggingMiddleware extends AbstractMiddleware
      * Sanitize body content to remove sensitive information
      *
      * @param string $body
+     *
      * @return string
      */
     private function sanitizeBody(string $body): string
@@ -289,6 +296,7 @@ class LoggingMiddleware extends AbstractMiddleware
         $decoded = json_decode($body, true);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
             $sanitized = $this->sanitizeArray($decoded);
+
             return json_encode($sanitized, JSON_PRETTY_PRINT);
         }
 
@@ -312,6 +320,7 @@ class LoggingMiddleware extends AbstractMiddleware
      * Recursively sanitize an array
      *
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function sanitizeArray(array $data): array

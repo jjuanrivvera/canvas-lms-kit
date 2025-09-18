@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Dto\QuizSubmissions;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\QuizSubmissions\CreateQuizSubmissionDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\QuizSubmissions\CreateQuizSubmissionDTO
@@ -24,7 +24,7 @@ class CreateQuizSubmissionDTOTest extends TestCase
     {
         $data = [
             'access_code' => 'secret123',
-            'preview' => true
+            'preview' => true,
         ];
 
         $dto = new CreateQuizSubmissionDTO($data);
@@ -54,7 +54,7 @@ class CreateQuizSubmissionDTOTest extends TestCase
     {
         $dto = new CreateQuizSubmissionDTO([
             'access_code' => 'secret123',
-            'preview' => true
+            'preview' => true,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -93,7 +93,7 @@ class CreateQuizSubmissionDTOTest extends TestCase
     {
         $dto = new CreateQuizSubmissionDTO([
             'access_code' => 'secret123',
-            'preview' => null
+            'preview' => null,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -107,7 +107,7 @@ class CreateQuizSubmissionDTOTest extends TestCase
     {
         $dto = new CreateQuizSubmissionDTO([
             'access_code' => '',
-            'preview' => false
+            'preview' => false,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -132,7 +132,7 @@ class CreateQuizSubmissionDTOTest extends TestCase
     public function testBooleanValuesConvertedCorrectly(): void
     {
         $dto = new CreateQuizSubmissionDTO([
-            'preview' => true
+            'preview' => true,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -146,7 +146,7 @@ class CreateQuizSubmissionDTOTest extends TestCase
 
         // Test false value
         $dto = new CreateQuizSubmissionDTO([
-            'preview' => false
+            'preview' => false,
         ]);
 
         $apiArray = $dto->toApiArray();

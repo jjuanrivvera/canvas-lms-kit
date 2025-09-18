@@ -18,11 +18,11 @@ class UpdateConferenceDTOTest extends TestCase
             'duration' => 120,
             'settings' => [
                 'enable_recording' => false,
-                'enable_chat' => true
+                'enable_chat' => true,
             ],
             'long_running' => true,
             'users' => [5, 6, 7],
-            'has_advanced_settings' => false
+            'has_advanced_settings' => false,
         ];
 
         $dto = new UpdateConferenceDTO($data);
@@ -43,7 +43,7 @@ class UpdateConferenceDTOTest extends TestCase
     {
         $dto = new UpdateConferenceDTO([
             'title' => 'New Title',
-            'duration' => 45
+            'duration' => 45,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -69,11 +69,11 @@ class UpdateConferenceDTOTest extends TestCase
             'duration' => 180,
             'settings' => [
                 'enable_waiting_room' => true,
-                'allow_guests' => false
+                'allow_guests' => false,
             ],
             'long_running' => false,
             'users' => [100, 200],
-            'has_advanced_settings' => true
+            'has_advanced_settings' => true,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -125,7 +125,7 @@ class UpdateConferenceDTOTest extends TestCase
             'description' => null,
             'duration' => null,
             'settings' => null,
-            'users' => null
+            'users' => null,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -144,8 +144,8 @@ class UpdateConferenceDTOTest extends TestCase
             'has_advanced_settings' => false,
             'settings' => [
                 'enabled' => true,
-                'disabled' => false
-            ]
+                'disabled' => false,
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -171,8 +171,8 @@ class UpdateConferenceDTOTest extends TestCase
                 'max_duration' => 240,
                 'conference_code' => 'CONF-2024',
                 'auto_start' => true,
-                'participant_limit' => 500
-            ]
+                'participant_limit' => 500,
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -194,7 +194,7 @@ class UpdateConferenceDTOTest extends TestCase
     {
         $dto = new UpdateConferenceDTO([
             'title' => 'Users Update',
-            'users' => [111, 222, 333, 444]
+            'users' => [111, 222, 333, 444],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -214,8 +214,8 @@ class UpdateConferenceDTOTest extends TestCase
         $dto = new UpdateConferenceDTO([
             'settings' => [
                 'new_setting' => 'value',
-                'another_setting' => 123
-            ]
+                'another_setting' => 123,
+            ],
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -236,6 +236,7 @@ class UpdateConferenceDTOTest extends TestCase
                 return $field;
             }
         }
+
         return null;
     }
 
@@ -247,6 +248,7 @@ class UpdateConferenceDTOTest extends TestCase
                 $fields[] = $field;
             }
         }
+
         return $fields;
     }
 }

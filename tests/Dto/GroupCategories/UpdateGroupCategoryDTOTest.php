@@ -12,7 +12,7 @@ class UpdateGroupCategoryDTOTest extends TestCase
     public function testConstructorWithEmptyData(): void
     {
         $dto = new UpdateGroupCategoryDTO([]);
-        
+
         $this->assertNull($dto->name);
         $this->assertNull($dto->selfSignup);
         $this->assertNull($dto->autoLeader);
@@ -31,7 +31,7 @@ class UpdateGroupCategoryDTOTest extends TestCase
             'group_limit' => 8,
             'sis_group_category_id' => 'UPDATED_SIS',
             'create_group_count' => 4,
-            'split_group_count' => 'request'
+            'split_group_count' => 'request',
         ];
 
         $dto = new UpdateGroupCategoryDTO($data);
@@ -77,7 +77,7 @@ class UpdateGroupCategoryDTOTest extends TestCase
             'name' => 'Updated Category',
             'self_signup' => 'restricted',
             'auto_leader' => 'first',
-            'group_limit' => 10
+            'group_limit' => 10,
         ];
 
         $dto = new UpdateGroupCategoryDTO($data);
@@ -95,7 +95,7 @@ class UpdateGroupCategoryDTOTest extends TestCase
             'name' => 'Updated Category',
             'self_signup' => 'restricted',
             'auto_leader' => 'first',
-            'group_limit' => 10
+            'group_limit' => 10,
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -104,19 +104,19 @@ class UpdateGroupCategoryDTOTest extends TestCase
         $this->assertCount(4, $apiArray);
 
         // Check multipart format
-        $nameField = array_filter($apiArray, fn($field) => $field['name'] === 'name');
+        $nameField = array_filter($apiArray, fn ($field) => $field['name'] === 'name');
         $this->assertCount(1, $nameField);
         $this->assertEquals('Updated Category', reset($nameField)['contents']);
 
-        $selfSignupField = array_filter($apiArray, fn($field) => $field['name'] === 'self_signup');
+        $selfSignupField = array_filter($apiArray, fn ($field) => $field['name'] === 'self_signup');
         $this->assertCount(1, $selfSignupField);
         $this->assertEquals('restricted', reset($selfSignupField)['contents']);
 
-        $autoLeaderField = array_filter($apiArray, fn($field) => $field['name'] === 'auto_leader');
+        $autoLeaderField = array_filter($apiArray, fn ($field) => $field['name'] === 'auto_leader');
         $this->assertCount(1, $autoLeaderField);
         $this->assertEquals('first', reset($autoLeaderField)['contents']);
 
-        $groupLimitField = array_filter($apiArray, fn($field) => $field['name'] === 'group_limit');
+        $groupLimitField = array_filter($apiArray, fn ($field) => $field['name'] === 'group_limit');
         $this->assertCount(1, $groupLimitField);
         $this->assertEquals('10', reset($groupLimitField)['contents']);
     }
@@ -133,12 +133,11 @@ class UpdateGroupCategoryDTOTest extends TestCase
         $this->assertEquals('Updated Name', $apiArray[0]['contents']);
     }
 
-
     public function testPartialUpdate(): void
     {
         // Update DTOs should allow partial updates
         $dto = new UpdateGroupCategoryDTO([
-            'name' => 'Only Update Name'
+            'name' => 'Only Update Name',
         ]);
 
         $apiArray = $dto->toApiArray();
@@ -151,10 +150,10 @@ class UpdateGroupCategoryDTOTest extends TestCase
     public function testSelfSignupDisabled(): void
     {
         $dto = new UpdateGroupCategoryDTO(['self_signup' => 'disabled']);
-        
+
         $apiArray = $dto->toApiArray();
-        
-        $selfSignupField = array_filter($apiArray, fn($field) => $field['name'] === 'self_signup');
+
+        $selfSignupField = array_filter($apiArray, fn ($field) => $field['name'] === 'self_signup');
         $this->assertEquals('disabled', reset($selfSignupField)['contents']);
     }
 
@@ -162,10 +161,10 @@ class UpdateGroupCategoryDTOTest extends TestCase
     {
         // Setting group_limit to 0 removes the limit
         $dto = new UpdateGroupCategoryDTO(['group_limit' => 0]);
-        
+
         $apiArray = $dto->toApiArray();
-        
-        $groupLimitField = array_filter($apiArray, fn($field) => $field['name'] === 'group_limit');
+
+        $groupLimitField = array_filter($apiArray, fn ($field) => $field['name'] === 'group_limit');
         $this->assertEquals('0', reset($groupLimitField)['contents']);
     }
 
@@ -178,13 +177,13 @@ class UpdateGroupCategoryDTOTest extends TestCase
             'group_limit' => 20,
             'sis_group_category_id' => 'COMPLETE_SIS',
             'create_group_count' => 10,
-            'split_group_count' => 'request'
+            'split_group_count' => 'request',
         ]);
 
         $apiArray = $dto->toApiArray();
 
         $this->assertCount(7, $apiArray);
-        
+
         $fieldNames = array_column($apiArray, 'name');
         $this->assertContains('name', $fieldNames);
         $this->assertContains('self_signup', $fieldNames);

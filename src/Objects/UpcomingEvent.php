@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Objects;
 
 use DateTime;
@@ -152,6 +154,7 @@ class UpcomingEvent
 
     /**
      * Constructor
+     *
      * @param array<string, mixed> $data
      */
     public function __construct(array $data = [])
@@ -166,6 +169,7 @@ class UpcomingEvent
 
     /**
      * Get start time as DateTime
+     *
      * @return DateTimeInterface|null
      */
     public function getStartAtDate(): ?DateTimeInterface
@@ -175,6 +179,7 @@ class UpcomingEvent
 
     /**
      * Get end time as DateTime
+     *
      * @return DateTimeInterface|null
      */
     public function getEndAtDate(): ?DateTimeInterface
@@ -184,6 +189,7 @@ class UpcomingEvent
 
     /**
      * Check if event is active
+     *
      * @return bool
      */
     public function isActive(): bool
@@ -193,6 +199,7 @@ class UpcomingEvent
 
     /**
      * Check if event has location
+     *
      * @return bool
      */
     public function hasLocation(): bool
@@ -202,6 +209,7 @@ class UpcomingEvent
 
     /**
      * Convert to array
+     *
      * @return array<string, mixed>
      */
     public function toArray(): array

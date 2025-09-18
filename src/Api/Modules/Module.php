@@ -1,17 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Api\Modules;
 
-use Exception;
-use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\AbstractBaseApi;
-use CanvasLMS\Dto\Modules\CreateModuleDTO;
-use CanvasLMS\Dto\Modules\UpdateModuleDTO;
-use CanvasLMS\Dto\Modules\CreateModuleItemDTO;
+use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Dto\Modules\BulkUpdateModuleAssignmentOverridesDTO;
+use CanvasLMS\Dto\Modules\CreateModuleDTO;
+use CanvasLMS\Dto\Modules\CreateModuleItemDTO;
+use CanvasLMS\Dto\Modules\UpdateModuleDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
+use Exception;
 
 /**
  * Module Class
@@ -115,12 +115,14 @@ class Module extends AbstractBaseApi
 {
     /**
      * Course
+     *
      * @var Course
      */
     protected static ?Course $course = null;
 
     /**
      * Module constructor.
+     *
      * @param mixed[] $data
      */
     public function __construct(array $data = [])
@@ -248,7 +250,9 @@ class Module extends AbstractBaseApi
 
     /**
      * Set the course
+     *
      * @param Course $course
+     *
      * @return void
      */
     public static function setCourse(Course $course): void
@@ -258,8 +262,10 @@ class Module extends AbstractBaseApi
 
     /**
      * Check if course exits and has id
-     * @return bool
+     *
      * @throws CanvasApiException
+     *
+     * @return bool
      */
     public static function checkCourse(): bool
     {
@@ -272,8 +278,10 @@ class Module extends AbstractBaseApi
 
     /**
      * Validate that prerequisite modules have lower position values
+     *
      * @param int[] $prerequisiteModuleIds
      * @param int $position
+     *
      * @throws CanvasApiException
      */
     protected static function validatePrerequisitePositions(array $prerequisiteModuleIds, int $position): void
@@ -300,10 +308,13 @@ class Module extends AbstractBaseApi
 
     /**
      * Create a new module
+     *
      * @param CreateModuleDTO|mixed[] $data
-     * @return self
+     *
      * @throws CanvasApiException
      * @throws Exception
+     *
+     * @return self
      */
     public static function create(array | CreateModuleDTO $data): self
     {
@@ -320,21 +331,24 @@ class Module extends AbstractBaseApi
         }
 
         $response = self::$apiClient->post(sprintf('courses/%d/modules', self::$course->id), [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
         ]);
 
-        $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $moduleData = self::parseJsonResponse($response);
 
         return new self($moduleData);
     }
 
     /**
      * Update a module
+     *
      * @param int $id
      * @param UpdateModuleDTO|mixed[] $data
-     * @return self
+     *
      * @throws CanvasApiException
      * @throws Exception
+     *
+     * @return self
      */
     public static function update(int $id, array | UpdateModuleDTO $data): self
     {
@@ -351,20 +365,23 @@ class Module extends AbstractBaseApi
         }
 
         $response = self::$apiClient->put(sprintf('courses/%d/modules/%d', self::$course->id, $id), [
-            'multipart' => $data->toApiArray()
+            'multipart' => $data->toApiArray(),
         ]);
 
-        $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $moduleData = self::parseJsonResponse($response);
 
         return new self($moduleData);
     }
 
     /**
      * Find a module by its ID.
+     *
      * @param int $id
      * @param mixed[] $params Query parameters (include[], student_id)
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -372,18 +389,20 @@ class Module extends AbstractBaseApi
         self::checkCourse();
 
         $response = self::$apiClient->get(sprintf('courses/%d/modules/%d', self::$course->id, $id), [
-            'query' => $params
+            'query' => $params,
         ]);
 
-        $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $moduleData = self::parseJsonResponse($response);
 
         return new self($moduleData);
     }
 
     /**
      * Save the module
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -399,10 +418,10 @@ class Module extends AbstractBaseApi
         $method = isset($data['id']) ? 'PUT' : 'POST';
 
         $response = self::$apiClient->request($method, $path, [
-            'multipart' => $dto->toApiArray()
+            'multipart' => $dto->toApiArray(),
         ]);
 
-        $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $moduleData = self::parseJsonResponse($response);
         $this->populate($moduleData);
 
         return $this;
@@ -410,8 +429,10 @@ class Module extends AbstractBaseApi
 
     /**
      * Delete a module
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
@@ -666,8 +687,10 @@ class Module extends AbstractBaseApi
     /**
      * Re-lock module progressions
      * Resets module progressions to their default locked state and recalculates them based on the current requirements.
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function relock(): self
     {
@@ -675,16 +698,20 @@ class Module extends AbstractBaseApi
         self::checkCourse();
 
         $response = self::$apiClient->put(sprintf('courses/%d/modules/%d/relock', self::$course->id, $this->id));
-        $moduleData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $moduleData = self::parseJsonResponse($response);
         $this->populate($moduleData);
+
         return $this;
     }
 
     /**
      * Get module items
+     *
      * @param mixed[] $params Query parameters (include[], search_term, student_id)
-     * @return ModuleItem[]
+     *
      * @throws CanvasApiException
+     *
+     * @return ModuleItem[]
      */
     public function items(array $params = []): array
     {
@@ -699,10 +726,13 @@ class Module extends AbstractBaseApi
 
     /**
      * Create a module item
+     *
      * @param mixed[]|CreateModuleItemDTO $data
-     * @return ModuleItem
+     *
      * @throws CanvasApiException
      * @throws Exception
+     *
+     * @return ModuleItem
      */
     public function createModuleItem(array | CreateModuleItemDTO $data): ModuleItem
     {
@@ -717,6 +747,7 @@ class Module extends AbstractBaseApi
 
     /**
      * Convert the module to a DTO array
+     *
      * @return mixed[]
      */
     protected function toDtoArray(): array
@@ -760,9 +791,12 @@ class Module extends AbstractBaseApi
 
     /**
      * List module assignment overrides
+     *
      * @param mixed[] $params Query parameters
-     * @return ModuleAssignmentOverride[]
+     *
      * @throws CanvasApiException
+     *
+     * @return ModuleAssignmentOverride[]
      */
     public function listOverrides(array $params = []): array
     {
@@ -774,7 +808,7 @@ class Module extends AbstractBaseApi
             ['query' => $params]
         );
 
-        $overridesData = json_decode($response->getBody()->getContents(), true) ?? [];
+        $overridesData = self::parseJsonResponse($response);
 
         $overrides = [];
         foreach ($overridesData as $overrideData) {
@@ -786,9 +820,12 @@ class Module extends AbstractBaseApi
 
     /**
      * Bulk update module assignment overrides
+     *
      * @param mixed[]|BulkUpdateModuleAssignmentOverridesDTO $overrides
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function bulkUpdateOverrides(array | BulkUpdateModuleAssignmentOverridesDTO $overrides): self
     {
@@ -804,9 +841,10 @@ class Module extends AbstractBaseApi
         self::$apiClient->put(
             sprintf('courses/%d/modules/%d/assignment_overrides', self::$course->id, $this->id),
             [
-                'json' => $overrides->toApiArray()
+                'json' => $overrides->toApiArray(),
             ]
         );
+
         return $this;
     }
 
@@ -815,12 +853,14 @@ class Module extends AbstractBaseApi
     /**
      * Get the course this module belongs to
      *
-     * @return Course|null
      * @throws CanvasApiException
+     *
+     * @return Course|null
      */
     public function course(): ?Course
     {
         self::checkCourse();
+
         return self::$course;
     }
 
@@ -853,8 +893,10 @@ class Module extends AbstractBaseApi
      * ```
      *
      * @param int|null $userId Optional user ID to get completion rate for specific user
-     * @return float Completion rate as a percentage (0.0 to 100.0)
+     *
      * @throws CanvasApiException
+     *
+     * @return float Completion rate as a percentage (0.0 to 100.0)
      */
     public function getCompletionRate(?int $userId = null): float
     {
@@ -908,8 +950,9 @@ class Module extends AbstractBaseApi
      * }
      * ```
      *
-     * @return Module[] Array of prerequisite Module objects
      * @throws CanvasApiException
+     *
+     * @return Module[] Array of prerequisite Module objects
      */
     public function prerequisites(): array
     {
@@ -935,12 +978,15 @@ class Module extends AbstractBaseApi
 
     /**
      * Get the API endpoint for this resource
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
+
         return sprintf('courses/%d/modules', self::$course->getId());
     }
 }

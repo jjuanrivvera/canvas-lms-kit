@@ -28,6 +28,7 @@ class UpdateTabDTO extends AbstractBaseDto
      *
      * @param int|null $position Position of the tab (1-based, max 50)
      * @param bool|null $hidden Whether the tab should be hidden
+     *
      * @throws CanvasApiException If position is invalid
      */
     public function __construct(
@@ -54,8 +55,10 @@ class UpdateTabDTO extends AbstractBaseDto
      * Set the position
      *
      * @param int|null $position Position (1-based, max 50)
-     * @return void
+     *
      * @throws CanvasApiException If position is invalid
+     *
+     * @return void
      */
     public function setPosition(?int $position): void
     {
@@ -79,6 +82,7 @@ class UpdateTabDTO extends AbstractBaseDto
      * Set the hidden status
      *
      * @param bool|null $hidden
+     *
      * @return void
      */
     public function setHidden(?bool $hidden): void
@@ -118,14 +122,14 @@ class UpdateTabDTO extends AbstractBaseDto
         if ($this->position !== null) {
             $modifiedProperties[] = [
                 'name' => 'tab[position]',
-                'contents' => $this->position
+                'contents' => $this->position,
             ];
         }
 
         if ($this->hidden !== null) {
             $modifiedProperties[] = [
                 'name' => 'tab[hidden]',
-                'contents' => $this->hidden
+                'contents' => $this->hidden,
             ];
         }
 

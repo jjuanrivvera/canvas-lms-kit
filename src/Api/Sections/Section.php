@@ -122,12 +122,14 @@ class Section extends AbstractBaseApi
 
     /**
      * Students array (populated when included)
+     *
      * @var mixed[]|null
      */
     public ?array $students = null;
 
     /**
      * Enrollments array (populated when included)
+     *
      * @var array<int, array<string, mixed>>|null
      */
     public ?array $enrollments = null;
@@ -139,6 +141,7 @@ class Section extends AbstractBaseApi
 
     /**
      * Section permissions
+     *
      * @var array<string, bool>|null
      */
     public ?array $permissions = null;
@@ -157,6 +160,7 @@ class Section extends AbstractBaseApi
      * Set the course context for section operations
      *
      * @param Course $course The course to operate on
+     *
      * @return void
      */
     public static function setCourse(Course $course): void
@@ -167,14 +171,16 @@ class Section extends AbstractBaseApi
     /**
      * Check if course context is set
      *
-     * @return bool
      * @throws CanvasApiException If course is not set
+     *
+     * @return bool
      */
     public static function checkCourse(): bool
     {
         if (!isset(self::$course) || !isset(self::$course->id)) {
             throw new CanvasApiException('Course context is required');
         }
+
         return true;
     }
 
@@ -183,8 +189,10 @@ class Section extends AbstractBaseApi
      *
      * @param int $id Section ID
      * @param array<string, mixed> $params Optional query parameters
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -198,7 +206,7 @@ class Section extends AbstractBaseApi
         }
 
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -207,8 +215,10 @@ class Section extends AbstractBaseApi
      * Get sections for the current course
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<self>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<self>
      */
     public static function get(array $params = []): array
     {
@@ -222,21 +232,23 @@ class Section extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/sections', self::$course->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         if (!is_array($data)) {
             return [];
         }
 
-        return array_map(fn($item) => new self($item), $data);
+        return array_map(fn ($item) => new self($item), $data);
     }
 
     /**
      * Get all sections for the current course (paginated)
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<self>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<self>
      */
     public static function all(array $params = []): array
     {
@@ -251,15 +263,17 @@ class Section extends AbstractBaseApi
             return [];
         }
 
-        return array_map(fn($item) => new self($item), $data);
+        return array_map(fn ($item) => new self($item), $data);
     }
 
     /**
      * Get sections with pagination support
      *
      * @param array<string, mixed> $params Query parameters
-     * @return \CanvasLMS\Pagination\PaginationResult
+     *
      * @throws CanvasApiException
+     *
+     * @return \CanvasLMS\Pagination\PaginationResult
      */
     public static function paginate(array $params = []): \CanvasLMS\Pagination\PaginationResult
     {
@@ -270,7 +284,7 @@ class Section extends AbstractBaseApi
         $paginatedResponse = self::$apiClient->getPaginated($endpoint, ['query' => $params]);
 
         $data = $paginatedResponse->getJsonData();
-        $sections = array_map(fn($item) => new self($item), $data);
+        $sections = array_map(fn ($item) => new self($item), $data);
 
         return $paginatedResponse->toPaginationResult($sections);
     }
@@ -279,8 +293,10 @@ class Section extends AbstractBaseApi
      * Create a new section
      *
      * @param array<string, mixed>|CreateSectionDTO $data Section data
-     * @return self Created Section object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Created Section object
      */
     public static function create(array|CreateSectionDTO $data): self
     {
@@ -293,7 +309,7 @@ class Section extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/sections', self::$course->id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $sectionData = json_decode($response->getBody()->getContents(), true);
+        $sectionData = self::parseJsonResponse($response);
 
         return new self($sectionData);
     }
@@ -303,8 +319,10 @@ class Section extends AbstractBaseApi
      *
      * @param int $id Section ID
      * @param array<string, mixed>|UpdateSectionDTO $data Section data
-     * @return self Updated Section object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Updated Section object
      */
     public static function update(int $id, array|UpdateSectionDTO $data): self
     {
@@ -316,7 +334,7 @@ class Section extends AbstractBaseApi
 
         $endpoint = sprintf('sections/%d', $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $sectionData = json_decode($response->getBody()->getContents(), true);
+        $sectionData = self::parseJsonResponse($response);
 
         return new self($sectionData);
     }
@@ -324,8 +342,9 @@ class Section extends AbstractBaseApi
     /**
      * Save the current section (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -357,8 +376,9 @@ class Section extends AbstractBaseApi
     /**
      * Delete the section
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
@@ -416,7 +436,7 @@ class Section extends AbstractBaseApi
             'start_at' => $this->startAt,
             'end_at' => $this->endAt,
             'restrict_enrollments_to_section_dates' => $this->restrictEnrollmentsToSectionDates,
-        ], fn($value) => $value !== null);
+        ], fn ($value) => $value !== null);
     }
 
     // Getter methods
@@ -509,12 +529,14 @@ class Section extends AbstractBaseApi
     /**
      * Get the associated course for this section
      *
-     * @return Course
      * @throws CanvasApiException
+     *
+     * @return Course
      */
     public function course(): Course
     {
         self::checkCourse();
+
         return self::$course;
     }
 
@@ -522,8 +544,10 @@ class Section extends AbstractBaseApi
      * Get enrollments for this section
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<\CanvasLMS\Api\Enrollments\Enrollment>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<\CanvasLMS\Api\Enrollments\Enrollment>
      */
     public function enrollments(array $params = []): array
     {
@@ -538,12 +562,15 @@ class Section extends AbstractBaseApi
      * Get student enrollments for this section
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<\CanvasLMS\Api\Enrollments\Enrollment>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<\CanvasLMS\Api\Enrollments\Enrollment>
      */
     public function students(array $params = []): array
     {
         $params['type[]'] = ['StudentEnrollment'];
+
         return $this->enrollments($params);
     }
 
@@ -553,8 +580,10 @@ class Section extends AbstractBaseApi
      * @param int $sectionId Section ID to cross-list
      * @param int $newCourseId Target course ID
      * @param bool $overrideSisStickiness Override SIS stickiness
-     * @return self Cross-listed Section object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Cross-listed Section object
      */
     public static function crossList(int $sectionId, int $newCourseId, bool $overrideSisStickiness = true): self
     {
@@ -564,12 +593,12 @@ class Section extends AbstractBaseApi
         $multipart = [
             [
                 'name' => 'override_sis_stickiness',
-                'contents' => $overrideSisStickiness ? 'true' : 'false'
-            ]
+                'contents' => $overrideSisStickiness ? 'true' : 'false',
+            ],
         ];
 
         $response = self::$apiClient->post($endpoint, ['multipart' => $multipart]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -579,8 +608,10 @@ class Section extends AbstractBaseApi
      *
      * @param int $sectionId Section ID to de-cross-list
      * @param bool $overrideSisStickiness Override SIS stickiness
-     * @return self De-cross-listed Section object
+     *
      * @throws CanvasApiException
+     *
+     * @return self De-cross-listed Section object
      */
     public static function deCrossList(int $sectionId, bool $overrideSisStickiness = true): self
     {
@@ -590,19 +621,22 @@ class Section extends AbstractBaseApi
         $queryParams = ['override_sis_stickiness' => $overrideSisStickiness];
 
         $response = self::$apiClient->delete($endpoint, ['query' => $queryParams]);
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
 
     /**
      * Get the API endpoint for this resource
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
+
         return sprintf('courses/%d/sections', self::$course->getId());
     }
 }

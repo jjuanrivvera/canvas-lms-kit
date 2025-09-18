@@ -10,8 +10,6 @@ use CanvasLMS\Api\QuizSubmissions\QuizSubmission;
 use CanvasLMS\Dto\Quizzes\CreateQuizDTO;
 use CanvasLMS\Dto\Quizzes\UpdateQuizDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Quizzes API
@@ -81,7 +79,7 @@ class Quiz extends AbstractBaseApi
         'assignment',
         'practice_quiz',
         'survey',
-        'graded_survey'
+        'graded_survey',
     ];
 
     /**
@@ -90,7 +88,7 @@ class Quiz extends AbstractBaseApi
     public const VALID_HIDE_RESULTS = [
         null,
         'always',
-        'until_after_last_attempt'
+        'until_after_last_attempt',
     ];
 
     protected static ?Course $course = null;
@@ -232,6 +230,7 @@ class Quiz extends AbstractBaseApi
 
     /**
      * All date variations for the quiz
+     *
      * @var array<string, mixed>|null
      */
     public ?array $allDates = null;
@@ -260,6 +259,7 @@ class Quiz extends AbstractBaseApi
      * Set the course context for quiz operations
      *
      * @param Course $course The course to operate on
+     *
      * @return void
      */
     public static function setCourse(Course $course): void
@@ -270,14 +270,16 @@ class Quiz extends AbstractBaseApi
     /**
      * Check if course context is set
      *
-     * @return bool
      * @throws CanvasApiException If course is not set
+     *
+     * @return bool
      */
     public static function checkCourse(): bool
     {
         if (!isset(self::$course) || !isset(self::$course->id)) {
             throw new CanvasApiException('Course is required');
         }
+
         return true;
     }
 
@@ -295,6 +297,7 @@ class Quiz extends AbstractBaseApi
      * Set quiz ID
      *
      * @param int|null $id
+     *
      * @return void
      */
     public function setId(?int $id): void
@@ -316,6 +319,7 @@ class Quiz extends AbstractBaseApi
      * Set quiz title
      *
      * @param string|null $title
+     *
      * @return void
      */
     public function setTitle(?string $title): void
@@ -337,8 +341,10 @@ class Quiz extends AbstractBaseApi
      * Set quiz description
      *
      * @param string|null $description
-     * @return void
+     *
      * @throws CanvasApiException If description contains potentially dangerous content
+     *
+     * @return void
      */
     public function setDescription(?string $description): void
     {
@@ -352,8 +358,10 @@ class Quiz extends AbstractBaseApi
      * Validate quiz description for XSS prevention
      *
      * @param string $description
-     * @return void
+     *
      * @throws CanvasApiException If description contains potentially dangerous content
+     *
+     * @return void
      */
     private function validateDescription(string $description): void
     {
@@ -367,7 +375,7 @@ class Quiz extends AbstractBaseApi
             '/<object[^>]*>.*?<\/object>/is',
             '/<embed[^>]*>.*?<\/embed>/is',
             '/<applet[^>]*>.*?<\/applet>/is',
-            '/<form[^>]*>.*?<\/form>/is'
+            '/<form[^>]*>.*?<\/form>/is',
         ];
 
         foreach ($dangerousPatterns as $pattern) {
@@ -388,6 +396,7 @@ class Quiz extends AbstractBaseApi
      * Check if a property is safe to update from API response
      *
      * @param string $property
+     *
      * @return bool
      */
     private function isSafeToUpdateProperty(string $property): bool
@@ -425,6 +434,7 @@ class Quiz extends AbstractBaseApi
      * Set quiz type
      *
      * @param string|null $quizType
+     *
      * @return void
      */
     public function setQuizType(?string $quizType): void
@@ -446,6 +456,7 @@ class Quiz extends AbstractBaseApi
      * Set course ID
      *
      * @param int|null $courseId
+     *
      * @return void
      */
     public function setCourseId(?int $courseId): void
@@ -467,6 +478,7 @@ class Quiz extends AbstractBaseApi
      * Set assignment group ID
      *
      * @param int|null $assignmentGroupId
+     *
      * @return void
      */
     public function setAssignmentGroupId(?int $assignmentGroupId): void
@@ -488,6 +500,7 @@ class Quiz extends AbstractBaseApi
      * Set time limit
      *
      * @param int|null $timeLimit
+     *
      * @return void
      */
     public function setTimeLimit(?int $timeLimit): void
@@ -509,6 +522,7 @@ class Quiz extends AbstractBaseApi
      * Set points possible
      *
      * @param float|null $pointsPossible
+     *
      * @return void
      */
     public function setPointsPossible(?float $pointsPossible): void
@@ -530,6 +544,7 @@ class Quiz extends AbstractBaseApi
      * Set due date
      *
      * @param string|null $dueAt
+     *
      * @return void
      */
     public function setDueAt(?string $dueAt): void
@@ -551,6 +566,7 @@ class Quiz extends AbstractBaseApi
      * Set lock date
      *
      * @param string|null $lockAt
+     *
      * @return void
      */
     public function setLockAt(?string $lockAt): void
@@ -572,6 +588,7 @@ class Quiz extends AbstractBaseApi
      * Set unlock date
      *
      * @param string|null $unlockAt
+     *
      * @return void
      */
     public function setUnlockAt(?string $unlockAt): void
@@ -593,6 +610,7 @@ class Quiz extends AbstractBaseApi
      * Set published status
      *
      * @param bool|null $published
+     *
      * @return void
      */
     public function setPublished(?bool $published): void
@@ -614,6 +632,7 @@ class Quiz extends AbstractBaseApi
      * Set workflow state
      *
      * @param string|null $workflowState
+     *
      * @return void
      */
     public function setWorkflowState(?string $workflowState): void
@@ -635,6 +654,7 @@ class Quiz extends AbstractBaseApi
      * Set shuffle answers status
      *
      * @param bool|null $shuffleAnswers
+     *
      * @return void
      */
     public function setShuffleAnswers(?bool $shuffleAnswers): void
@@ -656,6 +676,7 @@ class Quiz extends AbstractBaseApi
      * Set show correct answers status
      *
      * @param bool|null $showCorrectAnswers
+     *
      * @return void
      */
     public function setShowCorrectAnswers(?bool $showCorrectAnswers): void
@@ -677,6 +698,7 @@ class Quiz extends AbstractBaseApi
      * Set allowed attempts
      *
      * @param int|null $allowedAttempts
+     *
      * @return void
      */
     public function setAllowedAttempts(?int $allowedAttempts): void
@@ -698,6 +720,7 @@ class Quiz extends AbstractBaseApi
      * Set one question at a time status
      *
      * @param bool|null $oneQuestionAtATime
+     *
      * @return void
      */
     public function setOneQuestionAtATime(?bool $oneQuestionAtATime): void
@@ -719,6 +742,7 @@ class Quiz extends AbstractBaseApi
      * Set hide results setting
      *
      * @param string|null $hideResults
+     *
      * @return void
      */
     public function setHideResults(?string $hideResults): void
@@ -740,6 +764,7 @@ class Quiz extends AbstractBaseApi
      * Set IP filter
      *
      * @param string|null $ipFilter
+     *
      * @return void
      */
     public function setIpFilter(?string $ipFilter): void
@@ -761,6 +786,7 @@ class Quiz extends AbstractBaseApi
      * Set access code
      *
      * @param string|null $accessCode
+     *
      * @return void
      */
     public function setAccessCode(?string $accessCode): void
@@ -782,6 +808,7 @@ class Quiz extends AbstractBaseApi
      * Set HTML URL
      *
      * @param string|null $htmlUrl
+     *
      * @return void
      */
     public function setHtmlUrl(?string $htmlUrl): void
@@ -803,6 +830,7 @@ class Quiz extends AbstractBaseApi
      * Set mobile URL
      *
      * @param string|null $mobileUrl
+     *
      * @return void
      */
     public function setMobileUrl(?string $mobileUrl): void
@@ -824,6 +852,7 @@ class Quiz extends AbstractBaseApi
      * Set question count
      *
      * @param int|null $questionCount
+     *
      * @return void
      */
     public function setQuestionCount(?int $questionCount): void
@@ -845,6 +874,7 @@ class Quiz extends AbstractBaseApi
      * Set require lockdown browser status
      *
      * @param bool|null $requireLockdownBrowser
+     *
      * @return void
      */
     public function setRequireLockdownBrowser(?bool $requireLockdownBrowser): void
@@ -866,6 +896,7 @@ class Quiz extends AbstractBaseApi
      * Set require lockdown browser for results status
      *
      * @param bool|null $requireLockdownBrowserForResults
+     *
      * @return void
      */
     public function setRequireLockdownBrowserForResults(?bool $requireLockdownBrowserForResults): void
@@ -887,6 +918,7 @@ class Quiz extends AbstractBaseApi
      * Set require lockdown browser monitor status
      *
      * @param bool|null $requireLockdownBrowserMonitor
+     *
      * @return void
      */
     public function setRequireLockdownBrowserMonitor(?bool $requireLockdownBrowserMonitor): void
@@ -908,6 +940,7 @@ class Quiz extends AbstractBaseApi
      * Set lockdown browser monitor data
      *
      * @param string|null $lockdownBrowserMonitorData
+     *
      * @return void
      */
     public function setLockdownBrowserMonitorData(?string $lockdownBrowserMonitorData): void
@@ -929,6 +962,7 @@ class Quiz extends AbstractBaseApi
      * Set all dates
      *
      * @param array<string, mixed>|null $allDates
+     *
      * @return void
      */
     public function setAllDates(?array $allDates): void
@@ -950,6 +984,7 @@ class Quiz extends AbstractBaseApi
      * Set created at timestamp
      *
      * @param string|null $createdAt
+     *
      * @return void
      */
     public function setCreatedAt(?string $createdAt): void
@@ -971,6 +1006,7 @@ class Quiz extends AbstractBaseApi
      * Set updated at timestamp
      *
      * @param string|null $updatedAt
+     *
      * @return void
      */
     public function setUpdatedAt(?string $updatedAt): void
@@ -1048,15 +1084,17 @@ class Quiz extends AbstractBaseApi
             'require_lockdown_browser_for_results' => $this->requireLockdownBrowserForResults,
             'require_lockdown_browser_monitor' => $this->requireLockdownBrowserMonitor,
             'lockdown_browser_monitor_data' => $this->lockdownBrowserMonitorData,
-        ], fn($value) => $value !== null);
+        ], fn ($value) => $value !== null);
     }
 
     /**
      * Find a single quiz by ID
      *
      * @param int $id Quiz ID
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -1065,7 +1103,7 @@ class Quiz extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/quizzes/%d', self::$course->id, $id);
         $response = self::$apiClient->get($endpoint);
-        $quizData = json_decode($response->getBody()->getContents(), true);
+        $quizData = self::parseJsonResponse($response);
 
         return new self($quizData);
     }
@@ -1074,8 +1112,10 @@ class Quiz extends AbstractBaseApi
      * Create a new quiz
      *
      * @param array<string, mixed>|CreateQuizDTO $data Quiz data
-     * @return self Created Quiz object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Created Quiz object
      */
     public static function create(array|CreateQuizDTO $data): self
     {
@@ -1088,7 +1128,7 @@ class Quiz extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/quizzes', self::$course->id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $quizData = json_decode($response->getBody()->getContents(), true);
+        $quizData = self::parseJsonResponse($response);
 
         return new self($quizData);
     }
@@ -1098,8 +1138,10 @@ class Quiz extends AbstractBaseApi
      *
      * @param int $id Quiz ID
      * @param array<string, mixed>|UpdateQuizDTO $data Quiz data
-     * @return self Updated Quiz object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Updated Quiz object
      */
     public static function update(int $id, array|UpdateQuizDTO $data): self
     {
@@ -1112,7 +1154,7 @@ class Quiz extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/quizzes/%d', self::$course->id, $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $quizData = json_decode($response->getBody()->getContents(), true);
+        $quizData = self::parseJsonResponse($response);
 
         return new self($quizData);
     }
@@ -1120,8 +1162,9 @@ class Quiz extends AbstractBaseApi
     /**
      * Save the current quiz (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -1198,8 +1241,9 @@ class Quiz extends AbstractBaseApi
     /**
      * Delete the quiz
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
@@ -1219,8 +1263,9 @@ class Quiz extends AbstractBaseApi
     /**
      * Publish the quiz
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function publish(): self
     {
@@ -1231,14 +1276,16 @@ class Quiz extends AbstractBaseApi
         $updatedQuiz = self::update($this->id, ['published' => true]);
         $this->published = $updatedQuiz->published;
         $this->workflowState = $updatedQuiz->workflowState;
+
         return $this;
     }
 
     /**
      * Unpublish the quiz
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function unpublish(): self
     {
@@ -1249,6 +1296,7 @@ class Quiz extends AbstractBaseApi
         $updatedQuiz = self::update($this->id, ['published' => false]);
         $this->published = $updatedQuiz->published;
         $this->workflowState = $updatedQuiz->workflowState;
+
         return $this;
     }
 
@@ -1266,26 +1314,31 @@ class Quiz extends AbstractBaseApi
      * Get all submissions for this quiz
      *
      * @param mixed[] $params Optional parameters for filtering submissions
-     * @return QuizSubmission[] Array of quiz submission instances
+     *
      * @throws CanvasApiException If course not set or API error
+     *
+     * @return QuizSubmission[] Array of quiz submission instances
      */
     public function submissions(array $params = []): array
     {
         QuizSubmission::setCourse(self::$course);
         QuizSubmission::setQuiz($this);
+
         return QuizSubmission::all($params);
     }
 
     /**
      * Get current user's submission for this quiz
      *
-     * @return QuizSubmission|null Quiz submission instance or null if no submission
      * @throws CanvasApiException If course not set or API error
+     *
+     * @return QuizSubmission|null Quiz submission instance or null if no submission
      */
     public function currentUserSubmission(): ?QuizSubmission
     {
         QuizSubmission::setCourse(self::$course);
         QuizSubmission::setQuiz($this);
+
         return QuizSubmission::getCurrentUserSubmission();
     }
 
@@ -1293,25 +1346,30 @@ class Quiz extends AbstractBaseApi
      * Start a new submission for this quiz
      *
      * @param mixed[] $params Optional parameters like access_code
-     * @return QuizSubmission Created quiz submission instance
+     *
      * @throws CanvasApiException If course not set or API error
+     *
+     * @return QuizSubmission Created quiz submission instance
      */
     public function startSubmission(array $params = []): QuizSubmission
     {
         QuizSubmission::setCourse(self::$course);
         QuizSubmission::setQuiz($this);
+
         return QuizSubmission::start($params);
     }
 
-
     /**
      * Get the API endpoint for this resource
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
+
         return sprintf('courses/%d/quizzes', self::$course->getId());
     }
 }

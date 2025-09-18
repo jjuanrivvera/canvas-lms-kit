@@ -30,6 +30,7 @@ class UpdateMigrationIssueDTO extends AbstractBaseDto implements DTOInterface
 
     /**
      * Constructor
+     *
      * @param array<string, mixed> $data
      */
     public function __construct(array $data = [])
@@ -49,7 +50,7 @@ class UpdateMigrationIssueDTO extends AbstractBaseDto implements DTOInterface
         if ($this->workflowState !== null) {
             $result[] = [
                 'name' => 'workflow_state',
-                'contents' => $this->workflowState
+                'contents' => $this->workflowState,
             ];
         }
 
@@ -70,7 +71,8 @@ class UpdateMigrationIssueDTO extends AbstractBaseDto implements DTOInterface
 
         // Validate workflow state value
         $validStates = ['active', 'resolved'];
-        return in_array($this->workflowState, $validStates);
+
+        return in_array($this->workflowState, $validStates, true);
     }
 
     // Getters and setters

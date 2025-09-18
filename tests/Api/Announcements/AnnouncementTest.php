@@ -1,16 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Api\Announcements;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Api\Announcements\Announcement;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Dto\Announcements\CreateAnnouncementDTO;
-use CanvasLMS\Dto\Announcements\UpdateAnnouncementDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -20,6 +19,7 @@ use Psr\Http\Message\StreamInterface;
 class AnnouncementTest extends TestCase
 {
     private HttpClientInterface $httpClientMock;
+
     private Course $course;
 
     protected function setUp(): void
@@ -75,7 +75,7 @@ class AnnouncementTest extends TestCase
             'published' => true,
             'is_announcement' => true,
             'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-01T00:00:00Z'
+            'updated_at' => '2024-01-01T00:00:00Z',
         ];
 
         $announcement = new Announcement($data);
@@ -99,13 +99,13 @@ class AnnouncementTest extends TestCase
             [
                 'id' => 1,
                 'title' => 'Announcement 1',
-                'is_announcement' => true
+                'is_announcement' => true,
             ],
             [
                 'id' => 2,
                 'title' => 'Announcement 2',
-                'is_announcement' => true
-            ]
+                'is_announcement' => true,
+            ],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -143,8 +143,8 @@ class AnnouncementTest extends TestCase
                 'id' => 1,
                 'title' => 'Active Announcement',
                 'is_announcement' => true,
-                'published' => true
-            ]
+                'published' => true,
+            ],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -179,14 +179,14 @@ class AnnouncementTest extends TestCase
                 'id' => 1,
                 'title' => 'Course 123 Announcement',
                 'context_code' => 'course_123',
-                'is_announcement' => true
+                'is_announcement' => true,
             ],
             [
                 'id' => 2,
                 'title' => 'Course 456 Announcement',
                 'context_code' => 'course_456',
-                'is_announcement' => true
-            ]
+                'is_announcement' => true,
+            ],
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -206,7 +206,7 @@ class AnnouncementTest extends TestCase
                 'announcements',
                 ['query' => [
                     'context_codes[0]' => 'course_123',
-                    'context_codes[1]' => 'course_456'
+                    'context_codes[1]' => 'course_456',
                 ]]
             )
             ->willReturn($responseMock);
@@ -231,14 +231,14 @@ class AnnouncementTest extends TestCase
         $createData = [
             'title' => 'New Announcement',
             'message' => 'This is a new announcement',
-            'published' => true
+            'published' => true,
         ];
 
         $responseData = array_merge($createData, [
             'id' => 1,
             'is_announcement' => true,
             'discussion_type' => 'side_comment',
-            'require_initial_post' => false
+            'require_initial_post' => false,
         ]);
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -275,7 +275,7 @@ class AnnouncementTest extends TestCase
         $createDTO = new CreateAnnouncementDTO([
             'title' => 'DTO Announcement',
             'message' => 'Created with DTO',
-            'delayed_post_at' => '2024-03-01T10:00:00Z'
+            'delayed_post_at' => '2024-03-01T10:00:00Z',
         ]);
 
         $responseData = [
@@ -284,7 +284,7 @@ class AnnouncementTest extends TestCase
             'message' => 'Created with DTO',
             'is_announcement' => true,
             'delayed_post_at' => '2024-03-01T10:00:00Z',
-            'published' => false
+            'published' => false,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -315,7 +315,7 @@ class AnnouncementTest extends TestCase
         $responseData = [
             'id' => 1,
             'title' => 'Updated Announcement',
-            'is_announcement' => true
+            'is_announcement' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -352,7 +352,7 @@ class AnnouncementTest extends TestCase
             'id' => 1,
             'title' => 'Scheduled Announcement',
             'delayed_post_at' => '2024-06-01T10:00:00Z',
-            'is_announcement' => true
+            'is_announcement' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -401,7 +401,7 @@ class AnnouncementTest extends TestCase
             'title' => 'Immediate Announcement',
             'delayed_post_at' => null,
             'published' => true,
-            'is_announcement' => true
+            'is_announcement' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -430,7 +430,7 @@ class AnnouncementTest extends TestCase
     {
         $announcement = new Announcement([
             'title' => 'New Announcement to Save',
-            'message' => 'Test message'
+            'message' => 'Test message',
         ]);
 
         $responseData = [
@@ -439,7 +439,7 @@ class AnnouncementTest extends TestCase
             'message' => 'Test message',
             'is_announcement' => true,
             'require_initial_post' => false,
-            'published' => true
+            'published' => true,
         ];
 
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -467,9 +467,9 @@ class AnnouncementTest extends TestCase
     public function testContextCodeGetterAndSetter(): void
     {
         $announcement = new Announcement();
-        
+
         $this->assertNull($announcement->getContextCode());
-        
+
         $announcement->setContextCode('course_789');
         $this->assertEquals('course_789', $announcement->getContextCode());
     }

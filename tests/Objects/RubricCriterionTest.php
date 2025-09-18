@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Objects;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Objects\RubricCriterion;
 use CanvasLMS\Objects\RubricRating;
+use PHPUnit\Framework\TestCase;
 
 class RubricCriterionTest extends TestCase
 {
@@ -25,22 +27,22 @@ class RubricCriterionTest extends TestCase
                 [
                     'id' => 'rating_1',
                     'description' => 'Excellent',
-                    'points' => 20.0
+                    'points' => 20.0,
                 ],
                 [
                     'id' => 'rating_2',
                     'description' => 'Good',
-                    'points' => 15.0
+                    'points' => 15.0,
                 ],
                 [
                     'id' => 'rating_3',
                     'description' => 'Satisfactory',
-                    'points' => 10.0
-                ]
+                    'points' => 10.0,
+                ],
             ],
             'learning_outcome_id' => 'outcome_456',
             'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-02T00:00:00Z'
+            'updated_at' => '2024-01-02T00:00:00Z',
         ];
 
         $criterion = new RubricCriterion($data);
@@ -59,7 +61,7 @@ class RubricCriterionTest extends TestCase
         // Test ratings
         $this->assertIsArray($criterion->ratings);
         $this->assertCount(3, $criterion->ratings);
-        
+
         foreach ($criterion->ratings as $rating) {
             $this->assertInstanceOf(RubricRating::class, $rating);
         }
@@ -79,7 +81,7 @@ class RubricCriterionTest extends TestCase
     {
         $data = [
             'description' => 'Writing Style',
-            'points' => 10.0
+            'points' => 10.0,
         ];
 
         $criterion = new RubricCriterion($data);
@@ -109,8 +111,8 @@ class RubricCriterionTest extends TestCase
                 'invalid_string_rating',
                 null,
                 123,
-                ['description' => 'Valid Rating', 'points' => 5.0]
-            ]
+                ['description' => 'Valid Rating', 'points' => 5.0],
+            ],
         ];
 
         $criterion = new RubricCriterion($data);
@@ -130,7 +132,7 @@ class RubricCriterionTest extends TestCase
         $data = [
             'description' => 'Test Criterion',
             'points' => 5.0,
-            'ratings' => []
+            'ratings' => [],
         ];
 
         $criterion = new RubricCriterion($data);
@@ -152,8 +154,8 @@ class RubricCriterionTest extends TestCase
             'criterion_use_range' => false,
             'ratings' => [
                 ['description' => 'Advanced', 'points' => 25.0],
-                ['description' => 'Proficient', 'points' => 20.0]
-            ]
+                ['description' => 'Proficient', 'points' => 20.0],
+            ],
         ];
 
         $criterion = new RubricCriterion($data);
@@ -165,7 +167,7 @@ class RubricCriterionTest extends TestCase
         $this->assertEquals('Critical thinking and analysis skills', $array['long_description']);
         $this->assertEquals(25.0, $array['points']);
         $this->assertFalse($array['criterion_use_range']);
-        
+
         // Check ratings in array format
         $this->assertIsArray($array['ratings']);
         $this->assertCount(2, $array['ratings']);
@@ -196,7 +198,7 @@ class RubricCriterionTest extends TestCase
             'points' => 15.0,
             'long_description' => null,
             'criterion_use_range' => null,
-            'ratings' => null
+            'ratings' => null,
         ];
 
         $criterion = new RubricCriterion($data);

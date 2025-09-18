@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Dto\Conversations;
 
 /**
@@ -16,24 +18,28 @@ class CreateConversationDTO
     /**
      * An array of recipient ids. These may be user ids or course/group ids
      * prefixed with "course_" or "group_" respectively
+     *
      * @var array<string>
      */
     public array $recipients;
 
     /**
      * The subject of the conversation (max 255 characters)
+     *
      * @var string|null
      */
     public ?string $subject = null;
 
     /**
      * The message body to be sent
+     *
      * @var string
      */
     public string $body;
 
     /**
      * Forces a new message to be created, even if there is an existing private conversation
+     *
      * @var bool|null
      */
     public ?bool $forceNew = null;
@@ -41,6 +47,7 @@ class CreateConversationDTO
     /**
      * When false, individual private conversations will be created with each recipient.
      * If true, this will be a group conversation
+     *
      * @var bool|null
      */
     public ?bool $groupConversation = null;
@@ -48,54 +55,63 @@ class CreateConversationDTO
     /**
      * An array of attachment IDs. These must be files previously uploaded
      * to the sender's "conversation attachments" folder
+     *
      * @var array<int>|null
      */
     public ?array $attachmentIds = null;
 
     /**
      * Media comment id of an audio or video file
+     *
      * @var string|null
      */
     public ?string $mediaCommentId = null;
 
     /**
      * Type of the associated media file
+     *
      * @var string|null
      */
     public ?string $mediaCommentType = null;
 
     /**
      * Determines whether messages will be created/sent synchronously or asynchronously
+     *
      * @var string|null
      */
     public ?string $mode = null;
 
     /**
      * Used when generating "visible" in the API response
+     *
      * @var string|null
      */
     public ?string $scope = null;
 
     /**
      * Used when generating "visible" in the API response
+     *
      * @var array<string>|null
      */
     public ?array $filter = null;
 
     /**
      * Used when generating "visible" in the API response
+     *
      * @var string|null
      */
     public ?string $filterMode = null;
 
     /**
      * The course or group that is the context for this conversation
+     *
      * @var string|null
      */
     public ?string $contextCode = null;
 
     /**
      * Whether to send as a bulk message to each recipient
+     *
      * @var bool|null
      */
     public ?bool $bulkMessage = null;
@@ -146,7 +162,7 @@ class CreateConversationDTO
         }
         if ($this->attachmentIds !== null) {
             foreach ($this->attachmentIds as $attachmentId) {
-                $data[] = ['name' => 'attachment_ids[]', 'contents' => (string)$attachmentId];
+                $data[] = ['name' => 'attachment_ids[]', 'contents' => (string) $attachmentId];
             }
         }
         if ($this->mediaCommentId !== null) {

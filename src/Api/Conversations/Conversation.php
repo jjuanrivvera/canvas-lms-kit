@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Api\Conversations;
 
 use CanvasLMS\Api\AbstractBaseApi;
-use CanvasLMS\Objects\ConversationParticipant;
-use CanvasLMS\Dto\Conversations\CreateConversationDTO;
-use CanvasLMS\Dto\Conversations\UpdateConversationDTO;
 use CanvasLMS\Dto\Conversations\AddMessageDTO;
 use CanvasLMS\Dto\Conversations\AddRecipientsDTO;
+use CanvasLMS\Dto\Conversations\CreateConversationDTO;
+use CanvasLMS\Dto\Conversations\UpdateConversationDTO;
+use CanvasLMS\Objects\ConversationParticipant;
 
 /**
  * Class Conversation
@@ -42,26 +44,43 @@ class Conversation extends AbstractBaseApi
     protected static string $endpoint = '/conversations';
 
     public ?int $id = null;
+
     public ?string $subject = null;
+
     public ?string $workflowState = null;
+
     public ?string $lastMessage = null;
+
     public ?string $lastMessageAt = null;
+
     public ?string $startAt = null;
+
     public ?int $messageCount = null;
+
     public ?bool $subscribed = null;
+
     public ?bool $private = null;
+
     public ?bool $starred = null;
+
     /** @var array<string>|null */
     public ?array $properties = null;
+
     /** @var array<int>|null */
     public ?array $audience = null;
+
     /** @var array<string, mixed>|null */
     public ?array $audienceContexts = null;
+
     public ?string $avatarUrl = null;
+
     /** @var array<ConversationParticipant>|null */
     public ?array $participants = null;
+
     public ?bool $visible = null;
+
     public ?string $contextName = null;
+
     /** @var array<array<string, mixed>>|null */
     public ?array $messages = null;
 
@@ -101,6 +120,7 @@ class Conversation extends AbstractBaseApi
      *                      - filter_mode: and, or, default or
      *                      - include_all_conversation_ids: Return all conversation IDs
      *                      - include[]: participant_avatars
+     *
      * @return array<Conversation> Array of Conversation objects
      */
     public static function get(array $params = []): array
@@ -109,7 +129,7 @@ class Conversation extends AbstractBaseApi
         $response = self::$apiClient->get(self::$endpoint, $params);
 
         $conversations = [];
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         // Handle the case where include_all_conversation_ids is true
         if (isset($data['conversations'])) {
@@ -134,6 +154,7 @@ class Conversation extends AbstractBaseApi
      *                      - scope: unread, starred, archived
      *                      - filter[]: Used for generating "visible" in response
      *                      - filter_mode: and, or, default or
+     *
      * @return self
      */
     public static function find(int $id, array $params = []): self
@@ -146,7 +167,7 @@ class Conversation extends AbstractBaseApi
         }
 
         $response = self::$apiClient->get(self::$endpoint . '/' . $id, $params);
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -155,6 +176,7 @@ class Conversation extends AbstractBaseApi
      * Create a new conversation
      *
      * @param array<string, mixed>|CreateConversationDTO $data Conversation data
+     *
      * @return self
      */
     public static function create(array|CreateConversationDTO $data): self
@@ -166,7 +188,7 @@ class Conversation extends AbstractBaseApi
         }
 
         $response = self::$apiClient->post(self::$endpoint, ['multipart' => $data->toApiArray()]);
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         // Handle async mode where response might be empty
         if (empty($responseData)) {
@@ -185,6 +207,7 @@ class Conversation extends AbstractBaseApi
      * Update a conversation
      *
      * @param array<string, mixed>|UpdateConversationDTO|null $data Optional update data
+     *
      * @return self
      */
     public function save(array|UpdateConversationDTO|null $data = null): self
@@ -210,9 +233,10 @@ class Conversation extends AbstractBaseApi
             }
             $response = self::$apiClient->put(self::$endpoint . '/' . $this->id, ['multipart' => $updateData]);
         }
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         $this->populate($responseData);
+
         return $this;
     }
 
@@ -226,6 +250,7 @@ class Conversation extends AbstractBaseApi
         self::checkApiClient();
 
         self::$apiClient->delete(self::$endpoint . '/' . $this->id);
+
         return $this;
     }
 
@@ -233,6 +258,7 @@ class Conversation extends AbstractBaseApi
      * Add a message to an existing conversation
      *
      * @param array<string, mixed>|AddMessageDTO $data Message data
+     *
      * @return self
      */
     public function addMessage(array|AddMessageDTO $data): self
@@ -248,7 +274,7 @@ class Conversation extends AbstractBaseApi
             ['multipart' => $data->toApiArray()]
         );
 
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         $this->populate($responseData);
 
         return $this;
@@ -258,6 +284,7 @@ class Conversation extends AbstractBaseApi
      * Add recipients to an existing group conversation
      *
      * @param array<string, mixed>|AddRecipientsDTO $data Recipients data
+     *
      * @return self
      */
     public function addRecipients(array|AddRecipientsDTO $data): self
@@ -273,7 +300,7 @@ class Conversation extends AbstractBaseApi
             ['multipart' => $data->toApiArray()]
         );
 
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         $this->populate($responseData);
 
         return $this;
@@ -283,6 +310,7 @@ class Conversation extends AbstractBaseApi
      * Remove messages from a conversation
      *
      * @param array<int> $messageIds Array of message IDs to remove
+     *
      * @return self
      */
     public function removeMessages(array $messageIds): self
@@ -292,7 +320,7 @@ class Conversation extends AbstractBaseApi
         // Build multipart format for array parameters
         $data = [];
         foreach ($messageIds as $messageId) {
-            $data[] = ['name' => 'remove[]', 'contents' => (string)$messageId];
+            $data[] = ['name' => 'remove[]', 'contents' => (string) $messageId];
         }
 
         $response = self::$apiClient->post(
@@ -300,7 +328,7 @@ class Conversation extends AbstractBaseApi
             ['multipart' => $data]
         );
 
-        $responseData = json_decode($response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
         $this->populate($responseData);
 
         return $this;
@@ -312,6 +340,7 @@ class Conversation extends AbstractBaseApi
      * @param array<int> $conversationIds Array of conversation IDs to update
      * @param array<string, mixed> $data Update data
      *                     (event: mark_as_read, mark_as_unread, star, unstar, archive, destroy)
+     *
      * @return array<string, mixed> Progress information
      */
     public static function batchUpdate(array $conversationIds, array $data): array
@@ -321,17 +350,17 @@ class Conversation extends AbstractBaseApi
         // Build multipart format for array parameters
         $updateData = [];
         foreach ($conversationIds as $conversationId) {
-            $updateData[] = ['name' => 'conversation_ids[]', 'contents' => (string)$conversationId];
+            $updateData[] = ['name' => 'conversation_ids[]', 'contents' => (string) $conversationId];
         }
 
         // Add other data fields
         foreach ($data as $key => $value) {
-            $updateData[] = ['name' => $key, 'contents' => (string)$value];
+            $updateData[] = ['name' => $key, 'contents' => (string) $value];
         }
 
         $response = self::$apiClient->put(self::$endpoint, ['multipart' => $updateData]);
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -358,7 +387,7 @@ class Conversation extends AbstractBaseApi
         self::checkApiClient();
 
         $response = self::$apiClient->get(self::$endpoint . '/unread_count');
-        $data = json_decode($response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return $data['unread_count'] ?? 0;
     }
@@ -374,7 +403,7 @@ class Conversation extends AbstractBaseApi
 
         $response = self::$apiClient->get(self::$endpoint . '/batches');
 
-        return json_decode($response->getBody(), true);
+        return self::parseJsonResponse($response);
     }
 
     /**
@@ -382,6 +411,7 @@ class Conversation extends AbstractBaseApi
      * Override to handle camelCase properties and participant objects
      *
      * @param array<string, mixed> $data
+     *
      * @return void
      */
     protected function populate(array $data): void
@@ -414,6 +444,7 @@ class Conversation extends AbstractBaseApi
     public function markAsRead(): self
     {
         $this->workflowState = 'read';
+
         return $this->save();
     }
 
@@ -425,6 +456,7 @@ class Conversation extends AbstractBaseApi
     public function markAsUnread(): self
     {
         $this->workflowState = 'unread';
+
         return $this->save();
     }
 
@@ -436,6 +468,7 @@ class Conversation extends AbstractBaseApi
     public function star(): self
     {
         $this->starred = true;
+
         return $this->save();
     }
 
@@ -447,6 +480,7 @@ class Conversation extends AbstractBaseApi
     public function unstar(): self
     {
         $this->starred = false;
+
         return $this->save();
     }
 
@@ -458,11 +492,13 @@ class Conversation extends AbstractBaseApi
     public function archive(): self
     {
         $this->workflowState = 'archived';
+
         return $this->save();
     }
 
     /**
      * Get the API endpoint for this resource
+     *
      * @return string
      */
     protected static function getEndpoint(): string

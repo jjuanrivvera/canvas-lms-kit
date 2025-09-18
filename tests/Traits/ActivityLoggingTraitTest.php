@@ -1,27 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Tests\Traits;
 
 use CanvasLMS\Config;
 use CanvasLMS\Traits\ActivityLoggingTrait;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
 
 class ActivityLoggingTraitTest extends TestCase
 {
     use ActivityLoggingTrait;
 
     private $mockLogger;
+
     private $originalContext;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Save original context
         $this->originalContext = Config::getContext();
-        
+
         // Create mock logger
         $this->mockLogger = $this->createMock(LoggerInterface::class);
         Config::setLogger($this->mockLogger);
@@ -32,7 +34,7 @@ class ActivityLoggingTraitTest extends TestCase
         // Reset configuration
         Config::setContext($this->originalContext);
         Config::resetContext('default');
-        
+
         parent::tearDown();
     }
 
@@ -107,7 +109,7 @@ class ActivityLoggingTraitTest extends TestCase
     public function testLogError(): void
     {
         $exception = new \Exception('Test error', 500);
-        
+
         $this->mockLogger->expects($this->once())
             ->method('error')
             ->with(
@@ -172,7 +174,7 @@ class ActivityLoggingTraitTest extends TestCase
 
         $this->logOAuthOperation('refresh', [
             'token' => 'abc12345678',
-            'user_id' => 999
+            'user_id' => 999,
         ]);
     }
 
@@ -218,7 +220,7 @@ class ActivityLoggingTraitTest extends TestCase
             'password' => 'pwd',
             'api_key' => 'abcdefg',
             'user_id' => 123,
-            'scope' => 'read write'
+            'scope' => 'read write',
         ]);
     }
 
@@ -226,10 +228,10 @@ class ActivityLoggingTraitTest extends TestCase
     {
         $startTime = $this->startTimer();
         $this->assertIsFloat($startTime);
-        
+
         // Simulate some work
         usleep(100000); // 100ms
-        
+
         $this->mockLogger->expects($this->once())
             ->method('info')
             ->with(
@@ -240,7 +242,7 @@ class ActivityLoggingTraitTest extends TestCase
                            $context['operation'] === 'timed_operation';
                 })
             );
-        
+
         $this->endTimer($startTime, 'timed_operation');
     }
 }

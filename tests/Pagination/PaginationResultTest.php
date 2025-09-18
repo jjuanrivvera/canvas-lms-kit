@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Tests\Pagination;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Pagination\PaginationResult;
+use PHPUnit\Framework\TestCase;
 
 /**
  * PaginationResultTest Class
@@ -19,12 +21,14 @@ class PaginationResultTest extends TestCase
 {
     /**
      * Sample data for testing
+     *
      * @var mixed[]
      */
     private array $sampleData;
 
     /**
      * Sample navigation links for testing
+     *
      * @var string[]
      */
     private array $sampleLinks;

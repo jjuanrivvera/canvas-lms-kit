@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Assignments;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Assignments\UpdateAssignmentDTO;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\Assignments\UpdateAssignmentDTO
@@ -31,7 +33,7 @@ class UpdateAssignmentDTOTest extends TestCase
             'published' => false,
             'grading_type' => 'percent',
             'submission_types' => ['online_upload'],
-            'assignment_group_id' => 789
+            'assignment_group_id' => 789,
         ];
 
         $dto = new UpdateAssignmentDTO($data);
@@ -166,7 +168,7 @@ class UpdateAssignmentDTOTest extends TestCase
             'published' => false,
             'grading_type' => 'percent',
             'submission_types' => ['online_upload'],
-            'assignment_group_id' => 789
+            'assignment_group_id' => 789,
         ];
 
         $dto = new UpdateAssignmentDTO($data);
@@ -190,7 +192,7 @@ class UpdateAssignmentDTOTest extends TestCase
             'description' => 'Updated description',
             'due_at' => '2024-12-31T23:59:59Z',
             'points_possible' => 150.0,
-            'published' => false
+            'published' => false,
         ];
 
         $dto = new UpdateAssignmentDTO($data);
@@ -212,7 +214,7 @@ class UpdateAssignmentDTOTest extends TestCase
         $data = [
             'name' => 'Updated Assignment',
             'submission_types' => ['online_upload', 'media_recording'],
-            'allowed_extensions' => ['jpg', 'png', 'gif']
+            'allowed_extensions' => ['jpg', 'png', 'gif'],
         ];
 
         $dto = new UpdateAssignmentDTO($data);
@@ -231,7 +233,7 @@ class UpdateAssignmentDTOTest extends TestCase
             'name' => 'Updated Assignment',
             'description' => null,
             'due_at' => null,
-            'points_possible' => 150.0
+            'points_possible' => 150.0,
         ];
 
         $dto = new UpdateAssignmentDTO($data);
@@ -247,7 +249,7 @@ class UpdateAssignmentDTOTest extends TestCase
     public function testPartialUpdate(): void
     {
         $data = [
-            'name' => 'Updated Assignment Name Only'
+            'name' => 'Updated Assignment Name Only',
         ];
 
         $dto = new UpdateAssignmentDTO($data);

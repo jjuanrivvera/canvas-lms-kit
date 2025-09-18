@@ -11,8 +11,6 @@ use CanvasLMS\Dto\Pages\CreatePageDTO;
 use CanvasLMS\Dto\Pages\UpdatePageDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Objects\PageRevision;
-use CanvasLMS\Pagination\PaginatedResponse;
-use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Pages API
@@ -82,7 +80,7 @@ class Page extends AbstractBaseApi
         'teachers' => 'teachers',
         'students' => 'students',
         'members' => 'members',
-        'public' => 'public'
+        'public' => 'public',
     ];
 
     /**
@@ -137,6 +135,7 @@ class Page extends AbstractBaseApi
 
     /**
      * Block editor attributes (when editor is 'block_editor')
+     *
      * @var array<string, mixed>|null
      */
     public ?array $blockEditorAttributes = null;
@@ -163,6 +162,7 @@ class Page extends AbstractBaseApi
 
     /**
      * User who last edited the page
+     *
      * @var array<string, mixed>|null
      */
     public ?array $lastEditedBy = null;
@@ -201,6 +201,7 @@ class Page extends AbstractBaseApi
      * Set the course context for page operations
      *
      * @param Course $course The course to operate on
+     *
      * @return void
      */
     public static function setCourse(Course $course): void
@@ -211,14 +212,16 @@ class Page extends AbstractBaseApi
     /**
      * Check if course context is set
      *
-     * @return bool
      * @throws CanvasApiException If course is not set
+     *
+     * @return bool
      */
     public static function checkCourse(): bool
     {
         if (!isset(self::$course) || !isset(self::$course->id)) {
             throw new CanvasApiException('Course is required');
         }
+
         return true;
     }
 
@@ -236,6 +239,7 @@ class Page extends AbstractBaseApi
      * Set page ID
      *
      * @param int|null $pageId
+     *
      * @return void
      */
     public function setPageId(?int $pageId): void
@@ -257,6 +261,7 @@ class Page extends AbstractBaseApi
      * Set page URL slug
      *
      * @param string|null $url
+     *
      * @return void
      */
     public function setUrl(?string $url): void
@@ -278,6 +283,7 @@ class Page extends AbstractBaseApi
      * Set page title
      *
      * @param string|null $title
+     *
      * @return void
      */
     public function setTitle(?string $title): void
@@ -299,6 +305,7 @@ class Page extends AbstractBaseApi
      * Set page body content
      *
      * @param string|null $body
+     *
      * @return void
      */
     public function setBody(?string $body): void
@@ -344,6 +351,7 @@ class Page extends AbstractBaseApi
                 if (preg_match('#^\s*(javascript|data):#i', $url)) {
                     return $attr . '="#"';
                 }
+
                 return $matches[0];
             },
             $safeBody
@@ -379,6 +387,7 @@ class Page extends AbstractBaseApi
      * Set workflow state
      *
      * @param string|null $workflowState
+     *
      * @return void
      */
     public function setWorkflowState(?string $workflowState): void
@@ -400,6 +409,7 @@ class Page extends AbstractBaseApi
      * Set editing roles
      *
      * @param string|null $editingRoles
+     *
      * @return void
      */
     public function setEditingRoles(?string $editingRoles): void
@@ -421,6 +431,7 @@ class Page extends AbstractBaseApi
      * Set published status
      *
      * @param bool|null $published
+     *
      * @return void
      */
     public function setPublished(?bool $published): void
@@ -442,6 +453,7 @@ class Page extends AbstractBaseApi
      * Set front page status
      *
      * @param bool|null $frontPage
+     *
      * @return void
      */
     public function setFrontPage(?bool $frontPage): void
@@ -463,6 +475,7 @@ class Page extends AbstractBaseApi
      * Set publish at date
      *
      * @param string|null $publishAt
+     *
      * @return void
      */
     public function setPublishAt(?string $publishAt): void
@@ -484,6 +497,7 @@ class Page extends AbstractBaseApi
      * Set editor type
      *
      * @param string|null $editor
+     *
      * @return void
      */
     public function setEditor(?string $editor): void
@@ -505,6 +519,7 @@ class Page extends AbstractBaseApi
      * Set block editor attributes
      *
      * @param array<string, mixed>|null $blockEditorAttributes
+     *
      * @return void
      */
     public function setBlockEditorAttributes(?array $blockEditorAttributes): void
@@ -526,6 +541,7 @@ class Page extends AbstractBaseApi
      * Set lock info
      *
      * @param string|null $lockInfo
+     *
      * @return void
      */
     public function setLockInfo(?string $lockInfo): void
@@ -547,6 +563,7 @@ class Page extends AbstractBaseApi
      * Set HTML URL
      *
      * @param string|null $htmlUrl
+     *
      * @return void
      */
     public function setHtmlUrl(?string $htmlUrl): void
@@ -568,6 +585,7 @@ class Page extends AbstractBaseApi
      * Set created at timestamp
      *
      * @param string|null $createdAt
+     *
      * @return void
      */
     public function setCreatedAt(?string $createdAt): void
@@ -589,6 +607,7 @@ class Page extends AbstractBaseApi
      * Set updated at timestamp
      *
      * @param string|null $updatedAt
+     *
      * @return void
      */
     public function setUpdatedAt(?string $updatedAt): void
@@ -610,6 +629,7 @@ class Page extends AbstractBaseApi
      * Set last edited by user
      *
      * @param array<string, mixed>|null $lastEditedBy
+     *
      * @return void
      */
     public function setLastEditedBy(?array $lastEditedBy): void
@@ -631,6 +651,7 @@ class Page extends AbstractBaseApi
      * Set locked for user status
      *
      * @param bool|null $lockedForUser
+     *
      * @return void
      */
     public function setLockedForUser(?bool $lockedForUser): void
@@ -652,6 +673,7 @@ class Page extends AbstractBaseApi
      * Set lock explanation
      *
      * @param string|null $lockExplanation
+     *
      * @return void
      */
     public function setLockExplanation(?string $lockExplanation): void
@@ -673,6 +695,7 @@ class Page extends AbstractBaseApi
      * Set revision ID
      *
      * @param int|null $revisionId
+     *
      * @return void
      */
     public function setRevisionId(?int $revisionId): void
@@ -694,6 +717,7 @@ class Page extends AbstractBaseApi
      * Set page views count
      *
      * @param int|null $pageViewsCount
+     *
      * @return void
      */
     public function setPageViewsCount(?int $pageViewsCount): void
@@ -745,7 +769,7 @@ class Page extends AbstractBaseApi
             'editing_roles' => $this->editingRoles,
             'published' => $this->published,
             'front_page' => $this->frontPage,
-        ], fn($value) => $value !== null);
+        ], fn ($value) => $value !== null);
     }
 
     /**
@@ -753,8 +777,10 @@ class Page extends AbstractBaseApi
      *
      * @param int $id Page ID
      * @param array<string, mixed> $params Optional query parameters
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function find(int $id, array $params = []): self
     {
@@ -765,7 +791,7 @@ class Page extends AbstractBaseApi
         // Canvas API doesn't provide direct page lookup by numeric ID
         $endpoint = sprintf('courses/%d/pages', self::$course->id);
         $response = self::$apiClient->get($endpoint);
-        $pagesData = json_decode($response->getBody()->getContents(), true);
+        $pagesData = self::parseJsonResponse($response);
 
         foreach ($pagesData as $pageData) {
             if (isset($pageData['page_id']) && $pageData['page_id'] === $id) {
@@ -785,8 +811,10 @@ class Page extends AbstractBaseApi
      * Find a single page by URL slug
      *
      * @param string $url Page URL slug
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function findByUrl(string $url): self
     {
@@ -795,7 +823,7 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, rawurlencode($url));
         $response = self::$apiClient->get($endpoint);
-        $pageData = json_decode($response->getBody()->getContents(), true);
+        $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
     }
@@ -809,8 +837,10 @@ class Page extends AbstractBaseApi
      *   - search_term: The partial title of the pages to match and return
      *   - published: If true, include only published pages. If false, exclude published pages
      *   - include: Array or string. 'body' to include page body with each Page
-     * @return array<Page> Array of Page objects
+     *
      * @throws CanvasApiException
+     *
+     * @return array<Page> Array of Page objects
      */
     public static function get(array $params = []): array
     {
@@ -824,7 +854,7 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/pages', self::$course->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $pagesData = json_decode($response->getBody()->getContents(), true);
+        $pagesData = self::parseJsonResponse($response);
 
         $pages = [];
         foreach ($pagesData as $pageData) {
@@ -834,15 +864,14 @@ class Page extends AbstractBaseApi
         return $pages;
     }
 
-
-
-
     /**
      * Create a new page
      *
      * @param array<string, mixed>|CreatePageDTO $data Page data
-     * @return self Created Page object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Created Page object
      */
     public static function create(array|CreatePageDTO $data): self
     {
@@ -855,7 +884,7 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/pages', self::$course->id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $pageData = json_decode($response->getBody()->getContents(), true);
+        $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
     }
@@ -865,8 +894,10 @@ class Page extends AbstractBaseApi
      *
      * @param string $url Page URL slug
      * @param array<string, mixed>|UpdatePageDTO $data Page data
-     * @return self Updated Page object
+     *
      * @throws CanvasApiException
+     *
+     * @return self Updated Page object
      */
     public static function update(string $url, array|UpdatePageDTO $data): self
     {
@@ -879,7 +910,7 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, rawurlencode($url));
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $pageData = json_decode($response->getBody()->getContents(), true);
+        $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
     }
@@ -887,8 +918,9 @@ class Page extends AbstractBaseApi
     /**
      * Save the current page (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -930,8 +962,9 @@ class Page extends AbstractBaseApi
     /**
      * Delete the page
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
@@ -951,8 +984,9 @@ class Page extends AbstractBaseApi
     /**
      * Get the course front page
      *
-     * @return self|null Front page object or null if not set
      * @throws CanvasApiException
+     *
+     * @return self|null Front page object or null if not set
      */
     public static function fetchFrontPage(): ?self
     {
@@ -962,7 +996,7 @@ class Page extends AbstractBaseApi
         try {
             $endpoint = sprintf('courses/%d/front_page', self::$course->id);
             $response = self::$apiClient->get($endpoint);
-            $pageData = json_decode($response->getBody()->getContents(), true);
+            $pageData = self::parseJsonResponse($response);
 
             return new self($pageData);
         } catch (CanvasApiException $e) {
@@ -970,6 +1004,7 @@ class Page extends AbstractBaseApi
             if (str_contains($e->getMessage(), '404')) {
                 return null;
             }
+
             throw $e;
         }
     }
@@ -978,8 +1013,10 @@ class Page extends AbstractBaseApi
      * Set a page as the course front page
      *
      * @param string $pageUrl Page URL slug to set as front page
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public static function setAsFrontPage(string $pageUrl): self
     {
@@ -989,14 +1026,16 @@ class Page extends AbstractBaseApi
         $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, rawurlencode($pageUrl));
         $data = ['wiki_page' => ['front_page' => true]];
         self::$apiClient->put($endpoint, ['multipart' => $data]);
+
         return new self([]);
     }
 
     /**
      * Make this page the course front page
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function makeFrontPage(): self
     {
@@ -1006,14 +1045,16 @@ class Page extends AbstractBaseApi
 
         self::setAsFrontPage($this->url);
         $this->frontPage = true;
+
         return $this;
     }
 
     /**
      * Publish the page
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function publish(): self
     {
@@ -1024,14 +1065,16 @@ class Page extends AbstractBaseApi
         $updatedPage = self::update($this->url, ['published' => true]);
         $this->published = $updatedPage->published;
         $this->workflowState = $updatedPage->workflowState;
+
         return $this;
     }
 
     /**
      * Unpublish the page
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function unpublish(): self
     {
@@ -1042,6 +1085,7 @@ class Page extends AbstractBaseApi
         $updatedPage = self::update($this->url, ['published' => false]);
         $this->published = $updatedPage->published;
         $this->workflowState = $updatedPage->workflowState;
+
         return $this;
     }
 
@@ -1069,6 +1113,7 @@ class Page extends AbstractBaseApi
      * Generate a URL slug from a title
      *
      * @param string $title Page title
+     *
      * @return string URL slug
      */
     public static function generateSlug(string $title): string
@@ -1105,8 +1150,10 @@ class Page extends AbstractBaseApi
      * Update the URL slug for this page
      *
      * @param string $newSlug New URL slug
-     * @return self
+     *
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function updateUrlSlug(string $newSlug): self
     {
@@ -1116,15 +1163,16 @@ class Page extends AbstractBaseApi
 
         $updatedPage = self::update($this->url, ['url' => $newSlug]);
         $this->url = $updatedPage->url;
+
         return $this;
     }
-
 
     /**
      * Duplicate this page
      *
-     * @return self New duplicated page
      * @throws CanvasApiException
+     *
+     * @return self New duplicated page
      */
     public function duplicate(): self
     {
@@ -1135,10 +1183,10 @@ class Page extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $identifier = $this->url ?: (string)$this->pageId;
+        $identifier = $this->url ?: (string) $this->pageId;
         $endpoint = sprintf('courses/%d/pages/%s/duplicate', self::$course->id, rawurlencode($identifier));
         $response = self::$apiClient->post($endpoint);
-        $pageData = json_decode($response->getBody()->getContents(), true);
+        $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
     }
@@ -1148,8 +1196,10 @@ class Page extends AbstractBaseApi
      *
      * @param int|string $revisionId Revision ID or 'latest'
      * @param bool $summary If true, exclude page content from results
-     * @return PageRevision Revision object
+     *
      * @throws CanvasApiException
+     *
+     * @return PageRevision Revision object
      */
     public function revision(int|string $revisionId, bool $summary = false): PageRevision
     {
@@ -1168,7 +1218,7 @@ class Page extends AbstractBaseApi
             $revisionId
         );
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $revisionData = json_decode($response->getBody()->getContents(), true);
+        $revisionData = self::parseJsonResponse($response);
 
         return new PageRevision($revisionData);
     }
@@ -1177,8 +1227,10 @@ class Page extends AbstractBaseApi
      * Revert to a specific revision
      *
      * @param int $revisionId The revision ID to revert to
-     * @return PageRevision The revision data after reverting
+     *
      * @throws CanvasApiException
+     *
+     * @return PageRevision The revision data after reverting
      */
     public function revertToRevision(int $revisionId): PageRevision
     {
@@ -1196,7 +1248,7 @@ class Page extends AbstractBaseApi
             $revisionId
         );
         $response = self::$apiClient->post($endpoint);
-        $revisionData = json_decode($response->getBody()->getContents(), true);
+        $revisionData = self::parseJsonResponse($response);
 
         return new PageRevision($revisionData);
     }
@@ -1205,8 +1257,10 @@ class Page extends AbstractBaseApi
      * Update or create the course front page
      *
      * @param array<string, mixed>|UpdatePageDTO $data Page data
-     * @return self The updated front page
+     *
      * @throws CanvasApiException
+     *
+     * @return self The updated front page
      */
     public static function updateFrontPage(array|UpdatePageDTO $data): self
     {
@@ -1219,7 +1273,7 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/front_page', self::$course->id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $pageData = json_decode($response->getBody()->getContents(), true);
+        $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
     }
@@ -1240,8 +1294,10 @@ class Page extends AbstractBaseApi
      * Get revisions for this page
      *
      * @param array<string, mixed> $params Query parameters
-     * @return array<PageRevision>
+     *
      * @throws CanvasApiException
+     *
+     * @return array<PageRevision>
      */
     public function revisions(array $params = []): array
     {
@@ -1254,7 +1310,7 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/pages/%s/revisions', self::$course->id, rawurlencode($this->url));
         $response = self::$apiClient->get($endpoint);
-        $revisionsData = json_decode($response->getBody()->getContents(), true);
+        $revisionsData = self::parseJsonResponse($response);
 
         $revisions = [];
         foreach ($revisionsData as $revisionData) {
@@ -1267,8 +1323,9 @@ class Page extends AbstractBaseApi
     /**
      * Get the user who last edited this page
      *
-     * @return User|null
      * @throws CanvasApiException
+     *
+     * @return User|null
      */
     public function lastEditor(): ?User
     {
@@ -1279,18 +1336,21 @@ class Page extends AbstractBaseApi
         try {
             return User::find($this->lastEditedBy['id']);
         } catch (\Exception $e) {
-            throw new CanvasApiException("Could not load user who last edited page: " . $e->getMessage());
+            throw new CanvasApiException('Could not load user who last edited page: ' . $e->getMessage());
         }
     }
 
     /**
      * Get the API endpoint for this resource
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
+
         return sprintf('courses/%d/pages', self::$course->getId());
     }
 }

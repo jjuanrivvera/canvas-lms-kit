@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS;
 
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -51,6 +53,7 @@ class Canvas
         if (self::$httpClient === null) {
             self::$httpClient = new HttpClient();
         }
+
         return self::$httpClient;
     }
 
@@ -58,6 +61,7 @@ class Canvas
      * Set a custom HTTP client instance
      *
      * @param HttpClientInterface|null $client Pass null to reset to default
+     *
      * @return void
      */
     public static function setHttpClient(?HttpClientInterface $client): void
@@ -70,10 +74,12 @@ class Canvas
      *
      * @param string $url Full URL or relative path
      * @param mixed[] $options Optional Guzzle request options
-     * @return mixed Decoded JSON response or raw response based on content type
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     *
+     * @return mixed Decoded JSON response or raw response based on content type
      */
     public static function get(string $url, array $options = []): mixed
     {
@@ -86,10 +92,12 @@ class Canvas
      * @param string $url Full URL or relative path
      * @param mixed[]|null $data Data to send in request body
      * @param mixed[] $options Optional Guzzle request options
-     * @return mixed Decoded JSON response or raw response based on content type
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     *
+     * @return mixed Decoded JSON response or raw response based on content type
      */
     public static function post(string $url, ?array $data = null, array $options = []): mixed
     {
@@ -101,6 +109,7 @@ class Canvas
                 $options['json'] = $data;
             }
         }
+
         return self::request($url, 'POST', $options);
     }
 
@@ -110,10 +119,12 @@ class Canvas
      * @param string $url Full URL or relative path
      * @param mixed[]|null $data Data to send in request body
      * @param mixed[] $options Optional Guzzle request options
-     * @return mixed Decoded JSON response or raw response based on content type
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     *
+     * @return mixed Decoded JSON response or raw response based on content type
      */
     public static function put(string $url, ?array $data = null, array $options = []): mixed
     {
@@ -125,6 +136,7 @@ class Canvas
                 $options['json'] = $data;
             }
         }
+
         return self::request($url, 'PUT', $options);
     }
 
@@ -133,10 +145,12 @@ class Canvas
      *
      * @param string $url Full URL or relative path
      * @param mixed[] $options Optional Guzzle request options
-     * @return mixed Decoded JSON response or raw response based on content type
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     *
+     * @return mixed Decoded JSON response or raw response based on content type
      */
     public static function delete(string $url, array $options = []): mixed
     {
@@ -149,10 +163,12 @@ class Canvas
      * @param string $url Full URL or relative path
      * @param mixed[]|null $data Data to send in request body
      * @param mixed[] $options Optional Guzzle request options
-     * @return mixed Decoded JSON response or raw response based on content type
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     *
+     * @return mixed Decoded JSON response or raw response based on content type
      */
     public static function patch(string $url, ?array $data = null, array $options = []): mixed
     {
@@ -164,6 +180,7 @@ class Canvas
                 $options['json'] = $data;
             }
         }
+
         return self::request($url, 'PATCH', $options);
     }
 
@@ -173,10 +190,12 @@ class Canvas
      * @param string $url Full URL or relative path
      * @param string $method HTTP method (GET, POST, PUT, DELETE, PATCH, etc.)
      * @param mixed[] $options Optional Guzzle request options
-     * @return mixed Decoded JSON response or raw response based on content type
+     *
      * @throws CanvasApiException
      * @throws MissingApiKeyException
      * @throws MissingBaseUrlException
+     *
+     * @return mixed Decoded JSON response or raw response based on content type
      */
     public static function request(string $url, string $method = 'GET', array $options = []): mixed
     {
@@ -190,6 +209,7 @@ class Canvas
      * Parse the response based on content type
      *
      * @param ResponseInterface $response
+     *
      * @return mixed
      */
     protected static function parseResponse(ResponseInterface $response): mixed
@@ -221,6 +241,7 @@ class Canvas
      * when arrays are nested or when file uploads are involved.
      *
      * @param mixed[] $data
+     *
      * @return bool
      */
     protected static function isMultipartData(array $data): bool
@@ -231,6 +252,7 @@ class Canvas
                 return true;
             }
         }
+
         return false;
     }
 
@@ -238,6 +260,7 @@ class Canvas
      * Prepare data for multipart encoding
      *
      * @param mixed[] $data
+     *
      * @return mixed[]
      */
     protected static function prepareMultipartData(array $data): array
@@ -250,20 +273,20 @@ class Canvas
                 foreach ($value as $subKey => $subValue) {
                     $multipart[] = [
                         'name' => "{$key}[{$subKey}]",
-                        'contents' => (string) $subValue
+                        'contents' => (string) $subValue,
                     ];
                 }
             } elseif (is_resource($value)) {
                 // Handle file uploads
                 $multipart[] = [
                     'name' => $key,
-                    'contents' => $value
+                    'contents' => $value,
                 ];
             } else {
                 // Handle simple values
                 $multipart[] = [
                     'name' => $key,
-                    'contents' => (string) $value
+                    'contents' => (string) $value,
                 ];
             }
         }

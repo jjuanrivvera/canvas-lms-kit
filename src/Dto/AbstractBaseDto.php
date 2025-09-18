@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Dto;
 
+use CanvasLMS\Utilities\Str;
 use DateTime;
-use Exception;
 use DateTimeInterface;
+use Exception;
 
 /**
  * Abstract base class for Data Transfer Objects (DTOs).
@@ -17,13 +20,16 @@ abstract class AbstractBaseDto
 {
     /**
      * The name of the property in the API
+     *
      * @var string
      */
     protected string $apiPropertyName = '';
 
     /**
      * BaseDto constructor.
+     *
      * @param mixed[] $data
+     *
      * @throws Exception
      */
     public function __construct(array $data)
@@ -39,10 +45,13 @@ abstract class AbstractBaseDto
 
     /**
      * Cast the value to the correct type
+     *
      * @param mixed $value
      * @param string $key
-     * @return DateTime|mixed
+     *
      * @throws Exception
+     *
+     * @return DateTime|mixed
      */
     private function cast($value, string $key)
     {
@@ -52,19 +61,38 @@ abstract class AbstractBaseDto
             $property = $reflection->getProperty($key);
             $type = $property->getType();
 
-            if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
+            if ($type instanceof \ReflectionNamedType) {
                 $typeName = $type->getName();
-                if ($typeName === 'DateTimeInterface' || is_subclass_of($typeName, 'DateTimeInterface')) {
-                    if (is_string($value) && !empty($value)) {
-                        return new DateTime($value);
+
+                // Handle DateTimeInterface
+                if (!$type->isBuiltin()) {
+                    if ($typeName === 'DateTimeInterface' || is_subclass_of($typeName, 'DateTimeInterface')) {
+                        if (is_string($value) && !empty($value)) {
+                            return new DateTime($value);
+                        }
+
+                        return null;
                     }
-                    return null;
+                }
+
+                // Handle built-in types for strict_types compatibility
+                if ($type->isBuiltin()) {
+                    switch ($typeName) {
+                        case 'int':
+                            return $value === null ? null : (int) $value;
+                        case 'float':
+                            return $value === null ? null : (float) $value;
+                        case 'string':
+                            return $value === null ? null : (string) $value;
+                        case 'bool':
+                            return $value === null ? null : (bool) $value;
+                    }
                 }
             }
         }
 
         // Legacy support for known date fields ONLY if they're typed as DateTime/DateTimeInterface
-        if (in_array($key, ['startAt', 'endAt']) && is_string($value) && !empty($value)) {
+        if (in_array($key, ['startAt', 'endAt'], true) && is_string($value) && !empty($value)) {
             $reflection = new \ReflectionClass($this);
             if ($reflection->hasProperty($key)) {
                 $property = $reflection->getProperty($key);
@@ -80,6 +108,7 @@ abstract class AbstractBaseDto
 
     /**
      * Convert the DTO to an array
+     *
      * @return mixed[]
      */
     public function toArray(): array
@@ -107,6 +136,7 @@ abstract class AbstractBaseDto
 
     /**
      * Convert the DTO to an array for API requests
+     *
      * @return mixed[]
      */
     public function toApiArray(): array
@@ -125,7 +155,7 @@ abstract class AbstractBaseDto
                 throw new Exception('The API property name must be set in the DTO');
             }
 
-            $propertyName = $this->apiPropertyName . '[' . str_to_snake_case($property) . ']';
+            $propertyName = $this->apiPropertyName . '[' . Str::toSnakeCase($property) . ']';
 
             // Directly handle null values to continue to the next iteration.
             if (is_null($value)) {
@@ -135,8 +165,8 @@ abstract class AbstractBaseDto
             // For DateTimeInterface values, format them as ISO 8601 strings.
             if ($value instanceof DateTimeInterface) {
                 $modifiedProperties[] = [
-                    "name" => $propertyName,
-                    "contents" => $value->format(DateTimeInterface::ATOM)
+                    'name' => $propertyName,
+                    'contents' => $value->format(DateTimeInterface::ATOM),
                 ];
                 continue;
             }
@@ -145,8 +175,8 @@ abstract class AbstractBaseDto
             if (is_array($value)) {
                 foreach ($value as $arrayValue) {
                     $modifiedProperties[] = [
-                        "name" => $propertyName . '[]',
-                        "contents" => $arrayValue
+                        'name' => $propertyName . '[]',
+                        'contents' => $arrayValue,
                     ];
                 }
                 continue;
@@ -154,8 +184,8 @@ abstract class AbstractBaseDto
 
             // Handle scalar values (int, string, bool) as they don't need special treatment.
             $modifiedProperties[] = [
-                "name" => $propertyName,
-                "contents" => $value
+                'name' => $propertyName,
+                'contents' => $value,
             ];
         }
 

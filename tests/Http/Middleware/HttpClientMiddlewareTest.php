@@ -1,20 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Http\Middleware;
 
 use CanvasLMS\Config;
-use GuzzleHttp\Client;
-use GuzzleHttp\HandlerStack;
-use Psr\Log\LoggerInterface;
-use GuzzleHttp\Psr7\Response;
 use CanvasLMS\Http\HttpClient;
-use PHPUnit\Framework\TestCase;
-use GuzzleHttp\Handler\MockHandler;
 use CanvasLMS\Http\Middleware\MiddlewareInterface;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 class HttpClientMiddlewareTest extends TestCase
 {
     private $loggerMock;
+
     private $httpClient;
 
     protected function setUp(): void
@@ -49,13 +52,14 @@ class HttpClientMiddlewareTest extends TestCase
         $middlewareMock->expects($this->atLeastOnce())
             ->method('getName')
             ->willReturn('test-middleware');
-        
+
         $middlewareMock->expects($this->once())
             ->method('__invoke')
             ->willReturn(function ($handler) {
                 return function ($request, $options) use ($handler) {
                     // Simple middleware that adds a header
                     $request = $request->withHeader('X-Test-Middleware', 'true');
+
                     return $handler($request, $options);
                 };
             });
@@ -94,11 +98,11 @@ class HttpClientMiddlewareTest extends TestCase
         $this->httpClient = new HttpClient(null, null, [$dummyMiddleware]);
         $this->httpClient->removeMiddleware('dummy'); // Remove the dummy
         $this->httpClient->addMiddleware($middlewareMock);
-        
+
         $this->assertCount(1, $this->httpClient->getMiddleware());
-        
+
         $this->httpClient->removeMiddleware('test-middleware');
-        
+
         $this->assertCount(0, $this->httpClient->getMiddleware());
     }
 
@@ -134,9 +138,9 @@ class HttpClientMiddlewareTest extends TestCase
     {
         // Create HttpClient without any middleware or client
         $this->httpClient = new HttpClient();
-        
+
         $middleware = $this->httpClient->getMiddleware();
-        
+
         // Should have retry and rate limit middleware by default
         $this->assertCount(2, $middleware);
         $this->assertArrayHasKey('retry', $middleware);
@@ -147,9 +151,9 @@ class HttpClientMiddlewareTest extends TestCase
     {
         // Create HttpClient with logger but no middleware
         $this->httpClient = new HttpClient(null, $this->loggerMock);
-        
+
         $middleware = $this->httpClient->getMiddleware();
-        
+
         // Should have retry, rate limit, and logging middleware
         $this->assertCount(3, $middleware);
         $this->assertArrayHasKey('retry', $middleware);
@@ -162,9 +166,9 @@ class HttpClientMiddlewareTest extends TestCase
         // Create HttpClient with custom client (backward compatibility)
         $guzzleClient = new \GuzzleHttp\Client();
         $this->httpClient = new HttpClient($guzzleClient);
-        
+
         $middleware = $this->httpClient->getMiddleware();
-        
+
         // Should have no middleware when custom client is provided
         $this->assertCount(0, $middleware);
     }
@@ -179,9 +183,9 @@ class HttpClientMiddlewareTest extends TestCase
         });
 
         $this->httpClient = new HttpClient(null, null, [$customMiddleware]);
-        
+
         $middleware = $this->httpClient->getMiddleware();
-        
+
         // Should only have the custom middleware, no defaults
         $this->assertCount(1, $middleware);
         $this->assertArrayHasKey('custom', $middleware);

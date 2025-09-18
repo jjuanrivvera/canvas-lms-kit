@@ -6,8 +6,8 @@ namespace CanvasLMS\Api\Enrollments;
 
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\Courses\Course;
-use CanvasLMS\Api\Users\User;
 use CanvasLMS\Api\Sections\Section;
+use CanvasLMS\Api\Users\User;
 use CanvasLMS\Dto\Enrollments\CreateEnrollmentDTO;
 use CanvasLMS\Dto\Enrollments\UpdateEnrollmentDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -39,7 +39,6 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * echo $user->getName();
  * echo $course->getName();
  * ```
- *
  * @example Working with enrollment collections
  * ```php
  * // Get enrollments from course perspective
@@ -54,7 +53,6 @@ use CanvasLMS\Exceptions\CanvasApiException;
  *     echo $enrollment->getTypeName() . ': ' . $enrollment->getStateName();
  * }
  * ```
- *
  * @example Pagination for large datasets (IMPORTANT for large institutions)
  * ```php
  * // ⚠️ CAUTION: Universities can have MILLIONS of enrollments!
@@ -84,51 +82,87 @@ class Enrollment extends AbstractBaseApi
 
     // Core enrollment properties
     public ?int $id = null;
+
     public ?int $userId = null;
+
     public ?int $courseId = null;
+
     public ?string $type = null;
+
     public ?string $enrollmentState = null;
+
     public ?int $sectionId = null;
+
     public ?int $roleId = null;
+
     public ?bool $limitPrivilegesToCourseSection = null;
+
     public ?string $createdAt = null;
+
     public ?string $updatedAt = null;
 
     // Canvas-specific properties
     public ?string $role = null;
+
     public ?float $currentScore = null;
+
     public ?string $currentGrade = null;
+
     public ?float $finalScore = null;
+
     public ?string $finalGrade = null;
+
     /** @var mixed[]|null */
     public ?array $grades = null;
+
     /** @var mixed[]|null */
     public ?array $user = null;
+
     public ?int $rootAccountId = null;
 
     // Extended Canvas API properties
     public ?string $uuid = null;
+
     public ?float $currentPoints = null;
+
     public ?float $unpostedCurrentPoints = null;
+
     public ?float $unpostedCurrentScore = null;
+
     public ?string $unpostedCurrentGrade = null;
+
     public ?float $unpostedFinalScore = null;
+
     public ?string $unpostedFinalGrade = null;
+
     public ?int $totalActivityTime = null;
+
     public ?string $lastActivityAt = null;
+
     public ?string $startAt = null;
+
     public ?string $endAt = null;
+
     /** @var mixed[]|null */
     public ?array $observedUsers = null;
+
     public ?bool $canBeRemoved = null;
+
     public ?bool $locked = null;
+
     /** @var int[]|null */
     public ?array $groupIds = null;
+
     public ?string $sisAccountId = null;
+
     public ?string $sisCourseId = null;
+
     public ?string $sisSectionId = null;
+
     public ?string $sisUserId = null;
+
     public ?int $enrollmentTermId = null;
+
     public ?int $gradingPeriodId = null;
 
     // Canvas enrollment type constants
@@ -151,7 +185,6 @@ class Enrollment extends AbstractBaseApi
     public const NOTIFY_TRUE = true;
     public const NOTIFY_FALSE = false;
 
-
     /**
      * Set the course context for enrollment operations
      */
@@ -168,12 +201,14 @@ class Enrollment extends AbstractBaseApi
         if (!isset(self::$course) || !isset(self::$course->id)) {
             throw new CanvasApiException('Course is required for enrollment operations');
         }
+
         return true;
     }
 
     /**
      * Find a specific enrollment by ID
      */
+
     /**
      * @return self
      */
@@ -184,7 +219,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments/%d', self::$course->id, $id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -194,10 +229,13 @@ class Enrollment extends AbstractBaseApi
      */
     /**
      * @param mixed[] $params
+     *
      * @return self[]
      */
+
     /**
      * @param array<string, mixed> $params
+     *
      * @return array<self>
      */
     public static function get(array $params = []): array
@@ -207,7 +245,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments', self::$course->id);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         $enrollments = [];
         foreach ($data as $item) {
@@ -217,15 +255,16 @@ class Enrollment extends AbstractBaseApi
         return $enrollments;
     }
 
-
     /**
      * Create a new enrollment
      */
     /**
      * @return self
      */
+
     /**
      * @param array<string, mixed>|CreateEnrollmentDTO $data
+     *
      * @return self
      */
     public static function create(array|CreateEnrollmentDTO $data): self
@@ -239,7 +278,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments', self::$course->id);
         $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
-        $responseData = json_decode((string) $response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -250,8 +289,10 @@ class Enrollment extends AbstractBaseApi
     /**
      * @return self
      */
+
     /**
      * @param array<string, mixed>|UpdateEnrollmentDTO $data
+     *
      * @return self
      */
     public static function update(int $id, array|UpdateEnrollmentDTO $data): self
@@ -265,7 +306,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments/%d', self::$course->id, $id);
         $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
-        $responseData = json_decode((string) $response->getBody(), true);
+        $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
     }
@@ -273,6 +314,7 @@ class Enrollment extends AbstractBaseApi
     /**
      * Accept an enrollment invitation
      */
+
     /**
      * @return self
      */
@@ -283,7 +325,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments/%d/accept', self::$course->id, $enrollmentId);
         $response = self::$apiClient->post($endpoint);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -291,6 +333,7 @@ class Enrollment extends AbstractBaseApi
     /**
      * Reject an enrollment invitation
      */
+
     /**
      * @return self
      */
@@ -301,7 +344,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments/%d/reject', self::$course->id, $enrollmentId);
         $response = self::$apiClient->post($endpoint);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -309,6 +352,7 @@ class Enrollment extends AbstractBaseApi
     /**
      * Reactivate a deleted enrollment
      */
+
     /**
      * @return self
      */
@@ -319,7 +363,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/enrollments/%d/reactivate', self::$course->id, $enrollmentId);
         $response = self::$apiClient->put($endpoint);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         return new self($data);
     }
@@ -329,10 +373,13 @@ class Enrollment extends AbstractBaseApi
      */
     /**
      * @param mixed[] $params
+     *
      * @return self[]
      */
+
     /**
      * @param array<string, mixed> $params
+     *
      * @return array<self>
      */
     public static function fetchAllBySection(int $sectionId, array $params = []): array
@@ -341,7 +388,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('sections/%d/enrollments', $sectionId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         $enrollments = [];
         foreach ($data as $item) {
@@ -356,10 +403,13 @@ class Enrollment extends AbstractBaseApi
      */
     /**
      * @param mixed[] $params
+     *
      * @return self[]
      */
+
     /**
      * @param array<string, mixed> $params
+     *
      * @return array<self>
      */
     public static function fetchAllByUser(int $userId, array $params = []): array
@@ -368,7 +418,7 @@ class Enrollment extends AbstractBaseApi
 
         $endpoint = sprintf('users/%d/enrollments', $userId);
         $response = self::$apiClient->get($endpoint, ['query' => $params]);
-        $data = json_decode((string) $response->getBody(), true);
+        $data = self::parseJsonResponse($response);
 
         $enrollments = [];
         foreach ($data as $item) {
@@ -381,8 +431,9 @@ class Enrollment extends AbstractBaseApi
     /**
      * Save the current enrollment (create or update)
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function save(): self
     {
@@ -415,14 +466,16 @@ class Enrollment extends AbstractBaseApi
             $new = self::create($createData);
             $this->populate($new->toArray());
         }
+
         return $this;
     }
 
     /**
      * Delete the current enrollment
      *
-     * @return self
      * @throws CanvasApiException
+     *
+     * @return self
      */
     public function delete(): self
     {
@@ -472,6 +525,7 @@ class Enrollment extends AbstractBaseApi
     /**
      * Convert enrollment to array format
      */
+
     /**
      * @return mixed[]
      */
@@ -523,6 +577,7 @@ class Enrollment extends AbstractBaseApi
     /**
      * Convert to DTO array format for API operations
      */
+
     /**
      * @return mixed[]
      */
@@ -538,7 +593,7 @@ class Enrollment extends AbstractBaseApi
             'start_at' => $this->startAt,
             'end_at' => $this->endAt,
             'sis_user_id' => $this->sisUserId,
-        ], fn($value) => $value !== null);
+        ], fn ($value) => $value !== null);
     }
 
     // Getter methods
@@ -812,8 +867,9 @@ class Enrollment extends AbstractBaseApi
      * echo $course->getName();
      * ```
      *
-     * @return Course|null The course object or null if no courseId is set
      * @throws CanvasApiException If course cannot be loaded
+     *
+     * @return Course|null The course object or null if no courseId is set
      */
     public function course(): ?Course
     {
@@ -847,8 +903,9 @@ class Enrollment extends AbstractBaseApi
      * echo $user->getName();
      * ```
      *
-     * @return User|null The user object or null if no userId is set
      * @throws CanvasApiException If user cannot be loaded
+     *
+     * @return User|null The user object or null if no userId is set
      */
     public function user(): ?User
     {
@@ -870,8 +927,6 @@ class Enrollment extends AbstractBaseApi
     }
 
     // Relationship Methods
-
-
 
     /**
      * Check if this enrollment is for a student
@@ -981,8 +1036,9 @@ class Enrollment extends AbstractBaseApi
     /**
      * Get the section for this enrollment
      *
-     * @return Section|null The section object or null if no section ID is set
      * @throws CanvasApiException If the section cannot be loaded
+     *
+     * @return Section|null The section object or null if no section ID is set
      */
     public function section(): ?Section
     {
@@ -999,12 +1055,15 @@ class Enrollment extends AbstractBaseApi
 
     /**
      * Get the API endpoint for this resource
-     * @return string
+     *
      * @throws CanvasApiException
+     *
+     * @return string
      */
     protected static function getEndpoint(): string
     {
         self::checkCourse();
+
         return sprintf('courses/%d/enrollments', self::$course->getId());
     }
 }

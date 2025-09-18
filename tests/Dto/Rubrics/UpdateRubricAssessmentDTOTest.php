@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Rubrics;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Rubrics\UpdateRubricAssessmentDTO;
+use PHPUnit\Framework\TestCase;
 
 class UpdateRubricAssessmentDTOTest extends TestCase
 {
@@ -16,7 +18,7 @@ class UpdateRubricAssessmentDTOTest extends TestCase
         $dto->userId = 123;
         $dto->assessmentType = 'grading';
         $dto->criterionData = [
-            'criterion_1' => ['points' => 9.5, 'comments' => 'Updated comment']
+            'criterion_1' => ['points' => 9.5, 'comments' => 'Updated comment'],
         ];
 
         $result = $dto->toApiArray();
@@ -26,24 +28,24 @@ class UpdateRubricAssessmentDTOTest extends TestCase
         // Check user ID
         $this->assertContains([
             'name' => 'rubric_assessment[user_id]',
-            'contents' => '123'
+            'contents' => '123',
         ], $result);
 
         // Check assessment type
         $this->assertContains([
             'name' => 'rubric_assessment[assessment_type]',
-            'contents' => 'grading'
+            'contents' => 'grading',
         ], $result);
 
         // Check criterion data
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_1][points]',
-            'contents' => '9.5'
+            'contents' => '9.5',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_1][comments]',
-            'contents' => 'Updated comment'
+            'contents' => 'Updated comment',
         ], $result);
     }
 
@@ -63,8 +65,8 @@ class UpdateRubricAssessmentDTOTest extends TestCase
                 'points' => 10.0,
                 'comments' => 'Perfect score',
                 'rating_id' => 'rating_updated',
-                'save_comment' => true
-            ]
+                'save_comment' => true,
+            ],
         ];
 
         $result = $dto->toApiArray();
@@ -72,48 +74,48 @@ class UpdateRubricAssessmentDTOTest extends TestCase
         // Check all fields
         $this->assertContains([
             'name' => 'rubric_assessment[user_id]',
-            'contents' => '456'
+            'contents' => '456',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_assessment[assessment_type]',
-            'contents' => 'peer_review'
+            'contents' => 'peer_review',
         ], $result);
 
         $this->assertContains([
             'name' => 'provisional',
-            'contents' => 'true'
+            'contents' => 'true',
         ], $result);
 
         $this->assertContains([
             'name' => 'final',
-            'contents' => 'true'
+            'contents' => 'true',
         ], $result);
 
         $this->assertContains([
             'name' => 'graded_anonymously',
-            'contents' => 'false'
+            'contents' => 'false',
         ], $result);
 
         // Check complete criterion data
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_1][points]',
-            'contents' => '10'
+            'contents' => '10',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_1][comments]',
-            'contents' => 'Perfect score'
+            'contents' => 'Perfect score',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_1][rating_id]',
-            'contents' => 'rating_updated'
+            'contents' => 'rating_updated',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_1][save_comment]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
     }
 
@@ -124,7 +126,7 @@ class UpdateRubricAssessmentDTOTest extends TestCase
     {
         $dto = new UpdateRubricAssessmentDTO();
         $dto->criterionData = [
-            'criterion_1' => ['points' => 7.0]
+            'criterion_1' => ['points' => 7.0],
         ];
 
         $result = $dto->toApiArray();
@@ -132,7 +134,7 @@ class UpdateRubricAssessmentDTOTest extends TestCase
         $this->assertCount(1, $result);
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_1][points]',
-            'contents' => '7'
+            'contents' => '7',
         ], $result);
     }
 
@@ -149,12 +151,12 @@ class UpdateRubricAssessmentDTOTest extends TestCase
 
         $this->assertContains([
             'name' => 'provisional',
-            'contents' => 'true'
+            'contents' => 'true',
         ], $result);
 
         $this->assertContains([
             'name' => 'final',
-            'contents' => 'false'
+            'contents' => 'false',
         ], $result);
     }
 
@@ -201,8 +203,8 @@ class UpdateRubricAssessmentDTOTest extends TestCase
             'final' => false,
             'gradedAnonymously' => true,
             'criterionData' => [
-                'criterion_1' => ['points' => 8.0]
-            ]
+                'criterion_1' => ['points' => 8.0],
+            ],
         ];
 
         $dto = new UpdateRubricAssessmentDTO($data);
@@ -224,7 +226,7 @@ class UpdateRubricAssessmentDTOTest extends TestCase
         $dto = new UpdateRubricAssessmentDTO();
         $dto->criterionData = [
             'criterion_1' => ['comments' => 'New feedback'],
-            'criterion_2' => ['comments' => 'Improved work']
+            'criterion_2' => ['comments' => 'Improved work'],
         ];
 
         $result = $dto->toApiArray();
@@ -233,12 +235,12 @@ class UpdateRubricAssessmentDTOTest extends TestCase
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_1][comments]',
-            'contents' => 'New feedback'
+            'contents' => 'New feedback',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_2][comments]',
-            'contents' => 'Improved work'
+            'contents' => 'Improved work',
         ], $result);
     }
 
@@ -251,7 +253,7 @@ class UpdateRubricAssessmentDTOTest extends TestCase
         $dto->criterionData = [
             'criterion_1' => ['rating_id' => 'new_rating_1'],
             'criterion_2' => ['rating_id' => 'new_rating_2'],
-            'criterion_3' => ['rating_id' => 'new_rating_3']
+            'criterion_3' => ['rating_id' => 'new_rating_3'],
         ];
 
         $result = $dto->toApiArray();
@@ -260,17 +262,17 @@ class UpdateRubricAssessmentDTOTest extends TestCase
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_1][rating_id]',
-            'contents' => 'new_rating_1'
+            'contents' => 'new_rating_1',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_2][rating_id]',
-            'contents' => 'new_rating_2'
+            'contents' => 'new_rating_2',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_3][rating_id]',
-            'contents' => 'new_rating_3'
+            'contents' => 'new_rating_3',
         ], $result);
     }
 
@@ -283,20 +285,20 @@ class UpdateRubricAssessmentDTOTest extends TestCase
         $dto->criterionData = [
             'criterion_1' => [
                 'points' => 8.5,
-                'comments' => 'Good improvement'
+                'comments' => 'Good improvement',
             ],
             'criterion_2' => [
-                'rating_id' => 'rating_excellent'
+                'rating_id' => 'rating_excellent',
             ],
             'criterion_3' => [
                 'comments' => 'Keep up the good work',
-                'save_comment' => true
+                'save_comment' => true,
             ],
             'criterion_4' => [
                 'points' => 6.0,
                 'rating_id' => 'rating_satisfactory',
-                'save_comment' => false
-            ]
+                'save_comment' => false,
+            ],
         ];
 
         $result = $dto->toApiArray();
@@ -308,7 +310,7 @@ class UpdateRubricAssessmentDTOTest extends TestCase
 
         // Should have 8 total criterion entries:
         // criterion_1: points + comments = 2
-        // criterion_2: rating_id = 1  
+        // criterion_2: rating_id = 1
         // criterion_3: comments + save_comment = 2
         // criterion_4: points + rating_id + save_comment = 3
         // Total: 8
@@ -317,17 +319,17 @@ class UpdateRubricAssessmentDTOTest extends TestCase
         // Verify specific complex update
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_4][points]',
-            'contents' => '6'
+            'contents' => '6',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_4][rating_id]',
-            'contents' => 'rating_satisfactory'
+            'contents' => 'rating_satisfactory',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_4][save_comment]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
     }
 
@@ -345,17 +347,17 @@ class UpdateRubricAssessmentDTOTest extends TestCase
 
         $this->assertContains([
             'name' => 'provisional',
-            'contents' => 'false'
+            'contents' => 'false',
         ], $result);
 
         $this->assertContains([
             'name' => 'final',
-            'contents' => 'true'
+            'contents' => 'true',
         ], $result);
 
         $this->assertContains([
             'name' => 'graded_anonymously',
-            'contents' => 'false'
+            'contents' => 'false',
         ], $result);
     }
 
@@ -367,19 +369,19 @@ class UpdateRubricAssessmentDTOTest extends TestCase
         $dto = new UpdateRubricAssessmentDTO();
         $dto->criterionData = [
             'criterion_1' => ['save_comment' => true],
-            'criterion_2' => ['save_comment' => false]
+            'criterion_2' => ['save_comment' => false],
         ];
 
         $result = $dto->toApiArray();
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_1][save_comment]',
-            'contents' => '1'
+            'contents' => '1',
         ], $result);
 
         $this->assertContains([
             'name' => 'rubric_assessment[criterion_criterion_2][save_comment]',
-            'contents' => '0'
+            'contents' => '0',
         ], $result);
     }
 }

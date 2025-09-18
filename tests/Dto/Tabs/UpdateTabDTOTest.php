@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Dto\Tabs;
 
-use PHPUnit\Framework\TestCase;
 use CanvasLMS\Dto\Tabs\UpdateTabDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CanvasLMS\Dto\Tabs\UpdateTabDTO
@@ -51,7 +53,7 @@ class UpdateTabDTOTest extends TestCase
 
         $expected = [
             'position' => 2,
-            'hidden' => true
+            'hidden' => true,
         ];
 
         $this->assertEquals($expected, $result);
@@ -83,7 +85,7 @@ class UpdateTabDTOTest extends TestCase
         // The AbstractBaseDto creates multipart form data format
         $expected = [
             ['name' => 'tab[position]', 'contents' => 3],
-            ['name' => 'tab[hidden]', 'contents' => false]
+            ['name' => 'tab[hidden]', 'contents' => false],
         ];
 
         $this->assertEquals($expected, $result);

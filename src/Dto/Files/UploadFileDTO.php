@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CanvasLMS\Dto\Files;
 
-use Exception;
 use CanvasLMS\Dto\AbstractBaseDto;
+use CanvasLMS\Utilities\Str;
+use Exception;
 
 /**
  * UploadFileDTO Class
@@ -38,60 +41,70 @@ class UploadFileDTO extends AbstractBaseDto
 {
     /**
      * The name of the property in the API
+     *
      * @var string
      */
     protected string $apiPropertyName = '';
 
     /**
      * The filename of the file
+     *
      * @var string|null
      */
     public ?string $name = null;
 
     /**
      * The size of the file, in bytes
+     *
      * @var int|null
      */
     public ?int $size = null;
 
     /**
      * The content type of the file
+     *
      * @var string|null
      */
     public ?string $contentType = null;
 
     /**
      * The id of the folder to store the file in
+     *
      * @var int|null
      */
     public ?int $parentFolderId = null;
 
     /**
      * The path of the folder to store the file in
+     *
      * @var string|null
      */
     public ?string $parentFolderPath = null;
 
     /**
      * How to handle duplicate filenames
+     *
      * @var string|null
      */
     public ?string $onDuplicate = null;
 
     /**
      * The file to upload (file path, resource, or stream)
+     *
      * @var mixed
      */
     public mixed $file = null;
 
     /**
      * URL for URL-based uploads
+     *
      * @var string|null
      */
     public ?string $url = null;
 
     /**
      * Whether to submit assignment after upload (for assignment submissions)
+     *
      * @var bool|null
      */
     public ?bool $submitAssignment = null;
@@ -104,8 +117,9 @@ class UploadFileDTO extends AbstractBaseDto
      * apiPropertyName prefix (e.g., 'file[name]'). Canvas file upload API
      * expects flat field names in multipart requests.
      *
-     * @return mixed[]
      * @throws Exception
+     *
+     * @return mixed[]
      */
     public function toApiArray(): array
     {
@@ -114,15 +128,15 @@ class UploadFileDTO extends AbstractBaseDto
 
         foreach ($properties as $property => $value) {
             // Skip internal properties and file data
-            if (in_array($property, ['apiPropertyName', 'file']) || is_null($value)) {
+            if (in_array($property, ['apiPropertyName', 'file'], true) || is_null($value)) {
                 continue;
             }
 
-            $propertyName = str_to_snake_case($property);
+            $propertyName = Str::toSnakeCase($property);
 
             $modifiedProperties[] = [
-                "name" => $propertyName,
-                "contents" => (string) $value
+                'name' => $propertyName,
+                'contents' => (string) $value,
             ];
         }
 
@@ -137,8 +151,9 @@ class UploadFileDTO extends AbstractBaseDto
      * resource leaks. The File API class handles this automatically
      * during the upload process.
      *
-     * @return mixed File resource, string path, or other file object
      * @throws Exception
+     *
+     * @return mixed File resource, string path, or other file object
      */
     public function getFileResource(): mixed
     {
@@ -150,7 +165,7 @@ class UploadFileDTO extends AbstractBaseDto
         if (is_string($this->file)) {
             // Security check: prevent path traversal attacks
             if (str_contains($this->file, '..')) {
-                throw new Exception("Invalid file path: directory traversal not allowed");
+                throw new Exception('Invalid file path: directory traversal not allowed');
             }
 
             // Validate file path
@@ -163,6 +178,7 @@ class UploadFileDTO extends AbstractBaseDto
             if ($resource === false) {
                 throw new Exception("Unable to open file: {$this->file}");
             }
+
             return $resource;
         }
 
@@ -177,6 +193,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Auto-detect content type from file
+     *
      * @return void
      */
     public function autoDetectContentType(): void
@@ -198,6 +215,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Auto-detect file size
+     *
      * @return void
      */
     public function autoDetectSize(): void
@@ -213,6 +231,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Auto-detect filename from file path
+     *
      * @return void
      */
     public function autoDetectName(): void
@@ -271,8 +290,10 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Validate the upload data
-     * @return bool
+     *
      * @throws Exception
+     *
+     * @return bool
      */
     public function validate(): bool
     {
@@ -288,7 +309,7 @@ class UploadFileDTO extends AbstractBaseDto
             throw new Exception('Cannot specify both parent_folder_id and parent_folder_path');
         }
 
-        if (!is_null($this->onDuplicate) && !in_array($this->onDuplicate, ['overwrite', 'rename'])) {
+        if (!is_null($this->onDuplicate) && !in_array($this->onDuplicate, ['overwrite', 'rename'], true)) {
             throw new Exception('on_duplicate must be either "overwrite" or "rename"');
         }
 
@@ -297,6 +318,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Get the file name
+     *
      * @return string|null
      */
     public function getName(): ?string
@@ -306,6 +328,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Set the file name
+     *
      * @param string|null $name
      */
     public function setName(?string $name): void
@@ -315,6 +338,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Get the file size
+     *
      * @return int|null
      */
     public function getSize(): ?int
@@ -324,6 +348,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Set the file size
+     *
      * @param int|null $size
      */
     public function setSize(?int $size): void
@@ -333,6 +358,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Get the content type
+     *
      * @return string|null
      */
     public function getContentType(): ?string
@@ -342,6 +368,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Set the content type
+     *
      * @param string|null $contentType
      */
     public function setContentType(?string $contentType): void
@@ -351,6 +378,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Get the parent folder ID
+     *
      * @return int|null
      */
     public function getParentFolderId(): ?int
@@ -360,6 +388,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Set the parent folder ID
+     *
      * @param int|null $parentFolderId
      */
     public function setParentFolderId(?int $parentFolderId): void
@@ -369,6 +398,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Get the parent folder path
+     *
      * @return string|null
      */
     public function getParentFolderPath(): ?string
@@ -378,6 +408,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Set the parent folder path
+     *
      * @param string|null $parentFolderPath
      */
     public function setParentFolderPath(?string $parentFolderPath): void
@@ -387,6 +418,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Get the on duplicate setting
+     *
      * @return string|null
      */
     public function getOnDuplicate(): ?string
@@ -396,6 +428,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Set the on duplicate setting
+     *
      * @param string|null $onDuplicate
      */
     public function setOnDuplicate(?string $onDuplicate): void
@@ -405,6 +438,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Get the file
+     *
      * @return mixed
      */
     public function getFile(): mixed
@@ -414,6 +448,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Set the file
+     *
      * @param mixed $file
      */
     public function setFile(mixed $file): void
@@ -423,6 +458,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Get the URL
+     *
      * @return string|null
      */
     public function getUrl(): ?string
@@ -432,6 +468,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Set the URL
+     *
      * @param string|null $url
      */
     public function setUrl(?string $url): void
@@ -441,6 +478,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Get the submit assignment flag
+     *
      * @return bool|null
      */
     public function getSubmitAssignment(): ?bool
@@ -450,6 +488,7 @@ class UploadFileDTO extends AbstractBaseDto
 
     /**
      * Set the submit assignment flag
+     *
      * @param bool|null $submitAssignment
      */
     public function setSubmitAssignment(?bool $submitAssignment): void
