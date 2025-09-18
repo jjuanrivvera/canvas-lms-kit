@@ -28,6 +28,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Provides smooth migration path with backward compatibility
   - Added comprehensive test coverage for the new Str utility class
 
+### Enhanced
+- **Rate Limit Bucket Scoping by Host and Credential** (#139)
+  - Automatically scopes rate limit buckets to prevent cross-tenant interference
+  - Generates unique bucket keys based on request host and credential fingerprint
+  - Isolates rate limits between different Canvas instances and API tokens
+  - Handles external hosts (S3, CDN) with separate buckets automatically
+  - Maintains full backward compatibility with manual bucket override
+  - Uses secure SHA1 fingerprinting for credential identification
+  - Adds comprehensive test coverage for multi-tenant scenarios
+  - Zero configuration required - works automatically out of the box
+
 ### Fixed
 - **Improved JSON Decode Safety with Consistent Null Checking** (#140)
   - Fixed 9 unsafe `json_decode()` calls in `Enrollment` class

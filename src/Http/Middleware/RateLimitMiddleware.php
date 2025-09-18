@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Http\Middleware;
 
+use CanvasLMS\Config;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Promise\Create;
 use Psr\Http\Message\RequestInterface;
@@ -54,8 +55,8 @@ class RateLimitMiddleware extends AbstractMiddleware
                     return $handler($request, $options);
                 }
 
-                // Get bucket key from options or use default
-                $bucketKey = $options['rate_limit_bucket'] ?? 'default';
+                // Get bucket key from options or generate based on host and credential
+                $bucketKey = $this->makeBucketKey($request, $options);
 
                 // Check if we should delay before making the request
                 $delay = $this->calculateDelay($bucketKey);
@@ -115,6 +116,59 @@ class RateLimitMiddleware extends AbstractMiddleware
                 );
             };
         };
+    }
+
+    /**
+     * Generate a bucket key based on the request host and credential fingerprint.
+     * This ensures rate limits are properly isolated per host and credential.
+     *
+     * @param RequestInterface $request The request being made
+     * @param array<string, mixed> $options Request options
+     *
+     * @return string The bucket key to use for rate limiting
+     */
+    private function makeBucketKey(RequestInterface $request, array $options): string
+    {
+        // Manual override takes precedence
+        if (isset($options['rate_limit_bucket']) && is_string($options['rate_limit_bucket'])) {
+            return $options['rate_limit_bucket'];
+        }
+
+        // Get host from request, fallback to config base URL host
+        $requestHost = $request->getUri()->getHost() ?: '';
+        $configHost = '';
+
+        $baseUrl = Config::getBaseUrl();
+        if ($baseUrl) {
+            $configHost = parse_url($baseUrl, PHP_URL_HOST) ?: '';
+        }
+
+        $host = $requestHost !== '' ? $requestHost : $configHost;
+
+        // If no host can be determined, use default
+        if ($host === '') {
+            return 'default';
+        }
+
+        // Generate credential fingerprint (non-sensitive hash)
+        $fingerprint = '';
+
+        if (Config::getAuthMode() === 'oauth') {
+            $token = Config::getOAuthToken();
+            if (!empty($token)) {
+                // Use first 8 chars of SHA1 hash for security
+                $fingerprint = substr(sha1($token), 0, 8);
+            }
+        } else {
+            $appKey = Config::getApiKey();
+            if (!empty($appKey)) {
+                // Use first 8 chars of SHA1 hash for security
+                $fingerprint = substr(sha1($appKey), 0, 8);
+            }
+        }
+
+        // Return host_fingerprint or just host if no credential available
+        return $fingerprint !== '' ? "{$host}_{$fingerprint}" : $host;
     }
 
     /**
