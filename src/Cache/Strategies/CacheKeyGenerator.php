@@ -128,6 +128,12 @@ class CacheKeyGenerator
         ksort($cacheAffectingOptions);
 
         // Use JSON encoding for better performance than serialize()
-        return substr(md5(json_encode($cacheAffectingOptions, JSON_UNESCAPED_SLASHES)), 0, 16);
+        $encoded = json_encode($cacheAffectingOptions, JSON_UNESCAPED_SLASHES);
+        if ($encoded === false) {
+            // Fallback to empty string if encoding fails
+            return '';
+        }
+
+        return substr(md5($encoded), 0, 16);
     }
 }

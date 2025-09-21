@@ -3770,7 +3770,7 @@ class Course extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return array<int, array<string, mixed>> Array of assignment analytics
+     * @return array<int|string, array<string, mixed>|string> Array of assignment analytics or progress URL
      */
     public function assignmentAnalytics(array $params = []): array
     {
@@ -3807,7 +3807,7 @@ class Course extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return array<string, array<string, mixed>> Analytics data for the student
+     * @return array<string, array<int|string, mixed>> Analytics data for the student
      */
     public function studentAnalytics(int $studentId, array $params = []): array
     {

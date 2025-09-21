@@ -345,9 +345,11 @@ class GradebookHistory extends AbstractBaseApi
                     $parsedUrl = parse_url($matches[1]);
                     $nextUrl = $parsedUrl['path'] ?? null;
                     if ($nextUrl && isset($parsedUrl['query'])) {
-                        parse_str($parsedUrl['query'], $nextParams['query']);
+                        $queryParams = [];
+                        parse_str($parsedUrl['query'], $queryParams);
+                        $nextParams = ['query' => $queryParams];
                     } else {
-                        $nextParams = [];
+                        $nextParams = ['query' => []];
                     }
                 }
             }

@@ -2048,7 +2048,7 @@ class User extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return array<string, array<string, mixed>> Analytics data for the user in the course
+     * @return array<string, array<int|string, mixed>> Analytics data for the user in the course
      */
     public function courseAnalytics(int $courseId, array $params = []): array
     {

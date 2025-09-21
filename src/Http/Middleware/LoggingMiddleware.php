@@ -296,8 +296,10 @@ class LoggingMiddleware extends AbstractMiddleware
         $decoded = json_decode($body, true);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
             $sanitized = $this->sanitizeArray($decoded);
+            $encoded = json_encode($sanitized, JSON_PRETTY_PRINT);
 
-            return json_encode($sanitized, JSON_PRETTY_PRINT);
+            // Fall back to original body if encoding fails
+            return $encoded !== false ? $encoded : $body;
         }
 
         // For non-JSON bodies, do basic pattern matching
