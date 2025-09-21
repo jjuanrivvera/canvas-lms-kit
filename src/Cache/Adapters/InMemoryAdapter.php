@@ -19,6 +19,11 @@ class InMemoryAdapter implements CacheAdapterInterface
     private array $cache = [];
 
     /**
+     * @var int Track approximate memory usage of cached data
+     */
+    private int $cacheMemoryUsage = 0;
+
+    /**
      * @var array{hits: int, misses: int} Cache statistics
      */
     private array $stats = ['hits' => 0, 'misses' => 0];
@@ -81,6 +86,17 @@ class InMemoryAdapter implements CacheAdapterInterface
 
         $expires = $ttl > 0 ? time() + $ttl : 0;
 
+        // Estimate memory usage of the data being stored
+        $dataSize = strlen(serialize($data));
+
+        // Update memory tracking
+        if (isset($this->cache[$key])) {
+            // Subtract old size if updating existing entry
+            $oldSize = strlen(serialize($this->cache[$key]['data']));
+            $this->cacheMemoryUsage -= $oldSize;
+        }
+        $this->cacheMemoryUsage += $dataSize;
+
         $this->cache[$key] = [
             'data' => $data,
             'expires' => $expires,
@@ -93,6 +109,10 @@ class InMemoryAdapter implements CacheAdapterInterface
     public function delete(string $key): bool
     {
         if (isset($this->cache[$key])) {
+            // Update memory tracking
+            $dataSize = strlen(serialize($this->cache[$key]['data']));
+            $this->cacheMemoryUsage -= $dataSize;
+
             unset($this->cache[$key]);
 
             return true;
@@ -107,6 +127,7 @@ class InMemoryAdapter implements CacheAdapterInterface
     public function clear(): void
     {
         $this->cache = [];
+        $this->cacheMemoryUsage = 0;
         $this->stats = ['hits' => 0, 'misses' => 0];
     }
 
@@ -159,7 +180,7 @@ class InMemoryAdapter implements CacheAdapterInterface
         return [
             'hits' => $this->stats['hits'],
             'misses' => $this->stats['misses'],
-            'size' => memory_get_usage(),
+            'size' => $this->cacheMemoryUsage,
             'entries' => count($this->cache),
         ];
     }
@@ -190,6 +211,10 @@ class InMemoryAdapter implements CacheAdapterInterface
 
         foreach ($this->cache as $key => $entry) {
             if ($entry['expires'] > 0 && $entry['expires'] < $now) {
+                // Update memory tracking
+                $dataSize = strlen(serialize($entry['data']));
+                $this->cacheMemoryUsage -= $dataSize;
+
                 unset($this->cache[$key]);
             }
         }
@@ -206,6 +231,10 @@ class InMemoryAdapter implements CacheAdapterInterface
             reset($this->cache);
             $oldestKey = key($this->cache);
             if ($oldestKey !== null) {
+                // Update memory tracking
+                $dataSize = strlen(serialize($this->cache[$oldestKey]['data']));
+                $this->cacheMemoryUsage -= $dataSize;
+
                 unset($this->cache[$oldestKey]);
             }
         }

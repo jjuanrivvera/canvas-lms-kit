@@ -91,7 +91,7 @@ class CacheKeyGenerator
             return '';
         }
 
-        return substr(md5($authHeader), 0, 8);
+        return substr(md5($authHeader), 0, 16);
     }
 
     /**
@@ -128,6 +128,6 @@ class CacheKeyGenerator
         ksort($cacheAffectingOptions);
 
         // Use JSON encoding for better performance than serialize()
-        return substr(md5(json_encode($cacheAffectingOptions, JSON_UNESCAPED_SLASHES)), 0, 8);
+        return substr(md5(json_encode($cacheAffectingOptions, JSON_UNESCAPED_SLASHES)), 0, 16);
     }
 }

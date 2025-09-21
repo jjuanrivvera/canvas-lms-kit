@@ -121,11 +121,22 @@ class APCuAdapter implements CacheAdapterInterface
             // Try to clear some space if storage failed
             $this->clearOldEntries();
 
-            // Retry once
-            $success = apcu_store($prefixedKey, $data, $ttl);
+            // Implement exponential backoff retry (100ms, then 200ms)
+            $retryDelays = [100000, 200000]; // microseconds
+            foreach ($retryDelays as $delay) {
+                usleep($delay);
+                $success = apcu_store($prefixedKey, $data, $ttl);
+                if ($success) {
+                    break;
+                }
+            }
 
             if (!$success) {
-                throw new \RuntimeException("Failed to store data in APCu cache for key: $key");
+                // Log the failure if logger is available
+                error_log("APCu cache store failed for key: $key after retries");
+
+                // Don't throw exception - gracefully degrade
+                return;
             }
         }
     }

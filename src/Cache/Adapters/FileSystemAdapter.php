@@ -42,14 +42,14 @@ class FileSystemAdapter implements CacheAdapterInterface
      *
      * @param string $cacheDir        Cache directory path
      * @param bool   $compression     Enable gzip compression
-     * @param int    $dirPermissions  Directory permissions
-     * @param int    $filePermissions File permissions
+     * @param int    $dirPermissions  Directory permissions (octal)
+     * @param int    $filePermissions File permissions (octal)
      */
     public function __construct(
         string $cacheDir = '/tmp/canvas-cache',
         bool $compression = true,
-        int $dirPermissions = 0775,
-        int $filePermissions = 0664
+        int $dirPermissions = 0755,
+        int $filePermissions = 0644
     ) {
         $this->cacheDir = rtrim($cacheDir, '/');
         $this->compression = $compression && function_exists('gzencode') && function_exists('gzdecode');
