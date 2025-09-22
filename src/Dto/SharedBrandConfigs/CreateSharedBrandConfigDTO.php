@@ -87,13 +87,13 @@ class CreateSharedBrandConfigDTO extends AbstractBaseDto
         // Add name field
         $properties[] = [
             'name' => sprintf('%s[name]', $this->apiPropertyName),
-            'contents' => $this->name,
+            'contents' => (string) $this->name,
         ];
 
         // Add brand_config_md5 field (Canvas expects snake_case)
         $properties[] = [
             'name' => sprintf('%s[brand_config_md5]', $this->apiPropertyName),
-            'contents' => $this->brandConfigMd5,
+            'contents' => (string) $this->brandConfigMd5,
         ];
 
         return $properties;

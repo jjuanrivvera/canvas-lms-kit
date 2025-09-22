@@ -228,16 +228,18 @@ class LoggingMiddleware extends AbstractMiddleware
         // Add response details if available
         if ($reason instanceof \GuzzleHttp\Exception\RequestException && $reason->hasResponse()) {
             $response = $reason->getResponse();
-            $context['status_code'] = $response->getStatusCode();
-            $context['headers'] = $this->sanitizeHeaders($response->getHeaders());
+            if ($response !== null) {
+                $context['status_code'] = $response->getStatusCode();
+                $context['headers'] = $this->sanitizeHeaders($response->getHeaders());
 
-            $body = (string) $response->getBody();
-            if ($body) {
-                $maxLength = $this->getConfig('max_body_length', 1000);
-                if (strlen($body) > $maxLength) {
-                    $context['response_body'] = substr($body, 0, $maxLength) . '... (truncated)';
-                } else {
-                    $context['response_body'] = $body;
+                $body = (string) $response->getBody();
+                if ($body) {
+                    $maxLength = $this->getConfig('max_body_length', 1000);
+                    if (strlen($body) > $maxLength) {
+                        $context['response_body'] = substr($body, 0, $maxLength) . '... (truncated)';
+                    } else {
+                        $context['response_body'] = $body;
+                    }
                 }
             }
         }
@@ -312,7 +314,7 @@ class LoggingMiddleware extends AbstractMiddleware
         }
 
         foreach ($patterns as $pattern) {
-            $body = preg_replace($pattern, '$1***REDACTED***', $body);
+            $body = preg_replace($pattern, '$1***REDACTED***', $body) ?? '';
         }
 
         return $body;

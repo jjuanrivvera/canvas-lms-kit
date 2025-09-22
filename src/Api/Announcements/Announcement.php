@@ -85,8 +85,8 @@ class Announcement extends DiscussionTopic
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $endpoint = sprintf('courses/%d/discussion_topics', self::getContextCourseId());
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $announcementsData = self::parseJsonResponse($response);
 
         $announcements = [];
@@ -113,7 +113,7 @@ class Announcement extends DiscussionTopic
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
+        $endpoint = sprintf('courses/%d/discussion_topics', self::getContextCourseId());
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
 
         // Convert data to models
@@ -141,7 +141,7 @@ class Announcement extends DiscussionTopic
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
+        $endpoint = sprintf('courses/%d/discussion_topics', self::getContextCourseId());
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
 
@@ -151,6 +151,18 @@ class Announcement extends DiscussionTopic
         }
 
         return $announcements;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
     }
 
     /**
@@ -164,7 +176,7 @@ class Announcement extends DiscussionTopic
     {
         self::checkCourse();
 
-        return sprintf('courses/%d/discussion_topics', self::$course->id);
+        return sprintf('courses/%d/discussion_topics', self::getContextCourseId());
     }
 
     /**
@@ -189,8 +201,8 @@ class Announcement extends DiscussionTopic
             $data = new CreateAnnouncementDTO($data->toApiArray());
         }
 
-        $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/discussion_topics', self::getContextCourseId());
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $announcementData = self::parseJsonResponse($response);
 
         return new self($announcementData);
@@ -219,8 +231,8 @@ class Announcement extends DiscussionTopic
             $data = new UpdateAnnouncementDTO($data->toApiArray());
         }
 
-        $endpoint = sprintf('courses/%d/discussion_topics/%d', self::$course->id, $id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/discussion_topics/%d', self::getContextCourseId(), $id);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $announcementData = self::parseJsonResponse($response);
 
         return new self($announcementData);
@@ -271,7 +283,7 @@ class Announcement extends DiscussionTopic
         }
 
         $endpoint = 'announcements';
-        $response = self::$apiClient->get($endpoint, ['query' => $queryParams]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $queryParams]);
         $announcementsData = self::parseJsonResponse($response);
 
         $announcements = [];

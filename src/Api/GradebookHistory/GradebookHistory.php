@@ -147,7 +147,7 @@ class GradebookHistory extends AbstractBaseApi
         $endpoint = self::getEndpoint() . '/days';
         self::checkApiClient();
 
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseBody = self::parseJsonResponse($response);
 
         if (!is_array($responseBody)) {
@@ -184,7 +184,7 @@ class GradebookHistory extends AbstractBaseApi
         $endpoint = self::getEndpoint() . '/' . $date;
         self::checkApiClient();
 
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseBody = self::parseJsonResponse($response);
 
         if (!is_array($responseBody)) {
@@ -228,7 +228,7 @@ class GradebookHistory extends AbstractBaseApi
                     '/assignments/' . $assignmentId . '/submissions';
         self::checkApiClient();
 
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseBody = self::parseJsonResponse($response);
 
         if (!is_array($responseBody)) {
@@ -263,7 +263,7 @@ class GradebookHistory extends AbstractBaseApi
         $endpoint = self::getEndpoint() . '/feed';
         self::checkApiClient();
 
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseBody = self::parseJsonResponse($response);
 
         if (!is_array($responseBody)) {
@@ -298,7 +298,7 @@ class GradebookHistory extends AbstractBaseApi
 
         self::checkApiClient();
 
-        return self::$apiClient->getPaginated($endpoint, [
+        return self::getApiClient()->getPaginated($endpoint, [
             'query' => $params,
         ]);
     }
@@ -325,7 +325,7 @@ class GradebookHistory extends AbstractBaseApi
         $nextParams = ['query' => $params];
 
         do {
-            $response = self::$apiClient->get($nextUrl, $nextParams);
+            $response = self::getApiClient()->get($nextUrl, $nextParams);
             $responseBody = self::parseJsonResponse($response);
 
             if (is_array($responseBody)) {

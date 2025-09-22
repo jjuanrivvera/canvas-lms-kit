@@ -254,11 +254,57 @@ class Submission extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
+    }
+
+    /**
      * Set the assignment context
      */
     public static function setAssignment(Assignment $assignment): void
     {
         self::$assignment = $assignment;
+    }
+
+    /**
+     * Get the Assignment instance, ensuring it is set
+     *
+     * @throws CanvasApiException if assignment is not set
+     *
+     * @return Assignment
+     */
+    protected static function getAssignment(): Assignment
+    {
+        if (self::$assignment === null) {
+            throw new CanvasApiException(
+                'Assignment context not set. Call ' . static::class . '::setAssignment() first.'
+            );
+        }
+
+        return self::$assignment;
     }
 
     /**
@@ -333,9 +379,13 @@ class Submission extends AbstractBaseApi
 
         $dto = $data instanceof CreateSubmissionDTO ? $data : new CreateSubmissionDTO($data);
 
-        $endpoint = sprintf('courses/%d/assignments/%d/submissions', self::$course->id, self::$assignment->id);
+        $endpoint = sprintf(
+            'courses/%d/assignments/%d/submissions',
+            self::getContextCourseId(),
+            self::getAssignment()->id
+        );
 
-        $response = self::$apiClient->request('POST', $endpoint, [
+        $response = self::getApiClient()->request('POST', $endpoint, [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -362,12 +412,12 @@ class Submission extends AbstractBaseApi
 
         $endpoint = sprintf(
             'courses/%d/assignments/%d/submissions/%d',
-            self::$course->id,
-            self::$assignment->id,
+            self::getContextCourseId(),
+            self::getAssignment()->id,
             $id
         );
 
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $submissionData = self::parseJsonResponse($response);
 
         /** @phpstan-ignore-next-line */
@@ -389,8 +439,12 @@ class Submission extends AbstractBaseApi
         self::checkApiClient();
         self::checkContexts();
 
-        $endpoint = sprintf('courses/%d/assignments/%d/submissions', self::$course->id, self::$assignment->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $endpoint = sprintf(
+            'courses/%d/assignments/%d/submissions',
+            self::getContextCourseId(),
+            self::getAssignment()->id
+        );
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $submissionsData = self::parseJsonResponse($response);
 
         $submissions = [];
@@ -416,7 +470,11 @@ class Submission extends AbstractBaseApi
         self::checkApiClient();
         self::checkContexts();
 
-        $endpoint = sprintf('courses/%d/assignments/%d/submissions', self::$course->id, self::$assignment->id);
+        $endpoint = sprintf(
+            'courses/%d/assignments/%d/submissions',
+            self::getContextCourseId(),
+            self::getAssignment()->id
+        );
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
 
         return self::createPaginationResult($paginatedResponse);
@@ -437,7 +495,11 @@ class Submission extends AbstractBaseApi
         self::checkApiClient();
         self::checkContexts();
 
-        $endpoint = sprintf('courses/%d/assignments/%d/submissions', self::$course->id, self::$assignment->id);
+        $endpoint = sprintf(
+            'courses/%d/assignments/%d/submissions',
+            self::getContextCourseId(),
+            self::getAssignment()->id
+        );
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
 
@@ -466,12 +528,12 @@ class Submission extends AbstractBaseApi
 
         $endpoint = sprintf(
             'courses/%d/assignments/%d/submissions/%d',
-            self::$course->id,
-            self::$assignment->id,
+            self::getContextCourseId(),
+            self::getAssignment()->id,
             $userId
         );
 
-        $response = self::$apiClient->request('PUT', $endpoint, [
+        $response = self::getApiClient()->request('PUT', $endpoint, [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -493,11 +555,11 @@ class Submission extends AbstractBaseApi
 
         $endpoint = sprintf(
             'courses/%d/assignments/%d/submissions/%d/read',
-            self::$course->id,
-            self::$assignment->id,
+            self::getContextCourseId(),
+            self::getAssignment()->id,
             $userId
         );
-        self::$apiClient->put($endpoint);
+        self::getApiClient()->put($endpoint);
 
         return new self([]);
     }
@@ -515,11 +577,11 @@ class Submission extends AbstractBaseApi
 
         $endpoint = sprintf(
             'courses/%d/assignments/%d/submissions/%d/read',
-            self::$course->id,
-            self::$assignment->id,
+            self::getContextCourseId(),
+            self::getAssignment()->id,
             $userId
         );
-        self::$apiClient->delete($endpoint);
+        self::getApiClient()->delete($endpoint);
 
         return new self([]);
     }
@@ -565,11 +627,11 @@ class Submission extends AbstractBaseApi
 
         $endpoint = sprintf(
             'courses/%d/assignments/%d/submissions/update_grades',
-            self::$course->id,
-            self::$assignment->id
+            self::getContextCourseId(),
+            self::getAssignment()->id
         );
 
-        self::$apiClient->request('PUT', $endpoint, [
+        self::getApiClient()->request('PUT', $endpoint, [
             'json' => $gradeData,
         ]);
 
@@ -597,12 +659,12 @@ class Submission extends AbstractBaseApi
 
         $endpoint = sprintf(
             'courses/%d/assignments/%d/submissions/%d',
-            self::$course->id,
-            self::$assignment->id,
+            self::getContextCourseId(),
+            self::getAssignment()->id,
             $this->userId
         );
 
-        $response = self::$apiClient->request('PUT', $endpoint, [
+        $response = self::getApiClient()->request('PUT', $endpoint, [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -1004,6 +1066,10 @@ class Submission extends AbstractBaseApi
         self::checkCourse();
         self::checkAssignment();
 
-        return sprintf('courses/%d/assignments/%d/submissions', self::$course->getId(), self::$assignment->getId());
+        return sprintf(
+            'courses/%d/assignments/%d/submissions',
+            self::getCourse()->getId(),
+            self::getAssignment()->getId()
+        );
     }
 }

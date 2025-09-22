@@ -284,6 +284,34 @@ class Quiz extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
+    }
+
+    /**
      * Get quiz ID
      *
      * @return int|null
@@ -1101,8 +1129,8 @@ class Quiz extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/quizzes/%d', self::$course->id, $id);
-        $response = self::$apiClient->get($endpoint);
+        $endpoint = sprintf('courses/%d/quizzes/%d', self::getContextCourseId(), $id);
+        $response = self::getApiClient()->get($endpoint);
         $quizData = self::parseJsonResponse($response);
 
         return new self($quizData);
@@ -1126,8 +1154,8 @@ class Quiz extends AbstractBaseApi
             $data = new CreateQuizDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/quizzes', self::$course->id);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/quizzes', self::getContextCourseId());
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $quizData = self::parseJsonResponse($response);
 
         return new self($quizData);
@@ -1152,8 +1180,8 @@ class Quiz extends AbstractBaseApi
             $data = new UpdateQuizDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/quizzes/%d', self::$course->id, $id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/quizzes/%d', self::getContextCourseId(), $id);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $quizData = self::parseJsonResponse($response);
 
         return new self($quizData);
@@ -1254,8 +1282,8 @@ class Quiz extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/quizzes/%d', self::$course->id, $this->id);
-        self::$apiClient->delete($endpoint);
+        $endpoint = sprintf('courses/%d/quizzes/%d', self::getContextCourseId(), $this->id);
+        self::getApiClient()->delete($endpoint);
 
         return $this;
     }
@@ -1321,7 +1349,7 @@ class Quiz extends AbstractBaseApi
      */
     public function submissions(array $params = []): array
     {
-        QuizSubmission::setCourse(self::$course);
+        QuizSubmission::setCourse(self::getCourse());
         QuizSubmission::setQuiz($this);
 
         return QuizSubmission::all($params);
@@ -1336,7 +1364,7 @@ class Quiz extends AbstractBaseApi
      */
     public function currentUserSubmission(): ?QuizSubmission
     {
-        QuizSubmission::setCourse(self::$course);
+        QuizSubmission::setCourse(self::getCourse());
         QuizSubmission::setQuiz($this);
 
         return QuizSubmission::getCurrentUserSubmission();
@@ -1353,7 +1381,7 @@ class Quiz extends AbstractBaseApi
      */
     public function startSubmission(array $params = []): QuizSubmission
     {
-        QuizSubmission::setCourse(self::$course);
+        QuizSubmission::setCourse(self::getCourse());
         QuizSubmission::setQuiz($this);
 
         return QuizSubmission::start($params);
@@ -1370,6 +1398,6 @@ class Quiz extends AbstractBaseApi
     {
         self::checkCourse();
 
-        return sprintf('courses/%d/quizzes', self::$course->getId());
+        return sprintf('courses/%d/quizzes', self::getCourse()->getId());
     }
 }

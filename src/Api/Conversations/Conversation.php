@@ -126,7 +126,7 @@ class Conversation extends AbstractBaseApi
     public static function get(array $params = []): array
     {
         self::checkApiClient();
-        $response = self::$apiClient->get(self::$endpoint, $params);
+        $response = self::getApiClient()->get(self::$endpoint, $params);
 
         $conversations = [];
         $data = self::parseJsonResponse($response);
@@ -166,7 +166,7 @@ class Conversation extends AbstractBaseApi
             $params['auto_mark_as_read'] = true;
         }
 
-        $response = self::$apiClient->get(self::$endpoint . '/' . $id, $params);
+        $response = self::getApiClient()->get(self::$endpoint . '/' . $id, $params);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -187,7 +187,7 @@ class Conversation extends AbstractBaseApi
             $data = new CreateConversationDTO($data);
         }
 
-        $response = self::$apiClient->post(self::$endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->post(self::$endpoint, ['multipart' => $data->toApiArray()]);
         $responseData = self::parseJsonResponse($response);
 
         // Handle async mode where response might be empty
@@ -218,7 +218,10 @@ class Conversation extends AbstractBaseApi
             if (is_array($data)) {
                 $data = new UpdateConversationDTO($data);
             }
-            $response = self::$apiClient->put(self::$endpoint . '/' . $this->id, ['multipart' => $data->toApiArray()]);
+            $response = self::getApiClient()->put(
+                self::$endpoint . '/' . $this->id,
+                ['multipart' => $data->toApiArray()]
+            );
         } else {
             // Build update data from current object state
             $updateData = [];
@@ -231,7 +234,7 @@ class Conversation extends AbstractBaseApi
             if ($this->starred !== null) {
                 $updateData[] = ['name' => 'conversation[starred]', 'contents' => $this->starred ? '1' : '0'];
             }
-            $response = self::$apiClient->put(self::$endpoint . '/' . $this->id, ['multipart' => $updateData]);
+            $response = self::getApiClient()->put(self::$endpoint . '/' . $this->id, ['multipart' => $updateData]);
         }
         $responseData = self::parseJsonResponse($response);
 
@@ -249,7 +252,7 @@ class Conversation extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        self::$apiClient->delete(self::$endpoint . '/' . $this->id);
+        self::getApiClient()->delete(self::$endpoint . '/' . $this->id);
 
         return $this;
     }
@@ -269,7 +272,7 @@ class Conversation extends AbstractBaseApi
             $data = new AddMessageDTO($data);
         }
 
-        $response = self::$apiClient->post(
+        $response = self::getApiClient()->post(
             self::$endpoint . '/' . $this->id . '/add_message',
             ['multipart' => $data->toApiArray()]
         );
@@ -295,7 +298,7 @@ class Conversation extends AbstractBaseApi
             $data = new AddRecipientsDTO($data);
         }
 
-        $response = self::$apiClient->post(
+        $response = self::getApiClient()->post(
             self::$endpoint . '/' . $this->id . '/add_recipients',
             ['multipart' => $data->toApiArray()]
         );
@@ -323,7 +326,7 @@ class Conversation extends AbstractBaseApi
             $data[] = ['name' => 'remove[]', 'contents' => (string) $messageId];
         }
 
-        $response = self::$apiClient->post(
+        $response = self::getApiClient()->post(
             self::$endpoint . '/' . $this->id . '/remove_messages',
             ['multipart' => $data]
         );
@@ -358,7 +361,7 @@ class Conversation extends AbstractBaseApi
             $updateData[] = ['name' => $key, 'contents' => (string) $value];
         }
 
-        $response = self::$apiClient->put(self::$endpoint, ['multipart' => $updateData]);
+        $response = self::getApiClient()->put(self::$endpoint, ['multipart' => $updateData]);
 
         return self::parseJsonResponse($response);
     }
@@ -372,7 +375,7 @@ class Conversation extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->post(self::$endpoint . '/mark_all_as_read', []);
+        $response = self::getApiClient()->post(self::$endpoint . '/mark_all_as_read', []);
 
         return $response->getStatusCode() === 200;
     }
@@ -386,7 +389,7 @@ class Conversation extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get(self::$endpoint . '/unread_count');
+        $response = self::getApiClient()->get(self::$endpoint . '/unread_count');
         $data = self::parseJsonResponse($response);
 
         return $data['unread_count'] ?? 0;
@@ -401,7 +404,7 @@ class Conversation extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get(self::$endpoint . '/batches');
+        $response = self::getApiClient()->get(self::$endpoint . '/batches');
 
         return self::parseJsonResponse($response);
     }

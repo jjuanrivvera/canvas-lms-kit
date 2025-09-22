@@ -148,7 +148,7 @@ class MigrationIssue extends AbstractBaseApi
             $migrationId,
             $id
         );
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
         $data = self::parseJsonResponse($response);
 
         if (!is_array($data)) {
@@ -302,7 +302,7 @@ class MigrationIssue extends AbstractBaseApi
             $migrationId,
             $id
         );
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $issueData = self::parseJsonResponse($response);
 
         if (!is_array($issueData)) {

@@ -277,6 +277,34 @@ class Module extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
+    }
+
+    /**
      * Validate that prerequisite modules have lower position values
      *
      * @param int[] $prerequisiteModuleIds
@@ -330,7 +358,7 @@ class Module extends AbstractBaseApi
             self::validatePrerequisitePositions($data->prerequisiteModuleIds, $data->position);
         }
 
-        $response = self::$apiClient->post(sprintf('courses/%d/modules', self::$course->id), [
+        $response = self::getApiClient()->post(sprintf('courses/%d/modules', self::getContextCourseId()), [
             'multipart' => $data->toApiArray(),
         ]);
 
@@ -364,7 +392,7 @@ class Module extends AbstractBaseApi
             self::validatePrerequisitePositions($data->prerequisiteModuleIds, $data->position);
         }
 
-        $response = self::$apiClient->put(sprintf('courses/%d/modules/%d', self::$course->id, $id), [
+        $response = self::getApiClient()->put(sprintf('courses/%d/modules/%d', self::getContextCourseId(), $id), [
             'multipart' => $data->toApiArray(),
         ]);
 
@@ -388,7 +416,7 @@ class Module extends AbstractBaseApi
         self::checkApiClient();
         self::checkCourse();
 
-        $response = self::$apiClient->get(sprintf('courses/%d/modules/%d', self::$course->id, $id), [
+        $response = self::getApiClient()->get(sprintf('courses/%d/modules/%d', self::getContextCourseId(), $id), [
             'query' => $params,
         ]);
 
@@ -413,11 +441,11 @@ class Module extends AbstractBaseApi
 
         $dto = isset($data['id']) ? new UpdateModuleDTO($data) : new CreateModuleDTO($data);
         $path = isset($data['id'])
-            ? sprintf('courses/%d/modules/%d', self::$course->id, $data['id'])
-            : sprintf('courses/%d/modules', self::$course->id);
+            ? sprintf('courses/%d/modules/%d', self::getContextCourseId(), $data['id'])
+            : sprintf('courses/%d/modules', self::getContextCourseId());
         $method = isset($data['id']) ? 'PUT' : 'POST';
 
-        $response = self::$apiClient->request($method, $path, [
+        $response = self::getApiClient()->request($method, $path, [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -439,7 +467,7 @@ class Module extends AbstractBaseApi
         self::checkApiClient();
         self::checkCourse();
 
-        self::$apiClient->delete(sprintf('courses/%d/modules/%d', self::$course->id, $this->id));
+        self::getApiClient()->delete(sprintf('courses/%d/modules/%d', self::getContextCourseId(), $this->id));
 
         return $this;
     }
@@ -593,7 +621,7 @@ class Module extends AbstractBaseApi
      */
     public function getItems(): array
     {
-        return $this->items;
+        return $this->items ?? [];
     }
 
     /**
@@ -697,7 +725,8 @@ class Module extends AbstractBaseApi
         self::checkApiClient();
         self::checkCourse();
 
-        $response = self::$apiClient->put(sprintf('courses/%d/modules/%d/relock', self::$course->id, $this->id));
+        $endpoint = sprintf('courses/%d/modules/%d/relock', self::getContextCourseId(), $this->id);
+        $response = self::getApiClient()->put($endpoint);
         $moduleData = self::parseJsonResponse($response);
         $this->populate($moduleData);
 
@@ -718,7 +747,7 @@ class Module extends AbstractBaseApi
         self::checkApiClient();
         self::checkCourse();
 
-        ModuleItem::setCourse(self::$course);
+        ModuleItem::setCourse(self::getCourse());
         ModuleItem::setModule($this);
 
         return ModuleItem::all($params);
@@ -739,7 +768,7 @@ class Module extends AbstractBaseApi
         self::checkApiClient();
         self::checkCourse();
 
-        ModuleItem::setCourse(self::$course);
+        ModuleItem::setCourse(self::getCourse());
         ModuleItem::setModule($this);
 
         return ModuleItem::create($data);
@@ -803,8 +832,8 @@ class Module extends AbstractBaseApi
         self::checkApiClient();
         self::checkCourse();
 
-        $response = self::$apiClient->get(
-            sprintf('courses/%d/modules/%d/assignment_overrides', self::$course->id, $this->id),
+        $response = self::getApiClient()->get(
+            sprintf('courses/%d/modules/%d/assignment_overrides', self::getContextCourseId(), $this->id),
             ['query' => $params]
         );
 
@@ -838,8 +867,8 @@ class Module extends AbstractBaseApi
             $overrides = $dto;
         }
 
-        self::$apiClient->put(
-            sprintf('courses/%d/modules/%d/assignment_overrides', self::$course->id, $this->id),
+        self::getApiClient()->put(
+            sprintf('courses/%d/modules/%d/assignment_overrides', self::getContextCourseId(), $this->id),
             [
                 'json' => $overrides->toApiArray(),
             ]
@@ -987,6 +1016,6 @@ class Module extends AbstractBaseApi
     {
         self::checkCourse();
 
-        return sprintf('courses/%d/modules', self::$course->getId());
+        return sprintf('courses/%d/modules', self::getCourse()->getId());
     }
 }

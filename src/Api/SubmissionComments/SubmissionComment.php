@@ -160,6 +160,34 @@ class SubmissionComment extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
+    }
+
+    /**
      * Check if assignment context is set
      *
      * @throws Exception
@@ -174,6 +202,24 @@ class SubmissionComment extends AbstractBaseApi
         }
 
         return true;
+    }
+
+    /**
+     * Get the Assignment instance, ensuring it is set
+     *
+     * @throws CanvasApiException if assignment is not set
+     *
+     * @return Assignment
+     */
+    protected static function getAssignment(): Assignment
+    {
+        if (self::$assignment === null) {
+            throw new CanvasApiException(
+                'Assignment context not set. Call ' . static::class . '::setAssignment() first.'
+            );
+        }
+
+        return self::$assignment;
     }
 
     /**
@@ -240,13 +286,13 @@ class SubmissionComment extends AbstractBaseApi
 
         $endpoint = sprintf(
             'courses/%d/assignments/%d/submissions/%d/comments/%d',
-            self::$course->id,
-            self::$assignment->id,
+            self::getContextCourseId(),
+            self::getAssignment()->id,
             self::$userId,
             $commentId
         );
 
-        $response = self::$apiClient->request('PUT', $endpoint, [
+        $response = self::getApiClient()->request('PUT', $endpoint, [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -270,12 +316,12 @@ class SubmissionComment extends AbstractBaseApi
 
         $endpoint = sprintf(
             'courses/%d/assignments/%d/submissions/%d/comments/%d',
-            self::$course->id,
-            self::$assignment->id,
+            self::getContextCourseId(),
+            self::getAssignment()->id,
             self::$userId,
             $commentId
         );
-        self::$apiClient->delete($endpoint);
+        self::getApiClient()->delete($endpoint);
 
         return new self([]);
     }
@@ -327,12 +373,12 @@ class SubmissionComment extends AbstractBaseApi
 
         $endpoint = sprintf(
             'courses/%d/assignments/%d/submissions/%d/comments/files',
-            self::$course->id,
-            self::$assignment->id,
+            self::getContextCourseId(),
+            self::getAssignment()->id,
             self::$userId
         );
 
-        $response = self::$apiClient->request('POST', $endpoint, [
+        $response = self::getApiClient()->request('POST', $endpoint, [
             'json' => $fileData,
         ]);
 
@@ -360,13 +406,13 @@ class SubmissionComment extends AbstractBaseApi
 
         $endpoint = sprintf(
             'courses/%d/assignments/%d/submissions/%d/comments/%d',
-            self::$course->id,
-            self::$assignment->id,
+            self::getContextCourseId(),
+            self::getAssignment()->id,
             self::$userId,
             $this->id
         );
 
-        $response = self::$apiClient->request('PUT', $endpoint, [
+        $response = self::getApiClient()->request('PUT', $endpoint, [
             'multipart' => $dto->toApiArray(),
         ]);
 

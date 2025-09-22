@@ -110,6 +110,20 @@ abstract class AbstractBaseApi implements ApiInterface
     }
 
     /**
+     * Get the API client, initializing if necessary
+     *
+     * @return HttpClientInterface
+     */
+    protected static function getApiClient(): HttpClientInterface
+    {
+        if (self::$apiClient === null) {
+            self::$apiClient = self::createConfiguredHttpClient();
+        }
+
+        return self::$apiClient;
+    }
+
+    /**
      * Create an HttpClient with configured middleware
      *
      * @return HttpClient
@@ -233,7 +247,7 @@ abstract class AbstractBaseApi implements ApiInterface
     {
         self::checkApiClient();
 
-        return self::$apiClient->getPaginated($endpoint, [
+        return self::getApiClient()->getPaginated($endpoint, [
             'query' => $params,
         ]);
     }
@@ -294,7 +308,7 @@ abstract class AbstractBaseApi implements ApiInterface
     {
         static::checkApiClient();
         $endpoint = static::getEndpoint();
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
 
         $data = self::parseJsonResponse($response);
 

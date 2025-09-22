@@ -229,6 +229,34 @@ class RubricAssessment extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
+    }
+
+    /**
      * Get the resource identifier for API endpoints
      *
      * @return string
@@ -257,7 +285,7 @@ class RubricAssessment extends AbstractBaseApi
 
         return sprintf(
             'courses/%d/rubric_associations/%d/rubric_assessments',
-            self::$course->id,
+            self::getContextCourseId(),
             $rubricAssociationId
         );
     }
@@ -281,7 +309,7 @@ class RubricAssessment extends AbstractBaseApi
         }
 
         $endpoint = self::getResourceEndpoint($rubricAssociationId);
-        $response = self::$apiClient->post($endpoint, $data->toApiArray());
+        $response = self::getApiClient()->post($endpoint, $data->toApiArray());
         $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
@@ -311,7 +339,7 @@ class RubricAssessment extends AbstractBaseApi
 
         $baseEndpoint = self::getResourceEndpoint($rubricAssociationId);
         $endpoint = sprintf('%s/%d', $baseEndpoint, $id);
-        $response = self::$apiClient->put($endpoint, $data->toApiArray());
+        $response = self::getApiClient()->put($endpoint, $data->toApiArray());
         $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
@@ -339,7 +367,7 @@ class RubricAssessment extends AbstractBaseApi
         $baseEndpoint = self::getResourceEndpoint($this->rubricAssociationId);
         $endpoint = sprintf('%s/%d', $baseEndpoint, $this->id);
 
-        $response = self::$apiClient->delete($endpoint);
+        $response = self::getApiClient()->delete($endpoint);
         self::parseJsonResponse($response);
 
         return $this;
@@ -364,6 +392,11 @@ class RubricAssessment extends AbstractBaseApi
 
             $associationId = $rubricAssociationId ?? $this->rubricAssociationId;
 
+            // Ensure associationId is not null before calling update
+            if ($associationId === null) {
+                throw new CanvasApiException('Rubric association ID cannot be null');
+            }
+
             $dto = new UpdateRubricAssessmentDTO();
             $dto->userId = $this->userId ?? $this->assessorId;
             $dto->assessmentType = $this->assessmentType;
@@ -385,6 +418,11 @@ class RubricAssessment extends AbstractBaseApi
             }
 
             $associationId = $rubricAssociationId ?? $this->rubricAssociationId;
+
+            // Ensure associationId is not null before calling create
+            if ($associationId === null) {
+                throw new CanvasApiException('Rubric association ID cannot be null');
+            }
 
             $dto = new CreateRubricAssessmentDTO();
             $dto->userId = $this->userId ?? $this->assessorId;
@@ -421,7 +459,7 @@ class RubricAssessment extends AbstractBaseApi
         }
 
         // Use the new context-based find method
-        return Rubric::findByContext('courses', self::$course->id, $this->rubricId);
+        return Rubric::findByContext('courses', self::getContextCourseId(), $this->rubricId);
     }
 
     /**

@@ -175,7 +175,7 @@ class Progress extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/progress/{$id}");
+        $response = self::getApiClient()->get("/progress/{$id}");
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -195,7 +195,7 @@ class Progress extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/lti/courses/{$courseId}/progress/{$id}");
+        $response = self::getApiClient()->get("/lti/courses/{$courseId}/progress/{$id}");
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -223,7 +223,7 @@ class Progress extends AbstractBaseApi
             $params['message'] = $message;
         }
 
-        $response = self::$apiClient->post("/progress/{$this->id}/cancel", [
+        $response = self::getApiClient()->post("/progress/{$this->id}/cancel", [
             'form_params' => $params,
         ]);
 

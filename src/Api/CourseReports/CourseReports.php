@@ -82,6 +82,34 @@ class CourseReports extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
+    }
+
+    /**
      * Check if course context is set and valid
      *
      * @throws CanvasApiException If course context is not set or invalid
@@ -111,11 +139,11 @@ class CourseReports extends AbstractBaseApi
     {
         self::checkCourse();
 
-        $endpoint = sprintf('courses/%d/reports/%s', self::$course->id, $reportType);
+        $endpoint = sprintf('courses/%d/reports/%s', self::getContextCourseId(), $reportType);
 
         self::checkApiClient();
 
-        $response = self::$apiClient->post($endpoint, [
+        $response = self::getApiClient()->post($endpoint, [
             'form_params' => $parameters,
         ]);
 
@@ -155,11 +183,11 @@ class CourseReports extends AbstractBaseApi
     {
         self::checkCourse();
 
-        $endpoint = sprintf('courses/%d/reports/%s/%d', self::$course->id, $reportType, $reportId);
+        $endpoint = sprintf('courses/%d/reports/%s/%d', self::getContextCourseId(), $reportType, $reportId);
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
         $reportData = self::parseJsonResponse($response);
 
         return new self($reportData);
@@ -178,11 +206,11 @@ class CourseReports extends AbstractBaseApi
     {
         self::checkCourse();
 
-        $endpoint = sprintf('courses/%d/reports/%s', self::$course->id, $reportType);
+        $endpoint = sprintf('courses/%d/reports/%s', self::getContextCourseId(), $reportType);
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
         $reportData = self::parseJsonResponse($response);
 
         return new self($reportData);

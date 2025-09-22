@@ -185,6 +185,34 @@ class Section extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
+    }
+
+    /**
      * Find a single section by ID
      *
      * @param int $id Section ID
@@ -199,13 +227,13 @@ class Section extends AbstractBaseApi
         self::checkApiClient();
 
         // Use course context if available, otherwise use direct section endpoint
-        if (isset(self::$course) && isset(self::$course->id)) {
-            $endpoint = sprintf('courses/%d/sections/%d', self::$course->id, $id);
+        if (isset(self::$course)) {
+            $endpoint = sprintf('courses/%d/sections/%d', self::getContextCourseId(), $id);
         } else {
             $endpoint = sprintf('sections/%d', $id);
         }
 
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -230,8 +258,8 @@ class Section extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/sections', self::$course->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $endpoint = sprintf('courses/%d/sections', self::getContextCourseId());
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         if (!is_array($data)) {
@@ -255,8 +283,8 @@ class Section extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/sections', self::$course->id);
-        $paginatedResponse = self::$apiClient->getPaginated($endpoint, ['query' => $params]);
+        $endpoint = sprintf('courses/%d/sections', self::getContextCourseId());
+        $paginatedResponse = self::getApiClient()->getPaginated($endpoint, ['query' => $params]);
         $data = $paginatedResponse->all();
 
         if (!is_array($data)) {
@@ -280,8 +308,8 @@ class Section extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/sections', self::$course->id);
-        $paginatedResponse = self::$apiClient->getPaginated($endpoint, ['query' => $params]);
+        $endpoint = sprintf('courses/%d/sections', self::getContextCourseId());
+        $paginatedResponse = self::getApiClient()->getPaginated($endpoint, ['query' => $params]);
 
         $data = $paginatedResponse->getJsonData();
         $sections = array_map(fn ($item) => new self($item), $data);
@@ -307,8 +335,8 @@ class Section extends AbstractBaseApi
             $data = new CreateSectionDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/sections', self::$course->id);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/sections', self::getContextCourseId());
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $sectionData = self::parseJsonResponse($response);
 
         return new self($sectionData);
@@ -333,7 +361,7 @@ class Section extends AbstractBaseApi
         }
 
         $endpoint = sprintf('sections/%d', $id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $sectionData = self::parseJsonResponse($response);
 
         return new self($sectionData);
@@ -390,7 +418,7 @@ class Section extends AbstractBaseApi
 
         // Use direct section endpoint for deletion
         $endpoint = sprintf('sections/%d', $this->id);
-        self::$apiClient->delete($endpoint);
+        self::getApiClient()->delete($endpoint);
 
         return $this;
     }
@@ -537,6 +565,10 @@ class Section extends AbstractBaseApi
     {
         self::checkCourse();
 
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
         return self::$course;
     }
 
@@ -597,7 +629,7 @@ class Section extends AbstractBaseApi
             ],
         ];
 
-        $response = self::$apiClient->post($endpoint, ['multipart' => $multipart]);
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $multipart]);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -620,7 +652,7 @@ class Section extends AbstractBaseApi
         $endpoint = sprintf('sections/%d/crosslist', $sectionId);
         $queryParams = ['override_sis_stickiness' => $overrideSisStickiness];
 
-        $response = self::$apiClient->delete($endpoint, ['query' => $queryParams]);
+        $response = self::getApiClient()->delete($endpoint, ['query' => $queryParams]);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -637,6 +669,6 @@ class Section extends AbstractBaseApi
     {
         self::checkCourse();
 
-        return sprintf('courses/%d/sections', self::$course->getId());
+        return sprintf('courses/%d/sections', self::getCourse()->getId());
     }
 }

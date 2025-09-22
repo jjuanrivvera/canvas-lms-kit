@@ -7,6 +7,7 @@ namespace CanvasLMS\Api\Bookmarks;
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Dto\Bookmarks\CreateBookmarkDTO;
 use CanvasLMS\Dto\Bookmarks\UpdateBookmarkDTO;
+use CanvasLMS\Pagination\PaginationResult;
 
 /**
  * Canvas LMS Bookmarks API
@@ -62,7 +63,7 @@ class Bookmark extends AbstractBaseApi
             $data = CreateBookmarkDTO::fromArray($data);
         }
 
-        $response = self::$apiClient->post(
+        $response = self::getApiClient()->post(
             self::getEndpoint(),
             $data->toApiArray()
         );
@@ -89,9 +90,9 @@ class Bookmark extends AbstractBaseApi
      *
      * @param array<string, mixed> $params Query parameters
      *
-     * @return \CanvasLMS\Pagination\PaginationResult
+     * @return PaginationResult
      */
-    public static function paginate(array $params = []): \CanvasLMS\Pagination\PaginationResult
+    public static function paginate(array $params = []): PaginationResult
     {
         return parent::paginate($params);
     }
@@ -117,7 +118,7 @@ class Bookmark extends AbstractBaseApi
      */
     public static function find(int $id, array $params = []): self
     {
-        $response = self::$apiClient->get(
+        $response = self::getApiClient()->get(
             self::getEndpoint() . '/' . $id
         );
 
@@ -140,7 +141,7 @@ class Bookmark extends AbstractBaseApi
             $data = UpdateBookmarkDTO::fromArray($data);
         }
 
-        $response = self::$apiClient->put(
+        $response = self::getApiClient()->put(
             self::getEndpoint() . '/' . $id,
             $data->toApiArray()
         );
@@ -168,13 +169,13 @@ class Bookmark extends AbstractBaseApi
 
         if ($this->id === null) {
             $dto = CreateBookmarkDTO::fromArray($data);
-            $response = self::$apiClient->post(
+            $response = self::getApiClient()->post(
                 self::getEndpoint(),
                 $dto->toApiArray()
             );
         } else {
             $dto = UpdateBookmarkDTO::fromArray($data);
-            $response = self::$apiClient->put(
+            $response = self::getApiClient()->put(
                 self::getEndpoint() . '/' . $this->id,
                 $dto->toApiArray()
             );
@@ -204,7 +205,7 @@ class Bookmark extends AbstractBaseApi
             throw new \RuntimeException('Cannot delete bookmark without ID');
         }
 
-        $response = self::$apiClient->delete(
+        $response = self::getApiClient()->delete(
             self::getEndpoint() . '/' . $this->id
         );
 

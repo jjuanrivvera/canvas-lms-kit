@@ -6,6 +6,7 @@ namespace CanvasLMS\Api\AppointmentGroups;
 
 use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
+use CanvasLMS\Config;
 use CanvasLMS\Dto\AppointmentGroups\CreateAppointmentGroupDTO;
 use CanvasLMS\Dto\AppointmentGroups\UpdateAppointmentGroupDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
@@ -277,7 +278,7 @@ class AppointmentGroup extends AbstractBaseApi
         }
 
         self::checkApiClient();
-        $response = self::$apiClient->post('appointment_groups', ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->post('appointment_groups', ['multipart' => $data->toApiArray()]);
         $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
@@ -297,7 +298,7 @@ class AppointmentGroup extends AbstractBaseApi
     {
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d', $id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -321,7 +322,7 @@ class AppointmentGroup extends AbstractBaseApi
 
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d', $id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $updateData->toApiArray()]);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $updateData->toApiArray()]);
         $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
@@ -350,7 +351,7 @@ class AppointmentGroup extends AbstractBaseApi
             $params['query'] = ['cancel_reason' => $cancelReason];
         }
 
-        self::$apiClient->delete($endpoint, $params);
+        self::getApiClient()->delete($endpoint, $params);
 
         return $this;
     }
@@ -367,7 +368,7 @@ class AppointmentGroup extends AbstractBaseApi
     public static function get(array $params = []): array
     {
         self::checkApiClient();
-        $response = self::$apiClient->get('appointment_groups', ['query' => $params]);
+        $response = self::getApiClient()->get('appointment_groups', ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
@@ -472,7 +473,7 @@ class AppointmentGroup extends AbstractBaseApi
 
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d/users', $this->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
 
         return self::parseJsonResponse($response);
     }
@@ -515,7 +516,7 @@ class AppointmentGroup extends AbstractBaseApi
 
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d/groups', $this->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
 
         return self::parseJsonResponse($response);
     }
@@ -616,7 +617,7 @@ class AppointmentGroup extends AbstractBaseApi
                 return new DateTime($value);
             } catch (\Exception $e) {
                 // Log the parsing error for debugging
-                $logger = \CanvasLMS\Config::getLogger();
+                $logger = Config::getLogger();
                 $logger->warning(
                     'AppointmentGroup: Failed to parse DateTime for field "{field}" with value "{value}": {error}',
                     [

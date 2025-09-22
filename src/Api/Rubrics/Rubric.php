@@ -222,7 +222,7 @@ class Rubric extends AbstractBaseApi
         }
 
         $endpoint = sprintf('%s/%d/rubrics', $contextType, $contextId);
-        $response = self::$apiClient->post($endpoint, $data->toApiArray());
+        $response = self::getApiClient()->post($endpoint, $data->toApiArray());
         $responseData = self::parseJsonResponse($response);
 
         // Handle non-standard response format
@@ -277,7 +277,7 @@ class Rubric extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('%s/%d/rubrics/%d', $contextType, $contextId, $id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -325,7 +325,7 @@ class Rubric extends AbstractBaseApi
         }
 
         $endpoint = sprintf('%s/%d/rubrics/%d', $contextType, $contextId, $id);
-        $response = self::$apiClient->put($endpoint, $data->toApiArray());
+        $response = self::getApiClient()->put($endpoint, $data->toApiArray());
         $responseData = self::parseJsonResponse($response);
 
         // Handle non-standard response format
@@ -362,7 +362,7 @@ class Rubric extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('%ss/%d/rubrics/%d', $this->contextType, $this->contextId, $this->id);
-        self::$apiClient->delete($endpoint);
+        self::getApiClient()->delete($endpoint);
 
         return $this;
     }
@@ -489,7 +489,7 @@ class Rubric extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('%ss/%d/rubrics/%d/used_locations', $this->contextType, $this->contextId, $this->id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
 
         return self::parseJsonResponse($response);
     }
@@ -539,7 +539,7 @@ class Rubric extends AbstractBaseApi
             ],
         ];
 
-        $response = self::$apiClient->post($endpoint, $multipart);
+        $response = self::getApiClient()->post($endpoint, $multipart);
 
         return self::parseJsonResponse($response);
     }
@@ -555,7 +555,7 @@ class Rubric extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get('rubrics/upload_template');
+        $response = self::getApiClient()->get('rubrics/upload_template');
 
         return $response->getBody()->getContents();
     }
@@ -599,7 +599,7 @@ class Rubric extends AbstractBaseApi
             $endpoint .= '/' . $importId;
         }
 
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
 
         return self::parseJsonResponse($response);
     }

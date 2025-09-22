@@ -142,7 +142,7 @@ class Conference extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get(
+        $response = self::getApiClient()->get(
             sprintf('courses/%d/conferences', $courseId),
             ['query' => $params]
         );
@@ -171,7 +171,7 @@ class Conference extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get(
+        $response = self::getApiClient()->get(
             sprintf('groups/%d/conferences', $groupId),
             ['query' => $params]
         );
@@ -199,7 +199,7 @@ class Conference extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get(sprintf('conferences/%d', $id));
+        $response = self::getApiClient()->get(sprintf('conferences/%d', $id));
         $data = self::parseJsonResponse($response);
 
         $conference = new self($data);
@@ -224,7 +224,7 @@ class Conference extends AbstractBaseApi
             $data = new CreateConferenceDTO($data);
         }
 
-        $response = self::$apiClient->post(
+        $response = self::getApiClient()->post(
             sprintf('courses/%d/conferences', $courseId),
             [
                 'multipart' => $data->toApiArray(),
@@ -254,7 +254,7 @@ class Conference extends AbstractBaseApi
             $data = new CreateConferenceDTO($data);
         }
 
-        $response = self::$apiClient->post(
+        $response = self::getApiClient()->post(
             sprintf('groups/%d/conferences', $groupId),
             [
                 'multipart' => $data->toApiArray(),
@@ -287,7 +287,7 @@ class Conference extends AbstractBaseApi
             $data = new UpdateConferenceDTO($data);
         }
 
-        $response = self::$apiClient->put(
+        $response = self::getApiClient()->put(
             sprintf('conferences/%d', $this->id),
             [
                 'multipart' => $data->toApiArray(),
@@ -341,7 +341,7 @@ class Conference extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->delete(sprintf('conferences/%d', $this->id));
+        $response = self::getApiClient()->delete(sprintf('conferences/%d', $this->id));
 
         if (!($response->getStatusCode() === 200 || $response->getStatusCode() === 204)) {
             throw new CanvasApiException('Failed to delete conference');
@@ -363,7 +363,7 @@ class Conference extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->post(sprintf('conferences/%d/join', $this->id));
+        $response = self::getApiClient()->post(sprintf('conferences/%d/join', $this->id));
 
         return self::parseJsonResponse($response);
     }
@@ -381,7 +381,7 @@ class Conference extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get(sprintf('conferences/%d/recording', $this->id));
+        $response = self::getApiClient()->get(sprintf('conferences/%d/recording', $this->id));
         $data = self::parseJsonResponse($response);
 
         $recordings = [];

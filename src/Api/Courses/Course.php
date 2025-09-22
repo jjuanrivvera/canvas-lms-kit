@@ -12,9 +12,15 @@ use CanvasLMS\Api\ContentMigrations\ContentMigration;
 use CanvasLMS\Api\DiscussionTopics\DiscussionTopic;
 use CanvasLMS\Api\Enrollments\Enrollment;
 use CanvasLMS\Api\ExternalTools\ExternalTool;
+use CanvasLMS\Api\FeatureFlags\FeatureFlag;
 use CanvasLMS\Api\Files\File;
 use CanvasLMS\Api\GradebookHistory\GradebookHistory;
+use CanvasLMS\Api\GroupCategories\GroupCategory;
+use CanvasLMS\Api\Groups\Group;
 use CanvasLMS\Api\Modules\Module;
+use CanvasLMS\Api\OutcomeGroups\OutcomeGroup;
+use CanvasLMS\Api\OutcomeImports\OutcomeImport;
+use CanvasLMS\Api\OutcomeResults\OutcomeResult;
 use CanvasLMS\Api\Pages\Page;
 use CanvasLMS\Api\Quizzes\Quiz;
 use CanvasLMS\Api\Rubrics\Rubric;
@@ -25,6 +31,9 @@ use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
 use CanvasLMS\Dto\ContentMigrations\CreateContentMigrationDTO;
 use CanvasLMS\Dto\Courses\CreateCourseDTO;
 use CanvasLMS\Dto\Courses\UpdateCourseDTO;
+use CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO;
+use CanvasLMS\Dto\GroupCategories\CreateGroupCategoryDTO;
+use CanvasLMS\Dto\Outcomes\CreateOutcomeDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Objects\CalendarLink;
 use CanvasLMS\Objects\CourseProgress;
@@ -543,7 +552,7 @@ class Course extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->post('/accounts/' . Config::getAccountId() . '/courses', [
+        $response = self::getApiClient()->post('/accounts/' . Config::getAccountId() . '/courses', [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -584,7 +593,7 @@ class Course extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->put("/courses/{$id}", [
+        $response = self::getApiClient()->put("/courses/{$id}", [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -606,7 +615,7 @@ class Course extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$id}");
+        $response = self::getApiClient()->get("/courses/{$id}");
 
         $courseData = self::parseJsonResponse($response);
 
@@ -628,7 +637,7 @@ class Course extends AbstractBaseApi
 
         $accountId = Config::getAccountId();
 
-        $response = self::$apiClient->get("/accounts/{$accountId}/courses", [
+        $response = self::getApiClient()->get("/accounts/{$accountId}/courses", [
             'query' => $params,
         ]);
 
@@ -674,7 +683,7 @@ class Course extends AbstractBaseApi
         $path = $data['id'] ? "/courses/{$this->id}" : "/accounts/{$accountId}/courses";
         $method = $data['id'] ? 'PUT' : 'POST';
 
-        $response = self::$apiClient->request($method, $path, [
+        $response = self::getApiClient()->request($method, $path, [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -695,7 +704,7 @@ class Course extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        self::$apiClient->delete("/courses/{$this->id}", [
+        self::getApiClient()->delete("/courses/{$this->id}", [
             'query' => [
                 'event' => 'delete',
             ],
@@ -711,7 +720,7 @@ class Course extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return array<\CanvasLMS\Api\Groups\Group>
+     * @return array<Group>
      */
     public function groups(array $params = []): array
     {
@@ -719,7 +728,7 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to fetch groups');
         }
 
-        return \CanvasLMS\Api\Groups\Group::fetchByContext('courses', $this->id, $params);
+        return Group::fetchByContext('courses', $this->id, $params);
     }
 
     /**
@@ -737,7 +746,7 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to fetch groups');
         }
 
-        return \CanvasLMS\Api\Groups\Group::fetchByContextPaginated('courses', $this->id, $params);
+        return Group::fetchByContextPaginated('courses', $this->id, $params);
     }
 
     /**
@@ -747,7 +756,7 @@ class Course extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return array<\CanvasLMS\Api\GroupCategories\GroupCategory>
+     * @return array<GroupCategory>
      */
     public function groupCategories(array $params = []): array
     {
@@ -755,9 +764,9 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to fetch group categories');
         }
 
-        \CanvasLMS\Api\GroupCategories\GroupCategory::setCourse($this);
+        GroupCategory::setCourse($this);
 
-        return \CanvasLMS\Api\GroupCategories\GroupCategory::all($params);
+        return GroupCategory::all($params);
     }
 
     /**
@@ -775,7 +784,7 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to fetch group categories');
         }
 
-        return \CanvasLMS\Api\GroupCategories\GroupCategory::getPaginatedResponse(
+        return GroupCategory::getPaginatedResponse(
             sprintf('courses/%d/group_categories', $this->id),
             $params
         );
@@ -784,15 +793,15 @@ class Course extends AbstractBaseApi
     /**
      * Create a group category in this course
      *
-     * @param array<string, mixed>|\CanvasLMS\Dto\GroupCategories\CreateGroupCategoryDTO $data Group category data
+     * @param array<string, mixed>|CreateGroupCategoryDTO $data Group category data
      *
      * @throws CanvasApiException
      *
-     * @return \CanvasLMS\Api\GroupCategories\GroupCategory
+     * @return GroupCategory
      */
     public function createGroupCategory(
-        array|\CanvasLMS\Dto\GroupCategories\CreateGroupCategoryDTO $data
-    ): \CanvasLMS\Api\GroupCategories\GroupCategory {
+        array|CreateGroupCategoryDTO $data
+    ): GroupCategory {
         if (!$this->id) {
             throw new CanvasApiException('Course ID is required to create group category');
         }
@@ -804,7 +813,7 @@ class Course extends AbstractBaseApi
             $data->courseId = $this->id;
         }
 
-        return \CanvasLMS\Api\GroupCategories\GroupCategory::create($data);
+        return GroupCategory::create($data);
     }
 
     /**
@@ -818,7 +827,7 @@ class Course extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        self::$apiClient->delete("/courses/{$this->id}", [
+        self::getApiClient()->delete("/courses/{$this->id}", [
             'query' => [
                 'event' => 'conclude',
             ],
@@ -840,7 +849,7 @@ class Course extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->post("/courses/{$this->id}/reset_content");
+        $response = self::getApiClient()->post("/courses/{$this->id}/reset_content");
 
         $courseData = self::parseJsonResponse($response);
 
@@ -860,7 +869,7 @@ class Course extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$courseId}/settings");
+        $response = self::getApiClient()->get("/courses/{$courseId}/settings");
 
         return self::parseJsonResponse($response);
     }
@@ -879,7 +888,7 @@ class Course extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->put("/courses/{$courseId}/settings", [
+        $response = self::getApiClient()->put("/courses/{$courseId}/settings", [
             'form_params' => $settings,
         ]);
 
@@ -903,7 +912,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/users/{$userId}/progress");
+        $response = self::getApiClient()->get("/courses/{$this->id}/users/{$userId}/progress");
 
         return self::parseJsonResponse($response);
     }
@@ -923,7 +932,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/bulk_user_progress");
+        $response = self::getApiClient()->get("/courses/{$this->id}/bulk_user_progress");
 
         return self::parseJsonResponse($response);
     }
@@ -945,7 +954,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/effective_due_dates", [
+        $response = self::getApiClient()->get("/courses/{$this->id}/effective_due_dates", [
             'query' => $params,
         ]);
 
@@ -969,7 +978,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/permissions", [
+        $response = self::getApiClient()->get("/courses/{$this->id}/permissions", [
             'query' => ['permissions' => $permissions],
         ]);
 
@@ -993,7 +1002,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/activity_stream", [
+        $response = self::getApiClient()->get("/courses/{$this->id}/activity_stream", [
             'query' => $params,
         ]);
 
@@ -1015,7 +1024,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/activity_stream/summary");
+        $response = self::getApiClient()->get("/courses/{$this->id}/activity_stream/summary");
 
         return self::parseJsonResponse($response);
     }
@@ -1035,7 +1044,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/todo");
+        $response = self::getApiClient()->get("/courses/{$this->id}/todo");
 
         return self::parseJsonResponse($response);
     }
@@ -1055,7 +1064,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/student_view_student");
+        $response = self::getApiClient()->get("/courses/{$this->id}/student_view_student");
 
         return self::parseJsonResponse($response);
     }
@@ -1077,7 +1086,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->post("/courses/{$this->id}/preview_html", [
+        $response = self::getApiClient()->post("/courses/{$this->id}/preview_html", [
             'form_params' => ['html' => $html],
         ]);
 
@@ -1108,7 +1117,7 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Invalid event. Must be one of: ' . implode(', ', $allowedEvents));
         }
 
-        $response = self::$apiClient->put("/accounts/{$accountId}/courses", [
+        $response = self::getApiClient()->put("/accounts/{$accountId}/courses", [
             'form_params' => [
                 'course_ids' => $courseIds,
                 'event' => $event,
@@ -1135,7 +1144,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/users", [
+        $response = self::getApiClient()->get("/courses/{$this->id}/users", [
             'query' => $params,
         ]);
 
@@ -1160,7 +1169,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/users/{$userId}", [
+        $response = self::getApiClient()->get("/courses/{$this->id}/users/{$userId}", [
             'query' => $params,
         ]);
 
@@ -1186,7 +1195,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/students", [
+        $response = self::getApiClient()->get("/courses/{$this->id}/students", [
             'query' => $params,
         ]);
 
@@ -1208,7 +1217,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/recent_students");
+        $response = self::getApiClient()->get("/courses/{$this->id}/recent_students");
 
         return self::parseJsonResponse($response);
     }
@@ -1230,7 +1239,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/content_share_users", [
+        $response = self::getApiClient()->get("/courses/{$this->id}/content_share_users", [
             'query' => ['search_term' => $searchTerm],
         ]);
 
@@ -1255,7 +1264,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->post("/courses/{$this->id}/files", [
+        $response = self::getApiClient()->post("/courses/{$this->id}/files", [
             'form_params' => $fileParams,
         ]);
 
@@ -1278,7 +1287,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->post("/courses/{$this->id}/dismiss_migration_limitation_message");
+        $response = self::getApiClient()->post("/courses/{$this->id}/dismiss_migration_limitation_message");
 
         return self::parseJsonResponse($response);
     }
@@ -1472,7 +1481,7 @@ class Course extends AbstractBaseApi
 
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/courses/{$this->id}/course_copy/{$copyId}");
+        $response = self::getApiClient()->get("/courses/{$this->id}/course_copy/{$copyId}");
 
         return self::parseJsonResponse($response);
     }
@@ -1499,7 +1508,7 @@ class Course extends AbstractBaseApi
 
         $params = array_merge(['source_course' => $sourceCourse], $options);
 
-        $response = self::$apiClient->post("/courses/{$this->id}/course_copy", [
+        $response = self::getApiClient()->post("/courses/{$this->id}/course_copy", [
             'form_params' => $params,
         ]);
 
@@ -3141,7 +3150,7 @@ class Course extends AbstractBaseApi
         }
 
         // Get the root outcome group for this course
-        $rootGroup = \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::getRootGroup('courses', $this->id);
+        $rootGroup = OutcomeGroup::getRootGroup('courses', $this->id);
 
         // Get outcomes from the root group (returns OutcomeLink objects)
         return $rootGroup->outcomes($params);
@@ -3162,7 +3171,7 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to fetch outcome links');
         }
 
-        return \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::fetchAllLinksByContext('courses', $this->id, $params);
+        return OutcomeGroup::fetchAllLinksByContext('courses', $this->id, $params);
     }
 
     /**
@@ -3172,7 +3181,7 @@ class Course extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return array<int, \CanvasLMS\Api\FeatureFlags\FeatureFlag> Array of FeatureFlag objects
+     * @return array<int, FeatureFlag> Array of FeatureFlag objects
      */
     public function featureFlags(array $params = []): array
     {
@@ -3180,7 +3189,7 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to fetch feature flags');
         }
 
-        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::fetchByContext('courses', $this->id, $params);
+        return FeatureFlag::fetchByContext('courses', $this->id, $params);
     }
 
     /**
@@ -3190,36 +3199,36 @@ class Course extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
+     * @return FeatureFlag
      */
-    public function featureFlag(string $featureName): \CanvasLMS\Api\FeatureFlags\FeatureFlag
+    public function featureFlag(string $featureName): FeatureFlag
     {
         if (!$this->id) {
             throw new CanvasApiException('Course ID is required to get feature flag');
         }
 
-        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::findByContext('courses', $this->id, $featureName);
+        return FeatureFlag::findByContext('courses', $this->id, $featureName);
     }
 
     /**
      * Update a feature flag for this course.
      *
      * @param string $featureName The symbolic name of the feature
-     * @param array<string, mixed>|\CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO $data Update data
+     * @param array<string, mixed>|UpdateFeatureFlagDTO $data Update data
      *
      * @throws CanvasApiException
      *
-     * @return \CanvasLMS\Api\FeatureFlags\FeatureFlag
+     * @return FeatureFlag
      */
     public function setFeatureFlag(
         string $featureName,
-        array|\CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO $data
-    ): \CanvasLMS\Api\FeatureFlags\FeatureFlag {
+        array|UpdateFeatureFlagDTO $data
+    ): FeatureFlag {
         if (!$this->id) {
             throw new CanvasApiException('Course ID is required to set feature flag');
         }
 
-        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::updateByContext('courses', $this->id, $featureName, $data);
+        return FeatureFlag::updateByContext('courses', $this->id, $featureName, $data);
     }
 
     /**
@@ -3237,13 +3246,13 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to remove feature flag');
         }
 
-        return \CanvasLMS\Api\FeatureFlags\FeatureFlag::deleteByContext('courses', $this->id, $featureName);
+        return FeatureFlag::deleteByContext('courses', $this->id, $featureName);
     }
 
     /**
      * Create a new outcome directly in this course.
      *
-     * @param array<string, mixed>|\CanvasLMS\Dto\Outcomes\CreateOutcomeDTO $data Outcome data
+     * @param array<string, mixed>|CreateOutcomeDTO $data Outcome data
      * @param int|null $groupId The group to create in (null for root group)
      *
      * @throws CanvasApiException
@@ -3251,7 +3260,7 @@ class Course extends AbstractBaseApi
      * @return OutcomeLink
      */
     public function createOutcome(
-        array|\CanvasLMS\Dto\Outcomes\CreateOutcomeDTO $data,
+        array|CreateOutcomeDTO $data,
         ?int $groupId = null
     ): OutcomeLink {
         if (!$this->id) {
@@ -3259,9 +3268,9 @@ class Course extends AbstractBaseApi
         }
 
         if ($groupId) {
-            $group = \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::findByContext('courses', $this->id, $groupId);
+            $group = OutcomeGroup::findByContext('courses', $this->id, $groupId);
         } else {
-            $group = \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::getRootGroup('courses', $this->id);
+            $group = OutcomeGroup::getRootGroup('courses', $this->id);
         }
 
         return $group->createOutcome($data);
@@ -3285,9 +3294,9 @@ class Course extends AbstractBaseApi
         }
 
         if ($groupId) {
-            $group = \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::findByContext('courses', $this->id, $groupId);
+            $group = OutcomeGroup::findByContext('courses', $this->id, $groupId);
         } else {
-            $group = \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::getRootGroup('courses', $this->id);
+            $group = OutcomeGroup::getRootGroup('courses', $this->id);
         }
 
         return $group->linkOutcome($outcomeId, $moveFrom);
@@ -3300,7 +3309,7 @@ class Course extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return array<int, \CanvasLMS\Api\OutcomeGroups\OutcomeGroup> Array of OutcomeGroup objects
+     * @return array<int, OutcomeGroup> Array of OutcomeGroup objects
      */
     public function outcomeGroups(array $params = []): array
     {
@@ -3308,7 +3317,7 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to fetch outcome groups');
         }
 
-        return \CanvasLMS\Api\OutcomeGroups\OutcomeGroup::fetchByContext('courses', $this->id, $params);
+        return OutcomeGroup::fetchByContext('courses', $this->id, $params);
     }
 
     /**
@@ -3318,7 +3327,7 @@ class Course extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return array<int, \CanvasLMS\Api\OutcomeResults\OutcomeResult> Array of OutcomeResult objects
+     * @return array<int, OutcomeResult> Array of OutcomeResult objects
      */
     public function outcomeResults(array $params = []): array
     {
@@ -3326,7 +3335,7 @@ class Course extends AbstractBaseApi
             throw new CanvasApiException('Course ID is required to fetch outcome results');
         }
 
-        return \CanvasLMS\Api\OutcomeResults\OutcomeResult::fetchByCourse($this->id, $params);
+        return OutcomeResult::fetchByCourse($this->id, $params);
     }
 
     /**
@@ -3349,7 +3358,7 @@ class Course extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/outcome_rollups', $this->id);
 
-        $response = self::$apiClient->get($endpoint, [
+        $response = self::getApiClient()->get($endpoint, [
             'query' => $params,
         ]);
 
@@ -3365,18 +3374,18 @@ class Course extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return \CanvasLMS\Api\OutcomeImports\OutcomeImport
+     * @return OutcomeImport
      */
     public function importOutcomes(
         string $filePath,
         ?int $groupId = null,
         string $importType = 'instructure_csv'
-    ): \CanvasLMS\Api\OutcomeImports\OutcomeImport {
+    ): OutcomeImport {
         if (!$this->id) {
             throw new CanvasApiException('Course ID is required to import outcomes');
         }
 
-        return \CanvasLMS\Api\OutcomeImports\OutcomeImport::importToContext(
+        return OutcomeImport::importToContext(
             'courses',
             $this->id,
             $filePath,
@@ -3394,18 +3403,18 @@ class Course extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return \CanvasLMS\Api\OutcomeImports\OutcomeImport
+     * @return OutcomeImport
      */
     public function importOutcomesFromData(
         string $csvData,
         ?int $groupId = null,
         string $importType = 'instructure_csv'
-    ): \CanvasLMS\Api\OutcomeImports\OutcomeImport {
+    ): OutcomeImport {
         if (!$this->id) {
             throw new CanvasApiException('Course ID is required to import outcomes');
         }
 
-        return \CanvasLMS\Api\OutcomeImports\OutcomeImport::importDataToContext(
+        return OutcomeImport::importDataToContext(
             'courses',
             $this->id,
             $csvData,
@@ -3421,15 +3430,15 @@ class Course extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return \CanvasLMS\Api\OutcomeImports\OutcomeImport
+     * @return OutcomeImport
      */
-    public function outcomeImportStatus(int|string $importId): \CanvasLMS\Api\OutcomeImports\OutcomeImport
+    public function outcomeImportStatus(int|string $importId): OutcomeImport
     {
         if (!$this->id) {
             throw new CanvasApiException('Course ID is required to get import status');
         }
 
-        return \CanvasLMS\Api\OutcomeImports\OutcomeImport::getStatus('courses', $this->id, $importId);
+        return OutcomeImport::getStatus('courses', $this->id, $importId);
     }
 
     /**
@@ -3480,7 +3489,7 @@ class Course extends AbstractBaseApi
             }
         }
 
-        $response = self::$apiClient->post($endpoint, $data);
+        $response = self::getApiClient()->post($endpoint, $data);
 
         return self::parseJsonResponse($response);
     }
@@ -3501,7 +3510,7 @@ class Course extends AbstractBaseApi
         }
 
         $endpoint = sprintf('courses/%d/calendar_events/timetable', $this->id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
 
         return self::parseJsonResponse($response);
     }
@@ -3549,7 +3558,7 @@ class Course extends AbstractBaseApi
             }
         }
 
-        $response = self::$apiClient->post($endpoint, $data);
+        $response = self::getApiClient()->post($endpoint, $data);
 
         return self::parseJsonResponse($response);
     }
@@ -3577,7 +3586,7 @@ class Course extends AbstractBaseApi
 
         $endpoint = sprintf('courses/%d/outcome_rollups', $this->id);
 
-        $response = self::$apiClient->get($endpoint, [
+        $response = self::getApiClient()->get($endpoint, [
             'query' => $params,
         ]);
 
@@ -3604,7 +3613,7 @@ class Course extends AbstractBaseApi
         $params['export_format'] = 'csv';
         $endpoint = sprintf('courses/%d/outcome_rollups.csv', $this->id);
 
-        $response = self::$apiClient->get($endpoint, [
+        $response = self::getApiClient()->get($endpoint, [
             'query' => $params,
         ]);
 
