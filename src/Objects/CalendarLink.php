@@ -26,7 +26,7 @@ class CalendarLink
      */
     public function __construct(array $data = [])
     {
-        if (isset($data['ics'])) {
+        if (isset($data['ics']) && is_scalar($data['ics'])) {
             $this->ics = (string) $data['ics'];
         }
     }

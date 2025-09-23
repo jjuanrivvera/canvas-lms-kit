@@ -117,7 +117,7 @@ class GroupCategory extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('group_categories/%d', $id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -140,6 +140,22 @@ class GroupCategory extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
      * Get the endpoint for this resource.
      *
      * @throws CanvasApiException
@@ -149,7 +165,7 @@ class GroupCategory extends AbstractBaseApi
     protected static function getEndpoint(): string
     {
         if (self::checkCourse()) {
-            return sprintf('courses/%d/group_categories', self::$course->getId());
+            return sprintf('courses/%d/group_categories', self::getCourse()->getId());
         }
 
         $accountId = Config::getAccountId();
@@ -176,7 +192,7 @@ class GroupCategory extends AbstractBaseApi
 
         $accountId = Config::getAccountId();
         $endpoint = sprintf('accounts/%d/group_categories', $accountId);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $categoryData = self::parseJsonResponse($response);
 
         return new self($categoryData);
@@ -201,7 +217,7 @@ class GroupCategory extends AbstractBaseApi
         }
 
         $endpoint = sprintf('group_categories/%d', $id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $categoryData = self::parseJsonResponse($response);
 
         return new self($categoryData);
@@ -244,7 +260,7 @@ class GroupCategory extends AbstractBaseApi
 
         self::checkApiClient();
         $endpoint = sprintf('group_categories/%d', $this->id);
-        self::$apiClient->delete($endpoint);
+        self::getApiClient()->delete($endpoint);
 
         return $this;
     }
@@ -309,7 +325,7 @@ class GroupCategory extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('group_categories/%d/users', $this->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $usersData = self::parseJsonResponse($response);
 
         return array_map(fn ($data) => new User($data), $usersData);
@@ -359,7 +375,7 @@ class GroupCategory extends AbstractBaseApi
         }
         $params = empty($multipart) ? [] : ['multipart' => $multipart];
 
-        $response = self::$apiClient->post($endpoint, $params);
+        $response = self::getApiClient()->post($endpoint, $params);
         $data = self::parseJsonResponse($response);
 
         // If sync=true, we get groups back. Otherwise, we get a progress object
@@ -386,7 +402,7 @@ class GroupCategory extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('group_categories/%d/export', $this->id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
 
         return self::parseJsonResponse($response);
     }

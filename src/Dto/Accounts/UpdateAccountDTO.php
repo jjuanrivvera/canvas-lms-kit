@@ -496,7 +496,7 @@ class UpdateAccountDTO extends AbstractBaseDto implements DTOInterface
             }
 
             // Convert property name to snake_case
-            $snakeCase = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $property));
+            $snakeCase = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $property) ?? '');
 
             // Handle boolean values
             if (is_bool($value)) {

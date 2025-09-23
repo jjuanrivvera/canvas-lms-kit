@@ -186,7 +186,7 @@ class OutcomeGroup extends AbstractBaseApi
         }
 
         $endpoint = sprintf('%s/%d/outcome_groups/%d', $contextType, $contextId, $id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
 
         return new self(self::parseJsonResponse($response));
     }
@@ -203,7 +203,7 @@ class OutcomeGroup extends AbstractBaseApi
     public static function findGlobal(int $id): self
     {
         $endpoint = sprintf('global/outcome_groups/%d', $id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
 
         return new self(self::parseJsonResponse($response));
     }
@@ -221,7 +221,7 @@ class OutcomeGroup extends AbstractBaseApi
     public static function getRootGroup(string $contextType, int $contextId): self
     {
         $endpoint = sprintf('%s/%d/root_outcome_group', $contextType, $contextId);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
 
         return new self(self::parseJsonResponse($response));
     }
@@ -235,7 +235,7 @@ class OutcomeGroup extends AbstractBaseApi
      */
     public static function getGlobalRootGroup(): self
     {
-        $response = self::$apiClient->get('global/root_outcome_group');
+        $response = self::getApiClient()->get('global/root_outcome_group');
 
         return new self(self::parseJsonResponse($response));
     }
@@ -280,7 +280,7 @@ class OutcomeGroup extends AbstractBaseApi
         $parentPath = $parentGroupId ? (string) $parentGroupId : 'global';
         $endpoint = sprintf('global/outcome_groups/%s/subgroups', $parentPath);
 
-        $response = self::$apiClient->post($endpoint, [
+        $response = self::getApiClient()->post($endpoint, [
             'multipart' => $data->toApiArray(),
         ]);
 
@@ -312,7 +312,7 @@ class OutcomeGroup extends AbstractBaseApi
         $parentPath = $parentGroupId ? (string) $parentGroupId : 'global';
         $endpoint = sprintf('%s/%d/outcome_groups/%s/subgroups', $contextType, $contextId, $parentPath);
 
-        $response = self::$apiClient->post($endpoint, [
+        $response = self::getApiClient()->post($endpoint, [
             'multipart' => $data->toApiArray(),
         ]);
 
@@ -345,7 +345,7 @@ class OutcomeGroup extends AbstractBaseApi
             $this->id
         );
 
-        $response = self::$apiClient->put($endpoint, [
+        $response = self::getApiClient()->put($endpoint, [
             'multipart' => $data->toApiArray(),
         ]);
 
@@ -382,7 +382,7 @@ class OutcomeGroup extends AbstractBaseApi
             $this->id
         );
 
-        self::$apiClient->delete($endpoint);
+        self::getApiClient()->delete($endpoint);
 
         return $this;
     }
@@ -478,7 +478,7 @@ class OutcomeGroup extends AbstractBaseApi
             $options['query'] = ['move_from' => $moveFrom];
         }
 
-        $response = self::$apiClient->put($endpoint, $options);
+        $response = self::getApiClient()->put($endpoint, $options);
 
         $responseData = self::parseJsonResponse($response);
 
@@ -512,7 +512,7 @@ class OutcomeGroup extends AbstractBaseApi
             $this->id
         );
 
-        $response = self::$apiClient->post($endpoint, [
+        $response = self::getApiClient()->post($endpoint, [
             'multipart' => $data->toApiArray(),
         ]);
 
@@ -545,7 +545,7 @@ class OutcomeGroup extends AbstractBaseApi
             $outcomeId
         );
 
-        $response = self::$apiClient->delete($endpoint);
+        $response = self::getApiClient()->delete($endpoint);
 
         return $response->getStatusCode() === 200 || $response->getStatusCode() === 204;
     }
@@ -581,7 +581,7 @@ class OutcomeGroup extends AbstractBaseApi
             ];
         }
 
-        $response = self::$apiClient->post($endpoint, [
+        $response = self::getApiClient()->post($endpoint, [
             'multipart' => $multipartData,
         ]);
 

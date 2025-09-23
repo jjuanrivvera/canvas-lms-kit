@@ -103,7 +103,7 @@ class OutcomeResult extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/outcome_results', $contextType, $contextId);
 
-        $response = self::$apiClient->get($endpoint, [
+        $response = self::getApiClient()->get($endpoint, [
             'query' => $params,
         ]);
 

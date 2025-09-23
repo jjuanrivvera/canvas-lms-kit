@@ -111,7 +111,7 @@ class GroupMembership extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('groups/%d/memberships/%d', $groupId, $id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -198,7 +198,7 @@ class GroupMembership extends AbstractBaseApi
         }
 
         $endpoint = sprintf('groups/%d/memberships', $groupId);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $membershipData = self::parseJsonResponse($response);
 
         return new self($membershipData);
@@ -230,7 +230,7 @@ class GroupMembership extends AbstractBaseApi
             $multipart[] = ['name' => 'moderator', 'contents' => $data['moderator'] ? 'true' : 'false'];
         }
 
-        $response = self::$apiClient->put($endpoint, ['multipart' => $multipart]);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $multipart]);
         $membershipData = self::parseJsonResponse($response);
 
         return new self($membershipData);
@@ -262,7 +262,7 @@ class GroupMembership extends AbstractBaseApi
             $multipart[] = ['name' => 'moderator', 'contents' => $data['moderator'] ? 'true' : 'false'];
         }
 
-        $response = self::$apiClient->put($endpoint, ['multipart' => $multipart]);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $multipart]);
         $membershipData = self::parseJsonResponse($response);
 
         return new self($membershipData);
@@ -282,7 +282,7 @@ class GroupMembership extends AbstractBaseApi
     {
         self::checkApiClient();
         $endpoint = sprintf('groups/%d/memberships/%d', $groupId, $membershipId);
-        self::$apiClient->delete($endpoint);
+        self::getApiClient()->delete($endpoint);
     }
 
     /**
@@ -316,7 +316,7 @@ class GroupMembership extends AbstractBaseApi
     {
         self::checkApiClient();
         $endpoint = sprintf('groups/%d/memberships/self', $groupId);
-        self::$apiClient->delete($endpoint);
+        self::getApiClient()->delete($endpoint);
     }
 
     /**
@@ -368,7 +368,7 @@ class GroupMembership extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('groups/%d/users/%d', $groupId, $userId);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
         $data = self::parseJsonResponse($response);
 
         return new self($data);

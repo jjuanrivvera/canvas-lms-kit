@@ -365,7 +365,7 @@ class File extends AbstractBaseApi
 
         // Step 1: Initialize upload
         $logger->debug('File Upload: Step 1 - Initializing upload with Canvas API');
-        $response = self::$apiClient->post($endpoint, [
+        $response = self::getApiClient()->post($endpoint, [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -412,7 +412,7 @@ class File extends AbstractBaseApi
 
             $startTime = microtime(true);
             // Use rawRequest with skipAuth and skipDomainValidation for external uploads (e.g., S3)
-            $uploadResponse = self::$apiClient->rawRequest($uploadUrl, 'POST', [
+            $uploadResponse = self::getApiClient()->rawRequest($uploadUrl, 'POST', [
                 'multipart' => $multipartData,
                 'skipAuth' => true,  // Don't send Canvas Bearer token to external storage
                 'skipDomainValidation' => true,  // Allow external storage URLs
@@ -449,7 +449,7 @@ class File extends AbstractBaseApi
         if (!empty($location)) {
             $logger->debug('File Upload: Step 3 - Following redirect to confirm upload');
             // Use rawRequest with skipAuth and skipDomainValidation for external redirect URLs
-            $confirmResponse = self::$apiClient->rawRequest($location, 'GET', [
+            $confirmResponse = self::getApiClient()->rawRequest($location, 'GET', [
                 'skipAuth' => true,  // Don't send Canvas Bearer token to external location
                 'skipDomainValidation' => true,  // Allow external redirect URLs
             ]);
@@ -482,7 +482,7 @@ class File extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/files/{$id}");
+        $response = self::getApiClient()->get("/files/{$id}");
 
         $fileData = self::parseJsonResponse($response);
 
@@ -659,7 +659,7 @@ class File extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/files/{$this->id}");
+        $response = self::getApiClient()->get("/files/{$this->id}");
 
         $fileData = self::parseJsonResponse($response);
 
@@ -674,7 +674,7 @@ class File extends AbstractBaseApi
     public function delete(): self
     {
         self::checkApiClient();
-        self::$apiClient->delete("/files/{$this->id}");
+        self::getApiClient()->delete("/files/{$this->id}");
 
         return $this;
     }
@@ -686,7 +686,7 @@ class File extends AbstractBaseApi
      */
     public function getId(): int
     {
-        return $this->id;
+        return $this->id ?? 0;
     }
 
     /**
@@ -706,7 +706,7 @@ class File extends AbstractBaseApi
      */
     public function getUuid(): string
     {
-        return $this->uuid;
+        return $this->uuid ?? '';
     }
 
     /**
@@ -726,7 +726,7 @@ class File extends AbstractBaseApi
      */
     public function getFolderId(): int
     {
-        return $this->folderId;
+        return $this->folderId ?? 0;
     }
 
     /**
@@ -746,7 +746,7 @@ class File extends AbstractBaseApi
      */
     public function getDisplayName(): string
     {
-        return $this->displayName;
+        return $this->displayName ?? '';
     }
 
     /**
@@ -766,7 +766,7 @@ class File extends AbstractBaseApi
      */
     public function getFilename(): string
     {
-        return $this->filename;
+        return $this->filename ?? '';
     }
 
     /**
@@ -786,7 +786,7 @@ class File extends AbstractBaseApi
      */
     public function getContentType(): string
     {
-        return $this->contentType;
+        return $this->contentType ?? '';
     }
 
     /**
@@ -826,7 +826,7 @@ class File extends AbstractBaseApi
      */
     public function getSize(): int
     {
-        return $this->size;
+        return $this->size ?? 0;
     }
 
     /**
@@ -846,7 +846,7 @@ class File extends AbstractBaseApi
      */
     public function getCreatedAt(): string
     {
-        return $this->createdAt;
+        return $this->createdAt ?? '';
     }
 
     /**
@@ -866,7 +866,7 @@ class File extends AbstractBaseApi
      */
     public function getUpdatedAt(): string
     {
-        return $this->updatedAt;
+        return $this->updatedAt ?? '';
     }
 
     /**

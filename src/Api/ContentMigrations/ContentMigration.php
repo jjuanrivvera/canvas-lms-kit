@@ -180,7 +180,7 @@ class ContentMigration extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('%s/%d/content_migrations/%d', $contextType, $contextId, $id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
         $data = self::parseJsonResponse($response);
 
         if (!is_array($data)) {
@@ -280,18 +280,20 @@ class ContentMigration extends AbstractBaseApi
         }
 
         $endpoint = sprintf('%s/%d/content_migrations', $contextType, $contextId);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $migrationData = self::parseJsonResponse($response);
 
         $migration = new self($migrationData);
 
         // If there's a pre_attachment error, it will be in the response
+        $preAttachment = $migrationData['pre_attachment'];
         if (
-            isset($migrationData['pre_attachment']['message']) &&
-            !isset($migrationData['pre_attachment']['upload_url'])
+            is_array($preAttachment) &&
+            isset($preAttachment['message']) &&
+            !isset($preAttachment['upload_url'])
         ) {
             throw new CanvasApiException(
-                'File upload initialization failed: ' . $migrationData['pre_attachment']['message']
+                'File upload initialization failed: ' . $preAttachment['message']
             );
         }
 
@@ -340,7 +342,7 @@ class ContentMigration extends AbstractBaseApi
         }
 
         $endpoint = sprintf('%s/%d/content_migrations/%d', $contextType, $contextId, $id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $migrationData = self::parseJsonResponse($response);
 
         return new self($migrationData);
@@ -627,7 +629,7 @@ class ContentMigration extends AbstractBaseApi
 
             $endpoint = sprintf('%s/%d/content_migrations/%d/selective_data', $contextType, $contextId, $this->id);
             $params = $type ? ['type' => $type] : [];
-            $response = self::$apiClient->get($endpoint, ['query' => $params]);
+            $response = self::getApiClient()->get($endpoint, ['query' => $params]);
 
             return self::parseJsonResponse($response);
         }
@@ -649,7 +651,7 @@ class ContentMigration extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('courses/%d/content_migrations/%d/asset_id_mapping', $courseId, $migrationId);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
 
         return self::parseJsonResponse($response);
     }
@@ -669,7 +671,7 @@ class ContentMigration extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('%s/%d/content_migrations/migrators', $contextType, $contextId);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
         $data = self::parseJsonResponse($response);
 
         return array_map(fn ($item) => new Migrator($item), $data);
@@ -759,7 +761,7 @@ class ContentMigration extends AbstractBaseApi
             $multipartData = $this->buildMultipartData($uploadParams, $filePath, $fileResource);
 
             self::checkApiClient();
-            $uploadResponse = self::$apiClient->post($uploadUrl, [
+            $uploadResponse = self::getApiClient()->post($uploadUrl, [
                 'multipart' => $multipartData,
             ]);
 

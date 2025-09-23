@@ -95,7 +95,7 @@ class Outcome extends AbstractBaseApi
     {
         self::checkApiClient();
         $endpoint = self::getEndpoint();
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return array_map(fn (array $item) => new static($item), $data);
@@ -174,7 +174,7 @@ class Outcome extends AbstractBaseApi
      */
     public static function find(int $id, array $params = []): self
     {
-        $response = self::$apiClient->get(sprintf('outcomes/%d', $id));
+        $response = self::getApiClient()->get(sprintf('outcomes/%d', $id));
 
         return new self(self::parseJsonResponse($response));
     }
@@ -224,7 +224,7 @@ class Outcome extends AbstractBaseApi
         $groupPath = $groupId ? (string) $groupId : 'global';
         $endpoint = sprintf('%s/%d/outcome_groups/%s/outcomes', $contextType, $contextId, $groupPath);
 
-        $response = self::$apiClient->post($endpoint, [
+        $response = self::getApiClient()->post($endpoint, [
             'multipart' => $data->toApiArray(),
         ]);
 
@@ -256,7 +256,7 @@ class Outcome extends AbstractBaseApi
             $data = new UpdateOutcomeDTO($data);
         }
 
-        $response = self::$apiClient->put(sprintf('outcomes/%d', $this->id), [
+        $response = self::getApiClient()->put(sprintf('outcomes/%d', $this->id), [
             'multipart' => $data->toApiArray(),
         ]);
 
@@ -335,7 +335,7 @@ class Outcome extends AbstractBaseApi
             $this->id
         );
 
-        $response = self::$apiClient->delete($endpoint);
+        $response = self::getApiClient()->delete($endpoint);
 
         return $response->getStatusCode() === 200 || $response->getStatusCode() === 204;
     }
@@ -359,7 +359,7 @@ class Outcome extends AbstractBaseApi
 
         $endpoint = sprintf('%s/%d/outcomes/%d/alignments', $contextType, $contextId, $this->id);
 
-        $response = self::$apiClient->get($endpoint, [
+        $response = self::getApiClient()->get($endpoint, [
             'query' => $params,
         ]);
 
@@ -469,7 +469,7 @@ class Outcome extends AbstractBaseApi
         $groupPath = $groupId ? (string) $groupId : 'global';
         $endpoint = sprintf('%s/%d/outcome_groups/%s/import', $contextType, $contextId, $groupPath);
 
-        $response = self::$apiClient->post($endpoint, [
+        $response = self::getApiClient()->post($endpoint, [
             'multipart' => [
                 [
                     'name' => 'source_outcome_id',

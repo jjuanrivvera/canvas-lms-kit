@@ -7,6 +7,7 @@ namespace CanvasLMS\Api\FeatureFlags;
 use CanvasLMS\Config;
 use CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Interfaces\HttpClientInterface;
 
 /**
@@ -105,6 +106,20 @@ class FeatureFlag
      * @var int|null
      */
     public ?int $contextId = null;
+
+    /**
+     * Get the API client, initializing if necessary
+     *
+     * @return HttpClientInterface
+     */
+    protected static function getApiClient(): HttpClientInterface
+    {
+        if (!isset(self::$apiClient)) {
+            self::$apiClient = new HttpClient();
+        }
+
+        return self::$apiClient;
+    }
 
     /**
      * The state of the feature flag (off, allowed, on)
@@ -208,7 +223,7 @@ class FeatureFlag
         self::validateContextType($contextType);
 
         $endpoint = sprintf('%s/%d/features', $contextType, $contextId);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $featuresData = self::parseJsonResponse($response);
 
         $features = [];
@@ -255,7 +270,7 @@ class FeatureFlag
         self::validateContextType($contextType);
 
         $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, $featureName);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
         $featureData = self::parseJsonResponse($response);
 
         $feature = new self();
@@ -308,7 +323,7 @@ class FeatureFlag
         }
 
         $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, $featureName);
-        $response = self::$apiClient->put($endpoint, [
+        $response = self::getApiClient()->put($endpoint, [
             'multipart' => $data->toMultipart(),
         ]);
         $featureData = self::parseJsonResponse($response);
@@ -355,7 +370,7 @@ class FeatureFlag
         $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, $featureName);
 
         try {
-            self::$apiClient->delete($endpoint);
+            self::getApiClient()->delete($endpoint);
 
             return true;
         } catch (CanvasApiException $e) {

@@ -194,6 +194,34 @@ class Enrollment extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
+    }
+
+    /**
      * Check if course context is set and valid
      */
     public static function checkCourse(): bool
@@ -217,8 +245,8 @@ class Enrollment extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/enrollments/%d', self::$course->id, $id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $endpoint = sprintf('courses/%d/enrollments/%d', self::getContextCourseId(), $id);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -243,8 +271,8 @@ class Enrollment extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/enrollments', self::$course->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $endpoint = sprintf('courses/%d/enrollments', self::getContextCourseId());
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         $enrollments = [];
@@ -276,8 +304,8 @@ class Enrollment extends AbstractBaseApi
             $data = new CreateEnrollmentDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/enrollments', self::$course->id);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/enrollments', self::getContextCourseId());
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
@@ -304,8 +332,8 @@ class Enrollment extends AbstractBaseApi
             $data = new UpdateEnrollmentDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/enrollments/%d', self::$course->id, $id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/enrollments/%d', self::getContextCourseId(), $id);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
@@ -323,8 +351,8 @@ class Enrollment extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/enrollments/%d/accept', self::$course->id, $enrollmentId);
-        $response = self::$apiClient->post($endpoint);
+        $endpoint = sprintf('courses/%d/enrollments/%d/accept', self::getContextCourseId(), $enrollmentId);
+        $response = self::getApiClient()->post($endpoint);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -342,8 +370,8 @@ class Enrollment extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/enrollments/%d/reject', self::$course->id, $enrollmentId);
-        $response = self::$apiClient->post($endpoint);
+        $endpoint = sprintf('courses/%d/enrollments/%d/reject', self::getContextCourseId(), $enrollmentId);
+        $response = self::getApiClient()->post($endpoint);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -361,8 +389,8 @@ class Enrollment extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/enrollments/%d/reactivate', self::$course->id, $enrollmentId);
-        $response = self::$apiClient->put($endpoint);
+        $endpoint = sprintf('courses/%d/enrollments/%d/reactivate', self::getContextCourseId(), $enrollmentId);
+        $response = self::getApiClient()->put($endpoint);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -387,7 +415,7 @@ class Enrollment extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('sections/%d/enrollments', $sectionId);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         $enrollments = [];
@@ -417,7 +445,7 @@ class Enrollment extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('users/%d/enrollments', $userId);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         $enrollments = [];
@@ -486,8 +514,8 @@ class Enrollment extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/enrollments/%d', self::$course->id, $this->id);
-        self::$apiClient->delete($endpoint);
+        $endpoint = sprintf('courses/%d/enrollments/%d', self::getContextCourseId(), $this->id);
+        self::getApiClient()->delete($endpoint);
 
         return $this;
     }
@@ -878,7 +906,7 @@ class Enrollment extends AbstractBaseApi
         }
 
         // If the static course context matches this enrollment's course, use it
-        if (isset(self::$course) && self::$course->id === $this->courseId) {
+        if (isset(self::$course) && self::getContextCourseId() === $this->courseId) {
             return self::$course;
         }
 
@@ -1064,6 +1092,6 @@ class Enrollment extends AbstractBaseApi
     {
         self::checkCourse();
 
-        return sprintf('courses/%d/enrollments', self::$course->getId());
+        return sprintf('courses/%d/enrollments', self::getCourse()->getId());
     }
 }

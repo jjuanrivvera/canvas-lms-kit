@@ -96,7 +96,7 @@ class MediaObject extends AbstractBaseApi
      */
     public static function get(array $params = []): array
     {
-        $response = self::$apiClient->get('/media_objects', ['query' => $params]);
+        $response = self::getApiClient()->get('/media_objects', ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
@@ -117,7 +117,7 @@ class MediaObject extends AbstractBaseApi
      */
     public static function fetchAttachments(array $params = []): array
     {
-        $response = self::$apiClient->get('/media_attachments', ['query' => $params]);
+        $response = self::getApiClient()->get('/media_attachments', ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
@@ -139,7 +139,7 @@ class MediaObject extends AbstractBaseApi
      */
     public static function fetchByCourse(int $courseId, array $params = []): array
     {
-        $response = self::$apiClient->get("/courses/{$courseId}/media_objects", ['query' => $params]);
+        $response = self::getApiClient()->get("/courses/{$courseId}/media_objects", ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
@@ -161,7 +161,7 @@ class MediaObject extends AbstractBaseApi
      */
     public static function fetchAttachmentsByCourse(int $courseId, array $params = []): array
     {
-        $response = self::$apiClient->get("/courses/{$courseId}/media_attachments", ['query' => $params]);
+        $response = self::getApiClient()->get("/courses/{$courseId}/media_attachments", ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
@@ -183,7 +183,7 @@ class MediaObject extends AbstractBaseApi
      */
     public static function fetchByGroup(int $groupId, array $params = []): array
     {
-        $response = self::$apiClient->get("/groups/{$groupId}/media_objects", ['query' => $params]);
+        $response = self::getApiClient()->get("/groups/{$groupId}/media_objects", ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
@@ -205,7 +205,7 @@ class MediaObject extends AbstractBaseApi
      */
     public static function fetchAttachmentsByGroup(int $groupId, array $params = []): array
     {
-        $response = self::$apiClient->get("/groups/{$groupId}/media_attachments", ['query' => $params]);
+        $response = self::getApiClient()->get("/groups/{$groupId}/media_attachments", ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         if (isset($data['media_objects'])) {
@@ -249,7 +249,7 @@ class MediaObject extends AbstractBaseApi
             $data = UpdateMediaObjectDTO::fromArray($data);
         }
 
-        $response = self::$apiClient->put(
+        $response = self::getApiClient()->put(
             "/media_objects/{$this->mediaId}",
             ['json' => $data->toArray()]
         );
@@ -283,7 +283,7 @@ class MediaObject extends AbstractBaseApi
             $data = UpdateMediaObjectDTO::fromArray($data);
         }
 
-        $response = self::$apiClient->put(
+        $response = self::getApiClient()->put(
             "/media_attachments/{$attachmentId}",
             ['json' => $data->toArray()]
         );
@@ -316,7 +316,7 @@ class MediaObject extends AbstractBaseApi
             throw new CanvasApiException('Media object ID is required to get tracks');
         }
 
-        $response = self::$apiClient->get(
+        $response = self::getApiClient()->get(
             "/media_objects/{$this->mediaId}/media_tracks",
             ['query' => $params]
         );
@@ -338,7 +338,7 @@ class MediaObject extends AbstractBaseApi
      */
     public function getTracksByAttachment(int $attachmentId, array $params = []): array
     {
-        $response = self::$apiClient->get(
+        $response = self::getApiClient()->get(
             "/media_attachments/{$attachmentId}/media_tracks",
             ['query' => $params]
         );
@@ -369,7 +369,7 @@ class MediaObject extends AbstractBaseApi
             $tracks = new UpdateMediaTracksDTO($tracks);
         }
 
-        $response = self::$apiClient->put(
+        $response = self::getApiClient()->put(
             "/media_objects/{$this->mediaId}/media_tracks",
             [
                 'json' => $tracks->toArray(),
@@ -406,7 +406,7 @@ class MediaObject extends AbstractBaseApi
             $tracks = new UpdateMediaTracksDTO($tracks);
         }
 
-        $response = self::$apiClient->put(
+        $response = self::getApiClient()->put(
             "/media_attachments/{$attachmentId}/media_tracks",
             [
                 'json' => $tracks->toArray(),

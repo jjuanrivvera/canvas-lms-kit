@@ -5,15 +5,19 @@ declare(strict_types=1);
 namespace CanvasLMS\Api\Accounts;
 
 use CanvasLMS\Api\AbstractBaseApi;
+use CanvasLMS\Api\BrandConfigs\BrandConfig;
 use CanvasLMS\Api\CalendarEvents\CalendarEvent;
 use CanvasLMS\Api\Courses\Course;
 use CanvasLMS\Api\Rubrics\Rubric;
 use CanvasLMS\Api\Rubrics\RubricAssociation;
+use CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig;
 use CanvasLMS\Config;
 use CanvasLMS\Dto\Accounts\CreateAccountDTO;
 use CanvasLMS\Dto\Accounts\UpdateAccountDTO;
 use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
 use CanvasLMS\Dto\Rubrics\CreateRubricDTO;
+use CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDTO;
+use CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 
 /**
@@ -200,7 +204,7 @@ class Account extends AbstractBaseApi
         }
 
         $endpoint = sprintf('accounts/%d/sub_accounts', $parentId);
-        $response = self::$apiClient->post($endpoint, [
+        $response = self::getApiClient()->post($endpoint, [
             'multipart' => $data->toApiArray(),
         ]);
 
@@ -224,7 +228,7 @@ class Account extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('accounts/%s', $id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
@@ -254,7 +258,7 @@ class Account extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = 'manageable_accounts';
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
@@ -276,7 +280,7 @@ class Account extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = 'course_creation_accounts';
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
@@ -302,7 +306,7 @@ class Account extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('accounts/%d/sub_accounts', $accountId);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
@@ -324,7 +328,7 @@ class Account extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = 'course_accounts';
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
@@ -368,7 +372,7 @@ class Account extends AbstractBaseApi
         }
 
         $endpoint = sprintf('accounts/%d', $id);
-        $response = self::$apiClient->put($endpoint, [
+        $response = self::getApiClient()->put($endpoint, [
             'multipart' => $data->toApiArray(),
         ]);
 
@@ -421,7 +425,7 @@ class Account extends AbstractBaseApi
         }
 
         $endpoint = sprintf('accounts/%d/sub_accounts/%d', $this->parentAccountId, $this->id);
-        $response = self::$apiClient->delete($endpoint);
+        $response = self::getApiClient()->delete($endpoint);
 
         self::parseJsonResponse($response);
 
@@ -444,7 +448,7 @@ class Account extends AbstractBaseApi
         }
 
         $endpoint = sprintf('accounts/%d/sub_accounts', $this->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
@@ -492,7 +496,7 @@ class Account extends AbstractBaseApi
         }
 
         $endpoint = sprintf('accounts/%d/settings', $this->id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
 
         return self::parseJsonResponse($response);
     }
@@ -515,7 +519,7 @@ class Account extends AbstractBaseApi
         $dto = new UpdateAccountDTO(['settings' => $settings]);
         $endpoint = sprintf('accounts/%d', $this->id);
 
-        $response = self::$apiClient->put($endpoint, [
+        $response = self::getApiClient()->put($endpoint, [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -549,7 +553,7 @@ class Account extends AbstractBaseApi
             $params['permissions'] = $permissions;
         }
 
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
 
         return self::parseJsonResponse($response);
     }
@@ -570,7 +574,7 @@ class Account extends AbstractBaseApi
         $endpoint = sprintf('accounts/%d/terms_of_service', $this->id);
 
         try {
-            $response = self::$apiClient->get($endpoint);
+            $response = self::getApiClient()->get($endpoint);
 
             return self::parseJsonResponse($response);
         } catch (CanvasApiException $e) {
@@ -598,7 +602,7 @@ class Account extends AbstractBaseApi
         $endpoint = sprintf('accounts/%d/help_links', $this->id);
 
         try {
-            $response = self::$apiClient->get($endpoint);
+            $response = self::getApiClient()->get($endpoint);
 
             return self::parseJsonResponse($response);
         } catch (CanvasApiException $e) {
@@ -626,7 +630,7 @@ class Account extends AbstractBaseApi
         }
 
         $endpoint = sprintf('accounts/%d/courses', $this->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseData = self::parseJsonResponse($response);
 
         // Convert to Course objects
@@ -764,7 +768,7 @@ class Account extends AbstractBaseApi
         }
 
         $endpoint = sprintf('accounts/%d/rubrics', $this->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($rubricData) {
@@ -794,7 +798,7 @@ class Account extends AbstractBaseApi
         }
 
         $endpoint = sprintf('accounts/%d/rubrics', $this->id);
-        $response = self::$apiClient->post($endpoint, $data->toApiArray());
+        $response = self::getApiClient()->post($endpoint, $data->toApiArray());
         $responseData = self::parseJsonResponse($response);
 
         // Handle non-standard response format
@@ -830,7 +834,7 @@ class Account extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('accounts/%d/rubrics/%d', $this->id, $rubricId);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return new Rubric($data);
@@ -855,7 +859,7 @@ class Account extends AbstractBaseApi
      */
     public function getBrandVariables(): array
     {
-        return \CanvasLMS\Api\BrandConfigs\BrandConfig::getBrandVariables();
+        return BrandConfig::getBrandVariables();
     }
 
     /**
@@ -864,11 +868,11 @@ class Account extends AbstractBaseApi
      * Creates a new shared brand configuration that can be reused across
      * multiple accounts. The config is associated with this account.
      *
-     * @param array<string, mixed>|\CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDTO $data Config data
+     * @param array<string, mixed>|CreateSharedBrandConfigDTO $data Config data
      *
      * @throws CanvasApiException If the API request fails
      *
-     * @return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig The created shared brand config
+     * @return SharedBrandConfig The created shared brand config
      *
      * @example
      * ```php
@@ -880,8 +884,8 @@ class Account extends AbstractBaseApi
      * ```
      */
     public function createSharedBrandConfig(
-        array|\CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDTO $data
-    ): \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig {
+        array|CreateSharedBrandConfigDTO $data
+    ): SharedBrandConfig {
         if (!$this->id) {
             throw new CanvasApiException('Account ID is required to create shared brand config');
         }
@@ -891,7 +895,7 @@ class Account extends AbstractBaseApi
         Config::setAccountId($this->id);
 
         try {
-            return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig::create($data);
+            return SharedBrandConfig::create($data);
         } finally {
             // Restore original account ID
             Config::setAccountId($originalAccountId);
@@ -904,11 +908,11 @@ class Account extends AbstractBaseApi
      * Updates an existing shared brand configuration associated with this account.
      *
      * @param int $id The ID of the shared brand config to update
-     * @param array<string, mixed>|\CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDTO $data The update data
+     * @param array<string, mixed>|UpdateSharedBrandConfigDTO $data The update data
      *
      * @throws CanvasApiException If the API request fails
      *
-     * @return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig The updated shared brand config
+     * @return SharedBrandConfig The updated shared brand config
      *
      * @example
      * ```php
@@ -920,8 +924,8 @@ class Account extends AbstractBaseApi
      */
     public function updateSharedBrandConfig(
         int $id,
-        array|\CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDTO $data
-    ): \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig {
+        array|UpdateSharedBrandConfigDTO $data
+    ): SharedBrandConfig {
         if (!$this->id) {
             throw new CanvasApiException('Account ID is required to update shared brand config');
         }
@@ -931,7 +935,7 @@ class Account extends AbstractBaseApi
         Config::setAccountId($this->id);
 
         try {
-            return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig::update($id, $data);
+            return SharedBrandConfig::update($id, $data);
         } finally {
             // Restore original account ID
             Config::setAccountId($originalAccountId);
@@ -948,7 +952,7 @@ class Account extends AbstractBaseApi
      *
      * @throws CanvasApiException If the API request fails
      *
-     * @return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig The deleted shared brand config
+     * @return SharedBrandConfig The deleted shared brand config
      *
      * @example
      * ```php
@@ -956,9 +960,9 @@ class Account extends AbstractBaseApi
      * $deleted = $account->deleteSharedBrandConfig(987);
      * ```
      */
-    public function deleteSharedBrandConfig(int $id): \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig
+    public function deleteSharedBrandConfig(int $id): SharedBrandConfig
     {
         // Note: DELETE endpoint doesn't use account ID in path
-        return \CanvasLMS\Api\SharedBrandConfigs\SharedBrandConfig::delete($id);
+        return SharedBrandConfig::delete($id);
     }
 }

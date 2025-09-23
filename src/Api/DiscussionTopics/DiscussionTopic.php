@@ -367,6 +367,34 @@ class DiscussionTopic extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
+    }
+
+    /**
      * Get discussion topic ID
      *
      * @return int|null
@@ -1520,8 +1548,8 @@ class DiscussionTopic extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/discussion_topics/%d', self::$course->id, $id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $endpoint = sprintf('courses/%d/discussion_topics/%d', self::getContextCourseId(), $id);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $discussionData = self::parseJsonResponse($response);
 
         return new self($discussionData);
@@ -1541,8 +1569,8 @@ class DiscussionTopic extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $endpoint = sprintf('courses/%d/discussion_topics', self::getContextCourseId());
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $discussionTopicsData = self::parseJsonResponse($response);
 
         $discussionTopics = [];
@@ -1567,7 +1595,7 @@ class DiscussionTopic extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
+        $endpoint = sprintf('courses/%d/discussion_topics', self::getContextCourseId());
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
 
         return self::createPaginationResult($paginatedResponse);
@@ -1591,8 +1619,8 @@ class DiscussionTopic extends AbstractBaseApi
             $data = new CreateDiscussionTopicDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/discussion_topics', self::$course->id);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/discussion_topics', self::getContextCourseId());
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $discussionData = self::parseJsonResponse($response);
 
         return new self($discussionData);
@@ -1617,8 +1645,8 @@ class DiscussionTopic extends AbstractBaseApi
             $data = new UpdateDiscussionTopicDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/discussion_topics/%d', self::$course->id, $id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/discussion_topics/%d', self::getContextCourseId(), $id);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $discussionData = self::parseJsonResponse($response);
 
         return new self($discussionData);
@@ -1699,8 +1727,8 @@ class DiscussionTopic extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/discussion_topics/%d', self::$course->id, $this->id);
-        self::$apiClient->delete($endpoint);
+        $endpoint = sprintf('courses/%d/discussion_topics/%d', self::getContextCourseId(), $this->id);
+        self::getApiClient()->delete($endpoint);
 
         return $this;
     }
@@ -1814,8 +1842,8 @@ class DiscussionTopic extends AbstractBaseApi
             self::checkCourse();
             self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/discussion_topics/%d/read', self::$course->id, $this->id);
-            self::$apiClient->put($endpoint);
+            $endpoint = sprintf('courses/%d/discussion_topics/%d/read', self::getContextCourseId(), $this->id);
+            self::getApiClient()->put($endpoint);
 
             $this->readState = 'read';
             $this->unreadCount = 0;
@@ -1843,8 +1871,8 @@ class DiscussionTopic extends AbstractBaseApi
             self::checkCourse();
             self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/discussion_topics/%d/read', self::$course->id, $this->id);
-            self::$apiClient->delete($endpoint);
+            $endpoint = sprintf('courses/%d/discussion_topics/%d/read', self::getContextCourseId(), $this->id);
+            self::getApiClient()->delete($endpoint);
 
             $this->readState = 'unread';
 
@@ -1871,8 +1899,8 @@ class DiscussionTopic extends AbstractBaseApi
             self::checkCourse();
             self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/discussion_topics/%d/subscribed', self::$course->id, $this->id);
-            self::$apiClient->put($endpoint);
+            $endpoint = sprintf('courses/%d/discussion_topics/%d/subscribed', self::getContextCourseId(), $this->id);
+            self::getApiClient()->put($endpoint);
 
             $this->subscribed = true;
 
@@ -1899,8 +1927,8 @@ class DiscussionTopic extends AbstractBaseApi
             self::checkCourse();
             self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/discussion_topics/%d/subscribed', self::$course->id, $this->id);
-            self::$apiClient->delete($endpoint);
+            $endpoint = sprintf('courses/%d/discussion_topics/%d/subscribed', self::getContextCourseId(), $this->id);
+            self::getApiClient()->delete($endpoint);
 
             $this->subscribed = false;
 
@@ -1923,8 +1951,8 @@ class DiscussionTopic extends AbstractBaseApi
             self::checkCourse();
             self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/discussion_topics/read_all', self::$course->id);
-            self::$apiClient->put($endpoint);
+            $endpoint = sprintf('courses/%d/discussion_topics/read_all', self::getContextCourseId());
+            self::getApiClient()->put($endpoint);
 
             return true;
         } catch (CanvasApiException) {
@@ -1945,8 +1973,8 @@ class DiscussionTopic extends AbstractBaseApi
             self::checkCourse();
             self::checkApiClient();
 
-            $endpoint = sprintf('courses/%d/discussion_topics/read_all', self::$course->id);
-            self::$apiClient->delete($endpoint);
+            $endpoint = sprintf('courses/%d/discussion_topics/read_all', self::getContextCourseId());
+            self::getApiClient()->delete($endpoint);
 
             return true;
         } catch (CanvasApiException) {
@@ -2052,6 +2080,6 @@ class DiscussionTopic extends AbstractBaseApi
     {
         self::checkCourse();
 
-        return sprintf('courses/%d/discussion_topics', self::$course->getId());
+        return sprintf('courses/%d/discussion_topics', self::getCourse()->getId());
     }
 }

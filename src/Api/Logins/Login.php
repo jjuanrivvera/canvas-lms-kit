@@ -80,7 +80,7 @@ class Login extends AbstractBaseApi
     {
         self::checkApiClient();
         $endpoint = self::getEndpoint();
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return array_map(fn (array $item) => new self($item), $data);
@@ -126,7 +126,7 @@ class Login extends AbstractBaseApi
         }
 
         $endpoint = sprintf('accounts/%d/logins', $accountId);
-        $response = self::$apiClient->post($endpoint, [
+        $response = self::getApiClient()->post($endpoint, [
             'multipart' => $data->toApiArray(),
         ]);
         $responseData = self::parseJsonResponse($response);
@@ -177,7 +177,7 @@ class Login extends AbstractBaseApi
         }
 
         $endpoint = sprintf('accounts/%d/logins/%d', $this->accountId, $this->id);
-        $response = self::$apiClient->put($endpoint, [
+        $response = self::getApiClient()->put($endpoint, [
             'multipart' => $data->toApiArray(),
         ]);
         $responseData = self::parseJsonResponse($response);
@@ -210,7 +210,7 @@ class Login extends AbstractBaseApi
         }
 
         $endpoint = sprintf('users/%d/logins/%d', $this->userId, $this->id);
-        $response = self::$apiClient->delete($endpoint);
+        $response = self::getApiClient()->delete($endpoint);
 
         return self::parseJsonResponse($response);
     }
@@ -234,7 +234,7 @@ class Login extends AbstractBaseApi
             $data = $email;
         }
 
-        $response = self::$apiClient->post('users/reset_password', [
+        $response = self::getApiClient()->post('users/reset_password', [
             'multipart' => $data->toApiArray(),
         ]);
 
@@ -254,7 +254,7 @@ class Login extends AbstractBaseApi
     {
         self::checkApiClient();
         $endpoint = sprintf('%s/%d/logins', $contextType, $contextId);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return array_map(fn (array $item) => new self($item), $data);
