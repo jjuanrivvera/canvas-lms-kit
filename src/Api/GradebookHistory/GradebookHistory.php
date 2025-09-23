@@ -343,8 +343,8 @@ class GradebookHistory extends AbstractBaseApi
                 if (preg_match('/<([^>]+)>;\s*rel="next"/', $links, $matches)) {
                     // Extract just the path from the full URL
                     $parsedUrl = parse_url($matches[1]);
-                    $nextUrl = $parsedUrl['path'] ?? null;
-                    if ($nextUrl && isset($parsedUrl['query'])) {
+                    $nextUrl = is_array($parsedUrl) && isset($parsedUrl['path']) ? $parsedUrl['path'] : null;
+                    if ($nextUrl && is_array($parsedUrl) && isset($parsedUrl['query'])) {
                         $queryParams = [];
                         parse_str($parsedUrl['query'], $queryParams);
                         $nextParams = ['query' => $queryParams];

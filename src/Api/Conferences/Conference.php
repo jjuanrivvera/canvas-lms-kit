@@ -93,7 +93,7 @@ class Conference extends AbstractBaseApi
 
         // Handle DateTime conversion for specific fields
         foreach ($dateData as $key => $value) {
-            if (!empty($value)) {
+            if (!empty($value) && is_string($value)) {
                 $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
                 $this->{$camelKey} = new DateTime($value);
             }
@@ -316,8 +316,10 @@ class Conference extends AbstractBaseApi
 
             // Handle DateTime conversion for specific fields
             foreach ($dateData as $key => $value) {
-                $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
-                $this->{$camelKey} = new DateTime($value);
+                if (is_string($value)) {
+                    $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
+                    $this->{$camelKey} = new DateTime($value);
+                }
             }
 
             $this->processRecordings($responseData);

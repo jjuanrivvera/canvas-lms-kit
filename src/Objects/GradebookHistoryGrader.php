@@ -27,7 +27,7 @@ class GradebookHistoryGrader
     public function __construct(array $data = [])
     {
         $this->id = isset($data['id']) ? (int) $data['id'] : null;
-        $this->name = $data['name'] ?? null;
+        $this->name = $data['name'];
         $this->assignments = isset($data['assignments']) && is_array($data['assignments'])
             ? array_map('intval', $data['assignments'])
             : [];

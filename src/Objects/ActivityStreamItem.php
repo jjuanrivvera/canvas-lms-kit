@@ -104,7 +104,9 @@ abstract class ActivityStreamItem
             'Conference' => new ConferenceItem($data),
             'Collaboration' => new CollaborationItem($data),
             'AssessmentRequest' => new AssessmentRequestItem($data),
-            default => throw new \InvalidArgumentException("Unknown activity stream item type: {$type}")
+            default => throw new \InvalidArgumentException(
+                'Unknown activity stream item type: ' . (is_scalar($type) ? $type : 'unknown')
+            )
         };
     }
 

@@ -286,12 +286,14 @@ class ContentMigration extends AbstractBaseApi
         $migration = new self($migrationData);
 
         // If there's a pre_attachment error, it will be in the response
+        $preAttachment = $migrationData['pre_attachment'];
         if (
-            isset($migrationData['pre_attachment']['message']) &&
-            !isset($migrationData['pre_attachment']['upload_url'])
+            is_array($preAttachment) &&
+            isset($preAttachment['message']) &&
+            !isset($preAttachment['upload_url'])
         ) {
             throw new CanvasApiException(
-                'File upload initialization failed: ' . $migrationData['pre_attachment']['message']
+                'File upload initialization failed: ' . $preAttachment['message']
             );
         }
 
@@ -361,7 +363,7 @@ class ContentMigration extends AbstractBaseApi
 
         // Extract progress ID from URL
         if (preg_match('/progress\/(\d+)/', $this->progressUrl, $matches)) {
-            $progressId = (int) $matches[1];
+            $progressId = (int) ($matches[1] ?? 0);
 
             return Progress::find($progressId);
         }

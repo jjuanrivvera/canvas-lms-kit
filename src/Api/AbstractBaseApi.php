@@ -36,7 +36,7 @@ abstract class AbstractBaseApi implements ApiInterface
     /**
      * Define method aliases
      *
-     * @var mixed[]
+     * @var array<string, string[]>
      */
     protected static array $methodAliases = [
         'get' => ['fetch', 'list', 'fetchAll'],
@@ -65,13 +65,13 @@ abstract class AbstractBaseApi implements ApiInterface
                     if ($type instanceof \ReflectionNamedType && $type->isBuiltin()) {
                         switch ($type->getName()) {
                             case 'int':
-                                $value = (int) $value;
+                                $value = is_numeric($value) ? (int) $value : null;
                                 break;
                             case 'float':
-                                $value = (float) $value;
+                                $value = is_numeric($value) ? (float) $value : null;
                                 break;
                             case 'string':
-                                $value = (string) $value;
+                                $value = is_scalar($value) ? (string) $value : null;
                                 break;
                             case 'bool':
                                 $value = (bool) $value;
@@ -379,7 +379,7 @@ abstract class AbstractBaseApi implements ApiInterface
     public static function __callStatic($name, $arguments)
     {
         foreach (static::$methodAliases as $method => $aliases) {
-            if (in_array($name, $aliases, true)) {
+            if (is_array($aliases) && in_array($name, $aliases, true)) {
                 return static::$method(...$arguments);
             }
         }
