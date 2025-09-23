@@ -953,8 +953,8 @@ class Module extends AbstractBaseApi
             // Check if item is completed based on completion_requirement
             if (
                 isset($item->completionRequirement) &&
-                isset($item->completionRequirement['completed']) &&
-                $item->completionRequirement['completed'] === true
+                $item->completionRequirement instanceof \CanvasLMS\Objects\CompletionRequirement &&
+                $item->completionRequirement->completed === true
             ) {
                 $completedCount++;
             }
