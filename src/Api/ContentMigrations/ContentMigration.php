@@ -363,7 +363,7 @@ class ContentMigration extends AbstractBaseApi
 
         // Extract progress ID from URL
         if (preg_match('/progress\/(\d+)/', $this->progressUrl, $matches)) {
-            $progressId = (int) ($matches[1] ?? 0);
+            $progressId = (int) $matches[1];
 
             return Progress::find($progressId);
         }
