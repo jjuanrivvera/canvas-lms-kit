@@ -588,6 +588,34 @@ class Assignment extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
+    }
+
+    /**
      * Get assignment ID
      *
      * @return int|null
@@ -1323,8 +1351,8 @@ class Assignment extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/assignments/%d', self::$course->id, $id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $endpoint = sprintf('courses/%d/assignments/%d', self::getContextCourseId(), $id);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $assignmentData = self::parseJsonResponse($response);
 
         return new self($assignmentData);
@@ -1348,8 +1376,8 @@ class Assignment extends AbstractBaseApi
             $data = new CreateAssignmentDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/assignments', self::$course->id);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/assignments', self::getContextCourseId());
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $assignmentData = self::parseJsonResponse($response);
 
         return new self($assignmentData);
@@ -1374,8 +1402,8 @@ class Assignment extends AbstractBaseApi
             $data = new UpdateAssignmentDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/assignments/%d', self::$course->id, $id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/assignments/%d', self::getContextCourseId(), $id);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $assignmentData = self::parseJsonResponse($response);
 
         return new self($assignmentData);
@@ -1470,8 +1498,8 @@ class Assignment extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/assignments/%d', self::$course->id, $this->id);
-        self::$apiClient->delete($endpoint);
+        $endpoint = sprintf('courses/%d/assignments/%d', self::getContextCourseId(), $this->id);
+        self::getApiClient()->delete($endpoint);
 
         return $this;
     }
@@ -1491,8 +1519,8 @@ class Assignment extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/assignments/%d/duplicate', self::$course->id, $id);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $options]);
+        $endpoint = sprintf('courses/%d/assignments/%d/duplicate', self::getContextCourseId(), $id);
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $options]);
         $assignmentData = self::parseJsonResponse($response);
 
         return new self($assignmentData);
@@ -1517,7 +1545,7 @@ class Assignment extends AbstractBaseApi
 
         self::checkCourse();
 
-        Submission::setCourse(self::$course);
+        Submission::setCourse(self::getCourse());
         Submission::setAssignment($this);
 
         return Submission::all($params);
@@ -1542,8 +1570,13 @@ class Assignment extends AbstractBaseApi
         self::checkApiClient();
 
         try {
-            $endpoint = sprintf('courses/%d/assignments/%d/submissions/%d', self::$course->id, $this->id, $userId);
-            $response = self::$apiClient->get($endpoint);
+            $endpoint = sprintf(
+                'courses/%d/assignments/%d/submissions/%d',
+                self::getContextCourseId(),
+                $this->id,
+                $userId
+            );
+            $response = self::getApiClient()->get($endpoint);
             $submissionData = self::parseJsonResponse($response);
 
             return new Submission($submissionData);
@@ -1617,8 +1650,8 @@ class Assignment extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/assignments/%d/overrides', self::$course->id, $this->id);
-        $response = self::$apiClient->get($endpoint);
+        $endpoint = sprintf('courses/%d/assignments/%d/overrides', self::getContextCourseId(), $this->id);
+        $response = self::getApiClient()->get($endpoint);
         $overridesData = self::parseJsonResponse($response);
 
         // Return raw override data for now, could create Override objects in future
@@ -1643,8 +1676,8 @@ class Assignment extends AbstractBaseApi
 
         try {
             // Get rubric associations for this assignment
-            $endpoint = sprintf('courses/%d/rubric_associations', self::$course->id);
-            $response = self::$apiClient->get($endpoint, [
+            $endpoint = sprintf('courses/%d/rubric_associations', self::getContextCourseId());
+            $response = self::getApiClient()->get($endpoint, [
                 'query' => [
                     'include' => ['association_object'],
                     'association_type' => 'Assignment',
@@ -1680,6 +1713,6 @@ class Assignment extends AbstractBaseApi
     {
         self::checkCourse();
 
-        return sprintf('courses/%d/assignments', self::$course->getId());
+        return sprintf('courses/%d/assignments', self::getCourse()->getId());
     }
 }

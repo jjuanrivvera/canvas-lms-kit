@@ -123,6 +123,34 @@ class Tab extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
+    }
+
+    /**
      * Get HTML URL
      *
      * @return string|null
@@ -315,7 +343,7 @@ class Tab extends AbstractBaseApi
             throw new CanvasApiException('Tab ID cannot be empty');
         }
 
-        $endpoint = sprintf('courses/%d/tabs/%s', self::$course->id, $id);
+        $endpoint = sprintf('courses/%d/tabs/%s', self::getContextCourseId(), $id);
 
         if ($data instanceof UpdateTabDTO) {
             $data = $data->toApiArray();
@@ -329,7 +357,7 @@ class Tab extends AbstractBaseApi
             }
         }
 
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data]);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data]);
         $tabData = self::parseJsonResponse($response);
 
         return new self($tabData);
@@ -421,6 +449,6 @@ class Tab extends AbstractBaseApi
     {
         self::checkCourse();
 
-        return sprintf('courses/%d/tabs', self::$course->getId());
+        return sprintf('courses/%d/tabs', self::getCourse()->getId());
     }
 }

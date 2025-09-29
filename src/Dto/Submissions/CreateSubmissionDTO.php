@@ -121,10 +121,10 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
     {
         if ($body !== null) {
             // Basic HTML sanitization - remove script tags and dangerous attributes
-            $body = preg_replace('/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/mi', '', $body);
-            $body = preg_replace('/on\w+\s*=\s*["\'][^"\']*["\']/i', '', $body);
-            $body = preg_replace('/javascript:/i', '', $body);
-            $body = preg_replace('/vbscript:/i', '', $body);
+            $body = preg_replace('/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/mi', '', $body) ?? '';
+            $body = preg_replace('/on\w+\s*=\s*["\'][^"\']*["\']/i', '', $body) ?? '';
+            $body = preg_replace('/javascript:/i', '', $body) ?? '';
+            $body = preg_replace('/vbscript:/i', '', $body) ?? '';
 
             // Trim whitespace
             $body = trim($body);

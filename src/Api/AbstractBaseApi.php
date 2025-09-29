@@ -36,7 +36,7 @@ abstract class AbstractBaseApi implements ApiInterface
     /**
      * Define method aliases
      *
-     * @var mixed[]
+     * @var array<string, string[]>
      */
     protected static array $methodAliases = [
         'get' => ['fetch', 'list', 'fetchAll'],
@@ -65,13 +65,13 @@ abstract class AbstractBaseApi implements ApiInterface
                     if ($type instanceof \ReflectionNamedType && $type->isBuiltin()) {
                         switch ($type->getName()) {
                             case 'int':
-                                $value = (int) $value;
+                                $value = is_numeric($value) ? (int) $value : null;
                                 break;
                             case 'float':
-                                $value = (float) $value;
+                                $value = is_numeric($value) ? (float) $value : null;
                                 break;
                             case 'string':
-                                $value = (string) $value;
+                                $value = is_scalar($value) ? (string) $value : null;
                                 break;
                             case 'bool':
                                 $value = (bool) $value;
@@ -107,6 +107,20 @@ abstract class AbstractBaseApi implements ApiInterface
         if (!isset(self::$apiClient)) {
             self::$apiClient = self::createConfiguredHttpClient();
         }
+    }
+
+    /**
+     * Get the API client, initializing if necessary
+     *
+     * @return HttpClientInterface
+     */
+    protected static function getApiClient(): HttpClientInterface
+    {
+        if (self::$apiClient === null) {
+            self::$apiClient = self::createConfiguredHttpClient();
+        }
+
+        return self::$apiClient;
     }
 
     /**
@@ -233,7 +247,7 @@ abstract class AbstractBaseApi implements ApiInterface
     {
         self::checkApiClient();
 
-        return self::$apiClient->getPaginated($endpoint, [
+        return self::getApiClient()->getPaginated($endpoint, [
             'query' => $params,
         ]);
     }
@@ -294,7 +308,7 @@ abstract class AbstractBaseApi implements ApiInterface
     {
         static::checkApiClient();
         $endpoint = static::getEndpoint();
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
 
         $data = self::parseJsonResponse($response);
 
@@ -365,7 +379,7 @@ abstract class AbstractBaseApi implements ApiInterface
     public static function __callStatic($name, $arguments)
     {
         foreach (static::$methodAliases as $method => $aliases) {
-            if (in_array($name, $aliases, true)) {
+            if (is_array($aliases) && in_array($name, $aliases, true)) {
                 return static::$method(...$arguments);
             }
         }

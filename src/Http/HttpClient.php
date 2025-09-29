@@ -384,7 +384,7 @@ class HttpClient implements HttpClientInterface
         if (!$isOAuthEndpoint) {
             $fullUrl = $baseUrl .
                 'api/' .
-                rtrim(Config::getApiVersion(), '/') .
+                rtrim(Config::getApiVersion() ?? '', '/') .
                 '/' .
                 ltrim($url, '/');
             $url = $fullUrl;

@@ -119,7 +119,7 @@ class OutcomeImport extends AbstractBaseApi
                 ],
             ];
 
-            $response = self::$apiClient->post($endpoint, [
+            $response = self::getApiClient()->post($endpoint, [
                 'multipart' => $multipart,
             ]);
 
@@ -184,7 +184,7 @@ class OutcomeImport extends AbstractBaseApi
 
         $queryParams = ['import_type' => $importType];
 
-        $response = self::$apiClient->post($endpoint, [
+        $response = self::getApiClient()->post($endpoint, [
             'query' => $queryParams,
             'headers' => [
                 'Content-Type' => 'text/csv',
@@ -215,7 +215,7 @@ class OutcomeImport extends AbstractBaseApi
     ): self {
         $endpoint = sprintf('%s/%d/outcome_imports/%s', $contextType, $contextId, $importId);
 
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
         $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);

@@ -10,6 +10,7 @@ use CanvasLMS\Dto\CalendarEvents\CreateCalendarEventDTO;
 use CanvasLMS\Dto\CalendarEvents\CreateReservationDTO;
 use CanvasLMS\Dto\CalendarEvents\UpdateCalendarEventDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Pagination\PaginationResult;
 use DateTime;
 
 /**
@@ -425,7 +426,7 @@ class CalendarEvent extends AbstractBaseApi
         }
 
         self::checkApiClient();
-        $response = self::$apiClient->post('calendar_events', ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->post('calendar_events', ['multipart' => $data->toApiArray()]);
         $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
@@ -445,7 +446,7 @@ class CalendarEvent extends AbstractBaseApi
     {
         self::checkApiClient();
         $endpoint = sprintf('calendar_events/%d', $id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -492,7 +493,7 @@ class CalendarEvent extends AbstractBaseApi
             }
         }
 
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data]);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data]);
         $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
@@ -521,7 +522,7 @@ class CalendarEvent extends AbstractBaseApi
             $queryParams['query'] = $params;
         }
 
-        self::$apiClient->delete($endpoint, $queryParams);
+        self::getApiClient()->delete($endpoint, $queryParams);
 
         return $this;
     }
@@ -548,7 +549,7 @@ class CalendarEvent extends AbstractBaseApi
             $params['context_codes'] = [sprintf('account_%d', $accountId)];
         }
 
-        $response = self::$apiClient->get('calendar_events', ['query' => $params]);
+        $response = self::getApiClient()->get('calendar_events', ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
@@ -574,7 +575,7 @@ class CalendarEvent extends AbstractBaseApi
         $params['context_codes'] = [$contextCode];
 
         self::checkApiClient();
-        $response = self::$apiClient->get('calendar_events', ['query' => $params]);
+        $response = self::getApiClient()->get('calendar_events', ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
@@ -698,7 +699,7 @@ class CalendarEvent extends AbstractBaseApi
             ? sprintf('calendar_events/%d/reservations/%d', $eventId, $participantId)
             : sprintf('calendar_events/%d/reservations', $eventId);
 
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $responseData = self::parseJsonResponse($response);
 
         return new self($responseData);
@@ -733,7 +734,10 @@ class CalendarEvent extends AbstractBaseApi
             ];
         }
 
-        $response = self::$apiClient->post('calendar_events/save_enabled_account_calendars', ['multipart' => $data]);
+        $response = self::getApiClient()->post(
+            'calendar_events/save_enabled_account_calendars',
+            ['multipart' => $data]
+        );
 
         return self::parseJsonResponse($response);
     }
@@ -756,7 +760,7 @@ class CalendarEvent extends AbstractBaseApi
             $params['appointment_group_ids'] = $appointmentGroupIds;
         }
 
-        $response = self::$apiClient->get('appointment_groups/next_appointment', ['query' => $params]);
+        $response = self::getApiClient()->get('appointment_groups/next_appointment', ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         if (empty($data)) {
@@ -853,7 +857,7 @@ class CalendarEvent extends AbstractBaseApi
                 return new DateTime($value);
             } catch (\Exception $e) {
                 // Log the parsing error for debugging
-                $logger = \CanvasLMS\Config::getLogger();
+                $logger = Config::getLogger();
                 $logger->warning(
                     'CalendarEvent: Failed to parse DateTime for field "{field}" with value "{value}": {error}',
                     [
@@ -890,9 +894,9 @@ class CalendarEvent extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return \CanvasLMS\Pagination\PaginationResult
+     * @return PaginationResult
      */
-    public static function paginate(array $params = []): \CanvasLMS\Pagination\PaginationResult
+    public static function paginate(array $params = []): PaginationResult
     {
         self::checkApiClient();
 

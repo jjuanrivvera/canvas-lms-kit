@@ -44,7 +44,7 @@ class ConferenceRecording
             $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
 
             if (property_exists($this, $camelKey)) {
-                if (in_array($key, ['created_at', 'updated_at'], true) && !empty($value)) {
+                if (in_array($key, ['created_at', 'updated_at'], true) && !empty($value) && is_string($value)) {
                     $this->$camelKey = new DateTime($value);
                 } else {
                     $this->$camelKey = $value;

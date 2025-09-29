@@ -226,6 +226,34 @@ class Page extends AbstractBaseApi
     }
 
     /**
+     * Get the Course instance, ensuring it is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return Course
+     */
+    protected static function getCourse(): Course
+    {
+        if (self::$course === null) {
+            throw new CanvasApiException('Course context not set. Call ' . static::class . '::setCourse() first.');
+        }
+
+        return self::$course;
+    }
+
+    /**
+     * Get the Course ID from context, ensuring course is set
+     *
+     * @throws CanvasApiException if course is not set
+     *
+     * @return int
+     */
+    protected static function getContextCourseId(): int
+    {
+        return self::getCourse()->id;
+    }
+
+    /**
      * Get page ID
      *
      * @return int|null
@@ -336,11 +364,11 @@ class Page extends AbstractBaseApi
         $safeBody = $this->body;
 
         // Remove script tags and their content
-        $safeBody = preg_replace('#<script[^>]*>.*?</script>#is', '', $safeBody);
+        $safeBody = preg_replace('#<script[^>]*>.*?</script>#is', '', $safeBody) ?? '';
 
         // Remove all on* event handlers (both quoted and unquoted values)
-        $safeBody = preg_replace('#\son\w+\s*=\s*["\'][^"\']*["\']#i', '', $safeBody);
-        $safeBody = preg_replace('#\son\w+\s*=\s*[^\s>]+#i', '', $safeBody);
+        $safeBody = preg_replace('#\son\w+\s*=\s*["\'][^"\']*["\']#i', '', $safeBody) ?? '';
+        $safeBody = preg_replace('#\son\w+\s*=\s*[^\s>]+#i', '', $safeBody) ?? '';
 
         // Remove javascript: and data: protocols in href/src
         $safeBody = preg_replace_callback(
@@ -355,13 +383,13 @@ class Page extends AbstractBaseApi
                 return $matches[0];
             },
             $safeBody
-        );
+        ) ?? '';
 
         // Remove dangerous tags completely
         $dangerousTags = ['iframe', 'object', 'embed', 'applet', 'form', 'input', 'button'];
         foreach ($dangerousTags as $tag) {
-            $safeBody = preg_replace('#<' . $tag . '[^>]*>.*?</' . $tag . '>#is', '', $safeBody);
-            $safeBody = preg_replace('#<' . $tag . '[^>]*/?>#i', '', $safeBody);
+            $safeBody = preg_replace('#<' . $tag . '[^>]*>.*?</' . $tag . '>#is', '', $safeBody) ?? '';
+            $safeBody = preg_replace('#<' . $tag . '[^>]*/?>#i', '', $safeBody) ?? '';
         }
 
         // Allow only safe tags
@@ -789,8 +817,8 @@ class Page extends AbstractBaseApi
 
         // First, fetch all pages to find the one with matching pageId
         // Canvas API doesn't provide direct page lookup by numeric ID
-        $endpoint = sprintf('courses/%d/pages', self::$course->id);
-        $response = self::$apiClient->get($endpoint);
+        $endpoint = sprintf('courses/%d/pages', self::getContextCourseId());
+        $response = self::getApiClient()->get($endpoint);
         $pagesData = self::parseJsonResponse($response);
 
         foreach ($pagesData as $pageData) {
@@ -804,7 +832,7 @@ class Page extends AbstractBaseApi
         // For simplicity in testing, we'll just throw the exception here
         // In a real implementation, you'd paginate through all results
 
-        throw new CanvasApiException("Page with ID {$id} not found in course " . self::$course->id);
+        throw new CanvasApiException("Page with ID {$id} not found in course " . self::getContextCourseId());
     }
 
     /**
@@ -821,8 +849,8 @@ class Page extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, rawurlencode($url));
-        $response = self::$apiClient->get($endpoint);
+        $endpoint = sprintf('courses/%d/pages/%s', self::getContextCourseId(), rawurlencode($url));
+        $response = self::getApiClient()->get($endpoint);
         $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
@@ -852,8 +880,8 @@ class Page extends AbstractBaseApi
             $params['include'] = implode(',', $params['include']);
         }
 
-        $endpoint = sprintf('courses/%d/pages', self::$course->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $endpoint = sprintf('courses/%d/pages', self::getContextCourseId());
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $pagesData = self::parseJsonResponse($response);
 
         $pages = [];
@@ -882,8 +910,8 @@ class Page extends AbstractBaseApi
             $data = new CreatePageDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/pages', self::$course->id);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/pages', self::getContextCourseId());
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
@@ -908,8 +936,8 @@ class Page extends AbstractBaseApi
             $data = new UpdatePageDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, rawurlencode($url));
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/pages/%s', self::getContextCourseId(), rawurlencode($url));
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
@@ -975,8 +1003,8 @@ class Page extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, urlencode($this->url));
-        self::$apiClient->delete($endpoint);
+        $endpoint = sprintf('courses/%d/pages/%s', self::getContextCourseId(), urlencode($this->url));
+        self::getApiClient()->delete($endpoint);
 
         return $this;
     }
@@ -994,8 +1022,8 @@ class Page extends AbstractBaseApi
         self::checkApiClient();
 
         try {
-            $endpoint = sprintf('courses/%d/front_page', self::$course->id);
-            $response = self::$apiClient->get($endpoint);
+            $endpoint = sprintf('courses/%d/front_page', self::getContextCourseId());
+            $response = self::getApiClient()->get($endpoint);
             $pageData = self::parseJsonResponse($response);
 
             return new self($pageData);
@@ -1023,9 +1051,9 @@ class Page extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/pages/%s', self::$course->id, rawurlencode($pageUrl));
+        $endpoint = sprintf('courses/%d/pages/%s', self::getContextCourseId(), rawurlencode($pageUrl));
         $data = ['wiki_page' => ['front_page' => true]];
-        self::$apiClient->put($endpoint, ['multipart' => $data]);
+        self::getApiClient()->put($endpoint, ['multipart' => $data]);
 
         return new self([]);
     }
@@ -1125,10 +1153,10 @@ class Page extends AbstractBaseApi
         $slug = str_replace(' ', '-', $slug);
 
         // Remove special characters but preserve hyphens
-        $slug = preg_replace('/[^a-z0-9\-]/', '-', $slug);
+        $slug = preg_replace('/[^a-z0-9\-]/', '-', $slug) ?? '';
 
         // Remove multiple consecutive hyphens
-        $slug = preg_replace('/-+/', '-', $slug);
+        $slug = preg_replace('/-+/', '-', $slug) ?? '';
 
         // Trim hyphens from start and end
         $slug = trim($slug, '-');
@@ -1184,8 +1212,8 @@ class Page extends AbstractBaseApi
         self::checkApiClient();
 
         $identifier = $this->url ?: (string) $this->pageId;
-        $endpoint = sprintf('courses/%d/pages/%s/duplicate', self::$course->id, rawurlencode($identifier));
-        $response = self::$apiClient->post($endpoint);
+        $endpoint = sprintf('courses/%d/pages/%s/duplicate', self::getContextCourseId(), rawurlencode($identifier));
+        $response = self::getApiClient()->post($endpoint);
         $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
@@ -1213,11 +1241,11 @@ class Page extends AbstractBaseApi
         $params = $summary ? ['summary' => true] : [];
         $endpoint = sprintf(
             'courses/%d/pages/%s/revisions/%s',
-            self::$course->id,
+            self::getContextCourseId(),
             rawurlencode($this->url),
             $revisionId
         );
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $revisionData = self::parseJsonResponse($response);
 
         return new PageRevision($revisionData);
@@ -1243,11 +1271,11 @@ class Page extends AbstractBaseApi
 
         $endpoint = sprintf(
             'courses/%d/pages/%s/revisions/%d',
-            self::$course->id,
+            self::getContextCourseId(),
             rawurlencode($this->url),
             $revisionId
         );
-        $response = self::$apiClient->post($endpoint);
+        $response = self::getApiClient()->post($endpoint);
         $revisionData = self::parseJsonResponse($response);
 
         return new PageRevision($revisionData);
@@ -1271,8 +1299,8 @@ class Page extends AbstractBaseApi
             $data = new UpdatePageDTO($data);
         }
 
-        $endpoint = sprintf('courses/%d/front_page', self::$course->id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $endpoint = sprintf('courses/%d/front_page', self::getContextCourseId());
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $pageData = self::parseJsonResponse($response);
 
         return new self($pageData);
@@ -1308,8 +1336,8 @@ class Page extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/pages/%s/revisions', self::$course->id, rawurlencode($this->url));
-        $response = self::$apiClient->get($endpoint);
+        $endpoint = sprintf('courses/%d/pages/%s/revisions', self::getContextCourseId(), rawurlencode($this->url));
+        $response = self::getApiClient()->get($endpoint);
         $revisionsData = self::parseJsonResponse($response);
 
         $revisions = [];
@@ -1351,6 +1379,6 @@ class Page extends AbstractBaseApi
     {
         self::checkCourse();
 
-        return sprintf('courses/%d/pages', self::$course->getId());
+        return sprintf('courses/%d/pages', self::getCourse()->getId());
     }
 }

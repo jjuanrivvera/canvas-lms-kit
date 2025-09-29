@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.4] - 2025-09-29
+
+### Added
+- **PSR-6/PSR-16 Cache Layer for API Response Caching** (#156)
+  - Implemented comprehensive caching system to reduce API calls and improve performance
+  - Multiple cache adapter support:
+    - **InMemoryAdapter** - Fast in-process caching for single request optimization
+    - **FileSystemAdapter** - Persistent disk-based caching with automatic cleanup
+    - **APCuAdapter** - High-performance shared memory caching for production environments
+  - **CacheMiddleware** for automatic HTTP response caching with configurable strategies
+  - Smart cache key generation based on request method, URL, headers, and body
+  - **TtlStrategy** for intelligent cache expiration based on response types:
+    - Static resources (users, courses): 1 hour default TTL
+    - Dynamic resources (submissions, grades): 5 minutes default TTL
+    - Configurable TTL overrides per endpoint pattern
+  - Response serialization for efficient storage and retrieval
+  - Cache invalidation support with tag-based clearing
+  - PSR-6 (Cache) and PSR-16 (Simple Cache) compliant interfaces
+  - Automatic stale cache cleanup and memory management
+  - Zero-configuration setup with sensible defaults
+  - Full test coverage for all cache components
+
+### Changed
+- **Code Quality: Achieved PHPStan Level 8 Compliance with Zero Errors** (#158)
+  - Successfully increased analysis level from 6 to 8 (level 9 not feasible - see documentation)
+  - Fixed all 13 type safety violations from level 7 upgrade
+  - Resolved 12 additional issues for level 8 compliance including:
+    - Improved parse_url() handling with proper type checking
+    - Fixed incorrect null coalescing patterns from cleanup
+    - Enhanced type safety in Conference, ContentMigration, and GradebookHistory classes
+    - Corrected isset() usage patterns that contained unnecessary null checks
+  - Added comprehensive documentation explaining why level 9 is incompatible with dynamic JSON APIs
+  - Maintains clean codebase with zero PHPStan errors at level 8
+  - All 2370 tests pass successfully with improved type safety
+
 ## [1.5.3] - 2025-09-18
 
 ### Added

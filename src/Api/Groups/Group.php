@@ -195,7 +195,7 @@ class Group extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('groups/%d', $id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
         $data = self::parseJsonResponse($response);
 
         return new self($data);
@@ -305,7 +305,7 @@ class Group extends AbstractBaseApi
 
         $accountId = Config::getAccountId();
         $endpoint = sprintf('accounts/%d/groups', $accountId);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $groupData = self::parseJsonResponse($response);
 
         return new self($groupData);
@@ -330,7 +330,7 @@ class Group extends AbstractBaseApi
         }
 
         $endpoint = sprintf('groups/%d', $id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $groupData = self::parseJsonResponse($response);
 
         return new self($groupData);
@@ -373,7 +373,7 @@ class Group extends AbstractBaseApi
 
         self::checkApiClient();
         $endpoint = sprintf('groups/%d', $this->id);
-        self::$apiClient->delete($endpoint);
+        self::getApiClient()->delete($endpoint);
 
         return $this;
     }
@@ -489,7 +489,7 @@ class Group extends AbstractBaseApi
         foreach ($emails as $email) {
             $data[] = ['name' => 'invitees[]', 'contents' => $email];
         }
-        self::$apiClient->post($endpoint, ['multipart' => $data]);
+        self::getApiClient()->post($endpoint, ['multipart' => $data]);
 
         return $this;
     }
@@ -577,7 +577,7 @@ class Group extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('groups/%d/activity_stream', $this->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
 
         return self::parseJsonResponse($response);
     }
@@ -604,7 +604,7 @@ class Group extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('groups/%d/activity_stream/summary', $this->id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
 
         return self::parseJsonResponse($response);
     }
@@ -632,7 +632,7 @@ class Group extends AbstractBaseApi
             $params['permissions'] = $permissions;
         }
 
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
 
         return self::parseJsonResponse($response);
     }

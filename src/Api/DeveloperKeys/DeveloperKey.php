@@ -136,7 +136,7 @@ class DeveloperKey extends AbstractBaseApi
         }
 
         $endpoint = self::getEndpoint();
-        $response = self::$apiClient->post($endpoint, [
+        $response = self::getApiClient()->post($endpoint, [
             'multipart' => $data->toApiArray(),
         ]);
         $responseData = self::parseJsonResponse($response);
@@ -165,7 +165,7 @@ class DeveloperKey extends AbstractBaseApi
 
         // Use direct ID endpoint (not account-scoped)
         $endpoint = "developer_keys/{$id}";
-        $response = self::$apiClient->put($endpoint, [
+        $response = self::getApiClient()->put($endpoint, [
             'multipart' => $data->toApiArray(),
         ]);
         $responseData = self::parseJsonResponse($response);
@@ -189,7 +189,7 @@ class DeveloperKey extends AbstractBaseApi
 
         // Use direct ID endpoint (not account-scoped)
         $endpoint = "developer_keys/{$id}";
-        $response = self::$apiClient->delete($endpoint);
+        $response = self::getApiClient()->delete($endpoint);
 
         return self::parseJsonResponse($response);
     }
@@ -231,7 +231,7 @@ class DeveloperKey extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = self::getEndpoint();
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return array_map(fn (array $item) => new self($item), $data);

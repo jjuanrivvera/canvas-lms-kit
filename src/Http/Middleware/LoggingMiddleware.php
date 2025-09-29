@@ -228,16 +228,18 @@ class LoggingMiddleware extends AbstractMiddleware
         // Add response details if available
         if ($reason instanceof \GuzzleHttp\Exception\RequestException && $reason->hasResponse()) {
             $response = $reason->getResponse();
-            $context['status_code'] = $response->getStatusCode();
-            $context['headers'] = $this->sanitizeHeaders($response->getHeaders());
+            if ($response !== null) {
+                $context['status_code'] = $response->getStatusCode();
+                $context['headers'] = $this->sanitizeHeaders($response->getHeaders());
 
-            $body = (string) $response->getBody();
-            if ($body) {
-                $maxLength = $this->getConfig('max_body_length', 1000);
-                if (strlen($body) > $maxLength) {
-                    $context['response_body'] = substr($body, 0, $maxLength) . '... (truncated)';
-                } else {
-                    $context['response_body'] = $body;
+                $body = (string) $response->getBody();
+                if ($body) {
+                    $maxLength = $this->getConfig('max_body_length', 1000);
+                    if (strlen($body) > $maxLength) {
+                        $context['response_body'] = substr($body, 0, $maxLength) . '... (truncated)';
+                    } else {
+                        $context['response_body'] = $body;
+                    }
                 }
             }
         }
@@ -296,8 +298,10 @@ class LoggingMiddleware extends AbstractMiddleware
         $decoded = json_decode($body, true);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
             $sanitized = $this->sanitizeArray($decoded);
+            $encoded = json_encode($sanitized, JSON_PRETTY_PRINT);
 
-            return json_encode($sanitized, JSON_PRETTY_PRINT);
+            // Fall back to original body if encoding fails
+            return $encoded !== false ? $encoded : $body;
         }
 
         // For non-JSON bodies, do basic pattern matching
@@ -310,7 +314,7 @@ class LoggingMiddleware extends AbstractMiddleware
         }
 
         foreach ($patterns as $pattern) {
-            $body = preg_replace($pattern, '$1***REDACTED***', $body);
+            $body = preg_replace($pattern, '$1***REDACTED***', $body) ?? '';
         }
 
         return $body;

@@ -323,7 +323,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get('/users/self');
+        $response = self::getApiClient()->get('/users/self');
 
         return new self(self::parseJsonResponse($response));
     }
@@ -359,7 +359,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->post('/accounts/' . Config::getAccountId() . '/users', [
+        $response = self::getApiClient()->post('/accounts/' . Config::getAccountId() . '/users', [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -379,7 +379,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->get("/users/{$id}");
+        $response = self::getApiClient()->get("/users/{$id}");
 
         return new self(self::parseJsonResponse($response));
     }
@@ -416,7 +416,7 @@ class User extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $response = self::$apiClient->put("/users/{$id}", [
+        $response = self::getApiClient()->put("/users/{$id}", [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -454,7 +454,7 @@ class User extends AbstractBaseApi
         $path = $this->id ? "/users/{$this->id}" : "/accounts/{$accountId}/users";
         $method = $this->id ? 'PUT' : 'POST';
 
-        $response = self::$apiClient->request($method, $path, [
+        $response = self::getApiClient()->request($method, $path, [
             'multipart' => $dto->toApiArray(),
         ]);
 
@@ -478,7 +478,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         try {
-            $response = self::$apiClient->put("/users/{$this->id}/merge_into/{$destinationUserId}");
+            $response = self::getApiClient()->put("/users/{$this->id}/merge_into/{$destinationUserId}");
 
             $this->populate(self::parseJsonResponse($response));
         } catch (CanvasApiException $e) {
@@ -1023,7 +1023,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $userId = $this->id ?? 'self';
-        $response = self::$apiClient->get("/users/{$userId}/activity_stream", [
+        $response = self::getApiClient()->get("/users/{$userId}/activity_stream", [
             'query' => $params,
         ]);
 
@@ -1057,7 +1057,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $userId = $this->id ?? 'self';
-        $response = self::$apiClient->get("/users/{$userId}/activity_stream/summary");
+        $response = self::getApiClient()->get("/users/{$userId}/activity_stream/summary");
 
         $summaries = self::parseJsonResponse($response);
 
@@ -1085,7 +1085,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
 
         try {
-            self::$apiClient->delete("/users/{$userId}/activity_stream/{$streamItemId}");
+            self::getApiClient()->delete("/users/{$userId}/activity_stream/{$streamItemId}");
 
             return true;
         } catch (CanvasApiException $e) {
@@ -1110,7 +1110,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
 
         try {
-            self::$apiClient->delete("/users/{$userId}/activity_stream");
+            self::getApiClient()->delete("/users/{$userId}/activity_stream");
 
             return true;
         } catch (CanvasApiException $e) {
@@ -1138,7 +1138,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $userId = $this->id ?? 'self';
-        $response = self::$apiClient->get("/users/{$userId}/todo", [
+        $response = self::getApiClient()->get("/users/{$userId}/todo", [
             'query' => $params,
         ]);
 
@@ -1180,7 +1180,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $userId = $this->id ?? 'self';
-        $response = self::$apiClient->get("/users/{$userId}/upcoming_events");
+        $response = self::getApiClient()->get("/users/{$userId}/upcoming_events");
 
         $events = self::parseJsonResponse($response);
 
@@ -1217,7 +1217,7 @@ class User extends AbstractBaseApi
             throw new CanvasApiException('User ID is required to fetch missing submissions');
         }
 
-        $response = self::$apiClient->get("/users/{$this->id}/missing_submissions", [
+        $response = self::getApiClient()->get("/users/{$this->id}/missing_submissions", [
             'query' => $params,
         ]);
 
@@ -1275,7 +1275,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $userId = $this->id ?? 'self';
-        $response = self::$apiClient->get("/users/{$userId}/profile");
+        $response = self::getApiClient()->get("/users/{$userId}/profile");
 
         $profileData = self::parseJsonResponse($response);
 
@@ -1297,7 +1297,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $userId = $this->id ?? 'self';
-        $response = self::$apiClient->get("/users/{$userId}/avatars");
+        $response = self::getApiClient()->get("/users/{$userId}/avatars");
 
         $avatars = self::parseJsonResponse($response);
 
@@ -1336,7 +1336,7 @@ class User extends AbstractBaseApi
             $path .= "/{$scope}";
         }
 
-        $response = self::$apiClient->put($path, [
+        $response = self::getApiClient()->put($path, [
             'form_params' => [
                 'ns' => $namespace,
                 'data' => json_encode($data),
@@ -1373,7 +1373,7 @@ class User extends AbstractBaseApi
             $path .= "/{$scope}";
         }
 
-        $response = self::$apiClient->get($path, [
+        $response = self::getApiClient()->get($path, [
             'query' => ['ns' => $namespace],
         ]);
 
@@ -1408,7 +1408,7 @@ class User extends AbstractBaseApi
         }
 
         try {
-            self::$apiClient->delete($path, [
+            self::getApiClient()->delete($path, [
                 'query' => ['ns' => $namespace],
             ]);
 
@@ -1434,7 +1434,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $userId = $this->id ?? 'self';
-        $response = self::$apiClient->get("/users/{$userId}/course_nicknames");
+        $response = self::getApiClient()->get("/users/{$userId}/course_nicknames");
 
         $nicknames = self::parseJsonResponse($response);
 
@@ -1461,7 +1461,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
 
         try {
-            $response = self::$apiClient->get("/users/{$userId}/course_nicknames/{$courseId}");
+            $response = self::getApiClient()->get("/users/{$userId}/course_nicknames/{$courseId}");
             $nicknameData = self::parseJsonResponse($response);
 
             return new CourseNickname($nicknameData);
@@ -1492,7 +1492,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $userId = $this->id ?? 'self';
-        $response = self::$apiClient->put("/users/{$userId}/course_nicknames/{$courseId}", [
+        $response = self::getApiClient()->put("/users/{$userId}/course_nicknames/{$courseId}", [
             'form_params' => [
                 'nickname' => $nickname,
             ],
@@ -1521,7 +1521,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
 
         try {
-            self::$apiClient->delete("/users/{$userId}/course_nicknames/{$courseId}");
+            self::getApiClient()->delete("/users/{$userId}/course_nicknames/{$courseId}");
 
             return true;
         } catch (CanvasApiException $e) {
@@ -1545,7 +1545,7 @@ class User extends AbstractBaseApi
         $userId = $this->id ?? 'self';
 
         try {
-            self::$apiClient->delete("/users/{$userId}/course_nicknames");
+            self::getApiClient()->delete("/users/{$userId}/course_nicknames");
 
             return true;
         } catch (CanvasApiException $e) {
@@ -1573,7 +1573,7 @@ class User extends AbstractBaseApi
         self::checkApiClient();
 
         $accountId = Config::getAccountId();
-        $response = self::$apiClient->post("/accounts/{$accountId}/self_registration", [
+        $response = self::getApiClient()->post("/accounts/{$accountId}/self_registration", [
             'form_params' => $userData,
         ]);
 
@@ -1600,7 +1600,7 @@ class User extends AbstractBaseApi
             throw new CanvasApiException('User ID is required to split user');
         }
 
-        $response = self::$apiClient->post("/users/{$this->id}/split");
+        $response = self::getApiClient()->post("/users/{$this->id}/split");
         $splitUsers = self::parseJsonResponse($response);
 
         return array_map(function ($userData) {
@@ -1627,7 +1627,7 @@ class User extends AbstractBaseApi
         }
 
         try {
-            self::$apiClient->delete("/users/{$this->id}/sessions");
+            self::getApiClient()->delete("/users/{$this->id}/sessions");
 
             return true;
         } catch (CanvasApiException $e) {
@@ -1659,7 +1659,7 @@ class User extends AbstractBaseApi
             throw new CanvasApiException('User ID is required to get page views');
         }
 
-        $response = self::$apiClient->get("/users/{$this->id}/page_views", [
+        $response = self::getApiClient()->get("/users/{$this->id}/page_views", [
             'query' => $params,
         ]);
 
@@ -1688,7 +1688,7 @@ class User extends AbstractBaseApi
             throw new CanvasApiException('User ID is required to get pandata events token');
         }
 
-        $response = self::$apiClient->get("/users/{$this->id}/pandata_events_token");
+        $response = self::getApiClient()->get("/users/{$this->id}/pandata_events_token");
 
         return self::parseJsonResponse($response);
     }
@@ -1711,7 +1711,7 @@ class User extends AbstractBaseApi
         }
 
         $endpoint = sprintf('users/%d/calendar_events', $this->id);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
         return array_map(function ($item) {
@@ -2048,7 +2048,7 @@ class User extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return array<string, array<string, mixed>> Analytics data for the user in the course
+     * @return array<string, array<int|string, mixed>> Analytics data for the user in the course
      */
     public function courseAnalytics(int $courseId, array $params = []): array
     {

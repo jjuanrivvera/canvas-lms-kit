@@ -1113,7 +1113,7 @@ class ExternalTool extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('%s/%d/external_tools/%d', $contextType, $contextId, $id);
-        $response = self::$apiClient->get($endpoint);
+        $response = self::getApiClient()->get($endpoint);
         $toolData = self::parseJsonResponse($response);
 
         $tool = new self($toolData);
@@ -1275,7 +1275,7 @@ class ExternalTool extends AbstractBaseApi
         }
 
         $endpoint = sprintf('%s/%d/external_tools', $contextType, $contextId);
-        $response = self::$apiClient->post($endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $toolData = self::parseJsonResponse($response);
 
         $tool = new self($toolData);
@@ -1328,7 +1328,7 @@ class ExternalTool extends AbstractBaseApi
         }
 
         $endpoint = sprintf('%s/%d/external_tools/%d', $contextType, $contextId, $id);
-        $response = self::$apiClient->put($endpoint, ['multipart' => $data->toApiArray()]);
+        $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $toolData = self::parseJsonResponse($response);
 
         $tool = new self($toolData);
@@ -1374,7 +1374,7 @@ class ExternalTool extends AbstractBaseApi
         self::checkApiClient();
 
         $endpoint = sprintf('%s/%d/external_tools/sessionless_launch', $contextType, $contextId);
-        $response = self::$apiClient->get($endpoint, ['query' => $params]);
+        $response = self::getApiClient()->get($endpoint, ['query' => $params]);
 
         return self::parseJsonResponse($response);
     }
@@ -1499,7 +1499,7 @@ class ExternalTool extends AbstractBaseApi
             $pluralContext = substr($pluralContext, 0, -1);
         }
         $endpoint = sprintf('%s/%d/external_tools/%d', $pluralContext, $this->contextId, $this->id);
-        self::$apiClient->delete($endpoint);
+        self::getApiClient()->delete($endpoint);
 
         return $this;
     }

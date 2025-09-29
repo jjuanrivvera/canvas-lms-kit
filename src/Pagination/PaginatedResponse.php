@@ -386,7 +386,7 @@ class PaginatedResponse
             $path = $parsedUrl['path'] ?? '';
 
             // Remove API base path if present
-            $path = preg_replace('/^\/api\/v\d+/', '', $path);
+            $path = preg_replace('/^\/api\/v\d+/', '', $path) ?? '';
 
             // Add query parameters
             $options = [];

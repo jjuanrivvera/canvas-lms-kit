@@ -204,11 +204,19 @@ class UploadFileDTO extends AbstractBaseDto
 
         if (is_string($this->file) && file_exists($this->file)) {
             if (function_exists('mime_content_type')) {
-                $this->contentType = mime_content_type($this->file);
+                $detected = mime_content_type($this->file);
+                if ($detected !== false) {
+                    $this->contentType = $detected;
+                }
             } elseif (function_exists('finfo_file')) {
                 $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                $this->contentType = finfo_file($finfo, $this->file);
-                finfo_close($finfo);
+                if ($finfo !== false) {
+                    $detected = finfo_file($finfo, $this->file);
+                    if ($detected !== false) {
+                        $this->contentType = $detected;
+                    }
+                    finfo_close($finfo);
+                }
             }
         }
     }
@@ -225,7 +233,10 @@ class UploadFileDTO extends AbstractBaseDto
         }
 
         if (is_string($this->file) && file_exists($this->file)) {
-            $this->size = filesize($this->file);
+            $fileSize = filesize($this->file);
+            if ($fileSize !== false) {
+                $this->size = $fileSize;
+            }
         }
     }
 
@@ -277,11 +288,17 @@ class UploadFileDTO extends AbstractBaseDto
         // This still requires a separate call as SplFileInfo doesn't provide MIME type
         if (is_null($this->contentType)) {
             if (function_exists('mime_content_type')) {
-                $this->contentType = mime_content_type($this->file);
+                $detected = mime_content_type($this->file);
+                if ($detected !== false) {
+                    $this->contentType = $detected;
+                }
             } elseif (function_exists('finfo_file')) {
                 $finfo = finfo_open(FILEINFO_MIME_TYPE);
                 if ($finfo !== false) {
-                    $this->contentType = finfo_file($finfo, $this->file);
+                    $detected = finfo_file($finfo, $this->file);
+                    if ($detected !== false) {
+                        $this->contentType = $detected;
+                    }
                     finfo_close($finfo);
                 }
             }
