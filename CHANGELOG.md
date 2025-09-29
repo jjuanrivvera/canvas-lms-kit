@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.4] - 2025-09-29
+
 ### Added
 - **PSR-6/PSR-16 Cache Layer for API Response Caching** (#156)
   - Implemented comprehensive caching system to reduce API calls and improve performance
