@@ -97,8 +97,10 @@ class PageTest extends TestCase
         $this->assertEquals('rce', $page->getEditor());
         $this->assertEquals(['id' => 123, 'version' => '0.2'], $page->getBlockEditorAttributes());
         $this->assertEquals('https://canvas.example.com/courses/123/pages/course-syllabus', $page->getHtmlUrl());
-        $this->assertEquals('2024-01-01T00:00:00Z', $page->getCreatedAt());
-        $this->assertEquals('2024-01-01T00:00:00Z', $page->getUpdatedAt());
+        $this->assertInstanceOf(\DateTime::class, $page->getCreatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $page->getCreatedAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $page->getUpdatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $page->getUpdatedAt()->format('c'));
         $this->assertEquals(1, $page->getRevisionId());
         $this->assertEquals(42, $page->getPageViewsCount());
     }
@@ -147,11 +149,13 @@ class PageTest extends TestCase
         $page->setHtmlUrl('https://example.com/page');
         $this->assertEquals('https://example.com/page', $page->getHtmlUrl());
 
-        $page->setCreatedAt('2024-01-01T00:00:00Z');
-        $this->assertEquals('2024-01-01T00:00:00Z', $page->getCreatedAt());
+        $page->setCreatedAt(new \DateTime('2024-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $page->getCreatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $page->getCreatedAt()->format('c'));
 
-        $page->setUpdatedAt('2024-01-01T00:00:00Z');
-        $this->assertEquals('2024-01-01T00:00:00Z', $page->getUpdatedAt());
+        $page->setUpdatedAt(new \DateTime('2024-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $page->getUpdatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $page->getUpdatedAt()->format('c'));
 
         $lastEditedBy = ['id' => 1, 'name' => 'John Doe'];
         $page->setLastEditedBy($lastEditedBy);

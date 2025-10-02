@@ -570,8 +570,10 @@ class RubricAssessmentTest extends TestCase
         $this->assertEquals(222, $assessment->artifactId);
         $this->assertEquals('peer_review', $assessment->assessmentType);
         $this->assertEquals(333, $assessment->provisionalGradeId);
-        $this->assertEquals('2024-01-01T00:00:00Z', $assessment->createdAt);
-        $this->assertEquals('2024-01-02T00:00:00Z', $assessment->updatedAt);
+        $this->assertInstanceOf(\DateTime::class, $assessment->createdAt);
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $assessment->createdAt->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $assessment->updatedAt);
+        $this->assertEquals('2024-01-02T00:00:00+00:00', $assessment->updatedAt->format('c'));
     }
 
     /**

@@ -221,7 +221,8 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
     public ?int $gradingStandardId = null;
 
     /**
-     * Optional. The grade_passback_setting for the course. Only ‘nightly_sync’, ‘disabled’, and ” are allowed.
+     * Optional. The grade_passback_setting for the course.
+     * Only 'nightly_sync', 'disabled', and " are allowed.
      *
      * @var string|null $gradePassbackSetting
      */

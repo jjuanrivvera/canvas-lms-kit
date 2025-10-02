@@ -51,9 +51,9 @@ class Conversation extends AbstractBaseApi
 
     public ?string $lastMessage = null;
 
-    public ?string $lastMessageAt = null;
+    public ?\DateTime $lastMessageAt = null;
 
-    public ?string $startAt = null;
+    public ?\DateTime $startAt = null;
 
     public ?int $messageCount = null;
 

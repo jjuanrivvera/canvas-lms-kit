@@ -95,7 +95,8 @@ class DiscussionTopicTest extends TestCase
         $this->assertEquals('Test Discussion Topic', $discussionTopic->getTitle());
         $this->assertEquals('Test discussion message', $discussionTopic->getMessage());
         $this->assertEquals('/courses/123/discussion_topics/1', $discussionTopic->getHtmlUrl());
-        $this->assertEquals('2024-01-01T00:00:00Z', $discussionTopic->getPostedAt());
+        $this->assertInstanceOf(\DateTime::class, $discussionTopic->getPostedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $discussionTopic->getPostedAt()->format('c'));
         $this->assertEquals('threaded', $discussionTopic->getDiscussionType());
         $this->assertTrue($discussionTopic->getRequireInitialPost());
         $this->assertFalse($discussionTopic->getLocked());
@@ -112,8 +113,10 @@ class DiscussionTopicTest extends TestCase
         $this->assertFalse($discussionTopic->getOnlyGradersCanRate());
         $this->assertFalse($discussionTopic->getGroupTopic());
         $this->assertNull($discussionTopic->getGroupCategoryId());
-        $this->assertEquals('2024-01-01T00:00:00Z', $discussionTopic->getCreatedAt());
-        $this->assertEquals('2024-01-01T00:00:00Z', $discussionTopic->getUpdatedAt());
+        $this->assertInstanceOf(\DateTime::class, $discussionTopic->getCreatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $discussionTopic->getCreatedAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $discussionTopic->getUpdatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $discussionTopic->getUpdatedAt()->format('c'));
     }
 
     public function testGettersAndSetters(): void
@@ -132,8 +135,9 @@ class DiscussionTopicTest extends TestCase
         $discussionTopic->setHtmlUrl('/courses/123/discussion_topics/1');
         $this->assertEquals('/courses/123/discussion_topics/1', $discussionTopic->getHtmlUrl());
 
-        $discussionTopic->setPostedAt('2024-01-01T00:00:00Z');
-        $this->assertEquals('2024-01-01T00:00:00Z', $discussionTopic->getPostedAt());
+        $discussionTopic->setPostedAt(new \DateTime('2024-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $discussionTopic->getPostedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $discussionTopic->getPostedAt()->format('c'));
 
         $discussionTopic->setDiscussionType('threaded');
         $this->assertEquals('threaded', $discussionTopic->getDiscussionType());
@@ -186,11 +190,13 @@ class DiscussionTopicTest extends TestCase
         $discussionTopic->setGroupCategoryId(null);
         $this->assertNull($discussionTopic->getGroupCategoryId());
 
-        $discussionTopic->setCreatedAt('2024-01-01T00:00:00Z');
-        $this->assertEquals('2024-01-01T00:00:00Z', $discussionTopic->getCreatedAt());
+        $discussionTopic->setCreatedAt(new \DateTime('2024-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $discussionTopic->getCreatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $discussionTopic->getCreatedAt()->format('c'));
 
-        $discussionTopic->setUpdatedAt('2024-01-01T00:00:00Z');
-        $this->assertEquals('2024-01-01T00:00:00Z', $discussionTopic->getUpdatedAt());
+        $discussionTopic->setUpdatedAt(new \DateTime('2024-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $discussionTopic->getUpdatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $discussionTopic->getUpdatedAt()->format('c'));
     }
 
     public function testFind(): void
@@ -710,7 +716,7 @@ class DiscussionTopicTest extends TestCase
         $this->assertEquals($data['title'], $array['title']);
         $this->assertEquals($data['message'], $array['message']);
         $this->assertEquals($data['html_url'], $array['html_url']);
-        $this->assertEquals($data['posted_at'], $array['posted_at']);
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $array['posted_at']);
         $this->assertEquals($data['discussion_type'], $array['discussion_type']);
         $this->assertEquals($data['require_initial_post'], $array['require_initial_post']);
         $this->assertEquals($data['locked'], $array['locked']);
@@ -727,8 +733,8 @@ class DiscussionTopicTest extends TestCase
         $this->assertEquals($data['only_graders_can_rate'], $array['only_graders_can_rate']);
         $this->assertEquals($data['group_topic'], $array['group_topic']);
         $this->assertEquals($data['group_category_id'], $array['group_category_id']);
-        $this->assertEquals($data['created_at'], $array['created_at']);
-        $this->assertEquals($data['updated_at'], $array['updated_at']);
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $array['created_at']);
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $array['updated_at']);
     }
 
     public function testToDtoArray(): void
@@ -764,9 +770,10 @@ class DiscussionTopicTest extends TestCase
         $topic = new DiscussionTopic([]);
 
         // Test lastReplyAt
-        $lastReplyAt = '2023-12-25T10:00:00Z';
+        $lastReplyAt = new \DateTime('2023-12-25T10:00:00Z');
         $topic->setLastReplyAt($lastReplyAt);
-        $this->assertEquals($lastReplyAt, $topic->getLastReplyAt());
+        $this->assertInstanceOf(\DateTime::class, $topic->getLastReplyAt());
+        $this->assertEquals('2023-12-25T10:00:00+00:00', $topic->getLastReplyAt()->format('c'));
 
         // Test userCanSeePosts
         $topic->setUserCanSeePosts(true);
@@ -1011,7 +1018,7 @@ class DiscussionTopicTest extends TestCase
 
         $this->assertEquals(123, $array['id']);
         $this->assertEquals('Test Discussion', $array['title']);
-        $this->assertEquals('2023-12-25T10:00:00Z', $array['last_reply_at']);
+        $this->assertEquals('2023-12-25T10:00:00+00:00', $array['last_reply_at']);
         $this->assertTrue($array['user_can_see_posts']);
         $this->assertEquals(15, $array['discussion_subentry_count']);
         $this->assertEquals('read', $array['read_state']);

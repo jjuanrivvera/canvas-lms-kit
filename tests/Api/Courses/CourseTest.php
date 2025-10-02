@@ -1254,6 +1254,197 @@ class CourseTest extends TestCase
         $course->copyCourseContent('789');
     }
 
+    /**
+     * Test date properties are hydrated as DateTime objects from constructor
+     */
+    public function testDatePropertiesHydratedFromConstructor(): void
+    {
+        $courseData = [
+            'id' => 123,
+            'name' => 'Test Course',
+            'created_at' => '2024-01-15T10:30:00Z',
+            'start_at' => '2024-02-01T08:00:00Z',
+            'end_at' => '2024-05-31T17:00:00Z',
+        ];
+
+        $course = new Course($courseData);
+
+        $this->assertInstanceOf(\DateTime::class, $course->getCreatedAt());
+        $this->assertInstanceOf(\DateTime::class, $course->getStartAt());
+        $this->assertInstanceOf(\DateTime::class, $course->getEndAt());
+
+        $this->assertEquals('2024-01-15', $course->getCreatedAt()->format('Y-m-d'));
+        $this->assertEquals('2024-02-01', $course->getStartAt()->format('Y-m-d'));
+        $this->assertEquals('2024-05-31', $course->getEndAt()->format('Y-m-d'));
+    }
+
+    /**
+     * Test date properties handle null values
+     */
+    public function testDatePropertiesHandleNullValues(): void
+    {
+        $courseData = [
+            'id' => 123,
+            'name' => 'Test Course',
+            'created_at' => '2024-01-15T10:30:00Z',
+            // start_at and end_at are omitted
+        ];
+
+        $course = new Course($courseData);
+
+        $this->assertInstanceOf(\DateTime::class, $course->getCreatedAt());
+        $this->assertNull($course->getStartAt());
+        $this->assertNull($course->getEndAt());
+    }
+
+    /**
+     * Test find() method correctly assigns DateTime objects to date properties (calls populate internally)
+     */
+    public function testFindMethodAssignsDateTimeObjects(): void
+    {
+        $responseData = [
+            'id' => 123,
+            'name' => 'Test Course',
+            'created_at' => '2024-03-20T12:00:00Z',
+            'start_at' => '2024-04-01T09:00:00Z',
+            'end_at' => '2024-06-30T18:00:00Z',
+        ];
+
+        $response = new Response(200, [], json_encode($responseData));
+
+        $this->httpClientMock
+            ->method('get')
+            ->willReturn($response);
+
+        $course = Course::find(123);
+
+        // After find (which calls populate), dates should be DateTime objects
+        $this->assertInstanceOf(\DateTime::class, $course->getCreatedAt());
+        $this->assertInstanceOf(\DateTime::class, $course->getStartAt());
+        $this->assertInstanceOf(\DateTime::class, $course->getEndAt());
+
+        $this->assertEquals('2024-03-20', $course->getCreatedAt()->format('Y-m-d'));
+        $this->assertEquals('2024-04-01', $course->getStartAt()->format('Y-m-d'));
+        $this->assertEquals('2024-06-30', $course->getEndAt()->format('Y-m-d'));
+    }
+
+    /**
+     * Test save() method works with DateTime properties (triggers populate internally)
+     */
+    public function testSaveMethodWorksWithDateTimeProperties(): void
+    {
+        $course = new Course([
+            'id' => 1,
+            'name' => 'Test Course',
+            'created_at' => '2024-01-01T00:00:00Z',
+        ]);
+
+        $course->setName('Updated Course Name');
+
+        $responseData = [
+            'id' => 1,
+            'name' => 'Updated Course Name',
+            'created_at' => '2024-01-01T00:00:00Z',
+            'start_at' => '2024-02-01T08:00:00Z',
+            'end_at' => '2024-05-31T17:00:00Z',
+        ];
+
+        $response = new Response(200, [], json_encode($responseData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->willReturn($response);
+
+        $result = $course->save();
+
+        // Verify that populate() worked correctly and assigned DateTime objects
+        $this->assertInstanceOf(Course::class, $result);
+        $this->assertInstanceOf(\DateTime::class, $course->getCreatedAt());
+        $this->assertInstanceOf(\DateTime::class, $course->getStartAt());
+        $this->assertInstanceOf(\DateTime::class, $course->getEndAt());
+    }
+
+    /**
+     * Test DTO serialization converts DateTime back to ISO-8601 strings
+     */
+    public function testDtoSerializationWithDateTimeProperties(): void
+    {
+        $startDate = new \DateTime('2024-02-01T08:00:00Z');
+        $endDate = new \DateTime('2024-05-31T17:00:00Z');
+
+        $dto = new CreateCourseDTO([
+            'name' => 'Test Course',
+            'course_code' => 'TC101',
+        ]);
+
+        $dto->setStartAt($startDate);
+        $dto->setEndAt($endDate);
+
+        $apiArray = $dto->toApiArray();
+
+        // Find the start_at and end_at in the multipart array
+        $startAtFound = false;
+        $endAtFound = false;
+
+        foreach ($apiArray as $field) {
+            if ($field['name'] === 'course[start_at]') {
+                $startAtFound = true;
+                // Verify it's an ISO-8601 string, not a DateTime object
+                $this->assertIsString($field['contents']);
+                $this->assertStringContainsString('2024-02-01', $field['contents']);
+            }
+            if ($field['name'] === 'course[end_at]') {
+                $endAtFound = true;
+                $this->assertIsString($field['contents']);
+                $this->assertStringContainsString('2024-05-31', $field['contents']);
+            }
+        }
+
+        $this->assertTrue($startAtFound, 'start_at should be in API array');
+        $this->assertTrue($endAtFound, 'end_at should be in API array');
+    }
+
+    /**
+     * Test updating course with DateTime properties
+     */
+    public function testUpdateCourseWithDateTimeProperties(): void
+    {
+        $startDate = new \DateTime('2024-09-01T08:00:00Z');
+        $endDate = new \DateTime('2024-12-15T17:00:00Z');
+
+        $dto = new UpdateCourseDTO([
+            'name' => 'Updated Course',
+        ]);
+        $dto->setStartAt($startDate);
+        $dto->setEndAt($endDate);
+
+        $responseData = [
+            'id' => 1,
+            'name' => 'Updated Course',
+            'created_at' => '2024-01-01T00:00:00Z',
+            'start_at' => '2024-09-01T08:00:00Z',
+            'end_at' => '2024-12-15T17:00:00Z',
+        ];
+
+        $response = new Response(200, [], json_encode($responseData));
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('put')
+            ->willReturn($response);
+
+        $course = Course::update(1, $dto);
+
+        // Verify DateTime objects are properly hydrated
+        $this->assertInstanceOf(\DateTime::class, $course->getCreatedAt());
+        $this->assertInstanceOf(\DateTime::class, $course->getStartAt());
+        $this->assertInstanceOf(\DateTime::class, $course->getEndAt());
+
+        $this->assertEquals('2024-09-01', $course->getStartAt()->format('Y-m-d'));
+        $this->assertEquals('2024-12-15', $course->getEndAt()->format('Y-m-d'));
+    }
+
     protected function tearDown(): void
     {
         $this->course = null;

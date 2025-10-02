@@ -170,8 +170,8 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
     public ?string $syllabusBody = null;
 
     /**
-     * @var bool|null Indicates whether the Course Summary (consisting of the course’s assignments and calendar events)
-     * is displayed on the syllabus page. Defaults to true.
+     * @var bool|null Indicates whether the Course Summary (consisting of the course's assignments
+     * and calendar events) is displayed on the syllabus page. Defaults to true.
      */
     public ?bool $syllabusCourseSummary = null;
 
@@ -228,9 +228,9 @@ class UpdateCourseDTO extends AbstractBaseDto implements DTOInterface
     public ?bool $useBlueprintRestrictionsByObjectType = null;
 
     /**
-     * @var mixed[]|null Allows setting multiple Blueprint Restriction to
-     * apply to blueprint course objects of the matching type when restricted.
-     * The possible object types are “assignment”, “attachment”, “discussion_topic”, “quiz” and “wiki_page”.
+     * @var mixed[]|null Allows setting multiple Blueprint Restriction to apply to blueprint course
+     * objects of the matching type when restricted. The possible object types are "assignment",
+     * "attachment", "discussion_topic", "quiz" and "wiki_page".
      */
     public ?array $blueprintRestrictionsByObjectType = null;
 

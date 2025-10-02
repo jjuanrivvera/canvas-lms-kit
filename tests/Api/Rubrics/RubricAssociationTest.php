@@ -462,7 +462,9 @@ class RubricAssociationTest extends TestCase
         $this->assertTrue($association->bookmarked);
         $this->assertEquals(600, $association->contextId);
         $this->assertEquals('Course', $association->contextType);
-        $this->assertEquals('2024-01-01T00:00:00Z', $association->createdAt);
-        $this->assertEquals('2024-01-02T00:00:00Z', $association->updatedAt);
+        $this->assertInstanceOf(\DateTime::class, $association->createdAt);
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $association->createdAt->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $association->updatedAt);
+        $this->assertEquals('2024-01-02T00:00:00+00:00', $association->updatedAt->format('c'));
     }
 }

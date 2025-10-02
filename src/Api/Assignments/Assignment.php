@@ -137,17 +137,17 @@ class Assignment extends AbstractBaseApi
     /**
      * Assignment due date
      */
-    public ?string $dueAt = null;
+    public ?\DateTime $dueAt = null;
 
     /**
      * Date when assignment becomes locked
      */
-    public ?string $lockAt = null;
+    public ?\DateTime $lockAt = null;
 
     /**
      * Date when assignment becomes available
      */
-    public ?string $unlockAt = null;
+    public ?\DateTime $unlockAt = null;
 
     /**
      * All date variations for the assignment
@@ -209,12 +209,12 @@ class Assignment extends AbstractBaseApi
     /**
      * Assignment creation timestamp
      */
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
     /**
      * Assignment last update timestamp
      */
-    public ?string $updatedAt = null;
+    public ?\DateTime $updatedAt = null;
 
     /**
      * URL to download all submissions as a zip
@@ -273,7 +273,7 @@ class Assignment extends AbstractBaseApi
     /**
      * Date peer reviews are assigned
      */
-    public ?string $peerReviewsAssignAt = null;
+    public ?\DateTime $peerReviewsAssignAt = null;
 
     /**
      * Whether intra-group peer reviews are allowed
@@ -860,9 +860,9 @@ class Assignment extends AbstractBaseApi
     /**
      * Get due date
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getDueAt(): ?string
+    public function getDueAt(): ?\DateTime
     {
         return $this->dueAt;
     }
@@ -870,11 +870,11 @@ class Assignment extends AbstractBaseApi
     /**
      * Set due date
      *
-     * @param string|null $dueAt
+     * @param \DateTime|null $dueAt
      *
      * @return void
      */
-    public function setDueAt(?string $dueAt): void
+    public function setDueAt(?\DateTime $dueAt): void
     {
         $this->dueAt = $dueAt;
     }
@@ -882,9 +882,9 @@ class Assignment extends AbstractBaseApi
     /**
      * Get lock date
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getLockAt(): ?string
+    public function getLockAt(): ?\DateTime
     {
         return $this->lockAt;
     }
@@ -892,11 +892,11 @@ class Assignment extends AbstractBaseApi
     /**
      * Set lock date
      *
-     * @param string|null $lockAt
+     * @param \DateTime|null $lockAt
      *
      * @return void
      */
-    public function setLockAt(?string $lockAt): void
+    public function setLockAt(?\DateTime $lockAt): void
     {
         $this->lockAt = $lockAt;
     }
@@ -904,9 +904,9 @@ class Assignment extends AbstractBaseApi
     /**
      * Get unlock date
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getUnlockAt(): ?string
+    public function getUnlockAt(): ?\DateTime
     {
         return $this->unlockAt;
     }
@@ -914,11 +914,11 @@ class Assignment extends AbstractBaseApi
     /**
      * Set unlock date
      *
-     * @param string|null $unlockAt
+     * @param \DateTime|null $unlockAt
      *
      * @return void
      */
-    public function setUnlockAt(?string $unlockAt): void
+    public function setUnlockAt(?\DateTime $unlockAt): void
     {
         $this->unlockAt = $unlockAt;
     }
@@ -1168,9 +1168,9 @@ class Assignment extends AbstractBaseApi
     /**
      * Get created at timestamp
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getCreatedAt(): ?string
+    public function getCreatedAt(): ?\DateTime
     {
         return $this->createdAt;
     }
@@ -1178,11 +1178,11 @@ class Assignment extends AbstractBaseApi
     /**
      * Set created at timestamp
      *
-     * @param string|null $createdAt
+     * @param \DateTime|null $createdAt
      *
      * @return void
      */
-    public function setCreatedAt(?string $createdAt): void
+    public function setCreatedAt(?\DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
@@ -1190,9 +1190,9 @@ class Assignment extends AbstractBaseApi
     /**
      * Get updated at timestamp
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getUpdatedAt(): ?string
+    public function getUpdatedAt(): ?\DateTime
     {
         return $this->updatedAt;
     }
@@ -1200,11 +1200,11 @@ class Assignment extends AbstractBaseApi
     /**
      * Set updated at timestamp
      *
-     * @param string|null $updatedAt
+     * @param \DateTime|null $updatedAt
      *
      * @return void
      */
-    public function setUpdatedAt(?string $updatedAt): void
+    public function setUpdatedAt(?\DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
     }
@@ -1228,9 +1228,9 @@ class Assignment extends AbstractBaseApi
             'submission_types' => $this->submissionTypes,
             'allowed_extensions' => $this->allowedExtensions,
             'allowed_attempts' => $this->allowedAttempts,
-            'due_at' => $this->dueAt,
-            'lock_at' => $this->lockAt,
-            'unlock_at' => $this->unlockAt,
+            'due_at' => $this->dueAt?->format('c'),
+            'lock_at' => $this->lockAt?->format('c'),
+            'unlock_at' => $this->unlockAt?->format('c'),
             'all_dates' => $this->allDates,
             'published' => $this->published,
             'workflow_state' => $this->workflowState,
@@ -1242,8 +1242,8 @@ class Assignment extends AbstractBaseApi
             'group_category_id' => $this->groupCategoryId,
             'html_url' => $this->htmlUrl,
             'has_overrides' => $this->hasOverrides,
-            'created_at' => $this->createdAt,
-            'updated_at' => $this->updatedAt,
+            'created_at' => $this->createdAt?->format('c'),
+            'updated_at' => $this->updatedAt?->format('c'),
             'submissions_download_url' => $this->submissionsDownloadUrl,
             'due_date_required' => $this->dueDateRequired,
             'max_name_length' => $this->maxNameLength,
@@ -1323,9 +1323,9 @@ class Assignment extends AbstractBaseApi
             'submission_types' => $this->submissionTypes,
             'allowed_extensions' => $this->allowedExtensions,
             'allowed_attempts' => $this->allowedAttempts,
-            'due_at' => $this->dueAt,
-            'lock_at' => $this->lockAt,
-            'unlock_at' => $this->unlockAt,
+            'due_at' => $this->dueAt?->format('c'),
+            'lock_at' => $this->lockAt?->format('c'),
+            'unlock_at' => $this->unlockAt?->format('c'),
             'published' => $this->published,
             'assignment_group_id' => $this->assignmentGroupId,
             'position' => $this->position,

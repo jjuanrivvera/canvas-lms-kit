@@ -90,10 +90,13 @@ class AssignmentTest extends TestCase
         $this->assertEquals(100.0, $assignment->getPointsPossible());
         $this->assertEquals('points', $assignment->getGradingType());
         $this->assertEquals(['online_text_entry'], $assignment->getSubmissionTypes());
-        $this->assertEquals('2024-12-31T23:59:59Z', $assignment->getDueAt());
+        $this->assertInstanceOf(\DateTime::class, $assignment->getDueAt());
+        $this->assertEquals('2024-12-31T23:59:59+00:00', $assignment->getDueAt()->format('c'));
         $this->assertTrue($assignment->getPublished());
-        $this->assertEquals('2024-01-01T00:00:00Z', $assignment->getCreatedAt());
-        $this->assertEquals('2024-01-01T00:00:00Z', $assignment->getUpdatedAt());
+        $this->assertInstanceOf(\DateTime::class, $assignment->getCreatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $assignment->getCreatedAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $assignment->getUpdatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $assignment->getUpdatedAt()->format('c'));
     }
 
     public function testGettersAndSetters(): void
@@ -133,14 +136,17 @@ class AssignmentTest extends TestCase
         $assignment->setAllowedAttempts(3);
         $this->assertEquals(3, $assignment->getAllowedAttempts());
 
-        $assignment->setDueAt('2024-12-31T23:59:59Z');
-        $this->assertEquals('2024-12-31T23:59:59Z', $assignment->getDueAt());
+        $assignment->setDueAt(new \DateTime('2024-12-31T23:59:59Z'));
+        $this->assertInstanceOf(\DateTime::class, $assignment->getDueAt());
+        $this->assertEquals('2024-12-31T23:59:59+00:00', $assignment->getDueAt()->format('c'));
 
-        $assignment->setLockAt('2025-01-01T00:00:00Z');
-        $this->assertEquals('2025-01-01T00:00:00Z', $assignment->getLockAt());
+        $assignment->setLockAt(new \DateTime('2025-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $assignment->getLockAt());
+        $this->assertEquals('2025-01-01T00:00:00+00:00', $assignment->getLockAt()->format('c'));
 
-        $assignment->setUnlockAt('2024-01-01T00:00:00Z');
-        $this->assertEquals('2024-01-01T00:00:00Z', $assignment->getUnlockAt());
+        $assignment->setUnlockAt(new \DateTime('2024-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $assignment->getUnlockAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $assignment->getUnlockAt()->format('c'));
 
         $assignment->setPublished(true);
         $this->assertTrue($assignment->getPublished());
@@ -172,11 +178,13 @@ class AssignmentTest extends TestCase
         $assignment->setHasOverrides(true);
         $this->assertTrue($assignment->getHasOverrides());
 
-        $assignment->setCreatedAt('2024-01-01T00:00:00Z');
-        $this->assertEquals('2024-01-01T00:00:00Z', $assignment->getCreatedAt());
+        $assignment->setCreatedAt(new \DateTime('2024-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $assignment->getCreatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $assignment->getCreatedAt()->format('c'));
 
-        $assignment->setUpdatedAt('2024-01-01T00:00:00Z');
-        $this->assertEquals('2024-01-01T00:00:00Z', $assignment->getUpdatedAt());
+        $assignment->setUpdatedAt(new \DateTime('2024-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $assignment->getUpdatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $assignment->getUpdatedAt()->format('c'));
     }
 
     public function testFind(): void
@@ -656,9 +664,9 @@ class AssignmentTest extends TestCase
             'submission_types' => ['online_text_entry'],
             'allowed_extensions' => ['pdf', 'doc'],
             'allowed_attempts' => 3,
-            'due_at' => '2024-12-31T23:59:59Z',
-            'lock_at' => '2025-01-01T00:00:00Z',
-            'unlock_at' => '2024-01-01T00:00:00Z',
+            'due_at' => '2024-12-31T23:59:59+00:00',
+            'lock_at' => '2025-01-01T00:00:00+00:00',
+            'unlock_at' => '2024-01-01T00:00:00+00:00',
             'all_dates' => [],
             'published' => true,
             'workflow_state' => 'published',
@@ -670,8 +678,8 @@ class AssignmentTest extends TestCase
             'group_category_id' => null,
             'html_url' => '/courses/123/assignments/1',
             'has_overrides' => false,
-            'created_at' => '2024-01-01T00:00:00Z',
-            'updated_at' => '2024-01-01T00:00:00Z',
+            'created_at' => '2024-01-01T00:00:00+00:00',
+            'updated_at' => '2024-01-01T00:00:00+00:00',
             'submissions_download_url' => null,
             'due_date_required' => null,
             'max_name_length' => null,
@@ -765,9 +773,9 @@ class AssignmentTest extends TestCase
             'points_possible' => 100.0,
             'grading_type' => 'points',
             'submission_types' => ['online_text_entry'],
-            'due_at' => '2024-12-31T23:59:59Z',
-            'lock_at' => '2025-01-01T00:00:00Z',
-            'unlock_at' => '2024-01-01T00:00:00Z',
+            'due_at' => '2024-12-31T23:59:59+00:00',
+            'lock_at' => '2025-01-01T00:00:00+00:00',
+            'unlock_at' => '2024-01-01T00:00:00+00:00',
             'published' => true,
             'assignment_group_id' => 456,
         ];

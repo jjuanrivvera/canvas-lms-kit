@@ -55,8 +55,10 @@ class SharedBrandConfigTest extends TestCase
         $this->assertEquals('123', $config->accountId);
         $this->assertEquals('a1f113321fa024e7a14cb0948597a2a4', $config->brandConfigMd5);
         $this->assertEquals('Spring Theme', $config->name);
-        $this->assertEquals('2024-01-15T10:00:00Z', $config->createdAt);
-        $this->assertEquals('2024-01-15T11:00:00Z', $config->updatedAt);
+        $this->assertInstanceOf(\DateTime::class, $config->createdAt);
+        $this->assertEquals('2024-01-15T10:00:00+00:00', $config->createdAt->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $config->updatedAt);
+        $this->assertEquals('2024-01-15T11:00:00+00:00', $config->updatedAt->format('c'));
     }
 
     public function testCreateWithArrayData(): void

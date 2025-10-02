@@ -53,7 +53,7 @@ class Login extends AbstractBaseApi
 
     public ?string $declaredUserType = null;
 
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
     /**
      * Get endpoint for the API calls (required by AbstractBaseApi)

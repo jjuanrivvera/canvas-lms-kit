@@ -177,10 +177,10 @@ class CreateUserDTO extends AbstractBaseDto implements DTOInterface
     /**
      * If true, validations are performed on the newly created user (and their associated pseudonym)
      * even if the request is made by a privileged user like an admin. When set to false,
-     * or not included in the request parameters,any newly created users are subject to validations unless the request
-     * is made by a user with a ‘manage_user_logins’ right. In which case, certain validations such as
-     * ‘require_acceptance_of_terms’ and ‘require_presence_of_name’ are not enforced. Use this parameter to return
-     * helpful json errors while building users with an admin request.
+     * or not included in the request parameters,any newly created users are subject to validations
+     * unless the request is made by a user with a 'manage_user_logins' right. In which case, certain
+     * validations such as 'require_acceptance_of_terms' and 'require_presence_of_name' are not enforced.
+     * Use this parameter to return helpful json errors while building users with an admin request.
      *
      * @var bool|null
      */

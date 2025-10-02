@@ -98,9 +98,12 @@ class QuizTest extends TestCase
         $this->assertEquals(456, $quiz->getAssignmentGroupId());
         $this->assertEquals(60, $quiz->getTimeLimit());
         $this->assertEquals(100.0, $quiz->getPointsPossible());
-        $this->assertEquals('2024-12-31T23:59:59Z', $quiz->getDueAt());
-        $this->assertEquals('2025-01-01T00:00:00Z', $quiz->getLockAt());
-        $this->assertEquals('2024-01-01T00:00:00Z', $quiz->getUnlockAt());
+        $this->assertInstanceOf(\DateTime::class, $quiz->getDueAt());
+        $this->assertEquals('2024-12-31T23:59:59+00:00', $quiz->getDueAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $quiz->getLockAt());
+        $this->assertEquals('2025-01-01T00:00:00+00:00', $quiz->getLockAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $quiz->getUnlockAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $quiz->getUnlockAt()->format('c'));
         $this->assertTrue($quiz->getPublished());
         $this->assertEquals('published', $quiz->getWorkflowState());
         $this->assertTrue($quiz->getShuffleAnswers());
@@ -110,8 +113,10 @@ class QuizTest extends TestCase
         $this->assertEquals('always', $quiz->getHideResults());
         $this->assertEquals('192.168.1.0/24', $quiz->getIpFilter());
         $this->assertEquals('secret123', $quiz->getAccessCode());
-        $this->assertEquals('2024-01-01T00:00:00Z', $quiz->getCreatedAt());
-        $this->assertEquals('2024-01-01T00:00:00Z', $quiz->getUpdatedAt());
+        $this->assertInstanceOf(\DateTime::class, $quiz->getCreatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $quiz->getCreatedAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $quiz->getUpdatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $quiz->getUpdatedAt()->format('c'));
     }
 
     public function testGettersAndSetters(): void
@@ -142,14 +147,17 @@ class QuizTest extends TestCase
         $quiz->setPointsPossible(150.0);
         $this->assertEquals(150.0, $quiz->getPointsPossible());
 
-        $quiz->setDueAt('2024-12-31T23:59:59Z');
-        $this->assertEquals('2024-12-31T23:59:59Z', $quiz->getDueAt());
+        $quiz->setDueAt(new \DateTime('2024-12-31T23:59:59Z'));
+        $this->assertInstanceOf(\DateTime::class, $quiz->getDueAt());
+        $this->assertEquals('2024-12-31T23:59:59+00:00', $quiz->getDueAt()->format('c'));
 
-        $quiz->setLockAt('2025-01-01T00:00:00Z');
-        $this->assertEquals('2025-01-01T00:00:00Z', $quiz->getLockAt());
+        $quiz->setLockAt(new \DateTime('2025-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $quiz->getLockAt());
+        $this->assertEquals('2025-01-01T00:00:00+00:00', $quiz->getLockAt()->format('c'));
 
-        $quiz->setUnlockAt('2024-01-01T00:00:00Z');
-        $this->assertEquals('2024-01-01T00:00:00Z', $quiz->getUnlockAt());
+        $quiz->setUnlockAt(new \DateTime('2024-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $quiz->getUnlockAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $quiz->getUnlockAt()->format('c'));
 
         $quiz->setPublished(true);
         $this->assertTrue($quiz->getPublished());
@@ -203,11 +211,13 @@ class QuizTest extends TestCase
         $quiz->setAllDates($allDates);
         $this->assertEquals($allDates, $quiz->getAllDates());
 
-        $quiz->setCreatedAt('2024-01-01T00:00:00Z');
-        $this->assertEquals('2024-01-01T00:00:00Z', $quiz->getCreatedAt());
+        $quiz->setCreatedAt(new \DateTime('2024-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $quiz->getCreatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $quiz->getCreatedAt()->format('c'));
 
-        $quiz->setUpdatedAt('2024-01-01T00:00:00Z');
-        $this->assertEquals('2024-01-01T00:00:00Z', $quiz->getUpdatedAt());
+        $quiz->setUpdatedAt(new \DateTime('2024-01-01T00:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $quiz->getUpdatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $quiz->getUpdatedAt()->format('c'));
     }
 
     public function testToArray(): void

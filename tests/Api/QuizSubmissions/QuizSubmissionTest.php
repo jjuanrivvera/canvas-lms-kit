@@ -119,9 +119,12 @@ class QuizSubmissionTest extends TestCase
         $this->assertEquals(456, $submission->getQuizId());
         $this->assertEquals(123, $submission->getUserId());
         $this->assertEquals(101112, $submission->getSubmissionId());
-        $this->assertEquals('2024-01-01T12:00:00Z', $submission->getStartedAt());
-        $this->assertEquals('2024-01-01T13:00:00Z', $submission->getFinishedAt());
-        $this->assertEquals('2024-01-01T13:30:00Z', $submission->getEndAt());
+        $this->assertInstanceOf(\DateTime::class, $submission->getStartedAt());
+        $this->assertEquals('2024-01-01T12:00:00+00:00', $submission->getStartedAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $submission->getFinishedAt());
+        $this->assertEquals('2024-01-01T13:00:00+00:00', $submission->getFinishedAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $submission->getEndAt());
+        $this->assertEquals('2024-01-01T13:30:00+00:00', $submission->getEndAt()->format('c'));
         $this->assertEquals(1, $submission->getAttempt());
         $this->assertEquals(0, $submission->getExtraAttempts());
         $this->assertEquals(10, $submission->getExtraTime());
@@ -153,14 +156,17 @@ class QuizSubmissionTest extends TestCase
         $submission->setSubmissionId(666);
         $this->assertEquals(666, $submission->getSubmissionId());
 
-        $submission->setStartedAt('2024-02-01T10:00:00Z');
-        $this->assertEquals('2024-02-01T10:00:00Z', $submission->getStartedAt());
+        $submission->setStartedAt(new \DateTime('2024-02-01T10:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $submission->getStartedAt());
+        $this->assertEquals('2024-02-01T10:00:00+00:00', $submission->getStartedAt()->format('c'));
 
-        $submission->setFinishedAt('2024-02-01T11:00:00Z');
-        $this->assertEquals('2024-02-01T11:00:00Z', $submission->getFinishedAt());
+        $submission->setFinishedAt(new \DateTime('2024-02-01T11:00:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $submission->getFinishedAt());
+        $this->assertEquals('2024-02-01T11:00:00+00:00', $submission->getFinishedAt()->format('c'));
 
-        $submission->setEndAt('2024-02-01T11:30:00Z');
-        $this->assertEquals('2024-02-01T11:30:00Z', $submission->getEndAt());
+        $submission->setEndAt(new \DateTime('2024-02-01T11:30:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $submission->getEndAt());
+        $this->assertEquals('2024-02-01T11:30:00+00:00', $submission->getEndAt()->format('c'));
 
         $submission->setAttempt(2);
         $this->assertEquals(2, $submission->getAttempt());
@@ -564,7 +570,8 @@ class QuizSubmissionTest extends TestCase
 
         $this->assertInstanceOf(QuizSubmission::class, $result);
         $this->assertEquals('complete', $submission->getWorkflowState());
-        $this->assertEquals('2024-01-01T13:00:00Z', $submission->getFinishedAt());
+        $this->assertInstanceOf(\DateTime::class, $submission->getFinishedAt());
+        $this->assertEquals('2024-01-01T13:00:00+00:00', $submission->getFinishedAt()->format('c'));
         $this->assertEquals(85.0, $submission->getScore());
     }
 

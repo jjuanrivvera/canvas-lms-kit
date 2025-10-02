@@ -99,7 +99,7 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * When the discussion topic was posted
      */
-    public ?string $postedAt = null;
+    public ?\DateTime $postedAt = null;
 
     /**
      * Discussion type (threaded, side_comment, etc.)
@@ -191,7 +191,7 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * When the last reply was posted
      */
-    public ?string $lastReplyAt = null;
+    public ?\DateTime $lastReplyAt = null;
 
     /**
      * Whether users can see posts (based on require_initial_post)
@@ -226,7 +226,7 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * When the topic will be automatically published
      */
-    public ?string $delayedPostAt = null;
+    public ?\DateTime $delayedPostAt = null;
 
     /**
      * Whether the topic is locked for the current user
@@ -321,12 +321,12 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Discussion topic creation timestamp
      */
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
     /**
      * Discussion topic last update timestamp
      */
-    public ?string $updatedAt = null;
+    public ?\DateTime $updatedAt = null;
 
     /**
      * Create a new DiscussionTopic instance
@@ -485,9 +485,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Get posted at timestamp
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getPostedAt(): ?string
+    public function getPostedAt(): ?\DateTime
     {
         return $this->postedAt;
     }
@@ -495,11 +495,11 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Set posted at timestamp
      *
-     * @param string|null $postedAt
+     * @param \DateTime|null $postedAt
      *
      * @return void
      */
-    public function setPostedAt(?string $postedAt): void
+    public function setPostedAt(?\DateTime $postedAt): void
     {
         $this->postedAt = $postedAt;
     }
@@ -881,9 +881,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Get created at timestamp
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getCreatedAt(): ?string
+    public function getCreatedAt(): ?\DateTime
     {
         return $this->createdAt;
     }
@@ -891,11 +891,11 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Set created at timestamp
      *
-     * @param string|null $createdAt
+     * @param \DateTime|null $createdAt
      *
      * @return void
      */
-    public function setCreatedAt(?string $createdAt): void
+    public function setCreatedAt(?\DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
@@ -903,9 +903,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Get updated at timestamp
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getUpdatedAt(): ?string
+    public function getUpdatedAt(): ?\DateTime
     {
         return $this->updatedAt;
     }
@@ -913,11 +913,11 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Set updated at timestamp
      *
-     * @param string|null $updatedAt
+     * @param \DateTime|null $updatedAt
      *
      * @return void
      */
-    public function setUpdatedAt(?string $updatedAt): void
+    public function setUpdatedAt(?\DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
     }
@@ -925,9 +925,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Get last reply at timestamp
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getLastReplyAt(): ?string
+    public function getLastReplyAt(): ?\DateTime
     {
         return $this->lastReplyAt;
     }
@@ -935,11 +935,11 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Set last reply at timestamp
      *
-     * @param string|null $lastReplyAt
+     * @param \DateTime|null $lastReplyAt
      *
      * @return void
      */
-    public function setLastReplyAt(?string $lastReplyAt): void
+    public function setLastReplyAt(?\DateTime $lastReplyAt): void
     {
         $this->lastReplyAt = $lastReplyAt;
     }
@@ -1079,9 +1079,9 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Get delayed post at timestamp
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getDelayedPostAt(): ?string
+    public function getDelayedPostAt(): ?\DateTime
     {
         return $this->delayedPostAt;
     }
@@ -1089,11 +1089,11 @@ class DiscussionTopic extends AbstractBaseApi
     /**
      * Set delayed post at timestamp
      *
-     * @param string|null $delayedPostAt
+     * @param \DateTime|null $delayedPostAt
      *
      * @return void
      */
-    public function setDelayedPostAt(?string $delayedPostAt): void
+    public function setDelayedPostAt(?\DateTime $delayedPostAt): void
     {
         $this->delayedPostAt = $delayedPostAt;
     }
@@ -1462,8 +1462,8 @@ class DiscussionTopic extends AbstractBaseApi
             'title' => $this->title,
             'message' => $this->message,
             'html_url' => $this->htmlUrl,
-            'posted_at' => $this->postedAt,
-            'last_reply_at' => $this->lastReplyAt,
+            'posted_at' => $this->postedAt?->format('c'),
+            'last_reply_at' => $this->lastReplyAt?->format('c'),
             'discussion_type' => $this->discussionType,
             'require_initial_post' => $this->requireInitialPost,
             'user_can_see_posts' => $this->userCanSeePosts,
@@ -1474,7 +1474,7 @@ class DiscussionTopic extends AbstractBaseApi
             'subscription_hold' => $this->subscriptionHold,
             'locked' => $this->locked,
             'pinned' => $this->pinned,
-            'delayed_post_at' => $this->delayedPostAt,
+            'delayed_post_at' => $this->delayedPostAt?->format('c'),
             'locked_for_user' => $this->lockedForUser,
             'lock_info' => $this->lockInfo,
             'lock_explanation' => $this->lockExplanation,
@@ -1504,8 +1504,8 @@ class DiscussionTopic extends AbstractBaseApi
             'attachments' => $this->attachments,
             'permissions' => $this->permissions,
             'is_announcement' => $this->isAnnouncement,
-            'created_at' => $this->createdAt,
-            'updated_at' => $this->updatedAt,
+            'created_at' => $this->createdAt?->format('c'),
+            'updated_at' => $this->updatedAt?->format('c'),
         ];
     }
 
