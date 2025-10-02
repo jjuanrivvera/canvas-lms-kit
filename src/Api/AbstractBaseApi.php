@@ -246,10 +246,18 @@ abstract class AbstractBaseApi implements ApiInterface
             'assessedAt',
             'peerReviewsAssignAt',
             'cachedDueDate',
+            'expiresAt',
+            'activatedAt',
+            'archivedAt',
         ];
 
         if (in_array($key, $dateFields, true) && is_string($value) && !empty($value)) {
-            return new DateTime($value);
+            try {
+                return new DateTime($value);
+            } catch (\Exception $e) {
+                // Return null for invalid date strings
+                return null;
+            }
         }
 
         return $value;
