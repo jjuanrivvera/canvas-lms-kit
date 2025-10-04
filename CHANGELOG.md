@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **⚠️ BREAKING CHANGE: Standardized Date/Time Property Types Across 21 Models** (#154)
+  - Changed all date/time properties from `?string` to `?DateTime` in the following classes:
+    - **Course**: `createdAt`, `startAt`, `endAt`
+    - **Assignment**: `dueAt`, `lockAt`, `unlockAt`, `createdAt`, `updatedAt`, `peerReviewsAssignAt`
+    - **Quiz**: `dueAt`, `lockAt`, `unlockAt`, `createdAt`, `updatedAt`
+    - **Enrollment**: `createdAt`, `updatedAt`, `lastActivityAt`, `startAt`, `endAt`
+    - **DiscussionTopic**: `postedAt`, `lastReplyAt`, `delayedPostAt`, `createdAt`, `updatedAt`
+    - **Submission**: `submittedAt`, `gradedAt`, `postedAt`
+    - **File**: `createdAt`, `updatedAt`, `unlockAt`, `lockAt`
+    - **Page**: `createdAt`, `updatedAt`
+    - **Section**: `startAt`, `endAt`
+    - **ExternalTool**: `createdAt`, `updatedAt`
+    - **OutcomeResult**: `submittedOrAssessedAt`, `attemptedAt`, `assessedAt`
+    - **RubricAssessment**: `createdAt`, `updatedAt`
+    - **RubricAssociation**: `createdAt`, `updatedAt`
+    - **Login**: `createdAt`
+    - **CourseReports**: `createdAt`, `startedAt`, `endedAt`
+    - **GroupMembership**: `createdAt`, `updatedAt`
+    - **DeveloperKey**: `createdAt`, `updatedAt`, `lastUsedAt`
+    - **QuizSubmission**: `startedAt`, `finishedAt`, `endAt`
+    - **OutcomeImport**: `createdAt`, `endedAt`, `updatedAt`
+    - **Conversation**: `lastMessageAt`, `startAt`
+    - **User**: `lastLogin`
+    - **SharedBrandConfig**: `createdAt`, `updatedAt` (custom constructor implementation)
+  - Updated corresponding getters/setters to use `?DateTime` type hints (where applicable)
+  - Enhanced `AbstractBaseApi::__construct()` to automatically convert date strings to DateTime objects via `castValue()`
+  - Expanded `castValue()` date field detection from 12 to 29 recognized date field names
+  - **Migration Guide for Consumers:**
+    ```php
+    // Before (returned string):
+    $dateString = $course->createdAt; // "2024-01-15T10:30:00Z"
+
+    // After (returns DateTime):
+    $dateObject = $course->getCreatedAt(); // DateTime object
+    $formatted = $course->getCreatedAt()?->format('Y-m-d'); // "2024-01-15"
+    $iso8601 = $course->getCreatedAt()?->format('c'); // ISO-8601 format
+    ```
+  - Benefits:
+    - Type-safe DateTime operations with IDE autocomplete across all models
+    - Automatic ISO-8601 parsing eliminates manual conversions
+    - Consistent date handling across the entire SDK
+    - Prevents TypeError when using save/update operations
+  - Added comprehensive test coverage for date hydration, null handling, and DTO serialization
+
 ## [1.5.4] - 2025-09-29
 
 ### Added

@@ -75,8 +75,10 @@ class EnrollmentTest extends TestCase
         $this->assertEquals(456, $enrollment->getSectionId());
         $this->assertEquals(789, $enrollment->getRoleId());
         $this->assertFalse($enrollment->isLimitPrivilegesToCourseSection());
-        $this->assertEquals('2023-01-01T00:00:00Z', $enrollment->getCreatedAt());
-        $this->assertEquals('2023-01-02T00:00:00Z', $enrollment->getUpdatedAt());
+        $this->assertInstanceOf(\DateTime::class, $enrollment->getCreatedAt());
+        $this->assertEquals('2023-01-01T00:00:00+00:00', $enrollment->getCreatedAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $enrollment->getUpdatedAt());
+        $this->assertEquals('2023-01-02T00:00:00+00:00', $enrollment->getUpdatedAt()->format('c'));
         $this->assertEquals('StudentEnrollment', $enrollment->getRole());
         $this->assertEquals(85.5, $enrollment->getCurrentScore());
         $this->assertEquals('B', $enrollment->getCurrentGrade());
@@ -86,9 +88,12 @@ class EnrollmentTest extends TestCase
         $this->assertEquals(855.0, $enrollment->getCurrentPoints());
         $this->assertEquals(850.0, $enrollment->getUnpostedCurrentPoints());
         $this->assertEquals(3600, $enrollment->getTotalActivityTime());
-        $this->assertEquals('2023-01-03T00:00:00Z', $enrollment->getLastActivityAt());
-        $this->assertEquals('2023-01-01T00:00:00Z', $enrollment->getStartAt());
-        $this->assertEquals('2023-06-01T00:00:00Z', $enrollment->getEndAt());
+        $this->assertInstanceOf(\DateTime::class, $enrollment->getLastActivityAt());
+        $this->assertEquals('2023-01-03T00:00:00+00:00', $enrollment->getLastActivityAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $enrollment->getStartAt());
+        $this->assertEquals('2023-01-01T00:00:00+00:00', $enrollment->getStartAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $enrollment->getEndAt());
+        $this->assertEquals('2023-06-01T00:00:00+00:00', $enrollment->getEndAt()->format('c'));
         $this->assertTrue($enrollment->canBeRemoved());
         $this->assertFalse($enrollment->isLocked());
         $this->assertEquals('account123', $enrollment->getSisAccountId());
@@ -623,8 +628,8 @@ class EnrollmentTest extends TestCase
         $enrollment->setSectionId(456);
         $enrollment->setRoleId(789);
         $enrollment->setLimitPrivilegesToCourseSection(true);
-        $enrollment->setStartAt('2023-01-01T00:00:00Z');
-        $enrollment->setEndAt('2023-06-01T00:00:00Z');
+        $enrollment->setStartAt(new \DateTime('2023-01-01T00:00:00Z'));
+        $enrollment->setEndAt(new \DateTime('2023-06-01T00:00:00Z'));
         $enrollment->setSisUserId('user123');
 
         $this->assertEquals(100, $enrollment->getUserId());
@@ -633,8 +638,10 @@ class EnrollmentTest extends TestCase
         $this->assertEquals(456, $enrollment->getSectionId());
         $this->assertEquals(789, $enrollment->getRoleId());
         $this->assertTrue($enrollment->isLimitPrivilegesToCourseSection());
-        $this->assertEquals('2023-01-01T00:00:00Z', $enrollment->getStartAt());
-        $this->assertEquals('2023-06-01T00:00:00Z', $enrollment->getEndAt());
+        $this->assertInstanceOf(\DateTime::class, $enrollment->getStartAt());
+        $this->assertEquals('2023-01-01T00:00:00+00:00', $enrollment->getStartAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $enrollment->getEndAt());
+        $this->assertEquals('2023-06-01T00:00:00+00:00', $enrollment->getEndAt()->format('c'));
         $this->assertEquals('user123', $enrollment->getSisUserId());
     }
 

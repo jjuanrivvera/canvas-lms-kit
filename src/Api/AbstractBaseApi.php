@@ -77,6 +77,9 @@ abstract class AbstractBaseApi implements ApiInterface
                                 $value = (bool) $value;
                                 break;
                         }
+                    } else {
+                        // For non-builtin types (like DateTime), use castValue()
+                        $value = $this->castValue($key, $value);
                     }
                 }
 
@@ -216,9 +219,15 @@ abstract class AbstractBaseApi implements ApiInterface
         $dateFields = [
             'startAt',
             'endAt',
+            'startedAt',
+            'endedAt',
+            'finishedAt',
             'createdAt',
             'updatedAt',
             'deletedAt',
+            'modifiedAt',
+            'editedAt',
+            'lastEditedAt',
             'publishedAt',
             'postedAt',
             'dueAt',
@@ -226,10 +235,29 @@ abstract class AbstractBaseApi implements ApiInterface
             'unlockAt',
             'submittedAt',
             'gradedAt',
+            'delayedPostAt',
+            'lastReplyAt',
+            'lastMessageAt',
+            'lastActivityAt',
+            'lastUsedAt',
+            'lastLogin',
+            'submittedOrAssessedAt',
+            'attemptedAt',
+            'assessedAt',
+            'peerReviewsAssignAt',
+            'cachedDueDate',
+            'expiresAt',
+            'activatedAt',
+            'archivedAt',
         ];
 
         if (in_array($key, $dateFields, true) && is_string($value) && !empty($value)) {
-            return new DateTime($value);
+            try {
+                return new DateTime($value);
+            } catch (\Exception $e) {
+                // Return null for invalid date strings
+                return null;
+            }
         }
 
         return $value;

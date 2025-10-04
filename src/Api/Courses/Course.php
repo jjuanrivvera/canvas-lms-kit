@@ -185,19 +185,19 @@ class Course extends AbstractBaseApi
     public ?string $gradePassbackSetting = null;
 
     /**
-     * @var string
+     * @var \DateTime|null
      */
-    public string $createdAt = '';
+    public ?\DateTime $createdAt = null;
 
     /**
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $startAt = null;
+    public ?\DateTime $startAt = null;
 
     /**
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $endAt = null;
+    public ?\DateTime $endAt = null;
 
     /**
      * @var string|null
@@ -2019,49 +2019,49 @@ class Course extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return \DateTime|null
      */
-    public function getCreatedAt(): string
+    public function getCreatedAt(): ?\DateTime
     {
         return $this->createdAt;
     }
 
     /**
-     * @param string $createdAt
+     * @param \DateTime|null $createdAt
      */
-    public function setCreatedAt(string $createdAt): void
+    public function setCreatedAt(?\DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
 
     /**
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getStartAt(): ?string
+    public function getStartAt(): ?\DateTime
     {
         return $this->startAt;
     }
 
     /**
-     * @param string|null $startAt
+     * @param \DateTime|null $startAt
      */
-    public function setStartAt(?string $startAt): void
+    public function setStartAt(?\DateTime $startAt): void
     {
         $this->startAt = $startAt;
     }
 
     /**
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getEndAt(): ?string
+    public function getEndAt(): ?\DateTime
     {
         return $this->endAt;
     }
 
     /**
-     * @param string|null $endAt
+     * @param \DateTime|null $endAt
      */
-    public function setEndAt(?string $endAt): void
+    public function setEndAt(?\DateTime $endAt): void
     {
         $this->endAt = $endAt;
     }

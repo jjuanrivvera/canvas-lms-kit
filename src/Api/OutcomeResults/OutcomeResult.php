@@ -27,7 +27,7 @@ class OutcomeResult extends AbstractBaseApi
 
     public ?float $score = null;
 
-    public ?string $submittedOrAssessedAt = null;
+    public ?\DateTime $submittedOrAssessedAt = null;
 
     /** @var array<string, mixed>|null */
     public ?array $links = null;
@@ -40,9 +40,9 @@ class OutcomeResult extends AbstractBaseApi
 
     public ?bool $hidden = null;
 
-    public ?string $attemptedAt = null;
+    public ?\DateTime $attemptedAt = null;
 
-    public ?string $assessedAt = null;
+    public ?\DateTime $assessedAt = null;
 
     public ?int $assignmentId = null;
 

@@ -156,16 +156,16 @@ class RubricAssociation extends AbstractBaseApi
     /**
      * Created timestamp
      *
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
     /**
      * Updated timestamp
      *
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $updatedAt = null;
+    public ?\DateTime $updatedAt = null;
 
     /**
      * Course context for operations

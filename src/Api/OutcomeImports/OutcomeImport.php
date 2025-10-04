@@ -24,11 +24,11 @@ class OutcomeImport extends AbstractBaseApi
 
     public ?int $learningOutcomeGroupId = null;
 
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
-    public ?string $endedAt = null;
+    public ?\DateTime $endedAt = null;
 
-    public ?string $updatedAt = null;
+    public ?\DateTime $updatedAt = null;
 
     public ?string $workflowState = null;
 

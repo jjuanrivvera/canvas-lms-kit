@@ -106,7 +106,8 @@ class SubmissionTest extends TestCase
         $this->assertEquals('online_text_entry', $submission->getSubmissionType());
         $this->assertEquals('My essay content', $submission->getBody());
         $this->assertEquals('submitted', $submission->getWorkflowState());
-        $this->assertEquals('2024-01-15T10:30:00Z', $submission->getSubmittedAt());
+        $this->assertInstanceOf(\DateTime::class, $submission->getSubmittedAt());
+        $this->assertEquals('2024-01-15T10:30:00+00:00', $submission->getSubmittedAt()->format('c'));
         $this->assertFalse($submission->getLate());
         $this->assertFalse($submission->getExcused());
         $this->assertEquals(85.5, $submission->getScore());
@@ -138,8 +139,9 @@ class SubmissionTest extends TestCase
         $submission->setAttempt(2);
         $this->assertEquals(2, $submission->getAttempt());
 
-        $submission->setSubmittedAt('2024-01-15T10:30:00Z');
-        $this->assertEquals('2024-01-15T10:30:00Z', $submission->getSubmittedAt());
+        $submission->setSubmittedAt(new \DateTime('2024-01-15T10:30:00Z'));
+        $this->assertInstanceOf(\DateTime::class, $submission->getSubmittedAt());
+        $this->assertEquals('2024-01-15T10:30:00+00:00', $submission->getSubmittedAt()->format('c'));
 
         $submission->setScore(95.0);
         $this->assertEquals(95.0, $submission->getScore());
@@ -400,7 +402,8 @@ class SubmissionTest extends TestCase
         $this->assertEquals('graded', $submission->getWorkflowState());
         $this->assertEquals(88.0, $submission->getScore());
         $this->assertEquals('88', $submission->getGrade());
-        $this->assertEquals('2024-01-16T09:15:00Z', $submission->getGradedAt());
+        $this->assertInstanceOf(\DateTime::class, $submission->getGradedAt());
+        $this->assertEquals('2024-01-16T09:15:00+00:00', $submission->getGradedAt()->format('c'));
     }
 
     public function testUpdateWithDTO(): void

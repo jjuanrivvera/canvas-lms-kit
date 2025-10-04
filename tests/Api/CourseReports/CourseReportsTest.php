@@ -100,8 +100,10 @@ class CourseReportsTest extends TestCase
         $this->assertEquals(456, $report->id);
         $this->assertEquals('running', $report->status);
         $this->assertEquals(25, $report->progress);
-        $this->assertEquals('2024-01-15T10:00:00Z', $report->createdAt);
-        $this->assertEquals('2024-01-15T10:01:00Z', $report->startedAt);
+        $this->assertInstanceOf(\DateTime::class, $report->createdAt);
+        $this->assertEquals('2024-01-15T10:00:00+00:00', $report->createdAt->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $report->startedAt);
+        $this->assertEquals('2024-01-15T10:01:00+00:00', $report->startedAt->format('c'));
         $this->assertEquals(['enrollment_term_id' => 789], $report->parameters);
     }
 
@@ -152,7 +154,8 @@ class CourseReportsTest extends TestCase
         $this->assertEquals('complete', $report->status);
         $this->assertEquals('https://canvas.example.com/files/report.csv', $report->fileUrl);
         $this->assertEquals(100, $report->progress);
-        $this->assertEquals('2024-01-15T10:05:00Z', $report->endedAt);
+        $this->assertInstanceOf(\DateTime::class, $report->endedAt);
+        $this->assertEquals('2024-01-15T10:05:00+00:00', $report->endedAt->format('c'));
         $this->assertIsArray($report->attachment);
         $this->assertEquals(789, $report->attachment['id']);
     }
@@ -209,7 +212,8 @@ class CourseReportsTest extends TestCase
         $this->assertEquals(789, $report->id);
         $this->assertEquals('failed', $report->status);
         $this->assertEquals(50, $report->progress);
-        $this->assertEquals('2024-01-15T09:03:00Z', $report->endedAt);
+        $this->assertInstanceOf(\DateTime::class, $report->endedAt);
+        $this->assertEquals('2024-01-15T09:03:00+00:00', $report->endedAt->format('c'));
     }
 
     public function testLastReportThrowsExceptionWithoutCourse(): void
@@ -350,9 +354,9 @@ class CourseReportsTest extends TestCase
             'status' => 'complete',
             'file_url' => 'https://canvas.example.com/files/report.csv',
             'attachment' => ['id' => 456],
-            'created_at' => '2024-01-15T10:00:00Z',
-            'started_at' => '2024-01-15T10:01:00Z',
-            'ended_at' => '2024-01-15T10:05:00Z',
+            'created_at' => '2024-01-15T10:00:00+00:00',
+            'started_at' => '2024-01-15T10:01:00+00:00',
+            'ended_at' => '2024-01-15T10:05:00+00:00',
             'parameters' => ['term_id' => 789],
             'progress' => 100,
         ];
@@ -419,8 +423,11 @@ class CourseReportsTest extends TestCase
 
         // Verify snake_case properties are converted to camelCase
         $this->assertEquals('https://canvas.example.com/files/report.csv', $report->fileUrl);
-        $this->assertEquals('2024-01-15T10:00:00Z', $report->createdAt);
-        $this->assertEquals('2024-01-15T10:01:00Z', $report->startedAt);
-        $this->assertEquals('2024-01-15T10:05:00Z', $report->endedAt);
+        $this->assertInstanceOf(\DateTime::class, $report->createdAt);
+        $this->assertEquals('2024-01-15T10:00:00+00:00', $report->createdAt->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $report->startedAt);
+        $this->assertEquals('2024-01-15T10:01:00+00:00', $report->startedAt->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $report->endedAt);
+        $this->assertEquals('2024-01-15T10:05:00+00:00', $report->endedAt->format('c'));
     }
 }

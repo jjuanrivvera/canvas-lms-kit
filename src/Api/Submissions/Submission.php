@@ -138,7 +138,7 @@ class Submission extends AbstractBaseApi
     /**
      * Date and time when submission was submitted
      */
-    public ?string $submittedAt = null;
+    public ?\DateTime $submittedAt = null;
 
     /**
      * Canvas URL for viewing this submission
@@ -173,7 +173,7 @@ class Submission extends AbstractBaseApi
     /**
      * Date and time when submission was graded
      */
-    public ?string $gradedAt = null;
+    public ?\DateTime $gradedAt = null;
 
     /**
      * Workflow state of the submission
@@ -229,7 +229,7 @@ class Submission extends AbstractBaseApi
     /**
      * Date and time when grades were posted
      */
-    public ?string $postedAt = null;
+    public ?\DateTime $postedAt = null;
 
     /**
      * Array of submission comments
@@ -753,12 +753,12 @@ class Submission extends AbstractBaseApi
         $this->attempt = $attempt;
     }
 
-    public function getSubmittedAt(): ?string
+    public function getSubmittedAt(): ?\DateTime
     {
         return $this->submittedAt;
     }
 
-    public function setSubmittedAt(?string $submittedAt): void
+    public function setSubmittedAt(?\DateTime $submittedAt): void
     {
         $this->submittedAt = $submittedAt;
     }
@@ -823,12 +823,12 @@ class Submission extends AbstractBaseApi
         $this->graderId = $graderId;
     }
 
-    public function getGradedAt(): ?string
+    public function getGradedAt(): ?\DateTime
     {
         return $this->gradedAt;
     }
 
-    public function setGradedAt(?string $gradedAt): void
+    public function setGradedAt(?\DateTime $gradedAt): void
     {
         $this->gradedAt = $gradedAt;
     }
@@ -933,12 +933,12 @@ class Submission extends AbstractBaseApi
         $this->anonymousId = $anonymousId;
     }
 
-    public function getPostedAt(): ?string
+    public function getPostedAt(): ?\DateTime
     {
         return $this->postedAt;
     }
 
-    public function setPostedAt(?string $postedAt): void
+    public function setPostedAt(?\DateTime $postedAt): void
     {
         $this->postedAt = $postedAt;
     }

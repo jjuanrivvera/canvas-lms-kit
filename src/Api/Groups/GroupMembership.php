@@ -65,12 +65,12 @@ class GroupMembership extends AbstractBaseApi
     /**
      * When the membership was created
      */
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
     /**
      * When the membership was last updated
      */
-    public ?string $updatedAt = null;
+    public ?\DateTime $updatedAt = null;
 
     /**
      * Just created membership flag

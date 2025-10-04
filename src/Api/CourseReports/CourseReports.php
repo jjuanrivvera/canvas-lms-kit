@@ -47,17 +47,17 @@ class CourseReports extends AbstractBaseApi
     /**
      * Report creation timestamp
      */
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
     /**
      * Report start timestamp
      */
-    public ?string $startedAt = null;
+    public ?\DateTime $startedAt = null;
 
     /**
      * Report completion timestamp
      */
-    public ?string $endedAt = null;
+    public ?\DateTime $endedAt = null;
 
     /**
      * Parameters used to generate the report
@@ -294,9 +294,9 @@ class CourseReports extends AbstractBaseApi
             'status' => $this->status,
             'file_url' => $this->fileUrl,
             'attachment' => $this->attachment,
-            'created_at' => $this->createdAt,
-            'started_at' => $this->startedAt,
-            'ended_at' => $this->endedAt,
+            'created_at' => $this->createdAt?->format('c'),
+            'started_at' => $this->startedAt?->format('c'),
+            'ended_at' => $this->endedAt?->format('c'),
             'parameters' => $this->parameters,
             'progress' => $this->progress,
         ];

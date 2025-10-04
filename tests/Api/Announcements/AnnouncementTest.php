@@ -84,8 +84,10 @@ class AnnouncementTest extends TestCase
         $this->assertEquals('Important Announcement', $announcement->getTitle());
         $this->assertEquals('This is an important announcement', $announcement->getMessage());
         $this->assertEquals('https://canvas.example.com/announcements/1', $announcement->getHtmlUrl());
-        $this->assertEquals('2024-01-01T10:00:00Z', $announcement->getPostedAt());
-        $this->assertEquals('2024-01-02T10:00:00Z', $announcement->getDelayedPostAt());
+        $this->assertInstanceOf(\DateTime::class, $announcement->getPostedAt());
+        $this->assertEquals('2024-01-01T10:00:00+00:00', $announcement->getPostedAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $announcement->getDelayedPostAt());
+        $this->assertEquals('2024-01-02T10:00:00+00:00', $announcement->getDelayedPostAt()->format('c'));
         $this->assertEquals('side_comment', $announcement->getDiscussionType());
         $this->assertFalse($announcement->getRequireInitialPost());
         $this->assertFalse($announcement->getLocked());
@@ -305,7 +307,8 @@ class AnnouncementTest extends TestCase
         $announcement = Announcement::create($createDTO);
 
         $this->assertEquals('DTO Announcement', $announcement->getTitle());
-        $this->assertEquals('2024-03-01T10:00:00Z', $announcement->getDelayedPostAt());
+        $this->assertInstanceOf(\DateTime::class, $announcement->getDelayedPostAt());
+        $this->assertEquals('2024-03-01T10:00:00+00:00', $announcement->getDelayedPostAt()->format('c'));
     }
 
     public function testUpdate(): void
@@ -379,7 +382,8 @@ class AnnouncementTest extends TestCase
         $result = $announcement->scheduleFor('2024-06-01T10:00:00Z');
 
         $this->assertSame($announcement, $result);
-        $this->assertEquals('2024-06-01T10:00:00Z', $announcement->getDelayedPostAt());
+        $this->assertInstanceOf(\DateTime::class, $announcement->getDelayedPostAt());
+        $this->assertEquals('2024-06-01T10:00:00+00:00', $announcement->getDelayedPostAt()->format('c'));
     }
 
     public function testScheduleForThrowsExceptionWhenIdNotSet(): void

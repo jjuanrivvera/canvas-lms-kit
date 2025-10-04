@@ -119,23 +119,23 @@ class File extends AbstractBaseApi
     /**
      * The datetime the file was created
      *
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
     /**
      * The datetime the file was last updated
      *
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $updatedAt = null;
+    public ?\DateTime $updatedAt = null;
 
     /**
      * The datetime the file will be deleted (not present for file upload requests)
      *
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $unlockAt = null;
+    public ?\DateTime $unlockAt = null;
 
     /**
      * Whether the file is locked
@@ -154,9 +154,9 @@ class File extends AbstractBaseApi
     /**
      * The datetime the file was locked at
      *
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $lockAt = null;
+    public ?\DateTime $lockAt = null;
 
     /**
      * Whether the file is locked for the user
@@ -842,19 +842,19 @@ class File extends AbstractBaseApi
     /**
      * Get the created at timestamp
      *
-     * @return string
+     * @return \DateTime|null
      */
-    public function getCreatedAt(): string
+    public function getCreatedAt(): ?\DateTime
     {
-        return $this->createdAt ?? '';
+        return $this->createdAt;
     }
 
     /**
      * Set the created at timestamp
      *
-     * @param string $createdAt
+     * @param \DateTime|null $createdAt
      */
-    public function setCreatedAt(string $createdAt): void
+    public function setCreatedAt(?\DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
@@ -862,19 +862,19 @@ class File extends AbstractBaseApi
     /**
      * Get the updated at timestamp
      *
-     * @return string
+     * @return \DateTime|null
      */
-    public function getUpdatedAt(): string
+    public function getUpdatedAt(): ?\DateTime
     {
-        return $this->updatedAt ?? '';
+        return $this->updatedAt;
     }
 
     /**
      * Set the updated at timestamp
      *
-     * @param string $updatedAt
+     * @param \DateTime|null $updatedAt
      */
-    public function setUpdatedAt(string $updatedAt): void
+    public function setUpdatedAt(?\DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
     }

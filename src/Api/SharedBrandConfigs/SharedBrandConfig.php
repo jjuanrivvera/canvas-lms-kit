@@ -52,12 +52,12 @@ class SharedBrandConfig
     /**
      * When this was created
      */
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
     /**
      * When this was last updated
      */
-    public ?string $updatedAt = null;
+    public ?\DateTime $updatedAt = null;
 
     /**
      * Constructor
@@ -66,12 +66,25 @@ class SharedBrandConfig
      */
     public function __construct(array $data = [])
     {
+        // Define date fields that need DateTime conversion
+        $dateFields = ['createdAt', 'updatedAt'];
+
         // Convert snake_case keys from Canvas API to camelCase properties
         foreach ($data as $key => $value) {
             $camelKey = lcfirst(str_replace('_', '', ucwords($key, '_')));
 
             if (property_exists($this, $camelKey) && !is_null($value)) {
-                $this->{$camelKey} = $value;
+                // Cast date fields to DateTime
+                if (in_array($camelKey, $dateFields, true) && is_string($value)) {
+                    try {
+                        $this->{$camelKey} = new \DateTime($value);
+                    } catch (\Exception $e) {
+                        // If parsing fails, leave as null
+                        $this->{$camelKey} = null;
+                    }
+                } else {
+                    $this->{$camelKey} = $value;
+                }
             }
         }
     }
@@ -287,8 +300,8 @@ class SharedBrandConfig
             'account_id' => $this->accountId,
             'brand_config_md5' => $this->brandConfigMd5,
             'name' => $this->name,
-            'created_at' => $this->createdAt,
-            'updated_at' => $this->updatedAt,
+            'created_at' => $this->createdAt?->format('c'),
+            'updated_at' => $this->updatedAt?->format('c'),
         ];
     }
 }

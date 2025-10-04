@@ -214,9 +214,9 @@ class User extends AbstractBaseApi
      * Optional: This field is only returned in certain API calls, and will return a
      * timestamp representing the last time the user logged in to canvas.
      *
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $lastLogin;
+    public ?\DateTime $lastLogin;
 
     /**
      * Optional: This field is only returned in certain API calls, and will return
@@ -925,17 +925,21 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * @return string|null
+     * Get last login timestamp
+     *
+     * @return \DateTime|null
      */
-    public function getLastLogin(): ?string
+    public function getLastLogin(): ?\DateTime
     {
         return $this->lastLogin;
     }
 
     /**
-     * @param string|null $lastLogin
+     * Set last login timestamp
+     *
+     * @param \DateTime|null $lastLogin
      */
-    public function setLastLogin(?string $lastLogin): void
+    public function setLastLogin(?\DateTime $lastLogin): void
     {
         $this->lastLogin = $lastLogin;
     }

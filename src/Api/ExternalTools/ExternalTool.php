@@ -242,12 +242,12 @@ class ExternalTool extends AbstractBaseApi
     /**
      * External tool creation timestamp
      */
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
     /**
      * External tool last update timestamp
      */
-    public ?string $updatedAt = null;
+    public ?\DateTime $updatedAt = null;
 
     /**
      * The unique identifier for the deployment of the tool
@@ -920,9 +920,9 @@ class ExternalTool extends AbstractBaseApi
     /**
      * Get created at timestamp
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getCreatedAt(): ?string
+    public function getCreatedAt(): ?\DateTime
     {
         return $this->createdAt;
     }
@@ -930,11 +930,11 @@ class ExternalTool extends AbstractBaseApi
     /**
      * Set created at timestamp
      *
-     * @param string|null $createdAt
+     * @param \DateTime|null $createdAt
      *
      * @return void
      */
-    public function setCreatedAt(?string $createdAt): void
+    public function setCreatedAt(?\DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
@@ -942,9 +942,9 @@ class ExternalTool extends AbstractBaseApi
     /**
      * Get updated at timestamp
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getUpdatedAt(): ?string
+    public function getUpdatedAt(): ?\DateTime
     {
         return $this->updatedAt;
     }
@@ -952,11 +952,11 @@ class ExternalTool extends AbstractBaseApi
     /**
      * Set updated at timestamp
      *
-     * @param string|null $updatedAt
+     * @param \DateTime|null $updatedAt
      *
      * @return void
      */
-    public function setUpdatedAt(?string $updatedAt): void
+    public function setUpdatedAt(?\DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
     }
@@ -1040,8 +1040,8 @@ class ExternalTool extends AbstractBaseApi
             'icon_url' => $this->iconUrl,
             'not_selectable' => $this->notSelectable,
             'workflow_state' => $this->workflowState,
-            'created_at' => $this->createdAt,
-            'updated_at' => $this->updatedAt,
+            'created_at' => $this->createdAt?->format('c'),
+            'updated_at' => $this->updatedAt?->format('c'),
             'deployment_id' => $this->deploymentId,
             'unified_tool_id' => $this->unifiedToolId,
         ];

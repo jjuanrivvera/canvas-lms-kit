@@ -97,9 +97,9 @@ class Enrollment extends AbstractBaseApi
 
     public ?bool $limitPrivilegesToCourseSection = null;
 
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
-    public ?string $updatedAt = null;
+    public ?\DateTime $updatedAt = null;
 
     // Canvas-specific properties
     public ?string $role = null;
@@ -137,11 +137,11 @@ class Enrollment extends AbstractBaseApi
 
     public ?int $totalActivityTime = null;
 
-    public ?string $lastActivityAt = null;
+    public ?\DateTime $lastActivityAt = null;
 
-    public ?string $startAt = null;
+    public ?\DateTime $startAt = null;
 
-    public ?string $endAt = null;
+    public ?\DateTime $endAt = null;
 
     /** @var mixed[]|null */
     public ?array $observedUsers = null;
@@ -665,12 +665,12 @@ class Enrollment extends AbstractBaseApi
         return $this->limitPrivilegesToCourseSection;
     }
 
-    public function getCreatedAt(): ?string
+    public function getCreatedAt(): ?\DateTime
     {
         return $this->createdAt;
     }
 
-    public function getUpdatedAt(): ?string
+    public function getUpdatedAt(): ?\DateTime
     {
         return $this->updatedAt;
     }
@@ -763,17 +763,17 @@ class Enrollment extends AbstractBaseApi
         return $this->totalActivityTime;
     }
 
-    public function getLastActivityAt(): ?string
+    public function getLastActivityAt(): ?\DateTime
     {
         return $this->lastActivityAt;
     }
 
-    public function getStartAt(): ?string
+    public function getStartAt(): ?\DateTime
     {
         return $this->startAt;
     }
 
-    public function getEndAt(): ?string
+    public function getEndAt(): ?\DateTime
     {
         return $this->endAt;
     }
@@ -865,12 +865,12 @@ class Enrollment extends AbstractBaseApi
         $this->limitPrivilegesToCourseSection = $limitPrivilegesToCourseSection;
     }
 
-    public function setStartAt(?string $startAt): void
+    public function setStartAt(?\DateTime $startAt): void
     {
         $this->startAt = $startAt;
     }
 
-    public function setEndAt(?string $endAt): void
+    public function setEndAt(?\DateTime $endAt): void
     {
         $this->endAt = $endAt;
     }
