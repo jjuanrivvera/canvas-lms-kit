@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Critical: Fixed Static Alias Dispatch in AbstractBaseApi** (#149)
+  - Fixed fatal error in `AbstractBaseApi::__callStatic()` when using method aliases
+  - Corrected syntax from `static::$method()` to `static::{$method}()` for dynamic static method calls
+  - All 10 method aliases now work correctly:
+    - `get()` aliases: `fetch()`, `list()`, `fetchAll()`
+    - `find()` aliases: `one()`, `getOne()`
+    - `all()` aliases: `fetchAllPages()`, `getAll()`
+    - `paginate()` aliases: `getPaginated()`, `withPagination()`, `fetchPage()`
+  - Added comprehensive test coverage with actual alias invocation (15 assertions)
+  - **Impact**: Previously, calling any alias method would cause production fatal errors
+
 ### Changed
 - **⚠️ BREAKING CHANGE: Standardized Date/Time Property Types Across 21 Models** (#154)
   - Changed all date/time properties from `?string` to `?DateTime` in the following classes:

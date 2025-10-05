@@ -408,7 +408,7 @@ abstract class AbstractBaseApi implements ApiInterface
     {
         foreach (static::$methodAliases as $method => $aliases) {
             if (is_array($aliases) && in_array($name, $aliases, true)) {
-                return static::$method(...$arguments);
+                return static::{$method}(...$arguments);
             }
         }
 
