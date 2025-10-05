@@ -340,6 +340,77 @@ class AbstractBaseApiTest extends TestCase
     }
 
     /**
+     * Test that method aliases actually work when invoked
+     *
+     * This test actually CALLS the alias methods to ensure they work,
+     * unlike testMethodAliases which only checks registration.
+     */
+    public function testMethodAliasesActuallyWork(): void
+    {
+        // Test 'get' method aliases: fetch, list, fetchAll
+        $result = $this->testApiClass::fetch();
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+
+        $result = $this->testApiClass::list();
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+
+        $result = $this->testApiClass::fetchAll();
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+
+        // Test 'find' method aliases: one, getOne
+        $result = $this->testApiClass::one(123);
+        $this->assertInstanceOf($this->testApiClass, $result);
+        $this->assertEquals(123, $result->id);
+
+        $result = $this->testApiClass::getOne(456);
+        $this->assertInstanceOf($this->testApiClass, $result);
+        $this->assertEquals(456, $result->id);
+
+        // Test 'all' method aliases: fetchAllPages, getAll
+        // These require mocking since they use getPaginatedResponse
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->method('getJsonData')
+            ->willReturn([
+                ['id' => 1, 'name' => 'Item 1'],
+                ['id' => 2, 'name' => 'Item 2'],
+            ]);
+        $mockPaginatedResponse->method('getNext')
+            ->willReturn(null);
+
+        $this->mockHttpClient->method('getPaginated')
+            ->willReturn($mockPaginatedResponse);
+
+        $result = $this->testApiClass::fetchAllPages();
+        $this->assertIsArray($result);
+
+        $result = $this->testApiClass::getAll();
+        $this->assertIsArray($result);
+
+        // Test 'paginate' method aliases: getPaginated, withPagination, fetchPage
+        $mockPaginationResult = $this->createMock(PaginationResult::class);
+        $mockPaginatedResponse2 = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse2->method('getJsonData')
+            ->willReturn([['id' => 1, 'name' => 'Item 1']]);
+        $mockPaginatedResponse2->method('toPaginationResult')
+            ->willReturn($mockPaginationResult);
+
+        $this->mockHttpClient->method('getPaginated')
+            ->willReturn($mockPaginatedResponse2);
+
+        $result = $this->testApiClass::getPaginated();
+        $this->assertInstanceOf(PaginationResult::class, $result);
+
+        $result = $this->testApiClass::withPagination();
+        $this->assertInstanceOf(PaginationResult::class, $result);
+
+        $result = $this->testApiClass::fetchPage();
+        $this->assertInstanceOf(PaginationResult::class, $result);
+    }
+
+    /**
      * Test that invalid method calls throw appropriate exceptions
      */
     public function testInvalidMethodCallThrowsException(): void
