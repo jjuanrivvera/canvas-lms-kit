@@ -39,9 +39,9 @@ abstract class AbstractBaseApi implements ApiInterface
      * @var array<string, string[]>
      */
     protected static array $methodAliases = [
-        'get' => ['fetch', 'list', 'fetchAll'],
-        'all' => ['fetchAllPages', 'getAll'],
-        'paginate' => ['getPaginated', 'withPagination', 'fetchPage'],
+        'get' => ['fetch', 'list'],
+        'all' => ['fetchAllPages', 'getAll', 'fetchAll'],
+        'paginate' => ['getPaginated', 'withPagination'],
         'find' => ['one', 'getOne'],
     ];
 
