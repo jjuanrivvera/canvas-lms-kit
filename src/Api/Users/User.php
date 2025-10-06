@@ -436,6 +436,21 @@ class User extends AbstractBaseApi
     }
 
     /**
+     * Convert the object to an array for DTO operations
+     *
+     * @return mixed[]
+     */
+    protected function toDtoArray(): array
+    {
+        $data = parent::toDtoArray();
+
+        // Filter out null values to prevent type errors when creating DTOs
+        // This is necessary because CreateUserDTO has non-nullable typed properties
+        // with default values, while User properties are nullable
+        return array_filter($data, fn ($value) => $value !== null);
+    }
+
+    /**
      * Save the user to the Canvas LMS.
      *
      * @throws CanvasApiException
