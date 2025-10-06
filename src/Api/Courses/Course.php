@@ -518,7 +518,10 @@ class Course extends AbstractBaseApi
             $data['calendar'] = $this->calendar->toArray();
         }
 
-        return $data;
+        // Filter out null values to prevent type errors when creating DTOs
+        // This is necessary because CreateCourseDTO has non-nullable typed properties
+        // with default values, while Course properties are nullable
+        return array_filter($data, fn ($value) => $value !== null);
     }
 
     /**

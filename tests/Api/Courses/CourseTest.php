@@ -322,6 +322,221 @@ class CourseTest extends TestCase
     }
 
     /**
+     * Test saving a new course (POST path)
+     *
+     * @return void
+     */
+    public function testSaveNewCourse(): void
+    {
+        // Create new course without ID
+        $course = new Course(['name' => 'New Course', 'course_code' => 'NEW101']);
+
+        $responseBody = json_encode([
+            'id' => 123,
+            'name' => 'New Course',
+            'course_code' => 'NEW101',
+            'workflow_state' => 'unpublished',
+            'created_at' => '2024-01-01T00:00:00Z',
+        ]);
+
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with(
+                'POST',
+                '/accounts/1/courses',
+                $this->callback(function ($options) {
+                    // Verify multipart data for CreateCourseDTO
+                    return isset($options['multipart']) && is_array($options['multipart']);
+                })
+            )
+            ->willReturn($response);
+
+        $result = $course->save();
+
+        $this->assertInstanceOf(Course::class, $result);
+        $this->assertEquals(123, $course->getId());
+        $this->assertEquals('New Course', $course->getName());
+        $this->assertEquals('NEW101', $course->getCourseCode());
+    }
+
+    /**
+     * Test saving a new course with minimal data
+     *
+     * @return void
+     */
+    public function testSaveNewCourseWithMinimalData(): void
+    {
+        // Create course with only required field (name)
+        $course = new Course(['name' => 'Minimal Course']);
+
+        $responseBody = json_encode([
+            'id' => 456,
+            'name' => 'Minimal Course',
+            'workflow_state' => 'unpublished',
+        ]);
+
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', '/accounts/1/courses', $this->anything())
+            ->willReturn($response);
+
+        $result = $course->save();
+
+        $this->assertInstanceOf(Course::class, $result);
+        $this->assertEquals(456, $course->getId());
+        $this->assertEquals('Minimal Course', $course->getName());
+    }
+
+    /**
+     * Test saving a new course with all optional fields
+     *
+     * @return void
+     */
+    public function testSaveNewCourseWithAllOptionalFields(): void
+    {
+        $courseData = [
+            'name' => 'Complete Course',
+            'course_code' => 'COMP101',
+            'start_at' => '2024-09-01T08:00:00Z',
+            'end_at' => '2024-12-15T17:00:00Z',
+            'license' => 'private',
+            'is_public' => false,
+            'is_public_to_auth_users' => true,
+            'public_syllabus' => false,
+            'public_syllabus_to_auth' => true,
+            'public_description' => 'A complete test course',
+            'allow_student_wiki_edits' => true,
+            'allow_wiki_comments' => true,
+            'allow_student_forum_attachments' => true,
+            'open_enrollment' => false,
+            'self_enrollment' => false,
+            'restrict_enrollments_to_course_dates' => true,
+            'hide_final_grades' => false,
+            'apply_assignment_group_weights' => true,
+            'time_zone' => 'America/New_York',
+        ];
+
+        $course = new Course($courseData);
+
+        $responseBody = json_encode(array_merge(['id' => 789], $courseData));
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with(
+                'POST',
+                '/accounts/1/courses',
+                $this->callback(function ($options) {
+                    return isset($options['multipart']) && count($options['multipart']) > 0;
+                })
+            )
+            ->willReturn($response);
+
+        $result = $course->save();
+
+        $this->assertInstanceOf(Course::class, $result);
+        $this->assertEquals(789, $course->getId());
+        $this->assertEquals('Complete Course', $course->getName());
+        $this->assertEquals('COMP101', $course->getCourseCode());
+    }
+
+    /**
+     * Test that save() properly assigns ID after successful creation
+     *
+     * @return void
+     */
+    public function testSaveNewCourseAssignsIdAfterCreation(): void
+    {
+        $course = new Course(['name' => 'ID Assignment Test']);
+
+        // Verify no ID before save
+        $this->assertNull($course->getId());
+
+        $responseBody = json_encode([
+            'id' => 999,
+            'name' => 'ID Assignment Test',
+        ]);
+
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->willReturn($response);
+
+        $course->save();
+
+        // Verify ID is assigned after save
+        $this->assertNotNull($course->getId());
+        $this->assertEquals(999, $course->getId());
+    }
+
+    /**
+     * Test that save() uses the configured account ID for new courses
+     *
+     * @return void
+     */
+    public function testSaveNewCourseUsesConfiguredAccountId(): void
+    {
+        // Set a custom account ID
+        Config::setAccountId(789);
+
+        $course = new Course(['name' => 'Custom Account Course']);
+
+        $responseBody = json_encode([
+            'id' => 111,
+            'name' => 'Custom Account Course',
+        ]);
+
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with(
+                'POST',
+                '/accounts/789/courses',  // Verify custom account ID
+                $this->anything()
+            )
+            ->willReturn($response);
+
+        $course->save();
+
+        $this->assertEquals(111, $course->getId());
+
+        // Reset to default for other tests
+        Config::setAccountId(1);
+    }
+
+    /**
+     * Test that save() throws exception on API failure for new courses
+     *
+     * @return void
+     */
+    public function testSaveNewCourseThrowsExceptionOnApiFailure(): void
+    {
+        $course = new Course(['name' => 'Failing Course']);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', '/accounts/1/courses', $this->anything())
+            ->will($this->throwException(new CanvasApiException('API Error Creating Course')));
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('API Error Creating Course');
+
+        $course->save();
+    }
+
+    /**
      * Test the delete course method
      *
      * @return void

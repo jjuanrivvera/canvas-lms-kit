@@ -7,7 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Test Coverage: Course::save() and User::save() Creating New Resources** (#153)
+  - Added 6 comprehensive tests for Course::save() POST path (creating new courses)
+  - Added 6 comprehensive tests for User::save() POST path (creating new users)
+  - Tests cover: basic creation, minimal data, all optional fields, ID assignment, custom account ID, error handling
+  - Total Course test count increased from 45 to 51 tests (164 assertions)
+  - Total User test count increased from 29 to 35 tests (120 assertions)
+  - Tests validate CreateCourseDTO/CreateUserDTO usage and proper endpoint selection
+  - **Impact**: Prevents future issues similar to #150, ensures CREATE path works correctly with all data scenarios
+  - **Note**: Module and ModuleItem already had comprehensive save() tests for creating new resources
+
 ### Fixed
+- **Critical: Fixed Null Value Handling in Course::toDtoArray() and User::toDtoArray()** (#153)
+  - Fixed TypeError when creating Course/User with minimal data (null properties passed to non-nullable DTO)
+  - Added `array_filter()` to Course::toDtoArray() and User::toDtoArray() to remove null values before DTO construction
+  - Allows CreateCourseDTO/CreateUserDTO default values to work correctly
+  - **Impact**: Prevents type errors when creating courses/users, directly addresses issue #150's undefined index problems
 - **Critical: Fixed Uninitialized $id Property Errors Across 5 API Classes** (#150)
   - Fixed PHP 8+ "Typed property must not be accessed before initialization" errors
   - Changed `public int $id;` to `public ?int $id = null;` in:
