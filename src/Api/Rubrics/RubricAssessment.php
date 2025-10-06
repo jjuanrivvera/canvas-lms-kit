@@ -251,7 +251,7 @@ class RubricAssessment extends AbstractBaseApi
      *
      * @return int
      */
-    protected static function getContextCourseId(): int
+    protected static function getContextCourseId(): ?int
     {
         return self::getCourse()->id;
     }

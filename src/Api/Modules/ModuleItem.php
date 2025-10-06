@@ -114,9 +114,9 @@ class ModuleItem extends AbstractBaseApi
     /**
      * Unique identifier for the module item.
      *
-     * @var int
+     * @var int|null
      */
-    public int $id;
+    public ?int $id = null;
 
     /**
      * ID of the module containing this item.
@@ -307,7 +307,7 @@ class ModuleItem extends AbstractBaseApi
      *
      * @return int
      */
-    protected static function getContextCourseId(): int
+    protected static function getContextCourseId(): ?int
     {
         return self::getCourse()->id;
     }
@@ -643,9 +643,9 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

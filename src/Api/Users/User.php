@@ -96,9 +96,9 @@ class User extends AbstractBaseApi
     /**
      * The ID of the user.
      *
-     * @var int
+     * @var int|null
      */
-    public int $id;
+    public ?int $id = null;
 
     /**
      * The name of the user.
@@ -450,9 +450,9 @@ class User extends AbstractBaseApi
         $accountId = Config::getAccountId();
 
         // If the user has an ID, update it. Otherwise, create a new user.
-        $dto = $this->id ? new UpdateUserDTO($data) : new CreateUserDTO($data);
-        $path = $this->id ? "/users/{$this->id}" : "/accounts/{$accountId}/users";
-        $method = $this->id ? 'PUT' : 'POST';
+        $dto = $this->id !== null ? new UpdateUserDTO($data) : new CreateUserDTO($data);
+        $path = $this->id !== null ? "/users/{$this->id}" : "/accounts/{$accountId}/users";
+        $method = $this->id !== null ? 'PUT' : 'POST';
 
         $response = self::getApiClient()->request($method, $path, [
             'multipart' => $dto->toApiArray(),
@@ -685,9 +685,9 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

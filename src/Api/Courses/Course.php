@@ -102,9 +102,9 @@ class Course extends AbstractBaseApi
     /**
      * The unique identifier for the course
      *
-     * @var int
+     * @var int|null
      */
-    public int $id;
+    public ?int $id = null;
 
     /**
      * The SIS identifier for the course, if defined. This field is only included if
@@ -679,9 +679,9 @@ class Course extends AbstractBaseApi
         $accountId = Config::getAccountId();
 
         // If the course has an ID, update it. Otherwise, create it.
-        $dto = $data['id'] ? new UpdateCourseDTO($data) : new CreateCourseDTO($data);
-        $path = $data['id'] ? "/courses/{$this->id}" : "/accounts/{$accountId}/courses";
-        $method = $data['id'] ? 'PUT' : 'POST';
+        $dto = $this->id !== null ? new UpdateCourseDTO($data) : new CreateCourseDTO($data);
+        $path = $this->id !== null ? "/courses/{$this->id}" : "/accounts/{$accountId}/courses";
+        $method = $this->id !== null ? 'PUT' : 'POST';
 
         $response = self::getApiClient()->request($method, $path, [
             'multipart' => $dto->toApiArray(),
@@ -1779,9 +1779,9 @@ class Course extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

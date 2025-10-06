@@ -160,7 +160,7 @@ class Announcement extends DiscussionTopic
      *
      * @return int
      */
-    protected static function getContextCourseId(): int
+    protected static function getContextCourseId(): ?int
     {
         return self::getCourse()->id;
     }

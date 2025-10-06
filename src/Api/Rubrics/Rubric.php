@@ -270,7 +270,7 @@ class Rubric extends AbstractBaseApi
      */
     public static function findByContext(
         string $contextType,
-        int $contextId,
+        ?int $contextId,
         int $id,
         array $params = []
     ): self {
