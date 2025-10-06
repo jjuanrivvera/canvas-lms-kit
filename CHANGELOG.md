@@ -44,6 +44,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Impact**: Previously, calling any alias method would cause production fatal errors
 
 ### Changed
+- **⚠️ BREAKING CHANGE: Fixed fetchAll Alias and Removed fetchPage Alias** (#151)
+  - `fetchAll()` alias now maps to `all()` method (fetches all pages) instead of `get()` method (fetches first page only)
+  - Removed `fetchPage()` alias entirely - use `getPaginated()` or `withPagination()` instead
+  - **Migration**:
+    - If you were using `fetchAll()` expecting single-page results, use `fetch()` or `list()` instead
+    - If you were using `fetchPage()`, use `getPaginated()` or `withPagination()` instead
+  - **Benefit**: `fetchAll()` now intuitively retrieves all records across all pages as developers expect
+  - Updated tests to verify correct alias mapping and multi-page retrieval behavior
 - **⚠️ BREAKING CHANGE: Standardized Date/Time Property Types Across 21 Models** (#154)
   - Changed all date/time properties from `?string` to `?DateTime` in the following classes:
     - **Course**: `createdAt`, `startAt`, `endAt`
