@@ -141,9 +141,9 @@ class Module extends AbstractBaseApi
     /**
      * The unique identifier for the module.
      *
-     * @var int
+     * @var int|null
      */
-    public int $id;
+    public ?int $id = null;
 
     /**
      * The state of the module: 'active', 'deleted'.
@@ -299,7 +299,7 @@ class Module extends AbstractBaseApi
      *
      * @return int
      */
-    protected static function getContextCourseId(): int
+    protected static function getContextCourseId(): ?int
     {
         return self::getCourse()->id;
     }
@@ -473,9 +473,9 @@ class Module extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

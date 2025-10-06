@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Critical: Fixed Uninitialized $id Property Errors Across 5 API Classes** (#150)
+  - Fixed PHP 8+ "Typed property must not be accessed before initialization" errors
+  - Changed `public int $id;` to `public ?int $id = null;` in:
+    - Course, User, Module, ModuleItem, ModuleAssignmentOverride
+  - Updated `save()` methods in Course and User to use `$this->id !== null` instead of unsafe array/property access
+  - Updated all `getId()` methods to return `?int` instead of `int`
+  - Fixed 167 locations where uninitialized property access could throw errors
+  - **Impact**: Prevents fatal errors when accessing ID property before initialization, fixes undefined index errors in save() methods
 - **Critical: Fixed Static Alias Dispatch in AbstractBaseApi** (#149)
   - Fixed fatal error in `AbstractBaseApi::__callStatic()` when using method aliases
   - Corrected syntax from `static::$method()` to `static::{$method}()` for dynamic static method calls

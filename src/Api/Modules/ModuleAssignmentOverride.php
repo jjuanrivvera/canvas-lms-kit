@@ -23,9 +23,9 @@ class ModuleAssignmentOverride
     /**
      * The ID of the assignment override
      *
-     * @var int
+     * @var int|null
      */
-    public int $id;
+    public ?int $id = null;
 
     /**
      * The ID of the module the override applies to
@@ -81,9 +81,9 @@ class ModuleAssignmentOverride
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
