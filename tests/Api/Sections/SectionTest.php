@@ -319,7 +319,8 @@ class SectionTest extends TestCase
         $section = Section::update(456, $updateData);
 
         $this->assertEquals('Updated Section', $section->name);
-        $this->assertEquals('2024-06-30T17:00:00Z', $section->endAt);
+        $this->assertInstanceOf(\DateTime::class, $section->endAt);
+        $this->assertEquals('2024-06-30T17:00:00+00:00', $section->endAt->format('c'));
     }
 
     public function testCrossList(): void
@@ -457,8 +458,8 @@ class SectionTest extends TestCase
             'name' => 'Section A',
             'sis_section_id' => 's34643',
             'integration_id' => '3452342345',
-            'start_at' => '2024-01-15T08:00:00Z',
-            'end_at' => '2024-05-15T17:00:00Z',
+            'start_at' => '2024-01-15T08:00:00+00:00',
+            'end_at' => '2024-05-15T17:00:00+00:00',
             'restrict_enrollments_to_section_dates' => true,
         ];
 

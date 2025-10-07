@@ -153,12 +153,12 @@ class Page extends AbstractBaseApi
     /**
      * Page creation timestamp
      */
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
     /**
      * Page last update timestamp
      */
-    public ?string $updatedAt = null;
+    public ?\DateTime $updatedAt = null;
 
     /**
      * User who last edited the page
@@ -248,7 +248,7 @@ class Page extends AbstractBaseApi
      *
      * @return int
      */
-    protected static function getContextCourseId(): int
+    protected static function getContextCourseId(): ?int
     {
         return self::getCourse()->id;
     }
@@ -602,9 +602,9 @@ class Page extends AbstractBaseApi
     /**
      * Get created at timestamp
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getCreatedAt(): ?string
+    public function getCreatedAt(): ?\DateTime
     {
         return $this->createdAt;
     }
@@ -612,11 +612,11 @@ class Page extends AbstractBaseApi
     /**
      * Set created at timestamp
      *
-     * @param string|null $createdAt
+     * @param \DateTime|null $createdAt
      *
      * @return void
      */
-    public function setCreatedAt(?string $createdAt): void
+    public function setCreatedAt(?\DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
@@ -624,9 +624,9 @@ class Page extends AbstractBaseApi
     /**
      * Get updated at timestamp
      *
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getUpdatedAt(): ?string
+    public function getUpdatedAt(): ?\DateTime
     {
         return $this->updatedAt;
     }
@@ -634,11 +634,11 @@ class Page extends AbstractBaseApi
     /**
      * Set updated at timestamp
      *
-     * @param string|null $updatedAt
+     * @param \DateTime|null $updatedAt
      *
      * @return void
      */
-    public function setUpdatedAt(?string $updatedAt): void
+    public function setUpdatedAt(?\DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
     }

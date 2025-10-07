@@ -39,9 +39,9 @@ class DeveloperKey extends AbstractBaseApi
 
     public ?string $name = null;
 
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
-    public ?string $updatedAt = null;
+    public ?\DateTime $updatedAt = null;
 
     public ?string $workflowState = null;
 
@@ -73,7 +73,7 @@ class DeveloperKey extends AbstractBaseApi
 
     public ?int $accessTokenCount = null;
 
-    public ?string $lastUsedAt = null;
+    public ?\DateTime $lastUsedAt = null;
 
     public ?bool $testClusterOnly = null;
 

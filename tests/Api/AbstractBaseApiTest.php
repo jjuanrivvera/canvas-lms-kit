@@ -241,9 +241,9 @@ class AbstractBaseApiTest extends TestCase
         $this->assertArrayHasKey('find', $aliases);
 
         // Test specific alias mappings
-        $this->assertEquals(['fetch', 'list', 'fetchAll'], $aliases['get']);
-        $this->assertEquals(['fetchAllPages', 'getAll'], $aliases['all']);
-        $this->assertEquals(['getPaginated', 'withPagination', 'fetchPage'], $aliases['paginate']);
+        $this->assertEquals(['fetch', 'list'], $aliases['get']);
+        $this->assertEquals(['fetchAllPages', 'getAll', 'fetchAll'], $aliases['all']);
+        $this->assertEquals(['getPaginated', 'withPagination'], $aliases['paginate']);
         $this->assertEquals(['one', 'getOne'], $aliases['find']);
     }
 
@@ -337,6 +337,126 @@ class AbstractBaseApiTest extends TestCase
         $property->setAccessible(true);
 
         return $property->getValue();
+    }
+
+    /**
+     * Test that method aliases actually work when invoked
+     *
+     * This test actually CALLS the alias methods to ensure they work,
+     * unlike testMethodAliases which only checks registration.
+     */
+    public function testMethodAliasesActuallyWork(): void
+    {
+        // Test 'get' method aliases: fetch, list
+        $result = $this->testApiClass::fetch();
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+
+        $result = $this->testApiClass::list();
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+
+        // Test 'find' method aliases: one, getOne
+        $result = $this->testApiClass::one(123);
+        $this->assertInstanceOf($this->testApiClass, $result);
+        $this->assertEquals(123, $result->id);
+
+        $result = $this->testApiClass::getOne(456);
+        $this->assertInstanceOf($this->testApiClass, $result);
+        $this->assertEquals(456, $result->id);
+
+        // Test 'all' method aliases: fetchAllPages, getAll, fetchAll
+        // These require mocking since they use getPaginatedResponse
+        $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse->method('getJsonData')
+            ->willReturn([
+                ['id' => 1, 'name' => 'Item 1'],
+                ['id' => 2, 'name' => 'Item 2'],
+            ]);
+        $mockPaginatedResponse->method('getNext')
+            ->willReturn(null);
+
+        $this->mockHttpClient->method('getPaginated')
+            ->willReturn($mockPaginatedResponse);
+
+        $result = $this->testApiClass::fetchAllPages();
+        $this->assertIsArray($result);
+
+        $result = $this->testApiClass::getAll();
+        $this->assertIsArray($result);
+
+        $result = $this->testApiClass::fetchAll();
+        $this->assertIsArray($result);
+
+        // Test 'paginate' method aliases: getPaginated, withPagination
+        $mockPaginationResult = $this->createMock(PaginationResult::class);
+        $mockPaginatedResponse2 = $this->createMock(PaginatedResponse::class);
+        $mockPaginatedResponse2->method('getJsonData')
+            ->willReturn([['id' => 1, 'name' => 'Item 1']]);
+        $mockPaginatedResponse2->method('toPaginationResult')
+            ->willReturn($mockPaginationResult);
+
+        $this->mockHttpClient->method('getPaginated')
+            ->willReturn($mockPaginatedResponse2);
+
+        $result = $this->testApiClass::getPaginated();
+        $this->assertInstanceOf(PaginationResult::class, $result);
+
+        $result = $this->testApiClass::withPagination();
+        $this->assertInstanceOf(PaginationResult::class, $result);
+    }
+
+    /**
+     * Test that fetchAll retrieves all pages of results
+     *
+     * This integration test demonstrates that fetchAll() correctly
+     * retrieves all records across multiple pages, not just the first page.
+     */
+    public function testFetchAllRetrievesAllPages(): void
+    {
+        // Create mock data representing 3 pages of results
+        $page1Data = [
+            ['id' => 1, 'name' => 'Item 1'],
+            ['id' => 2, 'name' => 'Item 2'],
+        ];
+        $page2Data = [
+            ['id' => 3, 'name' => 'Item 3'],
+            ['id' => 4, 'name' => 'Item 4'],
+        ];
+        $page3Data = [
+            ['id' => 5, 'name' => 'Item 5'],
+            ['id' => 6, 'name' => 'Item 6'],
+        ];
+
+        // Create mock paginated responses for all pages
+        $mockPage3 = $this->createMock(PaginatedResponse::class);
+        $mockPage3->method('getJsonData')->willReturn($page3Data);
+        $mockPage3->method('getNext')->willReturn(null);
+
+        $mockPage2 = $this->createMock(PaginatedResponse::class);
+        $mockPage2->method('getJsonData')->willReturn($page2Data);
+        $mockPage2->method('getNext')->willReturn($mockPage3);
+
+        $mockPage1 = $this->createMock(PaginatedResponse::class);
+        $mockPage1->method('getJsonData')->willReturn($page1Data);
+        $mockPage1->method('getNext')->willReturn($mockPage2);
+
+        $this->mockHttpClient->expects($this->once())
+            ->method('getPaginated')
+            ->willReturn($mockPage1);
+
+        // Call fetchAll and verify it retrieves all pages
+        $result = $this->testApiClass::fetchAll();
+
+        $this->assertIsArray($result);
+        $this->assertCount(6, $result, 'fetchAll should retrieve all 6 items across 3 pages');
+
+        // Verify all items are present
+        $expectedIds = [1, 2, 3, 4, 5, 6];
+        foreach ($result as $index => $item) {
+            $this->assertInstanceOf($this->testApiClass, $item);
+            $this->assertEquals($expectedIds[$index], $item->id);
+        }
     }
 
     /**

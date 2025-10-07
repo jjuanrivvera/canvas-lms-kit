@@ -102,9 +102,9 @@ class Course extends AbstractBaseApi
     /**
      * The unique identifier for the course
      *
-     * @var int
+     * @var int|null
      */
-    public int $id;
+    public ?int $id = null;
 
     /**
      * The SIS identifier for the course, if defined. This field is only included if
@@ -185,19 +185,19 @@ class Course extends AbstractBaseApi
     public ?string $gradePassbackSetting = null;
 
     /**
-     * @var string
+     * @var \DateTime|null
      */
-    public string $createdAt = '';
+    public ?\DateTime $createdAt = null;
 
     /**
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $startAt = null;
+    public ?\DateTime $startAt = null;
 
     /**
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $endAt = null;
+    public ?\DateTime $endAt = null;
 
     /**
      * @var string|null
@@ -518,7 +518,10 @@ class Course extends AbstractBaseApi
             $data['calendar'] = $this->calendar->toArray();
         }
 
-        return $data;
+        // Filter out null values to prevent type errors when creating DTOs
+        // This is necessary because CreateCourseDTO has non-nullable typed properties
+        // with default values, while Course properties are nullable
+        return array_filter($data, fn ($value) => $value !== null);
     }
 
     /**
@@ -679,9 +682,9 @@ class Course extends AbstractBaseApi
         $accountId = Config::getAccountId();
 
         // If the course has an ID, update it. Otherwise, create it.
-        $dto = $data['id'] ? new UpdateCourseDTO($data) : new CreateCourseDTO($data);
-        $path = $data['id'] ? "/courses/{$this->id}" : "/accounts/{$accountId}/courses";
-        $method = $data['id'] ? 'PUT' : 'POST';
+        $dto = $this->id !== null ? new UpdateCourseDTO($data) : new CreateCourseDTO($data);
+        $path = $this->id !== null ? "/courses/{$this->id}" : "/accounts/{$accountId}/courses";
+        $method = $this->id !== null ? 'PUT' : 'POST';
 
         $response = self::getApiClient()->request($method, $path, [
             'multipart' => $dto->toApiArray(),
@@ -1779,9 +1782,9 @@ class Course extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -2019,49 +2022,49 @@ class Course extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return \DateTime|null
      */
-    public function getCreatedAt(): string
+    public function getCreatedAt(): ?\DateTime
     {
         return $this->createdAt;
     }
 
     /**
-     * @param string $createdAt
+     * @param \DateTime|null $createdAt
      */
-    public function setCreatedAt(string $createdAt): void
+    public function setCreatedAt(?\DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
     }
 
     /**
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getStartAt(): ?string
+    public function getStartAt(): ?\DateTime
     {
         return $this->startAt;
     }
 
     /**
-     * @param string|null $startAt
+     * @param \DateTime|null $startAt
      */
-    public function setStartAt(?string $startAt): void
+    public function setStartAt(?\DateTime $startAt): void
     {
         $this->startAt = $startAt;
     }
 
     /**
-     * @return string|null
+     * @return \DateTime|null
      */
-    public function getEndAt(): ?string
+    public function getEndAt(): ?\DateTime
     {
         return $this->endAt;
     }
 
     /**
-     * @param string|null $endAt
+     * @param \DateTime|null $endAt
      */
-    public function setEndAt(?string $endAt): void
+    public function setEndAt(?\DateTime $endAt): void
     {
         $this->endAt = $endAt;
     }

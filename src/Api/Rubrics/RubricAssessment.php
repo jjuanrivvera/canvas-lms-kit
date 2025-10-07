@@ -183,16 +183,16 @@ class RubricAssessment extends AbstractBaseApi
     /**
      * Created timestamp
      *
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $createdAt = null;
+    public ?\DateTime $createdAt = null;
 
     /**
      * Updated timestamp
      *
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $updatedAt = null;
+    public ?\DateTime $updatedAt = null;
 
     /**
      * Course context for operations
@@ -251,7 +251,7 @@ class RubricAssessment extends AbstractBaseApi
      *
      * @return int
      */
-    protected static function getContextCourseId(): int
+    protected static function getContextCourseId(): ?int
     {
         return self::getCourse()->id;
     }

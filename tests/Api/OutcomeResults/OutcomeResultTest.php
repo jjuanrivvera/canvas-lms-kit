@@ -74,7 +74,8 @@ class OutcomeResultTest extends TestCase
         $this->assertInstanceOf(OutcomeResult::class, $results[0]);
         $this->assertEquals(1, $results[0]->id);
         $this->assertEquals(3.5, $results[0]->score);
-        $this->assertEquals('2024-01-15T10:00:00Z', $results[0]->submittedOrAssessedAt);
+        $this->assertInstanceOf(\DateTime::class, $results[0]->submittedOrAssessedAt);
+        $this->assertEquals('2024-01-15T10:00:00+00:00', $results[0]->submittedOrAssessedAt->format('c'));
         $this->assertEquals(1001, $results[0]->links['user']);
     }
 

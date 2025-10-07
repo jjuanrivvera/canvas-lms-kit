@@ -7,6 +7,97 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2025-10-06
+
+### Added
+- **Test Coverage: Course::save() and User::save() Creating New Resources** (#153)
+  - Added 6 comprehensive tests for Course::save() POST path (creating new courses)
+  - Added 6 comprehensive tests for User::save() POST path (creating new users)
+  - Tests cover: basic creation, minimal data, all optional fields, ID assignment, custom account ID, error handling
+  - Total Course test count increased from 45 to 51 tests (164 assertions)
+  - Total User test count increased from 29 to 35 tests (120 assertions)
+  - Tests validate CreateCourseDTO/CreateUserDTO usage and proper endpoint selection
+  - **Impact**: Prevents future issues similar to #150, ensures CREATE path works correctly with all data scenarios
+  - **Note**: Module and ModuleItem already had comprehensive save() tests for creating new resources
+
+### Fixed
+- **Critical: Fixed Null Value Handling in Course::toDtoArray() and User::toDtoArray()** (#153)
+  - Fixed TypeError when creating Course/User with minimal data (null properties passed to non-nullable DTO)
+  - Added `array_filter()` to Course::toDtoArray() and User::toDtoArray() to remove null values before DTO construction
+  - Allows CreateCourseDTO/CreateUserDTO default values to work correctly
+  - **Impact**: Prevents type errors when creating courses/users, directly addresses issue #150's undefined index problems
+- **Critical: Fixed Uninitialized $id Property Errors Across 5 API Classes** (#150)
+  - Fixed PHP 8+ "Typed property must not be accessed before initialization" errors
+  - Changed `public int $id;` to `public ?int $id = null;` in:
+    - Course, User, Module, ModuleItem, ModuleAssignmentOverride
+  - Updated `save()` methods in Course and User to use `$this->id !== null` instead of unsafe array/property access
+  - Updated all `getId()` methods to return `?int` instead of `int`
+  - Fixed 167 locations where uninitialized property access could throw errors
+  - **Impact**: Prevents fatal errors when accessing ID property before initialization, fixes undefined index errors in save() methods
+- **Critical: Fixed Static Alias Dispatch in AbstractBaseApi** (#149)
+  - Fixed fatal error in `AbstractBaseApi::__callStatic()` when using method aliases
+  - Corrected syntax from `static::$method()` to `static::{$method}()` for dynamic static method calls
+  - All 10 method aliases now work correctly:
+    - `get()` aliases: `fetch()`, `list()`, `fetchAll()`
+    - `find()` aliases: `one()`, `getOne()`
+    - `all()` aliases: `fetchAllPages()`, `getAll()`
+    - `paginate()` aliases: `getPaginated()`, `withPagination()`, `fetchPage()`
+  - Added comprehensive test coverage with actual alias invocation (15 assertions)
+  - **Impact**: Previously, calling any alias method would cause production fatal errors
+
+### Changed
+- **⚠️ BREAKING CHANGE: Fixed fetchAll Alias and Removed fetchPage Alias** (#151)
+  - `fetchAll()` alias now maps to `all()` method (fetches all pages) instead of `get()` method (fetches first page only)
+  - Removed `fetchPage()` alias entirely - use `getPaginated()` or `withPagination()` instead
+  - **Migration**:
+    - If you were using `fetchAll()` expecting single-page results, use `fetch()` or `list()` instead
+    - If you were using `fetchPage()`, use `getPaginated()` or `withPagination()` instead
+  - **Benefit**: `fetchAll()` now intuitively retrieves all records across all pages as developers expect
+  - Updated tests to verify correct alias mapping and multi-page retrieval behavior
+- **⚠️ BREAKING CHANGE: Standardized Date/Time Property Types Across 21 Models** (#154)
+  - Changed all date/time properties from `?string` to `?DateTime` in the following classes:
+    - **Course**: `createdAt`, `startAt`, `endAt`
+    - **Assignment**: `dueAt`, `lockAt`, `unlockAt`, `createdAt`, `updatedAt`, `peerReviewsAssignAt`
+    - **Quiz**: `dueAt`, `lockAt`, `unlockAt`, `createdAt`, `updatedAt`
+    - **Enrollment**: `createdAt`, `updatedAt`, `lastActivityAt`, `startAt`, `endAt`
+    - **DiscussionTopic**: `postedAt`, `lastReplyAt`, `delayedPostAt`, `createdAt`, `updatedAt`
+    - **Submission**: `submittedAt`, `gradedAt`, `postedAt`
+    - **File**: `createdAt`, `updatedAt`, `unlockAt`, `lockAt`
+    - **Page**: `createdAt`, `updatedAt`
+    - **Section**: `startAt`, `endAt`
+    - **ExternalTool**: `createdAt`, `updatedAt`
+    - **OutcomeResult**: `submittedOrAssessedAt`, `attemptedAt`, `assessedAt`
+    - **RubricAssessment**: `createdAt`, `updatedAt`
+    - **RubricAssociation**: `createdAt`, `updatedAt`
+    - **Login**: `createdAt`
+    - **CourseReports**: `createdAt`, `startedAt`, `endedAt`
+    - **GroupMembership**: `createdAt`, `updatedAt`
+    - **DeveloperKey**: `createdAt`, `updatedAt`, `lastUsedAt`
+    - **QuizSubmission**: `startedAt`, `finishedAt`, `endAt`
+    - **OutcomeImport**: `createdAt`, `endedAt`, `updatedAt`
+    - **Conversation**: `lastMessageAt`, `startAt`
+    - **User**: `lastLogin`
+    - **SharedBrandConfig**: `createdAt`, `updatedAt` (custom constructor implementation)
+  - Updated corresponding getters/setters to use `?DateTime` type hints (where applicable)
+  - Enhanced `AbstractBaseApi::__construct()` to automatically convert date strings to DateTime objects via `castValue()`
+  - Expanded `castValue()` date field detection from 12 to 29 recognized date field names
+  - **Migration Guide for Consumers:**
+    ```php
+    // Before (returned string):
+    $dateString = $course->createdAt; // "2024-01-15T10:30:00Z"
+
+    // After (returns DateTime):
+    $dateObject = $course->getCreatedAt(); // DateTime object
+    $formatted = $course->getCreatedAt()?->format('Y-m-d'); // "2024-01-15"
+    $iso8601 = $course->getCreatedAt()?->format('c'); // ISO-8601 format
+    ```
+  - Benefits:
+    - Type-safe DateTime operations with IDE autocomplete across all models
+    - Automatic ISO-8601 parsing eliminates manual conversions
+    - Consistent date handling across the entire SDK
+    - Prevents TypeError when using save/update operations
+  - Added comprehensive test coverage for date hydration, null handling, and DTO serialization
+
 ## [1.5.4] - 2025-09-29
 
 ### Added
@@ -538,7 +629,12 @@ Canvas LMS Kit is now production-ready with 90% Canvas API coverage, rate limiti
 - Contributing guidelines
 - Wiki with implementation guides
 
-[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.4...v1.6.0
+[1.5.4]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.3...v1.5.4
+[1.5.3]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.2...v1.5.3
+[1.5.2]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.1...v1.5.2
+[1.5.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.1...v1.4.0

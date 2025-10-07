@@ -314,6 +314,204 @@ class UserTest extends TestCase
         $this->user->save();
     }
 
+    /**
+     * Test saving a new user (POST path)
+     *
+     * @return void
+     */
+    public function testSaveNewUser(): void
+    {
+        // Create new user without ID
+        $user = new User(['name' => 'New User']);
+
+        $responseBody = json_encode([
+            'id' => 123,
+            'name' => 'New User',
+            'login_id' => 'newuser',
+        ]);
+
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with(
+                'POST',
+                '/accounts/1/users',
+                $this->callback(function ($options) {
+                    // Verify multipart data for CreateUserDTO
+                    return isset($options['multipart']) && is_array($options['multipart']);
+                })
+            )
+            ->willReturn($response);
+
+        $result = $user->save();
+
+        $this->assertInstanceOf(User::class, $result);
+        $this->assertEquals(123, $user->getId());
+        $this->assertEquals('New User', $user->getName());
+    }
+
+    /**
+     * Test saving a new user with minimal data
+     *
+     * @return void
+     */
+    public function testSaveNewUserWithMinimalData(): void
+    {
+        // Create user with only required field (name)
+        $user = new User(['name' => 'Minimal User']);
+
+        $responseBody = json_encode([
+            'id' => 456,
+            'name' => 'Minimal User',
+        ]);
+
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', '/accounts/1/users', $this->anything())
+            ->willReturn($response);
+
+        $result = $user->save();
+
+        $this->assertInstanceOf(User::class, $result);
+        $this->assertEquals(456, $user->getId());
+        $this->assertEquals('Minimal User', $user->getName());
+    }
+
+    /**
+     * Test saving a new user with all optional fields
+     *
+     * @return void
+     */
+    public function testSaveNewUserWithAllOptionalFields(): void
+    {
+        $userData = [
+            'name' => 'Complete User',
+            'short_name' => 'C User',
+            'sortable_name' => 'User, Complete',
+            'time_zone' => 'America/New_York',
+            'locale' => 'en',
+            'terms_of_use' => true,
+            'skip_registration' => false,
+        ];
+
+        $user = new User($userData);
+
+        $responseBody = json_encode(array_merge(['id' => 789], $userData));
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with(
+                'POST',
+                '/accounts/1/users',
+                $this->callback(function ($options) {
+                    return isset($options['multipart']) && count($options['multipart']) > 0;
+                })
+            )
+            ->willReturn($response);
+
+        $result = $user->save();
+
+        $this->assertInstanceOf(User::class, $result);
+        $this->assertEquals(789, $user->getId());
+        $this->assertEquals('Complete User', $user->getName());
+    }
+
+    /**
+     * Test that save() properly assigns ID after successful creation
+     *
+     * @return void
+     */
+    public function testSaveNewUserAssignsIdAfterCreation(): void
+    {
+        $user = new User(['name' => 'ID Assignment Test']);
+
+        // Verify no ID before save
+        $this->assertNull($user->getId());
+
+        $responseBody = json_encode([
+            'id' => 999,
+            'name' => 'ID Assignment Test',
+        ]);
+
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->willReturn($response);
+
+        $user->save();
+
+        // Verify ID is assigned after save
+        $this->assertNotNull($user->getId());
+        $this->assertEquals(999, $user->getId());
+    }
+
+    /**
+     * Test that save() uses the configured account ID for new users
+     *
+     * @return void
+     */
+    public function testSaveNewUserUsesConfiguredAccountId(): void
+    {
+        // Set a custom account ID
+        Config::setAccountId(789);
+
+        $user = new User(['name' => 'Custom Account User']);
+
+        $responseBody = json_encode([
+            'id' => 111,
+            'name' => 'Custom Account User',
+        ]);
+
+        $response = new Response(200, [], $responseBody);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with(
+                'POST',
+                '/accounts/789/users',  // Verify custom account ID
+                $this->anything()
+            )
+            ->willReturn($response);
+
+        $user->save();
+
+        $this->assertEquals(111, $user->getId());
+
+        // Reset to default for other tests
+        Config::setAccountId(1);
+    }
+
+    /**
+     * Test that save() throws exception on API failure for new users
+     *
+     * @return void
+     */
+    public function testSaveNewUserThrowsExceptionOnApiFailure(): void
+    {
+        $user = new User(['name' => 'Failing User']);
+
+        $this->httpClientMock
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', '/accounts/1/users', $this->anything())
+            ->will($this->throwException(new CanvasApiException('API Error Creating User')));
+
+        $this->expectException(CanvasApiException::class);
+        $this->expectExceptionMessage('API Error Creating User');
+
+        $user->save();
+    }
+
     // Relationship Method Tests
 
     /**

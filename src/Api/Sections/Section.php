@@ -93,12 +93,12 @@ class Section extends AbstractBaseApi
     /**
      * Section start date
      */
-    public ?string $startAt = null;
+    public ?\DateTime $startAt = null;
 
     /**
      * Section end date
      */
-    public ?string $endAt = null;
+    public ?\DateTime $endAt = null;
 
     /**
      * Whether this section restricts enrollments to students
@@ -207,7 +207,7 @@ class Section extends AbstractBaseApi
      *
      * @return int
      */
-    protected static function getContextCourseId(): int
+    protected static function getContextCourseId(): ?int
     {
         return self::getCourse()->id;
     }
@@ -461,8 +461,8 @@ class Section extends AbstractBaseApi
             'name' => $this->name,
             'sis_section_id' => $this->sisSectionId,
             'integration_id' => $this->integrationId,
-            'start_at' => $this->startAt,
-            'end_at' => $this->endAt,
+            'start_at' => $this->startAt?->format('c'),
+            'end_at' => $this->endAt?->format('c'),
             'restrict_enrollments_to_section_dates' => $this->restrictEnrollmentsToSectionDates,
         ], fn ($value) => $value !== null);
     }
@@ -493,12 +493,12 @@ class Section extends AbstractBaseApi
         return $this->integrationId;
     }
 
-    public function getStartAt(): ?string
+    public function getStartAt(): ?\DateTime
     {
         return $this->startAt;
     }
 
-    public function getEndAt(): ?string
+    public function getEndAt(): ?\DateTime
     {
         return $this->endAt;
     }
@@ -539,12 +539,12 @@ class Section extends AbstractBaseApi
         $this->integrationId = $integrationId;
     }
 
-    public function setStartAt(?string $startAt): void
+    public function setStartAt(?\DateTime $startAt): void
     {
         $this->startAt = $startAt;
     }
 
-    public function setEndAt(?string $endAt): void
+    public function setEndAt(?\DateTime $endAt): void
     {
         $this->endAt = $endAt;
     }

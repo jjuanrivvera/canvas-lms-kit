@@ -581,8 +581,10 @@ class FileTest extends TestCase
         $this->assertEquals('text/plain', $file->getContentType());
         $this->assertEquals('https://example.com/file.txt', $file->getUrl());
         $this->assertEquals(1024, $file->getSize());
-        $this->assertEquals('2023-01-01T00:00:00Z', $file->getCreatedAt());
-        $this->assertEquals('2023-01-01T00:00:00Z', $file->getUpdatedAt());
+        $this->assertInstanceOf(\DateTime::class, $file->getCreatedAt());
+        $this->assertEquals('2023-01-01T00:00:00+00:00', $file->getCreatedAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $file->getUpdatedAt());
+        $this->assertEquals('2023-01-01T00:00:00+00:00', $file->getUpdatedAt()->format('c'));
         $this->assertTrue($file->isLocked());
         $this->assertTrue($file->isHidden());
 
@@ -595,8 +597,8 @@ class FileTest extends TestCase
         $file->setContentType('application/octet-stream');
         $file->setUrl('https://example.com/new-file.txt');
         $file->setSize(2048);
-        $file->setCreatedAt('2024-01-01T00:00:00Z');
-        $file->setUpdatedAt('2024-01-01T00:00:00Z');
+        $file->setCreatedAt(new \DateTime('2024-01-01T00:00:00Z'));
+        $file->setUpdatedAt(new \DateTime('2024-01-01T00:00:00Z'));
         $file->setLocked(false);
         $file->setHidden(false);
 
@@ -608,8 +610,10 @@ class FileTest extends TestCase
         $this->assertEquals('application/octet-stream', $file->getContentType());
         $this->assertEquals('https://example.com/new-file.txt', $file->getUrl());
         $this->assertEquals(2048, $file->getSize());
-        $this->assertEquals('2024-01-01T00:00:00Z', $file->getCreatedAt());
-        $this->assertEquals('2024-01-01T00:00:00Z', $file->getUpdatedAt());
+        $this->assertInstanceOf(\DateTime::class, $file->getCreatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $file->getCreatedAt()->format('c'));
+        $this->assertInstanceOf(\DateTime::class, $file->getUpdatedAt());
+        $this->assertEquals('2024-01-01T00:00:00+00:00', $file->getUpdatedAt()->format('c'));
         $this->assertFalse($file->isLocked());
         $this->assertFalse($file->isHidden());
     }

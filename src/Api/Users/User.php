@@ -96,9 +96,9 @@ class User extends AbstractBaseApi
     /**
      * The ID of the user.
      *
-     * @var int
+     * @var int|null
      */
-    public int $id;
+    public ?int $id = null;
 
     /**
      * The name of the user.
@@ -214,9 +214,9 @@ class User extends AbstractBaseApi
      * Optional: This field is only returned in certain API calls, and will return a
      * timestamp representing the last time the user logged in to canvas.
      *
-     * @var string|null
+     * @var \DateTime|null
      */
-    public ?string $lastLogin;
+    public ?\DateTime $lastLogin;
 
     /**
      * Optional: This field is only returned in certain API calls, and will return
@@ -436,6 +436,21 @@ class User extends AbstractBaseApi
     }
 
     /**
+     * Convert the object to an array for DTO operations
+     *
+     * @return mixed[]
+     */
+    protected function toDtoArray(): array
+    {
+        $data = parent::toDtoArray();
+
+        // Filter out null values to prevent type errors when creating DTOs
+        // This is necessary because CreateUserDTO has non-nullable typed properties
+        // with default values, while User properties are nullable
+        return array_filter($data, fn ($value) => $value !== null);
+    }
+
+    /**
      * Save the user to the Canvas LMS.
      *
      * @throws CanvasApiException
@@ -450,9 +465,9 @@ class User extends AbstractBaseApi
         $accountId = Config::getAccountId();
 
         // If the user has an ID, update it. Otherwise, create a new user.
-        $dto = $this->id ? new UpdateUserDTO($data) : new CreateUserDTO($data);
-        $path = $this->id ? "/users/{$this->id}" : "/accounts/{$accountId}/users";
-        $method = $this->id ? 'PUT' : 'POST';
+        $dto = $this->id !== null ? new UpdateUserDTO($data) : new CreateUserDTO($data);
+        $path = $this->id !== null ? "/users/{$this->id}" : "/accounts/{$accountId}/users";
+        $method = $this->id !== null ? 'PUT' : 'POST';
 
         $response = self::getApiClient()->request($method, $path, [
             'multipart' => $dto->toApiArray(),
@@ -685,9 +700,9 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -925,17 +940,21 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * @return string|null
+     * Get last login timestamp
+     *
+     * @return \DateTime|null
      */
-    public function getLastLogin(): ?string
+    public function getLastLogin(): ?\DateTime
     {
         return $this->lastLogin;
     }
 
     /**
-     * @param string|null $lastLogin
+     * Set last login timestamp
+     *
+     * @param \DateTime|null $lastLogin
      */
-    public function setLastLogin(?string $lastLogin): void
+    public function setLastLogin(?\DateTime $lastLogin): void
     {
         $this->lastLogin = $lastLogin;
     }
