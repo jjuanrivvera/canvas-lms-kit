@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2025-10-06
+
 ### Added
 - **Test Coverage: Course::save() and User::save() Creating New Resources** (#153)
   - Added 6 comprehensive tests for Course::save() POST path (creating new courses)
@@ -627,7 +629,12 @@ Canvas LMS Kit is now production-ready with 90% Canvas API coverage, rate limiti
 - Contributing guidelines
 - Wiki with implementation guides
 
-[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.4...v1.6.0
+[1.5.4]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.3...v1.5.4
+[1.5.3]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.2...v1.5.3
+[1.5.2]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.1...v1.5.2
+[1.5.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.3.1...v1.4.0
