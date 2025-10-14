@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Fixed Canvas Facade Multipart Builder for Deeply Nested Structures** (#165)
+  - Fixed `Canvas::prepareMultipartData()` to properly handle deeply nested arrays
+  - Implemented recursive `flattenArray()` helper method with proper array type detection
+  - Sequential arrays of scalars now correctly use `[]` suffix (e.g., `colors[]=red, colors[]=blue`)
+  - Sequential arrays of arrays now correctly use numeric indices (e.g., `items[0][name]=A, items[1][name]=B`)
+  - Associative arrays correctly use `[key]` notation (e.g., `user[name]=John, user[age]=30`)
+  - Fixed issue where nested arrays were converted to "Array" string
+  - Added 6 comprehensive test cases covering:
+    - Deeply nested sequential arrays (appointment groups pattern)
+    - Deeply nested associative arrays (bulk grades pattern)
+    - Mixed sequential/associative nesting
+    - Backward compatibility with simple arrays
+    - Empty array handling
+    - String array conversion prevention
+  - **Impact**: Canvas API endpoints requiring deeply nested structures (appointment groups, bulk operations) now work correctly via Canvas facade
+  - **Note**: Standard SDK operations (Course, Assignment, User) were already working correctly via DTOs
+
 ## [1.6.0] - 2025-10-06
 
 ### Added
