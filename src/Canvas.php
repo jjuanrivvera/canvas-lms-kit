@@ -259,6 +259,30 @@ class Canvas
     /**
      * Prepare data for multipart encoding
      *
+     * This method recursively flattens nested arrays into Canvas API's expected
+     * multipart format. It handles:
+     * - Scalar values: converted to strings
+     * - Resources: preserved for file uploads
+     * - Sequential arrays: appended with [] suffix (e.g., field[]=value1, field[]=value2)
+     * - Associative arrays: nested with [key] notation (e.g., field[subfield]=value)
+     * - Deeply nested structures: recursively processed to arbitrary depth
+     *
+     * @example
+     * ```php
+     * // Sequential array
+     * ['colors' => ['red', 'blue']]
+     * // Produces: colors[]=red, colors[]=blue
+     *
+     * // Associative array
+     * ['user' => ['name' => 'John', 'age' => 30]]
+     * // Produces: user[name]=John, user[age]=30
+     *
+     * // Deeply nested
+     * ['appointment_group' => ['new_appointments' => [['2024-01-01'], ['2024-01-02']]]]
+     * // Produces: appointment_group[new_appointments][0][]=2024-01-01,
+     * //           appointment_group[new_appointments][1][]=2024-01-02
+     * ```
+     *
      * @param mixed[] $data
      *
      * @return mixed[]
@@ -266,31 +290,72 @@ class Canvas
     protected static function prepareMultipartData(array $data): array
     {
         $multipart = [];
-
-        foreach ($data as $key => $value) {
-            if (is_array($value)) {
-                // Handle nested arrays (like assignment[name])
-                foreach ($value as $subKey => $subValue) {
-                    $multipart[] = [
-                        'name' => "{$key}[{$subKey}]",
-                        'contents' => (string) $subValue,
-                    ];
-                }
-            } elseif (is_resource($value)) {
-                // Handle file uploads
-                $multipart[] = [
-                    'name' => $key,
-                    'contents' => $value,
-                ];
-            } else {
-                // Handle simple values
-                $multipart[] = [
-                    'name' => $key,
-                    'contents' => (string) $value,
-                ];
-            }
-        }
+        self::flattenArray($data, '', $multipart);
 
         return $multipart;
+    }
+
+    /**
+     * Recursively flatten nested arrays into multipart format
+     *
+     * This helper method is called by prepareMultipartData() to recursively
+     * process nested data structures and convert them into the flat multipart
+     * format expected by Canvas API endpoints.
+     *
+     * Sequential arrays of scalars get [] suffix: colors[]=red, colors[]=blue
+     * Sequential arrays of arrays get numeric indices: items[0][name]=A, items[1][name]=B
+     *
+     * @param mixed $data The data to flatten (can be scalar, array, or resource)
+     * @param string $prefix The current field name prefix (e.g., "user[address]")
+     * @param mixed[] $result Reference to the result array being built
+     *
+     * @return void
+     */
+    private static function flattenArray(mixed $data, string $prefix, array &$result): void
+    {
+        // Handle resources (file uploads) - preserve as-is
+        if (is_resource($data)) {
+            $result[] = [
+                'name' => $prefix,
+                'contents' => $data,
+            ];
+
+            return;
+        }
+
+        // Handle non-array values (scalars: string, int, float, bool, null)
+        if (!is_array($data)) {
+            $result[] = [
+                'name' => $prefix,
+                'contents' => (string) $data,
+            ];
+
+            return;
+        }
+
+        // Handle arrays - distinguish between sequential and associative
+        $isSequential = array_is_list($data);
+
+        foreach ($data as $key => $value) {
+            if ($isSequential) {
+                // Sequential array: check if value is scalar or array
+                if (is_array($value) && !empty($value)) {
+                    // Sequential array of arrays: use numeric index
+                    // Example: items[0][name]=A, items[1][name]=B
+                    $fieldName = $prefix === '' ? (string) $key : "{$prefix}[{$key}]";
+                } else {
+                    // Sequential array of scalars: use [] suffix
+                    // Example: colors[]=red, colors[]=blue
+                    $fieldName = $prefix . '[]';
+                }
+            } else {
+                // Associative array: use [key] suffix
+                // Example: user[name]=John, user[age]=30
+                $fieldName = $prefix === '' ? (string) $key : "{$prefix}[{$key}]";
+            }
+
+            // Recurse for nested structures
+            self::flattenArray($value, $fieldName, $result);
+        }
     }
 }
