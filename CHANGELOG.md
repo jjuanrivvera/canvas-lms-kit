@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Critical: Fixed PaginatedResponse Stream Exhaustion on Repeated Reads** (#166)
+  - Fixed PSR-7 stream exhaustion bug where `getBody()` and `getJsonData()` returned empty data on subsequent calls
+  - Implemented response body caching via `private ?string $bodyCache = null;` property
+  - `getBody()` now caches stream contents on first read, returns cached value on subsequent calls
+  - `getJsonData()` automatically benefits from caching (internally calls `getBody()`)
+  - Added comprehensive test coverage:
+    - `testGetBodyCanBeCalledMultipleTimes()` - verifies multiple `getBody()` calls work
+    - `testGetJsonDataCanBeCalledMultipleTimes()` - verifies multiple `getJsonData()` calls work
+    - `testGetBodyAndGetJsonDataCanBeCalledInAnyOrder()` - verifies mixed method calls work
+    - `testBodyCachingDoesNotAffectPaginationMethods()` - verifies pagination still works correctly
+  - Updated class docblock to document caching behavior
+  - **Impact**: Production scenarios now safe:
+    - Calling `$response->getJsonData()` followed by `$response->getBody()` → returns correct data
+    - Passing `PaginatedResponse` between methods → data preserved across multiple reads
+    - Using `PaginatedResponse::all()` → no data loss during pagination loops
+  - **Backward Compatibility**: No breaking changes, only fixes buggy behavior
+  - **Performance**: No overhead - lazy loading on first access, minimal memory impact
 - **Fixed Canvas Facade Multipart Builder for Deeply Nested Structures** (#165)
   - Fixed `Canvas::prepareMultipartData()` to properly handle deeply nested arrays
   - Implemented recursive `flattenArray()` helper method with proper array type detection
