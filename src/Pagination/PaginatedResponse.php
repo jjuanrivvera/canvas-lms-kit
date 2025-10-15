@@ -16,6 +16,9 @@ use Psr\Log\LoggerInterface;
  * This class encapsulates an HTTP response and provides methods to navigate
  * through paginated results using Canvas API Link headers.
  *
+ * The response body is cached on first read to prevent PSR-7 stream exhaustion,
+ * making it safe to call getBody() and getJsonData() multiple times.
+ *
  * Usage:
  * ```php
  * $response = $httpClient->get('/api/v1/courses');
@@ -75,6 +78,16 @@ class PaginatedResponse
     private LoggerInterface $logger;
 
     /**
+     * Cached response body content
+     *
+     * This cache prevents multiple reads of the PSR-7 stream, which can only
+     * be read once unless rewound (and not all streams support rewinding).
+     *
+     * @var string|null
+     */
+    private ?string $bodyCache = null;
+
+    /**
      * PaginatedResponse constructor
      *
      * @param ResponseInterface $response The HTTP response
@@ -112,11 +125,19 @@ class PaginatedResponse
     /**
      * Get the response body as string
      *
+     * This method caches the body content on first read to prevent PSR-7 stream
+     * exhaustion. Subsequent calls return the cached value, making it safe to
+     * call this method multiple times or intermix calls with getJsonData().
+     *
      * @return string
      */
     public function getBody(): string
     {
-        return $this->response->getBody()->getContents();
+        if ($this->bodyCache === null) {
+            $this->bodyCache = $this->response->getBody()->getContents();
+        }
+
+        return $this->bodyCache;
     }
 
     /**
