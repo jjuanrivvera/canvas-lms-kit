@@ -190,4 +190,43 @@ class HttpClientMiddlewareTest extends TestCase
         $this->assertCount(1, $middleware);
         $this->assertArrayHasKey('custom', $middleware);
     }
+
+    /**
+     * Test that providing both client and middleware throws exception
+     */
+    public function testThrowsExceptionWhenProvidingClientAndMiddleware(): void
+    {
+        $client = new \GuzzleHttp\Client();
+
+        $middleware = $this->createMock(MiddlewareInterface::class);
+        $middleware->method('getName')->willReturn('test-middleware');
+        $middleware->method('__invoke')->willReturn(function ($handler) {
+            return $handler;
+        });
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot provide both a custom client and middleware');
+
+        new HttpClient($client, null, [$middleware]);
+    }
+
+    /**
+     * Test that providing client with empty middleware array is allowed
+     */
+    public function testAllowsClientWithEmptyMiddlewareArray(): void
+    {
+        $client = new \GuzzleHttp\Client();
+
+        // Should not throw - empty array is acceptable
+        $httpClient = new HttpClient($client, null, []);
+
+        // Use reflection to access private client property
+        $reflection = new \ReflectionClass($httpClient);
+        $clientProperty = $reflection->getProperty('client');
+        $clientProperty->setAccessible(true);
+        $actualClient = $clientProperty->getValue($httpClient);
+
+        $this->assertSame($client, $actualClient);
+        $this->assertCount(0, $httpClient->getMiddleware());
+    }
 }

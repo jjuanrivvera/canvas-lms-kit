@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Fixed HttpClient Middleware Silent Failure with External Client** (#167)
+  - Fixed critical bug where middleware passed to HttpClient constructor was silently ignored when using an external Guzzle client
+  - Added fail-fast validation that throws `InvalidArgumentException` when both `$client` and non-empty `$middleware` are provided
+  - Error message provides clear guidance: "Cannot provide both a custom client and middleware. Either configure middleware on your client or let HttpClient create one."
+  - **Impact**: Prevents silent failures where retry, rate limiting, and logging middleware were bypassed without warning
+  - Added comprehensive test coverage:
+    - `testThrowsExceptionWhenProvidingClientAndMiddleware()` - verifies exception is thrown for invalid configuration
+    - `testAllowsClientWithEmptyMiddlewareArray()` - verifies empty middleware array with client is allowed
+  - **Valid Usage Patterns** (unchanged):
+    - Custom client only: `new HttpClient($client)` ✅
+    - Middleware only: `new HttpClient(null, null, [$middleware])` ✅
+    - Neither (gets defaults): `new HttpClient()` ✅
+    - Client with empty array: `new HttpClient($client, null, [])` ✅
+  - **Invalid Usage** (now fails fast):
+    - Both client and middleware: `new HttpClient($client, null, [$middleware])` ❌ Throws InvalidArgumentException
+  - **Backward Compatibility**: No breaking changes for valid usage patterns; only prevents previously broken configurations
 - **Critical: Fixed PaginatedResponse Stream Exhaustion on Repeated Reads** (#166)
   - Fixed PSR-7 stream exhaustion bug where `getBody()` and `getJsonData()` returned empty data on subsequent calls
   - Implemented response body caching via `private ?string $bodyCache = null;` property
