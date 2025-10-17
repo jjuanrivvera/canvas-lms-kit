@@ -60,6 +60,15 @@ class HttpClient implements HttpClientInterface
         array $middleware = []
     ) {
         $this->logger = $logger ?? new \Psr\Log\NullLogger();
+
+        // Validate configuration: cannot provide both custom client and middleware
+        if ($client !== null && !empty($middleware)) {
+            throw new \InvalidArgumentException(
+                'Cannot provide both a custom client and middleware. ' .
+                'Either configure middleware on your client or let HttpClient create one.'
+            );
+        }
+
         $this->handlerStack = HandlerStack::create();
 
         // If no middleware provided and no client provided, add sensible defaults
