@@ -632,4 +632,204 @@ class PaginatedResponseTest extends TestCase
 
         $this->assertNull($nextResponse);
     }
+
+    /**
+     * Test that getBody() can be called multiple times without stream exhaustion
+     *
+     * This test verifies that the body caching mechanism works correctly,
+     * preventing PSR-7 stream exhaustion on repeated reads.
+     */
+    public function testGetBodyCanBeCalledMultipleTimes(): void
+    {
+        $responseBody = json_encode($this->sampleData);
+
+        // Mock stream should only be read ONCE (cached after first call)
+        $this->mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn($responseBody);
+
+        $this->mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($this->mockStream);
+
+        $this->mockResponse->expects($this->once())
+            ->method('getHeader')
+            ->with('Link')
+            ->willReturn([]);
+
+        $paginatedResponse = new PaginatedResponse($this->mockResponse, $this->mockHttpClient);
+
+        // Call getBody() multiple times
+        $body1 = $paginatedResponse->getBody();
+        $body2 = $paginatedResponse->getBody();
+        $body3 = $paginatedResponse->getBody();
+
+        // All calls should return the same non-empty content
+        $this->assertEquals($responseBody, $body1);
+        $this->assertEquals($responseBody, $body2);
+        $this->assertEquals($responseBody, $body3);
+        $this->assertEquals($body1, $body2);
+        $this->assertEquals($body2, $body3);
+        $this->assertNotEmpty($body2);
+        $this->assertNotEmpty($body3);
+    }
+
+    /**
+     * Test that getJsonData() can be called multiple times without stream exhaustion
+     *
+     * This test verifies that getJsonData() benefits from the body caching,
+     * as it internally calls getBody().
+     */
+    public function testGetJsonDataCanBeCalledMultipleTimes(): void
+    {
+        $responseBody = json_encode($this->sampleData);
+
+        // Mock stream should only be read ONCE (cached after first call)
+        $this->mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn($responseBody);
+
+        $this->mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($this->mockStream);
+
+        $this->mockResponse->expects($this->once())
+            ->method('getHeader')
+            ->with('Link')
+            ->willReturn([]);
+
+        $paginatedResponse = new PaginatedResponse($this->mockResponse, $this->mockHttpClient);
+
+        // Call getJsonData() multiple times
+        $data1 = $paginatedResponse->getJsonData();
+        $data2 = $paginatedResponse->getJsonData();
+        $data3 = $paginatedResponse->getJsonData();
+
+        // All calls should return the same non-empty data
+        $this->assertEquals($this->sampleData, $data1);
+        $this->assertEquals($this->sampleData, $data2);
+        $this->assertEquals($this->sampleData, $data3);
+        $this->assertEquals($data1, $data2);
+        $this->assertEquals($data2, $data3);
+        $this->assertNotEmpty($data2);
+        $this->assertNotEmpty($data3);
+    }
+
+    /**
+     * Test that getBody() and getJsonData() can be called in any order
+     *
+     * This test verifies real-world usage patterns where methods might be
+     * called in different orders or intermixed.
+     */
+    public function testGetBodyAndGetJsonDataCanBeCalledInAnyOrder(): void
+    {
+        $responseBody = json_encode($this->sampleData);
+
+        // Mock stream should only be read ONCE (cached after first call)
+        $this->mockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn($responseBody);
+
+        $this->mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($this->mockStream);
+
+        $this->mockResponse->expects($this->once())
+            ->method('getHeader')
+            ->with('Link')
+            ->willReturn([]);
+
+        $paginatedResponse = new PaginatedResponse($this->mockResponse, $this->mockHttpClient);
+
+        // Call methods in different order
+        $body1 = $paginatedResponse->getBody();
+        $data1 = $paginatedResponse->getJsonData();
+        $body2 = $paginatedResponse->getBody();
+        $data2 = $paginatedResponse->getJsonData();
+        $body3 = $paginatedResponse->getBody();
+
+        // All calls should return correct data
+        $this->assertEquals($responseBody, $body1);
+        $this->assertEquals($responseBody, $body2);
+        $this->assertEquals($responseBody, $body3);
+        $this->assertEquals($this->sampleData, $data1);
+        $this->assertEquals($this->sampleData, $data2);
+        $this->assertNotEmpty($body2);
+        $this->assertNotEmpty($data2);
+    }
+
+    /**
+     * Test that body caching does not affect pagination between different pages
+     *
+     * This test verifies that each PaginatedResponse instance has its own cache,
+     * and navigating to next pages works correctly.
+     */
+    public function testBodyCachingDoesNotAffectPaginationMethods(): void
+    {
+        // Setup first page
+        $firstPageBody = json_encode([['id' => 1, 'name' => 'Course 1']]);
+        $firstMockStream = $this->createMock(StreamInterface::class);
+
+        $firstMockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn($firstPageBody);
+
+        $this->mockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($firstMockStream);
+
+        $this->mockResponse->expects($this->once())
+            ->method('getHeader')
+            ->with('Link')
+            ->willReturn(['<https://canvas.example.com/api/v1/courses?page=2&per_page=10>; rel="next"']);
+
+        // Setup second page
+        $secondPageBody = json_encode([['id' => 2, 'name' => 'Course 2']]);
+        $secondMockStream = $this->createMock(StreamInterface::class);
+        $secondMockResponse = $this->createMock(ResponseInterface::class);
+
+        $secondMockStream->expects($this->once())
+            ->method('getContents')
+            ->willReturn($secondPageBody);
+
+        $secondMockResponse->expects($this->once())
+            ->method('getBody')
+            ->willReturn($secondMockStream);
+
+        $secondMockResponse->expects($this->once())
+            ->method('getHeader')
+            ->with('Link')
+            ->willReturn([]);
+
+        $this->mockHttpClient->expects($this->once())
+            ->method('get')
+            ->with('/courses', ['query' => ['page' => '2', 'per_page' => '10']])
+            ->willReturn($secondMockResponse);
+
+        // Test first page
+        $firstResponse = new PaginatedResponse($this->mockResponse, $this->mockHttpClient);
+
+        $firstData1 = $firstResponse->getJsonData();
+        $firstData2 = $firstResponse->getJsonData(); // Should work (cached)
+
+        $this->assertEquals([['id' => 1, 'name' => 'Course 1']], $firstData1);
+        $this->assertEquals($firstData1, $firstData2);
+
+        // Navigate to second page
+        $secondResponse = $firstResponse->getNext();
+        $this->assertNotNull($secondResponse);
+
+        // Test second page - multiple reads should work
+        $secondData1 = $secondResponse->getJsonData();
+        $secondData2 = $secondResponse->getJsonData();
+        $secondData3 = $secondResponse->getJsonData();
+
+        $this->assertEquals([['id' => 2, 'name' => 'Course 2']], $secondData1);
+        $this->assertEquals($secondData1, $secondData2);
+        $this->assertEquals($secondData2, $secondData3);
+
+        // Verify first page cache still works
+        $firstData3 = $firstResponse->getJsonData();
+        $this->assertEquals($firstData1, $firstData3);
+    }
 }

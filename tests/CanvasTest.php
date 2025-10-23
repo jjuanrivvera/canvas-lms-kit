@@ -428,4 +428,317 @@ class CanvasTest extends TestCase
 
         $this->assertEquals($expectedResponse, $result);
     }
+
+    public function testPrepareMultipartDataWithDeeplyNestedSequentialArrays(): void
+    {
+        // Test Canvas appointment groups pattern: appointment_group[new_appointments][0][]=timestamp
+        $data = [
+            'appointment_group' => [
+                'new_appointments' => [
+                    ['2024-01-01T10:00:00Z', '2024-01-01T11:00:00Z'],
+                    ['2024-01-02T10:00:00Z', '2024-01-02T11:00:00Z'],
+                ],
+            ],
+        ];
+
+        $this->mockStream->method('getContents')
+            ->willReturn(json_encode(['id' => 123]));
+
+        $this->mockResponse->method('getHeaderLine')
+            ->with('Content-Type')
+            ->willReturn('application/json');
+
+        $this->mockResponse->method('getBody')
+            ->willReturn($this->mockStream);
+
+        $this->mockHttpClient->expects($this->once())
+            ->method('rawRequest')
+            ->with('/api/v1/appointment_groups', 'POST', $this->callback(function ($options) {
+                if (!isset($options['multipart'])) {
+                    return false;
+                }
+
+                $multipart = $options['multipart'];
+
+                // Verify the structure matches Canvas API expectations
+                $expectedFields = [
+                    'appointment_group[new_appointments][0][]=2024-01-01T10:00:00Z',
+                    'appointment_group[new_appointments][0][]=2024-01-01T11:00:00Z',
+                    'appointment_group[new_appointments][1][]=2024-01-02T10:00:00Z',
+                    'appointment_group[new_appointments][1][]=2024-01-02T11:00:00Z',
+                ];
+
+                $actualFields = array_map(fn ($item) => $item['name'] . '=' . $item['contents'], $multipart);
+
+                foreach ($expectedFields as $expected) {
+                    if (!in_array($expected, $actualFields, true)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }))
+            ->willReturn($this->mockResponse);
+
+        Canvas::post('/api/v1/appointment_groups', $data);
+    }
+
+    public function testPrepareMultipartDataWithDeeplyNestedAssociativeArrays(): void
+    {
+        // Test Canvas bulk grades pattern: grade_data[134][posted_grade]=A-
+        $data = [
+            'grade_data' => [
+                '134' => ['posted_grade' => 'A-', 'excuse' => false],
+                '135' => ['posted_grade' => 'B+', 'excuse' => false],
+            ],
+        ];
+
+        $this->mockStream->method('getContents')
+            ->willReturn(json_encode(['success' => true]));
+
+        $this->mockResponse->method('getHeaderLine')
+            ->with('Content-Type')
+            ->willReturn('application/json');
+
+        $this->mockResponse->method('getBody')
+            ->willReturn($this->mockStream);
+
+        $this->mockHttpClient->expects($this->once())
+            ->method('rawRequest')
+            ->with('/api/v1/submissions/bulk', 'POST', $this->callback(function ($options) {
+                if (!isset($options['multipart'])) {
+                    return false;
+                }
+
+                $multipart = $options['multipart'];
+
+                // Verify the structure matches Canvas API expectations
+                $expectedFields = [
+                    'grade_data[134][posted_grade]' => 'A-',
+                    'grade_data[134][excuse]' => '',  // false converts to empty string
+                    'grade_data[135][posted_grade]' => 'B+',
+                    'grade_data[135][excuse]' => '',
+                ];
+
+                foreach ($expectedFields as $expectedName => $expectedContent) {
+                    $found = false;
+                    foreach ($multipart as $item) {
+                        if ($item['name'] === $expectedName && $item['contents'] === $expectedContent) {
+                            $found = true;
+                            break;
+                        }
+                    }
+                    if (!$found) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }))
+            ->willReturn($this->mockResponse);
+
+        Canvas::post('/api/v1/submissions/bulk', $data);
+    }
+
+    public function testPrepareMultipartDataWithMixedNesting(): void
+    {
+        // Test mixed sequential and associative nesting
+        $data = [
+            'quiz' => [
+                'title' => 'Final Exam',
+                'questions' => [
+                    ['question_text' => 'Question 1', 'points_possible' => 10],
+                    ['question_text' => 'Question 2', 'points_possible' => 15],
+                ],
+            ],
+        ];
+
+        $this->mockStream->method('getContents')
+            ->willReturn(json_encode(['id' => 456]));
+
+        $this->mockResponse->method('getHeaderLine')
+            ->with('Content-Type')
+            ->willReturn('application/json');
+
+        $this->mockResponse->method('getBody')
+            ->willReturn($this->mockStream);
+
+        $this->mockHttpClient->expects($this->once())
+            ->method('rawRequest')
+            ->with('/api/v1/quizzes', 'POST', $this->callback(function ($options) {
+                if (!isset($options['multipart'])) {
+                    return false;
+                }
+
+                $multipart = $options['multipart'];
+
+                // Verify mixed nesting is handled correctly
+                $expectedFields = [
+                    'quiz[title]' => 'Final Exam',
+                    'quiz[questions][0][question_text]' => 'Question 1',
+                    'quiz[questions][0][points_possible]' => '10',
+                    'quiz[questions][1][question_text]' => 'Question 2',
+                    'quiz[questions][1][points_possible]' => '15',
+                ];
+
+                foreach ($expectedFields as $expectedName => $expectedContent) {
+                    $found = false;
+                    foreach ($multipart as $item) {
+                        if ($item['name'] === $expectedName && $item['contents'] === $expectedContent) {
+                            $found = true;
+                            break;
+                        }
+                    }
+                    if (!$found) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }))
+            ->willReturn($this->mockResponse);
+
+        Canvas::post('/api/v1/quizzes', $data);
+    }
+
+    public function testPrepareMultipartDataBackwardCompatibilitySimpleArrays(): void
+    {
+        // Ensure existing simple one-level nested arrays still work
+        $data = [
+            'assignment' => [
+                'name' => 'Homework 1',
+                'points_possible' => 100,
+            ],
+        ];
+
+        $this->mockStream->method('getContents')
+            ->willReturn(json_encode(['id' => 789]));
+
+        $this->mockResponse->method('getHeaderLine')
+            ->with('Content-Type')
+            ->willReturn('application/json');
+
+        $this->mockResponse->method('getBody')
+            ->willReturn($this->mockStream);
+
+        $this->mockHttpClient->expects($this->once())
+            ->method('rawRequest')
+            ->with('/api/v1/assignments', 'POST', $this->callback(function ($options) {
+                if (!isset($options['multipart'])) {
+                    return false;
+                }
+
+                $multipart = $options['multipart'];
+
+                // Verify backward compatibility
+                $expectedFields = [
+                    'assignment[name]' => 'Homework 1',
+                    'assignment[points_possible]' => '100',
+                ];
+
+                foreach ($expectedFields as $expectedName => $expectedContent) {
+                    $found = false;
+                    foreach ($multipart as $item) {
+                        if ($item['name'] === $expectedName && $item['contents'] === $expectedContent) {
+                            $found = true;
+                            break;
+                        }
+                    }
+                    if (!$found) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }))
+            ->willReturn($this->mockResponse);
+
+        Canvas::post('/api/v1/assignments', $data);
+    }
+
+    public function testPrepareMultipartDataWithEmptyArrays(): void
+    {
+        // Test edge case of empty arrays
+        $data = [
+            'course' => [
+                'name' => 'Test Course',
+                'tags' => [],
+            ],
+        ];
+
+        $this->mockStream->method('getContents')
+            ->willReturn(json_encode(['id' => 999]));
+
+        $this->mockResponse->method('getHeaderLine')
+            ->with('Content-Type')
+            ->willReturn('application/json');
+
+        $this->mockResponse->method('getBody')
+            ->willReturn($this->mockStream);
+
+        $this->mockHttpClient->expects($this->once())
+            ->method('rawRequest')
+            ->with('/api/v1/courses', 'POST', $this->callback(function ($options) {
+                if (!isset($options['multipart'])) {
+                    return false;
+                }
+
+                $multipart = $options['multipart'];
+
+                // Empty arrays should not produce any fields
+                $names = array_column($multipart, 'name');
+
+                // Should have course[name] but no course[tags] entries
+                return in_array('course[name]', $names, true) &&
+                       !in_array('course[tags]', $names, true) &&
+                       count(array_filter($names, fn ($n) => str_starts_with($n, 'course[tags]'))) === 0;
+            }))
+            ->willReturn($this->mockResponse);
+
+        Canvas::post('/api/v1/courses', $data);
+    }
+
+    public function testPrepareMultipartDataNoStringArrayConversion(): void
+    {
+        // Ensure nested arrays are NOT converted to "Array" string
+        $data = [
+            'appointment_group' => [
+                'new_appointments' => [
+                    ['2024-01-01'],
+                ],
+            ],
+        ];
+
+        $this->mockStream->method('getContents')
+            ->willReturn(json_encode(['id' => 111]));
+
+        $this->mockResponse->method('getHeaderLine')
+            ->with('Content-Type')
+            ->willReturn('application/json');
+
+        $this->mockResponse->method('getBody')
+            ->willReturn($this->mockStream);
+
+        $this->mockHttpClient->expects($this->once())
+            ->method('rawRequest')
+            ->with('/api/v1/appointment_groups', 'POST', $this->callback(function ($options) {
+                if (!isset($options['multipart'])) {
+                    return false;
+                }
+
+                $multipart = $options['multipart'];
+
+                // Verify NO field contains "Array" as contents
+                foreach ($multipart as $item) {
+                    if ($item['contents'] === 'Array') {
+                        return false;
+                    }
+                }
+
+                return true;
+            }))
+            ->willReturn($this->mockResponse);
+
+        Canvas::post('/api/v1/appointment_groups', $data);
+    }
 }
