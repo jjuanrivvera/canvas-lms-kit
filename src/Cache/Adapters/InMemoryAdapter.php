@@ -14,7 +14,7 @@ namespace CanvasLMS\Cache\Adapters;
 class InMemoryAdapter implements CacheAdapterInterface
 {
     /**
-     * @var array<string, array{data: array<string, mixed>, expires: int}> Cache storage
+     * @var array<string, array{data: array<string, mixed>, expires: int, size: int}> Cache storage
      */
     private array $cache = [];
 
@@ -59,8 +59,8 @@ class InMemoryAdapter implements CacheAdapterInterface
         $entry = $this->cache[$key];
 
         // Check expiration
-        if ($entry['expires'] > 0 && $entry['expires'] < time()) {
-            unset($this->cache[$key]);
+        if ($entry['expires'] > 0 && $entry['expires'] < $this->currentTime()) {
+            $this->removeEntry($key);
             $this->stats['misses']++;
 
             return null;
@@ -84,22 +84,21 @@ class InMemoryAdapter implements CacheAdapterInterface
             $this->evictOldest();
         }
 
-        $expires = $ttl > 0 ? time() + $ttl : 0;
+        $expires = $ttl > 0 ? $this->currentTime() + $ttl : 0;
 
-        // Estimate memory usage of the data being stored
+        // Size is computed once at write time and stored with the entry so
+        // reads/deletes never pay a serialize() just to track memory
         $dataSize = strlen(serialize($data));
 
-        // Update memory tracking
         if (isset($this->cache[$key])) {
-            // Subtract old size if updating existing entry
-            $oldSize = strlen(serialize($this->cache[$key]['data']));
-            $this->cacheMemoryUsage -= $oldSize;
+            $this->cacheMemoryUsage -= $this->cache[$key]['size'];
         }
         $this->cacheMemoryUsage += $dataSize;
 
         $this->cache[$key] = [
             'data' => $data,
             'expires' => $expires,
+            'size' => $dataSize,
         ];
     }
 
@@ -109,11 +108,7 @@ class InMemoryAdapter implements CacheAdapterInterface
     public function delete(string $key): bool
     {
         if (isset($this->cache[$key])) {
-            // Update memory tracking
-            $dataSize = strlen(serialize($this->cache[$key]['data']));
-            $this->cacheMemoryUsage -= $dataSize;
-
-            unset($this->cache[$key]);
+            $this->removeEntry($key);
 
             return true;
         }
@@ -143,8 +138,8 @@ class InMemoryAdapter implements CacheAdapterInterface
         $entry = $this->cache[$key];
 
         // Check expiration
-        if ($entry['expires'] > 0 && $entry['expires'] < time()) {
-            unset($this->cache[$key]);
+        if ($entry['expires'] > 0 && $entry['expires'] < $this->currentTime()) {
+            $this->removeEntry($key);
 
             return false;
         }
@@ -162,7 +157,7 @@ class InMemoryAdapter implements CacheAdapterInterface
 
         foreach (array_keys($this->cache) as $key) {
             if (preg_match($regex, $key)) {
-                unset($this->cache[$key]);
+                $this->removeEntry($key);
                 $deleted++;
             }
         }
@@ -207,15 +202,11 @@ class InMemoryAdapter implements CacheAdapterInterface
      */
     private function cleanExpired(): void
     {
-        $now = time();
+        $now = $this->currentTime();
 
         foreach ($this->cache as $key => $entry) {
             if ($entry['expires'] > 0 && $entry['expires'] < $now) {
-                // Update memory tracking
-                $dataSize = strlen(serialize($entry['data']));
-                $this->cacheMemoryUsage -= $dataSize;
-
-                unset($this->cache[$key]);
+                $this->removeEntry($key);
             }
         }
     }
@@ -231,12 +222,34 @@ class InMemoryAdapter implements CacheAdapterInterface
             reset($this->cache);
             $oldestKey = key($this->cache);
             if ($oldestKey !== null) {
-                // Update memory tracking
-                $dataSize = strlen(serialize($this->cache[$oldestKey]['data']));
-                $this->cacheMemoryUsage -= $dataSize;
-
-                unset($this->cache[$oldestKey]);
+                $this->removeEntry($oldestKey);
             }
         }
+    }
+
+    /**
+     * Remove an entry and keep memory accounting in sync.
+     *
+     * @param string $key The cache key
+     *
+     * @return void
+     */
+    private function removeEntry(string $key): void
+    {
+        if (isset($this->cache[$key])) {
+            $this->cacheMemoryUsage -= $this->cache[$key]['size'];
+            unset($this->cache[$key]);
+        }
+    }
+
+    /**
+     * Current Unix timestamp; a seam so tests can control TTL expiry
+     * without real sleeps.
+     *
+     * @return int
+     */
+    protected function currentTime(): int
+    {
+        return time();
     }
 }

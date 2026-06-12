@@ -150,7 +150,7 @@ class CreateModuleItemDTOTest extends TestCase
 
         $this->assertContains(['name' => 'module_item[type]', 'contents' => 'ExternalTool'], $apiArray);
         $this->assertContains(['name' => 'module_item[external_url]', 'contents' => 'https://example.com/tool'], $apiArray);
-        $this->assertContains(['name' => 'module_item[new_tab]', 'contents' => true], $apiArray);
+        $this->assertContains(['name' => 'module_item[new_tab]', 'contents' => 'true'], $apiArray);
 
         // Check iframe array conversion
         $this->assertContains(['name' => 'module_item[iframe][width]', 'contents' => 800], $apiArray);

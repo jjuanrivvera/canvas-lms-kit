@@ -119,6 +119,7 @@ class OutcomeGroup extends AbstractBaseApi
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
+        self::validateContext($contextType, ['accounts', 'courses']);
         $endpoint = sprintf('%s/%d/outcome_groups', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
@@ -142,6 +143,7 @@ class OutcomeGroup extends AbstractBaseApi
         int $contextId,
         array $params = []
     ): PaginationResult {
+        self::validateContext($contextType, ['accounts', 'courses']);
         $endpoint = sprintf('%s/%d/outcome_groups', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
 
@@ -155,9 +157,9 @@ class OutcomeGroup extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         $accountId = Config::getAccountId();
 
@@ -177,10 +179,11 @@ class OutcomeGroup extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function findByContext(?string $contextType, ?int $contextId, int $id): self
+    public static function findByContext(?string $contextType, ?int $contextId, int $id): static
     {
+        self::validateContext($contextType, ['accounts', 'courses']);
         if ($contextType === null || $contextId === null) {
             return self::findGlobal($id);
         }
@@ -188,7 +191,7 @@ class OutcomeGroup extends AbstractBaseApi
         $endpoint = sprintf('%s/%d/outcome_groups/%d', $contextType, $contextId, $id);
         $response = self::getApiClient()->get($endpoint);
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -198,14 +201,14 @@ class OutcomeGroup extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function findGlobal(int $id): self
+    public static function findGlobal(int $id): static
     {
         $endpoint = sprintf('global/outcome_groups/%d', $id);
         $response = self::getApiClient()->get($endpoint);
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -220,10 +223,11 @@ class OutcomeGroup extends AbstractBaseApi
      */
     public static function getRootGroup(string $contextType, int $contextId): self
     {
+        self::validateContext($contextType, ['accounts', 'courses']);
         $endpoint = sprintf('%s/%d/root_outcome_group', $contextType, $contextId);
         $response = self::getApiClient()->get($endpoint);
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -237,7 +241,7 @@ class OutcomeGroup extends AbstractBaseApi
     {
         $response = self::getApiClient()->get('global/root_outcome_group');
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -284,7 +288,7 @@ class OutcomeGroup extends AbstractBaseApi
             'multipart' => $data->toApiArray(),
         ]);
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -305,6 +309,7 @@ class OutcomeGroup extends AbstractBaseApi
         array|CreateOutcomeGroupDTO $data,
         ?int $parentGroupId = null
     ): self {
+        self::validateContext($contextType, ['accounts', 'courses']);
         if (is_array($data)) {
             $data = new CreateOutcomeGroupDTO($data);
         }
@@ -316,7 +321,7 @@ class OutcomeGroup extends AbstractBaseApi
             'multipart' => $data->toApiArray(),
         ]);
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -651,6 +656,7 @@ class OutcomeGroup extends AbstractBaseApi
      */
     public static function fetchAllLinksByContext(string $contextType, int $contextId, array $params = []): array
     {
+        self::validateContext($contextType, ['accounts', 'courses']);
         $endpoint = sprintf('%s/%d/outcome_group_links', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();

@@ -100,7 +100,7 @@ class CreateSectionDTO extends AbstractBaseDto implements DTOInterface
                 foreach ($value as $arrayValue) {
                     $modifiedProperties[] = [
                         'name' => $propertyName . '[]',
-                        'contents' => $arrayValue,
+                        'contents' => self::formatMultipartValue($arrayValue),
                     ];
                 }
                 continue;
@@ -109,7 +109,7 @@ class CreateSectionDTO extends AbstractBaseDto implements DTOInterface
             // Handle regular values
             $modifiedProperties[] = [
                 'name' => $propertyName,
-                'contents' => $value,
+                'contents' => self::formatMultipartValue($value),
             ];
         }
 
@@ -117,7 +117,7 @@ class CreateSectionDTO extends AbstractBaseDto implements DTOInterface
         if ($this->enableSisReactivation !== null) {
             $modifiedProperties[] = [
                 'name' => 'enable_sis_reactivation',
-                'contents' => $this->enableSisReactivation,
+                'contents' => self::formatMultipartValue($this->enableSisReactivation),
             ];
         }
 

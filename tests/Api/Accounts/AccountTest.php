@@ -260,7 +260,7 @@ class AccountTest extends TestCase
         $this->httpClientMock
             ->expects($this->once())
             ->method('get')
-            ->with($this->equalTo('accounts/sis_account_id:SIS_ACCT_123'))
+            ->with($this->equalTo('accounts/sis_account_id%3ASIS_ACCT_123'))
             ->willReturn($response);
 
         $account = Account::find('sis_account_id:SIS_ACCT_123');

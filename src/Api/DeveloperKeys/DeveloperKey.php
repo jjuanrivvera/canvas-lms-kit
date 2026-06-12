@@ -203,13 +203,13 @@ class DeveloperKey extends AbstractBaseApi
      *
      * @throws CanvasApiException If key not found
      *
-     * @return self The DeveloperKey instance
+     * @return static The DeveloperKey instance
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
-        $keys = self::get();
-
-        foreach ($keys as $key) {
+        // Canvas has no direct developer-key-by-ID endpoint; stream()
+        // follows pagination and stops at a match
+        foreach (self::stream(array_merge($params, ['per_page' => 100])) as $key) {
             if ($key->id === $id) {
                 return $key;
             }
@@ -224,7 +224,7 @@ class DeveloperKey extends AbstractBaseApi
      *
      * @param array<string, mixed> $params Query parameters (e.g., 'inherited' => true)
      *
-     * @return array<self> Array of DeveloperKey instances
+     * @return array<int, static> Array of DeveloperKey instances
      */
     public static function get(array $params = []): array
     {
@@ -234,7 +234,7 @@ class DeveloperKey extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return array_map(fn (array $item) => new self($item), $data);
+        return array_map(fn (array $item) => new static($item), $data);
     }
 
     /**
@@ -254,7 +254,7 @@ class DeveloperKey extends AbstractBaseApi
     /**
      * Get developer keys with inherited keys from Site Admin
      *
-     * @return array<self> Array of DeveloperKey instances including inherited keys
+     * @return array<int, static> Array of DeveloperKey instances including inherited keys
      */
     public static function getWithInherited(): array
     {
@@ -264,17 +264,22 @@ class DeveloperKey extends AbstractBaseApi
     /**
      * Update this developer key instance
      *
-     * @param array<string, mixed>|UpdateDeveloperKeyDTO $data Update data
+     * When called without arguments the current object state is sent,
+     * matching the zero-argument save() contract of other resources.
+     *
+     * @param array<string, mixed>|UpdateDeveloperKeyDTO|null $data Update data (defaults to object state)
      *
      * @throws CanvasApiException If update fails or key has no ID
      *
      * @return self The updated DeveloperKey instance
      */
-    public function save(array|UpdateDeveloperKeyDTO $data): self
+    public function save(array|UpdateDeveloperKeyDTO|null $data = null): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Developer key must have an ID to update');
         }
+
+        $data ??= array_filter($this->toDtoArray(), static fn ($value) => $value !== null);
 
         $updatedKey = self::update($this->id, $data);
 

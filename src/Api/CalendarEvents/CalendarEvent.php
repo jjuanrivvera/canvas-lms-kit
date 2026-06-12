@@ -72,6 +72,8 @@ use DateTime;
  * @see https://canvas.instructure.com/doc/api/calendar_events.html
  *
  * @package CanvasLMS\Api\CalendarEvents
+ *
+ * @phpstan-consistent-constructor
  */
 class CalendarEvent extends AbstractBaseApi
 {
@@ -400,14 +402,7 @@ class CalendarEvent extends AbstractBaseApi
      */
     public function __construct(array $data = [])
     {
-        foreach ($data as $key => $value) {
-            $key = lcfirst(str_replace('_', '', ucwords($key, '_')));
-
-            if (property_exists($this, $key) && !is_null($value)) {
-                // Use the magic setter to ensure proper casting
-                $this->__set($key, $value);
-            }
-        }
+        parent::__construct($data);
     }
 
     /**
@@ -440,16 +435,16 @@ class CalendarEvent extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
         $endpoint = sprintf('calendar_events/%d', $id);
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return new self($data);
+        return new static($data);
     }
 
     /**
@@ -592,25 +587,13 @@ class CalendarEvent extends AbstractBaseApi
      */
     public function save(): self
     {
+        // Build DTO data from every non-null property; the DTO constructor
+        // keeps only the fields it defines, so new event fields flow through
+        // without maintaining a hardcoded property list here
+        $data = array_filter(get_object_vars($this), static fn ($value) => $value !== null);
+
         if ($this->id) {
-            // Update existing event
-            $data = [];
-
-            // Map properties to DTO data
-            $properties = [
-                'contextCode', 'title', 'description', 'startAt', 'endAt',
-                'locationName', 'locationAddress', 'allDay', 'blackoutDate',
-            ];
-
-            foreach ($properties as $property) {
-                if (property_exists($this, $property) && $this->{$property} !== null) {
-                    $data[$property] = $this->{$property};
-                }
-            }
-
-            $dto = new UpdateCalendarEventDTO($data);
-
-            $updated = self::update($this->id, $dto);
+            $updated = self::update($this->id, new UpdateCalendarEventDTO($data));
 
             // Update current instance with response data
             foreach (get_object_vars($updated) as $key => $value) {
@@ -618,40 +601,21 @@ class CalendarEvent extends AbstractBaseApi
             }
 
             return $this;
-        } else {
-            // Create new event
-            $dto = new CreateCalendarEventDTO([]);
-
-            // Context code is required for creation
-            if (!$this->contextCode) {
-                throw new CanvasApiException('Context code is required to create a calendar event');
-            }
-
-            // Map properties to DTO
-            $properties = [
-                'contextCode', 'title', 'description', 'startAt', 'endAt',
-                'locationName', 'locationAddress', 'allDay', 'rrule', 'blackoutDate',
-            ];
-
-            foreach ($properties as $property) {
-                if (
-                    property_exists($this, $property) &&
-                    property_exists($dto, $property) &&
-                    $this->{$property} !== null
-                ) {
-                    $dto->{$property} = $this->{$property};
-                }
-            }
-
-            $created = self::create($dto);
-
-            // Update current instance with response data
-            foreach (get_object_vars($created) as $key => $value) {
-                $this->{$key} = $value;
-            }
-
-            return $this;
         }
+
+        // Context code is required for creation
+        if (!$this->contextCode) {
+            throw new CanvasApiException('Context code is required to create a calendar event');
+        }
+
+        $created = self::create(new CreateCalendarEventDTO($data));
+
+        // Update current instance with response data
+        foreach (get_object_vars($created) as $key => $value) {
+            $this->{$key} = $value;
+        }
+
+        return $this;
     }
 
     /**

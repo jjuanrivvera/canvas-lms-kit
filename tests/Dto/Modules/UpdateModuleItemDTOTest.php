@@ -130,7 +130,7 @@ class UpdateModuleItemDTOTest extends TestCase
         $apiArray = $dto->toApiArray();
 
         $this->assertContains(['name' => 'module_item[external_url]', 'contents' => 'https://new-tool.example.com'], $apiArray);
-        $this->assertContains(['name' => 'module_item[new_tab]', 'contents' => true], $apiArray);
+        $this->assertContains(['name' => 'module_item[new_tab]', 'contents' => 'true'], $apiArray);
         $this->assertContains(['name' => 'module_item[iframe][width]', 'contents' => 1000], $apiArray);
         $this->assertContains(['name' => 'module_item[iframe][height]', 'contents' => 700], $apiArray);
     }
@@ -305,7 +305,7 @@ class UpdateModuleItemDTOTest extends TestCase
         $apiArray = $dto->toApiArray();
 
         // Both false boolean and string should be included
-        $this->assertContains(['name' => 'module_item[new_tab]', 'contents' => false], $apiArray);
+        $this->assertContains(['name' => 'module_item[new_tab]', 'contents' => 'false'], $apiArray);
         $this->assertContains(['name' => 'module_item[title]', 'contents' => 'Test Title'], $apiArray);
     }
 

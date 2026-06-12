@@ -7,7 +7,7 @@ namespace CanvasLMS\Api\FeatureFlags;
 use CanvasLMS\Config;
 use CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Http\HttpClient;
+use CanvasLMS\Http\ApiClientRegistry;
 use CanvasLMS\Interfaces\HttpClientInterface;
 
 /**
@@ -22,13 +22,14 @@ use CanvasLMS\Interfaces\HttpClientInterface;
  * @package CanvasLMS\Api\FeatureFlags
  *
  * @see https://canvas.instructure.com/doc/api/feature_flags.html
+ *
+ * @phpstan-consistent-constructor
  */
 class FeatureFlag
 {
-    /**
-     * @var HttpClientInterface
-     */
-    protected static HttpClientInterface $apiClient;
+    public function __construct()
+    {
+    }
 
     /**
      * The symbolic name of the feature
@@ -110,15 +111,14 @@ class FeatureFlag
     /**
      * Get the API client, initializing if necessary
      *
+     * Resolves through the shared registry so configured middleware
+     * (retry, rate limiting, logging) applies to feature flag calls too.
+     *
      * @return HttpClientInterface
      */
     protected static function getApiClient(): HttpClientInterface
     {
-        if (!isset(self::$apiClient)) {
-            self::$apiClient = new HttpClient();
-        }
-
-        return self::$apiClient;
+        return ApiClientRegistry::resolve(self::class);
     }
 
     /**
@@ -143,13 +143,13 @@ class FeatureFlag
     public ?bool $hidden = null;
 
     /**
-     * Set the API client
+     * Set the API client for this class
      *
      * @param HttpClientInterface $client
      */
     public static function setApiClient(HttpClientInterface $client): void
     {
-        self::$apiClient = $client;
+        ApiClientRegistry::setFor(self::class, $client);
     }
 
     /**
@@ -245,9 +245,9 @@ class FeatureFlag
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(string $featureName): self
+    public static function find(string $featureName): static
     {
         $accountId = Config::getAccountId();
 
@@ -263,17 +263,17 @@ class FeatureFlag
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function findByContext(string $contextType, int $contextId, string $featureName): self
+    public static function findByContext(string $contextType, int $contextId, string $featureName): static
     {
         self::validateContextType($contextType);
 
-        $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, $featureName);
+        $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, rawurlencode($featureName));
         $response = self::getApiClient()->get($endpoint);
         $featureData = self::parseJsonResponse($response);
 
-        $feature = new self();
+        $feature = new static();
         self::hydrateProperties($feature, $featureData);
         $feature->contextType = self::normalizeContextType($contextType);
         $feature->contextId = $contextId;
@@ -322,13 +322,13 @@ class FeatureFlag
             $data = new UpdateFeatureFlagDTO($data);
         }
 
-        $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, $featureName);
+        $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, rawurlencode($featureName));
         $response = self::getApiClient()->put($endpoint, [
             'multipart' => $data->toMultipart(),
         ]);
         $featureData = self::parseJsonResponse($response);
 
-        $feature = new self();
+        $feature = new static();
         self::hydrateProperties($feature, $featureData);
         $feature->contextType = self::normalizeContextType($contextType);
         $feature->contextId = $contextId;
@@ -367,7 +367,7 @@ class FeatureFlag
     {
         self::validateContextType($contextType);
 
-        $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, $featureName);
+        $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, rawurlencode($featureName));
 
         try {
             self::getApiClient()->delete($endpoint);

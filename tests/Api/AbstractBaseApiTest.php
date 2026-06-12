@@ -315,7 +315,7 @@ class AbstractBaseApiTest extends TestCase
             {
                 self::checkApiClient();
 
-                $response = self::$apiClient->get('/test', ['query' => $params]);
+                $response = self::getApiClient()->get('/test', ['query' => $params]);
                 $data = json_decode($response->getBody()->getContents(), true);
 
                 return array_map(function ($item) {
@@ -460,6 +460,41 @@ class AbstractBaseApiTest extends TestCase
     }
 
     /**
+     * Test that stream() lazily yields hydrated items across all pages
+     */
+    public function testStreamYieldsAllItemsAcrossPages(): void
+    {
+        $page2Data = [['id' => 3, 'name' => 'Item 3']];
+        $page1Data = [
+            ['id' => 1, 'name' => 'Item 1'],
+            ['id' => 2, 'name' => 'Item 2'],
+        ];
+
+        $mockPage2 = $this->createMock(PaginatedResponse::class);
+        $mockPage2->method('getJsonData')->willReturn($page2Data);
+        $mockPage2->method('getNext')->willReturn(null);
+
+        $mockPage1 = $this->createMock(PaginatedResponse::class);
+        $mockPage1->method('getJsonData')->willReturn($page1Data);
+        $mockPage1->method('getNext')->willReturn($mockPage2);
+
+        $this->mockHttpClient->expects($this->once())
+            ->method('getPaginated')
+            ->willReturn($mockPage1);
+
+        $generator = $this->testApiClass::stream();
+        $this->assertInstanceOf(\Generator::class, $generator);
+
+        $ids = [];
+        foreach ($generator as $item) {
+            $this->assertInstanceOf($this->testApiClass, $item);
+            $ids[] = $item->id;
+        }
+
+        $this->assertSame([1, 2, 3], $ids);
+    }
+
+    /**
      * Test that invalid method calls throw appropriate exceptions
      */
     public function testInvalidMethodCallThrowsException(): void
@@ -588,6 +623,17 @@ class AbstractBaseApiTest extends TestCase
         $this->assertEquals('Smith', $instance->lastName);
         $this->assertEquals(456, $instance->userId);
         $this->assertFalse($instance->isActive);
+
+        // Scalar coercion must apply on populate exactly as on construction:
+        // Canvas may return numeric values as strings, and save() round-trips
+        // go through populate()
+        $instance->testPopulate([
+            'user_id' => '789',
+            'is_active' => 1,
+        ]);
+
+        $this->assertSame(789, $instance->userId);
+        $this->assertTrue($instance->isActive);
     }
 
     /**

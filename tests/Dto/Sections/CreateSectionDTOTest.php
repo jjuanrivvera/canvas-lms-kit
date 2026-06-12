@@ -118,9 +118,9 @@ class CreateSectionDTOTest extends TestCase
     {
         $dto = new CreateSectionDTO(['name' => 'Valid Section']);
 
-        // Should not throw an exception
+        // The contract is simply that no exception is thrown
+        $this->expectNotToPerformAssertions();
         $dto->validate();
-        $this->assertTrue(true);
     }
 
     public function testValidateWithEmptyName(): void
@@ -169,7 +169,7 @@ class CreateSectionDTOTest extends TestCase
             $formattedArray1[$item['name']] = $item['contents'];
         }
 
-        $this->assertTrue($formattedArray1['course_section[restrict_enrollments_to_section_dates]']);
+        $this->assertSame('true', $formattedArray1['course_section[restrict_enrollments_to_section_dates]']);
 
         // Test with false
         $dto2 = new CreateSectionDTO([
@@ -185,7 +185,7 @@ class CreateSectionDTOTest extends TestCase
             $formattedArray2[$item['name']] = $item['contents'];
         }
 
-        $this->assertFalse($formattedArray2['course_section[restrict_enrollments_to_section_dates]']);
+        $this->assertSame('false', $formattedArray2['course_section[restrict_enrollments_to_section_dates]']);
 
         // Test with null (should be excluded)
         $dto3 = new CreateSectionDTO([

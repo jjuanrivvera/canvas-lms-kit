@@ -100,9 +100,9 @@ class CreateSharedBrandConfigDTOTest extends TestCase
             'brand_config_md5' => 'valid_hash',
         ]);
 
-        // Act & Assert - No exception should be thrown
+        // Act & Assert - the contract is simply that no exception is thrown
+        $this->expectNotToPerformAssertions();
         $dto->validate();
-        $this->assertTrue(true); // Test passes if no exception
     }
 
     public function testToApiArrayReturnsCorrectFormat(): void

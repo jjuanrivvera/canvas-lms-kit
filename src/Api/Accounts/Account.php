@@ -221,17 +221,19 @@ class Account extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int|string $id, array $params = []): self
+    public static function find(int|string $id, array $params = []): static
     {
         self::checkApiClient();
 
-        $endpoint = sprintf('accounts/%s', $id);
+        // Encode string IDs (e.g. sis_account_id:ABC-123): raw values could
+        // inject extra path segments or query parameters
+        $endpoint = sprintf('accounts/%s', rawurlencode((string) $id));
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseData = self::parseJsonResponse($response);
 
-        return new self($responseData);
+        return new static($responseData);
     }
 
     /**

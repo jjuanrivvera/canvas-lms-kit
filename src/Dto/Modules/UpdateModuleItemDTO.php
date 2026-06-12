@@ -311,7 +311,7 @@ class UpdateModuleItemDTO extends AbstractBaseDto implements DTOInterface
                 foreach ($value as $key => $arrayValue) {
                     $modifiedProperties[] = [
                         'name' => $propertyName . '[' . $key . ']',
-                        'contents' => $arrayValue,
+                        'contents' => self::formatMultipartValue($arrayValue),
                     ];
                 }
                 continue;
@@ -320,7 +320,7 @@ class UpdateModuleItemDTO extends AbstractBaseDto implements DTOInterface
             // Handle scalar values
             $modifiedProperties[] = [
                 'name' => $propertyName,
-                'contents' => $value,
+                'contents' => self::formatMultipartValue($value),
             ];
         }
 

@@ -238,9 +238,9 @@ class Enrollment extends AbstractBaseApi
      */
 
     /**
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkCourse();
         self::checkApiClient();
@@ -249,7 +249,7 @@ class Enrollment extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return new self($data);
+        return new static($data);
     }
 
     /**

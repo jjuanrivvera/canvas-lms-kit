@@ -96,6 +96,8 @@ use Exception;
  *```
  *
  * @package CanvasLMS\Api\Courses
+ *
+ * @phpstan-consistent-constructor
  */
 class Course extends AbstractBaseApi
 {
@@ -119,7 +121,7 @@ class Course extends AbstractBaseApi
      *
      * @var string
      */
-    public string $uuid;
+    public ?string $uuid = null;
 
     /**
      * @var string|null
@@ -137,12 +139,12 @@ class Course extends AbstractBaseApi
     /**
      * @var string
      */
-    public string $name;
+    public ?string $name = null;
 
     /**
      * @var string
      */
-    public string $courseCode;
+    public ?string $courseCode = null;
 
     /**
      * @var string|null
@@ -152,17 +154,17 @@ class Course extends AbstractBaseApi
     /**
      * @var string
      */
-    public string $workflowState;
+    public ?string $workflowState = null;
 
     /**
      * @var int
      */
-    public int $accountId;
+    public ?int $accountId = null;
 
     /**
      * @var int
      */
-    public int $rootAccountId;
+    public ?int $rootAccountId = null;
 
     /**
      * @var int|null
@@ -612,9 +614,9 @@ class Course extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
 
@@ -622,7 +624,7 @@ class Course extends AbstractBaseApi
 
         $courseData = self::parseJsonResponse($response);
 
-        return new self($courseData);
+        return new static($courseData);
     }
 
     /**
@@ -1738,7 +1740,7 @@ class Course extends AbstractBaseApi
      */
     public function getStudentCount(): int
     {
-        return count($this->getStudentEnrollments());
+        return $this->countEnrollments(['type[]' => ['StudentEnrollment']]);
     }
 
     /**
@@ -1750,7 +1752,7 @@ class Course extends AbstractBaseApi
      */
     public function getTeacherCount(): int
     {
-        return count($this->getTeacherEnrollments());
+        return $this->countEnrollments(['type[]' => ['TeacherEnrollment']]);
     }
 
     /**
@@ -1764,7 +1766,32 @@ class Course extends AbstractBaseApi
      */
     public function getTotalEnrollmentCount(array $params = []): int
     {
-        return count($this->enrollments($params));
+        return $this->countEnrollments($params);
+    }
+
+    /**
+     * Count enrollments from pagination metadata instead of fetching them.
+     *
+     * With per_page=1 the last page number in the Link header equals the
+     * total item count, so counting a 5,000-student course costs one
+     * request instead of one hundred.
+     *
+     * @param mixed[] $params Optional parameters to filter the count
+     *
+     * @throws CanvasApiException If course ID is not set or API request fails
+     *
+     * @return int
+     */
+    private function countEnrollments(array $params = []): int
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch enrollments');
+        }
+
+        Enrollment::setCourse($this);
+        $result = Enrollment::paginate(array_merge($params, ['per_page' => 1]));
+
+        return $result->getTotalPages() ?? $result->getCount();
     }
 
     /**
@@ -1814,9 +1841,9 @@ class Course extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getUuid(): string
+    public function getUuid(): ?string
     {
         return $this->uuid;
     }
@@ -1862,9 +1889,9 @@ class Course extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -1878,9 +1905,9 @@ class Course extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getCourseCode(): string
+    public function getCourseCode(): ?string
     {
         return $this->courseCode;
     }
@@ -1910,9 +1937,9 @@ class Course extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getWorkflowState(): string
+    public function getWorkflowState(): ?string
     {
         return $this->workflowState;
     }
@@ -1926,9 +1953,9 @@ class Course extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getAccountId(): int
+    public function getAccountId(): ?int
     {
         return $this->accountId;
     }
@@ -1942,9 +1969,9 @@ class Course extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getRootAccountId(): int
+    public function getRootAccountId(): ?int
     {
         return $this->rootAccountId;
     }

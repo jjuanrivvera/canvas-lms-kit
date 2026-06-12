@@ -9,34 +9,56 @@ permissions:
   contents: write
 
 jobs:
-  quality:
-    name: Quality Checks
+  verify-version:
+    name: Verify Release Consistency
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
+      - name: Check Version.php and CHANGELOG match the tag
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          CODE_VERSION=$(php -r "require 'src/Version.php'; echo \CanvasLMS\Version::VERSION;")
+          if [ "$TAG" != "$CODE_VERSION" ]; then
+            echo "::error::Tag v$TAG does not match Version::VERSION ($CODE_VERSION). Update src/Version.php before tagging."
+            exit 1
+          fi
+          if ! grep -q "## \[$TAG\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no entry for version $TAG."
+            exit 1
+          fi
+          echo "Release consistency verified for v$TAG"
+
+  quality:
+    name: Quality Checks
+    needs: verify-version
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: '8.1'
           extensions: mbstring, curl, json
           coverage: xdebug
           tools: composer:v2
-          
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
-        
+
       - name: Run all quality checks
         run: composer check
-        
+
       - name: Generate coverage report
         run: vendor/bin/phpunit tests --coverage-clover=coverage/clover.xml
-        
+
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5
         with:
-          file: ./coverage/clover.xml
+          files: ./coverage/clover.xml
 
   notify-packagist:
     name: Update Packagist

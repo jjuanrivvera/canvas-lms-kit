@@ -13,6 +13,14 @@ $finder = PhpCsFixer\Finder::create()
     ->ignoreVCS(true);
 
 $config = new PhpCsFixer\Config();
+
+// The codebase targets PHP 8.1 syntax, so style checks are safe to run on
+// PHP versions newer than the fixer officially supports (e.g. the 8.4 CI
+// lane with the lowest-resolved fixer release)
+if (method_exists($config, 'setUnsupportedPhpVersionAllowed')) {
+    $config->setUnsupportedPhpVersionAllowed(true);
+}
+
 return $config
     ->setRiskyAllowed(true)
     ->setRules([

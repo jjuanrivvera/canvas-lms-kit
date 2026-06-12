@@ -134,6 +134,7 @@ class Outcome extends AbstractBaseApi
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
+        self::validateContext($contextType, ['accounts', 'courses']);
         $endpoint = sprintf('%s/%d/outcome_groups/global/outcomes', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
@@ -157,6 +158,7 @@ class Outcome extends AbstractBaseApi
         int $contextId,
         array $params = []
     ): PaginationResult {
+        self::validateContext($contextType, ['accounts', 'courses']);
         $endpoint = sprintf('%s/%d/outcome_groups/global/outcomes', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
 
@@ -170,13 +172,13 @@ class Outcome extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         $response = self::getApiClient()->get(sprintf('outcomes/%d', $id));
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -217,6 +219,7 @@ class Outcome extends AbstractBaseApi
         ?int $groupId,
         array|CreateOutcomeDTO $data
     ): self {
+        self::validateContext($contextType, ['accounts', 'courses']);
         if (is_array($data)) {
             $data = new CreateOutcomeDTO($data);
         }
@@ -322,6 +325,7 @@ class Outcome extends AbstractBaseApi
      */
     public function deleteFromContext(string $contextType, int $contextId, ?int $groupId = null): bool
     {
+        self::validateContext($contextType, ['accounts', 'courses']);
         if (!$this->id) {
             throw new CanvasApiException('Outcome ID is required to delete');
         }
@@ -353,6 +357,7 @@ class Outcome extends AbstractBaseApi
      */
     public function getAlignments(string $contextType, int $contextId, array $params = []): array
     {
+        self::validateContext($contextType, ['accounts', 'courses']);
         if (!$this->id) {
             throw new CanvasApiException('Outcome ID is required to get alignments');
         }
@@ -466,6 +471,7 @@ class Outcome extends AbstractBaseApi
         string $vendorGuid,
         ?int $groupId = null
     ): self {
+        self::validateContext($contextType, ['accounts', 'courses']);
         $groupPath = $groupId ? (string) $groupId : 'global';
         $endpoint = sprintf('%s/%d/outcome_groups/%s/import', $contextType, $contextId, $groupPath);
 

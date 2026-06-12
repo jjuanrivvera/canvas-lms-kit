@@ -32,14 +32,14 @@ class ModuleAssignmentOverride
      *
      * @var int
      */
-    public int $contextModuleId;
+    public ?int $contextModuleId = null;
 
     /**
      * The title of the override
      *
      * @var string
      */
-    public string $title;
+    public ?string $title = null;
 
     /**
      * An array of the override's target students
@@ -97,9 +97,9 @@ class ModuleAssignmentOverride
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getContextModuleId(): int
+    public function getContextModuleId(): ?int
     {
         return $this->contextModuleId;
     }
@@ -113,9 +113,9 @@ class ModuleAssignmentOverride
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getTitle(): string
+    public function getTitle(): ?string
     {
         return $this->title;
     }

@@ -59,6 +59,8 @@ use DateTime;
  * @see https://canvas.instructure.com/doc/api/appointment_groups.html
  *
  * @package CanvasLMS\Api\AppointmentGroups
+ *
+ * @phpstan-consistent-constructor
  */
 class AppointmentGroup extends AbstractBaseApi
 {
@@ -292,16 +294,16 @@ class AppointmentGroup extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
         $endpoint = sprintf('appointment_groups/%d', $id);
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return new self($data);
+        return new static($data);
     }
 
     /**

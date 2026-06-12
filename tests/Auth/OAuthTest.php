@@ -223,7 +223,7 @@ class OAuthTest extends TestCase
             ])));
 
         $this->expectException(OAuthRefreshFailedException::class);
-        $this->expectExceptionMessage('Invalid response from token refresh');
+        $this->expectExceptionMessage('Token refresh failed: invalid_grant: Invalid refresh token');
 
         OAuth::refreshToken();
     }
@@ -244,6 +244,7 @@ class OAuthTest extends TestCase
                     'headers' => [
                         'Authorization' => 'Bearer token_to_revoke',
                     ],
+                    'skipAuth' => true,
                 ])
             )
             ->willReturn(new Response(200, [], json_encode(['success' => true])));
@@ -273,6 +274,7 @@ class OAuthTest extends TestCase
                     'headers' => [
                         'Authorization' => 'Bearer token_to_revoke',
                     ],
+                    'skipAuth' => true,
                     'query' => [
                         'expire_sessions' => 1,
                     ],
@@ -306,6 +308,7 @@ class OAuthTest extends TestCase
                         'Authorization' => 'Bearer test_token',
                     ],
                     'json' => [],
+                    'skipAuth' => true,
                 ])
             )
             ->willReturn(new Response(200, [], json_encode([
@@ -338,6 +341,7 @@ class OAuthTest extends TestCase
                     'json' => [
                         'return_to' => '/courses/123',
                     ],
+                    'skipAuth' => true,
                 ])
             )
             ->willReturn(new Response(200, [], json_encode([
@@ -553,7 +557,7 @@ class OAuthTest extends TestCase
     }
 
     /**
-     * Test that OAuth token revocation still requires authentication
+     * Test that token revocation sends the token being revoked explicitly
      */
     public function testTokenRevocationStillRequiresAuthentication(): void
     {
@@ -571,8 +575,9 @@ class OAuthTest extends TestCase
                 $this->equalTo('DELETE'),
                 $this->stringContains('/login/oauth2/token'),
                 $this->callback(function ($options) {
-                    // Verify that skipAuth is NOT present (authentication should be applied)
-                    return !isset($options['skipAuth']) &&
+                    // skipAuth must be set so HttpClient does not overwrite
+                    // the manually-set token with the configured credential
+                    return isset($options['skipAuth']) && $options['skipAuth'] === true &&
                            isset($options['headers']['Authorization']) &&
                            $options['headers']['Authorization'] === 'Bearer token_to_revoke';
                 })
@@ -587,7 +592,7 @@ class OAuthTest extends TestCase
     }
 
     /**
-     * Test that OAuth session token creation still requires authentication
+     * Test that session token creation sends the OAuth token explicitly
      */
     public function testSessionTokenCreationStillRequiresAuthentication(): void
     {
@@ -607,8 +612,9 @@ class OAuthTest extends TestCase
                 $this->equalTo('POST'),
                 $this->stringContains('/login/session_token'),
                 $this->callback(function ($options) {
-                    // Verify that skipAuth is NOT present (authentication should be applied)
-                    return !isset($options['skipAuth']) &&
+                    // skipAuth must be set so HttpClient does not overwrite
+                    // the manually-set token with the configured credential
+                    return isset($options['skipAuth']) && $options['skipAuth'] === true &&
                            isset($options['headers']['Authorization']) &&
                            $options['headers']['Authorization'] === 'Bearer test_token';
                 })

@@ -139,7 +139,7 @@ class CourseReports extends AbstractBaseApi
     {
         self::checkCourse();
 
-        $endpoint = sprintf('courses/%d/reports/%s', self::getContextCourseId(), $reportType);
+        $endpoint = sprintf('courses/%d/reports/%s', self::getContextCourseId(), rawurlencode($reportType));
 
         self::checkApiClient();
 
@@ -183,7 +183,12 @@ class CourseReports extends AbstractBaseApi
     {
         self::checkCourse();
 
-        $endpoint = sprintf('courses/%d/reports/%s/%d', self::getContextCourseId(), $reportType, $reportId);
+        $endpoint = sprintf(
+            'courses/%d/reports/%s/%d',
+            self::getContextCourseId(),
+            rawurlencode($reportType),
+            $reportId
+        );
 
         self::checkApiClient();
 
@@ -206,7 +211,7 @@ class CourseReports extends AbstractBaseApi
     {
         self::checkCourse();
 
-        $endpoint = sprintf('courses/%d/reports/%s', self::getContextCourseId(), $reportType);
+        $endpoint = sprintf('courses/%d/reports/%s', self::getContextCourseId(), rawurlencode($reportType));
 
         self::checkApiClient();
 

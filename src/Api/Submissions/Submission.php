@@ -420,8 +420,7 @@ class Submission extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $submissionData = self::parseJsonResponse($response);
 
-        /** @phpstan-ignore-next-line */
-        return new self($submissionData);
+        return new static($submissionData);
     }
 
     /**

@@ -681,9 +681,9 @@ class QuizSubmission extends AbstractBaseApi
      *
      * @throws CanvasApiException If course/quiz not set or API error
      *
-     * @return self Quiz submission instance
+     * @return static Quiz submission instance
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkContext();
 
@@ -700,7 +700,7 @@ class QuizSubmission extends AbstractBaseApi
 
         $data = $responseData['quiz_submissions'][0] ?? $responseData;
 
-        return new self($data);
+        return new static($data);
     }
 
     /**
@@ -852,7 +852,9 @@ class QuizSubmission extends AbstractBaseApi
             foreach ($data as $key => $value) {
                 $requestData[] = [
                     'name' => $key,
-                    'contents' => $value,
+                    // Booleans must be stringified: Guzzle's multipart encoder
+                    // turns false into an empty string
+                    'contents' => is_bool($value) ? ($value ? 'true' : 'false') : $value,
                 ];
             }
         }

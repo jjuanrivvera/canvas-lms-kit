@@ -93,6 +93,33 @@ class LinkHeaderParserTest extends TestCase
     }
 
     /**
+     * Test parsing Link header with commas inside URLs
+     *
+     * Canvas array parameters (e.g. context_codes) can put commas in
+     * pagination URLs; the parser must only split entries on commas
+     * outside the angle brackets.
+     */
+    public function testParseUrlContainingCommas(): void
+    {
+        $linkHeader = '<https://canvas.example.com/api/v1/calendar_events?' .
+                      'context_codes[]=course_1,account_2&page=2>; rel="next", ' .
+                      '<https://canvas.example.com/api/v1/calendar_events?' .
+                      'context_codes[]=course_1,account_2&page=1>; rel="current"';
+
+        $result = $this->parser->parse($linkHeader);
+
+        $this->assertCount(2, $result);
+        $this->assertEquals(
+            'https://canvas.example.com/api/v1/calendar_events?context_codes[]=course_1,account_2&page=2',
+            $result['next']
+        );
+        $this->assertEquals(
+            'https://canvas.example.com/api/v1/calendar_events?context_codes[]=course_1,account_2&page=1',
+            $result['current']
+        );
+    }
+
+    /**
      * Test parsing Link header with spaces and different formatting
      */
     public function testParseWithVariousSpacing(): void

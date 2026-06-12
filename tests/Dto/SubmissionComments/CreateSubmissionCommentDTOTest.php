@@ -112,7 +112,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
 
         $this->assertIsArray($apiArray);
         $this->assertContains(['name' => 'comment[text_comment]', 'contents' => 'Good teamwork everyone'], $apiArray);
-        $this->assertContains(['name' => 'comment[group_comment]', 'contents' => true], $apiArray);
+        $this->assertContains(['name' => 'comment[group_comment]', 'contents' => 'true'], $apiArray);
     }
 
     public function testToApiArrayForMediaComment(): void
@@ -213,7 +213,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
         $apiArray = $dto->toApiArray();
 
         $this->assertContains(['name' => 'comment[text_comment]', 'contents' => 'Boolean test'], $apiArray);
-        $this->assertContains(['name' => 'comment[group_comment]', 'contents' => false], $apiArray);
+        $this->assertContains(['name' => 'comment[group_comment]', 'contents' => 'false'], $apiArray);
     }
 
     public function testMediaCommentTypes(): void
@@ -279,7 +279,7 @@ class CreateSubmissionCommentDTOTest extends TestCase
 
         // Verify all components are present
         $this->assertContains(['name' => 'comment[text_comment]', 'contents' => 'See attached rubric and listen to audio feedback'], $apiArray);
-        $this->assertContains(['name' => 'comment[group_comment]', 'contents' => true], $apiArray);
+        $this->assertContains(['name' => 'comment[group_comment]', 'contents' => 'true'], $apiArray);
         $this->assertContains(['name' => 'comment[media_comment_id]', 'contents' => 'detailed_feedback_123'], $apiArray);
         $this->assertContains(['name' => 'comment[media_comment_type]', 'contents' => 'audio'], $apiArray);
         $this->assertContains(['name' => 'comment[file_ids][]', 'contents' => 111], $apiArray);
