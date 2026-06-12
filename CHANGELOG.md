@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-06-11
+
 ### Added
 - `AbstractBaseApi::stream()`: Generator-based pagination that yields hydrated objects page by page, a memory-safe alternative to `all()` for large datasets
 - Cache middleware is now reachable through configuration: `Config::setMiddleware(['cache' => ['adapter' => 'memory'|'file'|'apcu', ...]])` wires `CacheMiddleware` into the HTTP client (the cache subsystem previously had no public activation path)
@@ -711,7 +713,8 @@ Canvas LMS Kit is now production-ready with 90% Canvas API coverage, rate limiti
 - Contributing guidelines
 - Wiki with implementation guides
 
-[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.6.1...v1.7.0
 [1.6.1]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.4...v1.6.0
 [1.5.4]: https://github.com/jjuanrivvera/canvas-lms-kit/compare/v1.5.3...v1.5.4
