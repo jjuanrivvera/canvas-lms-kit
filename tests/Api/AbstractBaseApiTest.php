@@ -315,7 +315,7 @@ class AbstractBaseApiTest extends TestCase
             {
                 self::checkApiClient();
 
-                $response = self::$apiClient->get('/test', ['query' => $params]);
+                $response = self::getApiClient()->get('/test', ['query' => $params]);
                 $data = json_decode($response->getBody()->getContents(), true);
 
                 return array_map(function ($item) {

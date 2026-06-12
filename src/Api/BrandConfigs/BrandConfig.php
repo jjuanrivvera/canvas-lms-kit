@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace CanvasLMS\Api\BrandConfigs;
 
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Http\HttpClient;
+use CanvasLMS\Http\ApiClientRegistry;
+use CanvasLMS\Interfaces\HttpClientInterface;
 
 /**
  * BrandConfig API
@@ -20,6 +21,18 @@ use CanvasLMS\Http\HttpClient;
  */
 class BrandConfig
 {
+    /**
+     * Set the API client for this class
+     *
+     * @param HttpClientInterface $client
+     *
+     * @return void
+     */
+    public static function setApiClient(HttpClientInterface $client): void
+    {
+        ApiClientRegistry::setFor(self::class, $client);
+    }
+
     /**
      * Get brand config variables for the current domain
      *
@@ -42,7 +55,7 @@ class BrandConfig
      */
     public static function getBrandVariables(): array
     {
-        $httpClient = new HttpClient();
+        $httpClient = ApiClientRegistry::resolve(self::class);
 
         try {
             // This endpoint redirects to a static JSON file

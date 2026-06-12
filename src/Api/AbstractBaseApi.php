@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Api;
 
-use CanvasLMS\Config;
+use CanvasLMS\Http\ApiClientRegistry;
 use CanvasLMS\Http\HttpClient;
-use CanvasLMS\Http\Middleware\LoggingMiddleware;
-use CanvasLMS\Http\Middleware\RateLimitMiddleware;
-use CanvasLMS\Http\Middleware\RetryMiddleware;
 use CanvasLMS\Interfaces\ApiInterface;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
@@ -28,11 +25,6 @@ use InvalidArgumentException;
  */
 abstract class AbstractBaseApi implements ApiInterface
 {
-    /**
-     * @var HttpClientInterface
-     */
-    protected static ?HttpClientInterface $apiClient = null;
-
     /**
      * Define method aliases
      *
@@ -89,7 +81,13 @@ abstract class AbstractBaseApi implements ApiInterface
     }
 
     /**
-     * Set the API client
+     * Set the shared default API client used by ALL resource classes.
+     *
+     * Calling this on any resource (e.g. Course::setApiClient()) replaces
+     * the client for every resource, because relationship methods cross
+     * class boundaries ($course->enrollments() calls Enrollment internally).
+     * Use overrideApiClient() to scope a client to a single class, and
+     * resetApiClients() in test teardown to avoid state leaking.
      *
      * @param HttpClientInterface $apiClient
      *
@@ -97,7 +95,30 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     public static function setApiClient(HttpClientInterface $apiClient): void
     {
-        self::$apiClient = $apiClient;
+        ApiClientRegistry::setDefault($apiClient);
+    }
+
+    /**
+     * Set an API client for this class only, leaving other resources on
+     * the shared default.
+     *
+     * @param HttpClientInterface $apiClient
+     *
+     * @return void
+     */
+    public static function overrideApiClient(HttpClientInterface $apiClient): void
+    {
+        ApiClientRegistry::setFor(static::class, $apiClient);
+    }
+
+    /**
+     * Clear the shared default client and all per-class overrides.
+     *
+     * @return void
+     */
+    public static function resetApiClients(): void
+    {
+        ApiClientRegistry::reset();
     }
 
     /**
@@ -107,9 +128,7 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     protected static function checkApiClient(): void
     {
-        if (!isset(self::$apiClient)) {
-            self::$apiClient = self::createConfiguredHttpClient();
-        }
+        static::getApiClient();
     }
 
     /**
@@ -119,11 +138,7 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     protected static function getApiClient(): HttpClientInterface
     {
-        if (self::$apiClient === null) {
-            self::$apiClient = self::createConfiguredHttpClient();
-        }
-
-        return self::$apiClient;
+        return ApiClientRegistry::resolve(static::class);
     }
 
     /**
@@ -133,35 +148,7 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     protected static function createConfiguredHttpClient(): HttpClient
     {
-        $middlewareConfig = Config::getMiddleware();
-        $middleware = [];
-        $logger = null;
-
-        // Check if logging is configured
-        if (isset($middlewareConfig['logging']) && $middlewareConfig['logging']['enabled'] !== false) {
-            // Use the configured logger from Config, defaults to NullLogger if not configured
-            $logger = Config::getLogger();
-        }
-
-        // If middleware config is empty, HttpClient will use defaults
-        if (!empty($middlewareConfig)) {
-            // Build middleware instances from configuration
-            if (isset($middlewareConfig['retry'])) {
-                $middleware[] = new RetryMiddleware($middlewareConfig['retry']);
-            }
-
-            if (isset($middlewareConfig['rate_limit'])) {
-                $middleware[] = new RateLimitMiddleware($middlewareConfig['rate_limit']);
-            }
-
-            if (isset($middlewareConfig['logging']) && $logger !== null) {
-                $loggingConfig = $middlewareConfig['logging'];
-                unset($loggingConfig['enabled']); // Remove the enabled flag
-                $middleware[] = new LoggingMiddleware($logger, $loggingConfig);
-            }
-        }
-
-        return new HttpClient(null, $logger, $middleware);
+        return ApiClientRegistry::createConfiguredHttpClient();
     }
 
     /**

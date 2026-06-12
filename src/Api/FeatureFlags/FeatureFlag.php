@@ -7,7 +7,7 @@ namespace CanvasLMS\Api\FeatureFlags;
 use CanvasLMS\Config;
 use CanvasLMS\Dto\FeatureFlags\UpdateFeatureFlagDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Http\HttpClient;
+use CanvasLMS\Http\ApiClientRegistry;
 use CanvasLMS\Interfaces\HttpClientInterface;
 
 /**
@@ -25,11 +25,6 @@ use CanvasLMS\Interfaces\HttpClientInterface;
  */
 class FeatureFlag
 {
-    /**
-     * @var HttpClientInterface
-     */
-    protected static HttpClientInterface $apiClient;
-
     /**
      * The symbolic name of the feature
      *
@@ -110,15 +105,14 @@ class FeatureFlag
     /**
      * Get the API client, initializing if necessary
      *
+     * Resolves through the shared registry so configured middleware
+     * (retry, rate limiting, logging) applies to feature flag calls too.
+     *
      * @return HttpClientInterface
      */
     protected static function getApiClient(): HttpClientInterface
     {
-        if (!isset(self::$apiClient)) {
-            self::$apiClient = new HttpClient();
-        }
-
-        return self::$apiClient;
+        return ApiClientRegistry::resolve(self::class);
     }
 
     /**
@@ -143,13 +137,13 @@ class FeatureFlag
     public ?bool $hidden = null;
 
     /**
-     * Set the API client
+     * Set the API client for this class
      *
      * @param HttpClientInterface $client
      */
     public static function setApiClient(HttpClientInterface $client): void
     {
-        self::$apiClient = $client;
+        ApiClientRegistry::setFor(self::class, $client);
     }
 
     /**
