@@ -12,11 +12,18 @@ on:
 
 jobs:
   claude:
+    # Author-association gate: anyone can comment @claude on a public repo,
+    # so restrict triggering to maintainers to avoid quota abuse and
+    # prompt injection from arbitrary users
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      ((github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))) &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'),
+        github.event_name == 'issues' && github.event.issue.author_association ||
+        github.event_name == 'pull_request_review' && github.event.review.author_association ||
+        github.event.comment.author_association)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,7 +39,7 @@ jobs:
 
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@ebcdfe6dc6bb7511eb63e59e07df256dbcf59a2e # v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 

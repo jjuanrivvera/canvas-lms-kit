@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ "*" ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
 
@@ -12,42 +12,48 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.1', '8.2', '8.3']
+        php-version: ['8.1', '8.2', '8.3', '8.4']
         dependency-version: ['lowest', 'highest']
-        
+
     name: PHP ${{ matrix.php-version }} - ${{ matrix.dependency-version }} deps
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: ${{ matrix.php-version }}
           extensions: mbstring, curl, json
           coverage: xdebug
           tools: composer:v2
-          
+
       - name: Validate composer.json
         run: composer validate --strict
-        
+
+      - name: Remove platform pin for dependency resolution
+        # composer.json pins platform.php to the floor version for local
+        # reproducibility; in CI each matrix job must resolve dependencies
+        # for its actual PHP version or every job tests the same dep set
+        run: composer config platform.php --unset
+
       - name: Get Composer Cache Directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-        
+
       - name: Cache Composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ matrix.dependency-version }}-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ matrix.php-version }}-${{ matrix.dependency-version }}-${{ hashFiles('composer.json') }}
           restore-keys: |
-            ${{ runner.os }}-composer-${{ matrix.dependency-version }}-
+            ${{ runner.os }}-composer-${{ matrix.php-version }}-${{ matrix.dependency-version }}-
             ${{ runner.os }}-composer-
-            
+
       - name: Install dependencies
         run: |
           if [ "${{ matrix.dependency-version }}" = "lowest" ]; then
@@ -55,29 +61,33 @@ jobs:
           else
             composer update --no-interaction --no-progress
           fi
-          
+
+      - name: Audit dependencies for known vulnerabilities
+        run: composer audit
+        if: matrix.dependency-version == 'highest'
+
       - name: Run PHPStan
         run: composer phpstan
-        
+
       - name: Check coding standards
         run: composer cs
-        
-      - name: PHP syntax check
-        run: find src/ -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-        
+
+      - name: Check code style (php-cs-fixer)
+        run: composer cs-strict
+
       - name: Run tests
         run: composer test
         if: matrix.php-version != '8.1' || matrix.dependency-version != 'highest'
-        
+
       - name: Run tests with coverage
         run: vendor/bin/phpunit tests --coverage-clover=coverage/clover.xml
         if: matrix.php-version == '8.1' && matrix.dependency-version == 'highest'
-        
+
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5
         if: matrix.php-version == '8.1' && matrix.dependency-version == 'highest'
         with:
-          file: ./coverage/clover.xml
+          files: ./coverage/clover.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
