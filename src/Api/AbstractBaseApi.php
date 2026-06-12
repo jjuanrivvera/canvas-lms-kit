@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Api;
 
+use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Http\ApiClientRegistry;
 use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Interfaces\ApiInterface;
@@ -395,6 +396,38 @@ abstract class AbstractBaseApi implements ApiInterface
     }
 
     /**
+     * Stream all items across all pages one at a time.
+     *
+     * Unlike all(), only one page of raw data is held in memory at a time,
+     * making this safe for very large datasets (e.g. tens of thousands of
+     * enrollments):
+     *
+     * ```php
+     * foreach (User::stream(['per_page' => 100]) as $user) {
+     *     processUser($user);
+     * }
+     * ```
+     *
+     * @param mixed[] $params Query parameters for the request
+     *
+     * @throws CanvasApiException
+     *
+     * @return \Generator<int, static>
+     */
+    public static function stream(array $params = []): \Generator
+    {
+        static::checkApiClient();
+        $paginatedResponse = self::getPaginatedResponse(static::getEndpoint(), $params);
+
+        do {
+            foreach ($paginatedResponse->getJsonData() as $item) {
+                yield new static($item);
+            }
+            $paginatedResponse = $paginatedResponse->getNext();
+        } while ($paginatedResponse !== null);
+    }
+
+    /**
      * Get paginated results with metadata
      *
      * @param array<string, mixed> $params Query parameters
@@ -432,12 +465,35 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     public static function __callStatic($name, $arguments)
     {
-        foreach (static::$methodAliases as $method => $aliases) {
-            if (is_array($aliases) && in_array($name, $aliases, true)) {
-                return static::{$method}(...$arguments);
-            }
+        $method = static::getAliasMap()[$name] ?? null;
+
+        if ($method !== null) {
+            return static::{$method}(...$arguments);
         }
 
         throw new InvalidArgumentException("Method $name does not exist");
+    }
+
+    /**
+     * Build a flat alias-to-method lookup from $methodAliases.
+     *
+     * @return array<string, string>
+     */
+    protected static function getAliasMap(): array
+    {
+        static $maps = [];
+        $class = static::class;
+
+        if (!isset($maps[$class])) {
+            $map = [];
+            foreach (static::$methodAliases as $method => $aliases) {
+                foreach ($aliases as $alias) {
+                    $map[$alias] = $method;
+                }
+            }
+            $maps[$class] = $map;
+        }
+
+        return $maps[$class];
     }
 }

@@ -1740,7 +1740,7 @@ class Course extends AbstractBaseApi
      */
     public function getStudentCount(): int
     {
-        return count($this->getStudentEnrollments());
+        return $this->countEnrollments(['type[]' => ['StudentEnrollment']]);
     }
 
     /**
@@ -1752,7 +1752,7 @@ class Course extends AbstractBaseApi
      */
     public function getTeacherCount(): int
     {
-        return count($this->getTeacherEnrollments());
+        return $this->countEnrollments(['type[]' => ['TeacherEnrollment']]);
     }
 
     /**
@@ -1766,7 +1766,32 @@ class Course extends AbstractBaseApi
      */
     public function getTotalEnrollmentCount(array $params = []): int
     {
-        return count($this->enrollments($params));
+        return $this->countEnrollments($params);
+    }
+
+    /**
+     * Count enrollments from pagination metadata instead of fetching them.
+     *
+     * With per_page=1 the last page number in the Link header equals the
+     * total item count, so counting a 5,000-student course costs one
+     * request instead of one hundred.
+     *
+     * @param mixed[] $params Optional parameters to filter the count
+     *
+     * @throws CanvasApiException If course ID is not set or API request fails
+     *
+     * @return int
+     */
+    private function countEnrollments(array $params = []): int
+    {
+        if (!isset($this->id) || !$this->id) {
+            throw new CanvasApiException('Course ID is required to fetch enrollments');
+        }
+
+        Enrollment::setCourse($this);
+        $result = Enrollment::paginate(array_merge($params, ['per_page' => 1]));
+
+        return $result->getTotalPages() ?? $result->getCount();
     }
 
     /**
