@@ -38,45 +38,90 @@ abstract class AbstractBaseApi implements ApiInterface
     ];
 
     /**
+     * Cached property-to-builtin-type maps, keyed by class name.
+     *
+     * Hydrating large result sets previously created a ReflectionClass per
+     * property per object; the map is now computed once per class.
+     *
+     * @var array<class-string, array<string, string|null>>
+     */
+    private static array $propertyTypeCache = [];
+
+    /**
      * BaseApi constructor.
      *
      * @param mixed[] $data
      */
     public function __construct(array $data)
     {
+        $this->hydrate($data);
+    }
+
+    /**
+     * Get the builtin type name for each property of this class.
+     *
+     * @return array<string, string|null> Property name => builtin type name,
+     *                                    or null for non-builtin/untyped properties
+     */
+    private static function getPropertyTypeMap(): array
+    {
+        $class = static::class;
+
+        if (!isset(self::$propertyTypeCache[$class])) {
+            $map = [];
+            $reflection = new \ReflectionClass($class);
+
+            foreach ($reflection->getProperties() as $property) {
+                $type = $property->getType();
+                $map[$property->getName()] = $type instanceof \ReflectionNamedType && $type->isBuiltin()
+                    ? $type->getName()
+                    : null;
+            }
+
+            self::$propertyTypeCache[$class] = $map;
+        }
+
+        return self::$propertyTypeCache[$class];
+    }
+
+    /**
+     * Assign API response data to properties with type coercion.
+     *
+     * Shared by the constructor and populate() so objects keep the same
+     * type guarantees after save()/update() round-trips as on creation.
+     *
+     * @param mixed[] $data
+     *
+     * @return void
+     */
+    protected function hydrate(array $data): void
+    {
+        $typeMap = self::getPropertyTypeMap();
+
         foreach ($data as $key => $value) {
             $key = lcfirst(str_replace('_', '', ucwords($key, '_')));
 
-            if (property_exists($this, $key) && !is_null($value)) {
-                // Handle type conversion for strict_types compatibility
-                $reflection = new \ReflectionClass($this);
-                if ($reflection->hasProperty($key)) {
-                    $property = $reflection->getProperty($key);
-                    $type = $property->getType();
-
-                    if ($type instanceof \ReflectionNamedType && $type->isBuiltin()) {
-                        switch ($type->getName()) {
-                            case 'int':
-                                $value = is_numeric($value) ? (int) $value : null;
-                                break;
-                            case 'float':
-                                $value = is_numeric($value) ? (float) $value : null;
-                                break;
-                            case 'string':
-                                $value = is_scalar($value) ? (string) $value : null;
-                                break;
-                            case 'bool':
-                                $value = (bool) $value;
-                                break;
-                        }
-                    } else {
-                        // For non-builtin types (like DateTime), use castValue()
-                        $value = $this->castValue($key, $value);
-                    }
-                }
-
-                $this->{$key} = $value;
+            if (!array_key_exists($key, $typeMap) || is_null($value)) {
+                continue;
             }
+
+            $builtinType = $typeMap[$key];
+
+            if ($builtinType !== null) {
+                // Coerce scalars for strict_types compatibility
+                $value = match ($builtinType) {
+                    'int' => is_numeric($value) ? (int) $value : null,
+                    'float' => is_numeric($value) ? (float) $value : null,
+                    'string' => is_scalar($value) ? (string) $value : null,
+                    'bool' => (bool) $value,
+                    default => $value,
+                };
+            } else {
+                // For non-builtin types (like DateTime), use castValue()
+                $value = $this->castValue($key, $value);
+            }
+
+            $this->{$key} = $value;
         }
     }
 
@@ -181,13 +226,7 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     protected function populate(array $data): void
     {
-        foreach ($data as $key => $value) {
-            // Convert snake_case keys to camelCase to match property names
-            $key = lcfirst(str_replace('_', '', ucwords($key, '_')));
-            if (property_exists($this, $key) && !is_null($value)) {
-                $this->{$key} = $this->castValue($key, $value);
-            }
-        }
+        $this->hydrate($data);
     }
 
     /**

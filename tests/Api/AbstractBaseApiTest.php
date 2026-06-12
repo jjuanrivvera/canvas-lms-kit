@@ -588,6 +588,17 @@ class AbstractBaseApiTest extends TestCase
         $this->assertEquals('Smith', $instance->lastName);
         $this->assertEquals(456, $instance->userId);
         $this->assertFalse($instance->isActive);
+
+        // Scalar coercion must apply on populate exactly as on construction:
+        // Canvas may return numeric values as strings, and save() round-trips
+        // go through populate()
+        $instance->testPopulate([
+            'user_id' => '789',
+            'is_active' => 1,
+        ]);
+
+        $this->assertSame(789, $instance->userId);
+        $this->assertTrue($instance->isActive);
     }
 
     /**

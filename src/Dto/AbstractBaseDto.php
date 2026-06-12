@@ -44,6 +44,41 @@ abstract class AbstractBaseDto
     }
 
     /**
+     * Cached property type info, keyed by class name.
+     *
+     * Avoids constructing a ReflectionClass per property per instantiation.
+     *
+     * @var array<class-string, array<string, array{name: string, builtin: bool}|null>>
+     */
+    private static array $propertyTypeCache = [];
+
+    /**
+     * Get type info for each property of this class.
+     *
+     * @return array<string, array{name: string, builtin: bool}|null>
+     */
+    private static function getPropertyTypeMap(): array
+    {
+        $class = static::class;
+
+        if (!isset(self::$propertyTypeCache[$class])) {
+            $map = [];
+            $reflection = new \ReflectionClass($class);
+
+            foreach ($reflection->getProperties() as $property) {
+                $type = $property->getType();
+                $map[$property->getName()] = $type instanceof \ReflectionNamedType
+                    ? ['name' => $type->getName(), 'builtin' => $type->isBuiltin()]
+                    : null;
+            }
+
+            self::$propertyTypeCache[$class] = $map;
+        }
+
+        return self::$propertyTypeCache[$class];
+    }
+
+    /**
      * Cast the value to the correct type
      *
      * @param mixed $value
@@ -55,52 +90,47 @@ abstract class AbstractBaseDto
      */
     private function cast($value, string $key)
     {
-        // Check if the property expects a DateTimeInterface
-        $reflection = new \ReflectionClass($this);
-        if ($reflection->hasProperty($key)) {
-            $property = $reflection->getProperty($key);
-            $type = $property->getType();
+        $typeMap = self::getPropertyTypeMap();
+        $type = $typeMap[$key] ?? null;
 
-            if ($type instanceof \ReflectionNamedType) {
-                $typeName = $type->getName();
+        if ($type !== null) {
+            $typeName = $type['name'];
 
-                // Handle DateTimeInterface
-                if (!$type->isBuiltin()) {
-                    if ($typeName === 'DateTimeInterface' || is_subclass_of($typeName, 'DateTimeInterface')) {
-                        if (is_string($value) && !empty($value)) {
-                            return new DateTime($value);
-                        }
-
-                        return null;
+            // Handle DateTimeInterface
+            if (!$type['builtin']) {
+                if ($typeName === 'DateTimeInterface' || is_subclass_of($typeName, 'DateTimeInterface')) {
+                    if (is_string($value) && !empty($value)) {
+                        return new DateTime($value);
                     }
+
+                    return null;
                 }
+            }
 
-                // Handle built-in types for strict_types compatibility
-                if ($type->isBuiltin()) {
-                    switch ($typeName) {
-                        case 'int':
-                            return $value === null ? null : (int) $value;
-                        case 'float':
-                            return $value === null ? null : (float) $value;
-                        case 'string':
-                            return $value === null ? null : (string) $value;
-                        case 'bool':
-                            return $value === null ? null : (bool) $value;
-                    }
+            // Handle built-in types for strict_types compatibility
+            if ($type['builtin']) {
+                switch ($typeName) {
+                    case 'int':
+                        return $value === null ? null : (int) $value;
+                    case 'float':
+                        return $value === null ? null : (float) $value;
+                    case 'string':
+                        return $value === null ? null : (string) $value;
+                    case 'bool':
+                        return $value === null ? null : (bool) $value;
                 }
             }
         }
 
         // Legacy support for known date fields ONLY if they're typed as DateTime/DateTimeInterface
-        if (in_array($key, ['startAt', 'endAt'], true) && is_string($value) && !empty($value)) {
-            $reflection = new \ReflectionClass($this);
-            if ($reflection->hasProperty($key)) {
-                $property = $reflection->getProperty($key);
-                $type = $property->getType();
-                if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
-                    return new DateTime($value);
-                }
-            }
+        if (
+            in_array($key, ['startAt', 'endAt'], true)
+            && is_string($value)
+            && !empty($value)
+            && $type !== null
+            && !$type['builtin']
+        ) {
+            return new DateTime($value);
         }
 
         return $value;
