@@ -39,3 +39,13 @@ wiki/
 canvas-lms-*
 
 IMPLEMENTATION_STRUCTURE_RULES.md
+# Local AI assistant and planning artifacts (never commit)
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.claude/
+[0-9]*_*.md
+PROJECT_REVIEW.md
+
+# OS files
+.DS_Store

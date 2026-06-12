@@ -37,11 +37,13 @@ jobs:
               restore-keys: |
                 ${{ runner.os }}-phpdocumentor-
           - name: Build with phpDocumentor
-            run: docker run --rm --volume "$(pwd):/data" phpdoc/phpdoc:3 -vv --target docs --cache-folder .phpdoc/cache --template default
+            # Render to a clean build dir: publishing docs/ directly would
+            # expose internal planning and strategy documents on Pages
+            run: docker run --rm --volume "$(pwd):/data" phpdoc/phpdoc:3 -vv --target build/apidocs --cache-folder .phpdoc/cache --template default
           - name: Upload artifact to GitHub Pages
             uses: actions/upload-pages-artifact@v3
             with:
-              path: docs
+              path: build/apidocs
 
     deploy:
         needs: build
