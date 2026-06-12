@@ -55,8 +55,8 @@ class HttpClient implements HttpClientInterface
      * @param array<MiddlewareInterface> $middleware
      */
     public function __construct(
-        ClientInterface $client = null,
-        LoggerInterface $logger = null,
+        ?ClientInterface $client = null,
+        ?LoggerInterface $logger = null,
         array $middleware = []
     ) {
         $this->logger = $logger ?? new \Psr\Log\NullLogger();
