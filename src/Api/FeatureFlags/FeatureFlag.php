@@ -269,7 +269,7 @@ class FeatureFlag
     {
         self::validateContextType($contextType);
 
-        $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, $featureName);
+        $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, rawurlencode($featureName));
         $response = self::getApiClient()->get($endpoint);
         $featureData = self::parseJsonResponse($response);
 
@@ -322,7 +322,7 @@ class FeatureFlag
             $data = new UpdateFeatureFlagDTO($data);
         }
 
-        $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, $featureName);
+        $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, rawurlencode($featureName));
         $response = self::getApiClient()->put($endpoint, [
             'multipart' => $data->toMultipart(),
         ]);
@@ -367,7 +367,7 @@ class FeatureFlag
     {
         self::validateContextType($contextType);
 
-        $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, $featureName);
+        $endpoint = sprintf('%s/%d/features/flags/%s', $contextType, $contextId, rawurlencode($featureName));
 
         try {
             self::getApiClient()->delete($endpoint);

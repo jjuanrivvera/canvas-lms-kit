@@ -168,6 +168,31 @@ abstract class AbstractBaseApi implements ApiInterface
     }
 
     /**
+     * Validate a context type path segment against an allowlist.
+     *
+     * Context types are interpolated into URL paths; validating against the
+     * contexts Canvas actually supports prevents crafted values from
+     * injecting extra path segments or query parameters.
+     *
+     * @param string|null $contextType The context type (plural, e.g. 'courses'); null is ignored
+     * @param array<int, string> $allowed Allowed context types
+     *
+     * @throws CanvasApiException If the context type is not allowed
+     *
+     * @return void
+     */
+    protected static function validateContext(?string $contextType, array $allowed): void
+    {
+        if ($contextType !== null && !in_array($contextType, $allowed, true)) {
+            throw new CanvasApiException(sprintf(
+                "Invalid context type '%s'. Allowed context types: %s",
+                $contextType,
+                implode(', ', $allowed)
+            ));
+        }
+    }
+
+    /**
      * Check if the API client is set, if not, instantiate a new one
      *
      * @return void

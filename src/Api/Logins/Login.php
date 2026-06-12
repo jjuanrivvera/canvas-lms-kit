@@ -252,6 +252,7 @@ class Login extends AbstractBaseApi
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
+        self::validateContext($contextType, ['accounts', 'users']);
         self::checkApiClient();
         $endpoint = sprintf('%s/%d/logins', $contextType, $contextId);
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
@@ -274,6 +275,7 @@ class Login extends AbstractBaseApi
         int $contextId,
         array $params = []
     ): PaginatedResponse {
+        self::validateContext($contextType, ['accounts', 'users']);
         $endpoint = sprintf('%s/%d/logins', $contextType, $contextId);
 
         return self::getPaginatedResponse($endpoint, $params);

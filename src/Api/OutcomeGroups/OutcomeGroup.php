@@ -119,6 +119,7 @@ class OutcomeGroup extends AbstractBaseApi
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
+        self::validateContext($contextType, ['accounts', 'courses']);
         $endpoint = sprintf('%s/%d/outcome_groups', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
@@ -142,6 +143,7 @@ class OutcomeGroup extends AbstractBaseApi
         int $contextId,
         array $params = []
     ): PaginationResult {
+        self::validateContext($contextType, ['accounts', 'courses']);
         $endpoint = sprintf('%s/%d/outcome_groups', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
 
@@ -181,6 +183,7 @@ class OutcomeGroup extends AbstractBaseApi
      */
     public static function findByContext(?string $contextType, ?int $contextId, int $id): static
     {
+        self::validateContext($contextType, ['accounts', 'courses']);
         if ($contextType === null || $contextId === null) {
             return self::findGlobal($id);
         }
@@ -220,6 +223,7 @@ class OutcomeGroup extends AbstractBaseApi
      */
     public static function getRootGroup(string $contextType, int $contextId): self
     {
+        self::validateContext($contextType, ['accounts', 'courses']);
         $endpoint = sprintf('%s/%d/root_outcome_group', $contextType, $contextId);
         $response = self::getApiClient()->get($endpoint);
 
@@ -305,6 +309,7 @@ class OutcomeGroup extends AbstractBaseApi
         array|CreateOutcomeGroupDTO $data,
         ?int $parentGroupId = null
     ): self {
+        self::validateContext($contextType, ['accounts', 'courses']);
         if (is_array($data)) {
             $data = new CreateOutcomeGroupDTO($data);
         }
@@ -651,6 +656,7 @@ class OutcomeGroup extends AbstractBaseApi
      */
     public static function fetchAllLinksByContext(string $contextType, int $contextId, array $params = []): array
     {
+        self::validateContext($contextType, ['accounts', 'courses']);
         $endpoint = sprintf('%s/%d/outcome_group_links', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();

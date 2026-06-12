@@ -227,7 +227,9 @@ class Account extends AbstractBaseApi
     {
         self::checkApiClient();
 
-        $endpoint = sprintf('accounts/%s', $id);
+        // Encode string IDs (e.g. sis_account_id:ABC-123): raw values could
+        // inject extra path segments or query parameters
+        $endpoint = sprintf('accounts/%s', rawurlencode((string) $id));
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseData = self::parseJsonResponse($response);
 

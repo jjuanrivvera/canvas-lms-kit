@@ -177,6 +177,7 @@ class ContentMigration extends AbstractBaseApi
      */
     public static function findByContext(string $contextType, int $contextId, int $id): self
     {
+        self::validateContext($contextType, ['accounts', 'courses', 'groups', 'users']);
         self::checkApiClient();
 
         $endpoint = sprintf('%s/%d/content_migrations/%d', $contextType, $contextId, $id);
@@ -215,6 +216,7 @@ class ContentMigration extends AbstractBaseApi
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
+        self::validateContext($contextType, ['accounts', 'courses', 'groups', 'users']);
         $endpoint = sprintf('%s/%d/content_migrations', $contextType, $contextId);
         $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
         $allData = $paginatedResponse->all();
@@ -238,6 +240,8 @@ class ContentMigration extends AbstractBaseApi
         int $contextId,
         array $params = []
     ): PaginatedResponse {
+        self::validateContext($contextType, ['accounts', 'courses', 'groups', 'users']);
+
         return self::getPaginatedResponse(sprintf('%s/%d/content_migrations', $contextType, $contextId), $params);
     }
 
@@ -273,6 +277,7 @@ class ContentMigration extends AbstractBaseApi
         int $contextId,
         array|CreateContentMigrationDTO $data
     ): self {
+        self::validateContext($contextType, ['accounts', 'courses', 'groups', 'users']);
         self::checkApiClient();
 
         if (is_array($data)) {
@@ -668,6 +673,7 @@ class ContentMigration extends AbstractBaseApi
      */
     public static function getMigrators(string $contextType, int $contextId): array
     {
+        self::validateContext($contextType, ['accounts', 'courses', 'groups', 'users']);
         self::checkApiClient();
 
         $endpoint = sprintf('%s/%d/content_migrations/migrators', $contextType, $contextId);

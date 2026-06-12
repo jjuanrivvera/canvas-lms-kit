@@ -139,6 +139,7 @@ class MigrationIssue extends AbstractBaseApi
      */
     public static function findInMigration(string $contextType, int $contextId, int $migrationId, int $id): self
     {
+        self::validateContext($contextType, ['accounts', 'courses', 'groups', 'users']);
         self::checkApiClient();
 
         $endpoint = sprintf(
@@ -208,6 +209,8 @@ class MigrationIssue extends AbstractBaseApi
         int $migrationId,
         array $params = []
     ): array {
+        self::validateContext($contextType, ['accounts', 'courses', 'groups', 'users']);
+
         return self::allInMigration($contextType, $contextId, $migrationId, $params);
     }
 
@@ -229,6 +232,7 @@ class MigrationIssue extends AbstractBaseApi
         int $migrationId,
         array $params = []
     ): PaginatedResponse {
+        self::validateContext($contextType, ['accounts', 'courses', 'groups', 'users']);
         $endpoint = sprintf(
             '%s/%d/content_migrations/%d/migration_issues',
             $contextType,
@@ -257,6 +261,7 @@ class MigrationIssue extends AbstractBaseApi
         int $migrationId,
         array $params = []
     ): array {
+        self::validateContext($contextType, ['accounts', 'courses', 'groups', 'users']);
         $endpoint = sprintf(
             '%s/%d/content_migrations/%d/migration_issues',
             $contextType,
@@ -289,6 +294,7 @@ class MigrationIssue extends AbstractBaseApi
         int $id,
         array|UpdateMigrationIssueDTO $data
     ): self {
+        self::validateContext($contextType, ['accounts', 'courses', 'groups', 'users']);
         self::checkApiClient();
 
         if (is_array($data)) {
