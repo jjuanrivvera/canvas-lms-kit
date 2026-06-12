@@ -37,15 +37,15 @@ use CanvasLMS\Pagination\PaginatedResponse;
  * $rubrics = $course->rubrics();
  *
  * // Direct context access
- * $rubrics = Rubric::fetchByContext('course', 123);
- * $rubric = Rubric::createInContext('course', 123, [
+ * $rubrics = Rubric::fetchByContext('courses', 123);
+ * $rubric = Rubric::createInContext('courses', 123, [
  *     'title' => 'Course Rubric',
  *     'criteria' => [...]
  * ]);
  *
  * // Finding and updating rubrics
  * $rubric = Rubric::find(456); // Searches in account context
- * $rubric = Rubric::findByContext('course', 123, 456); // Course-specific
+ * $rubric = Rubric::findByContext('courses', 123, 456); // Course-specific
  *
  * $rubric = Rubric::update(456, [
  *     'title' => 'Updated Rubric'

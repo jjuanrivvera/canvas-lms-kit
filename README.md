@@ -18,7 +18,7 @@
 
 - 🚀 **Production Ready**: Rate limiting, middleware support, battle-tested
 - 📚 **Comprehensive**: 45 Canvas APIs fully implemented
-- 🛡️ **Type Safe**: Full PHP 8.1+ type declarations, strict_types, and PHPStan level 6
+- 🛡️ **Type Safe**: Full PHP 8.1+ type declarations, strict_types, and PHPStan level 8
 - 🔧 **Developer Friendly**: Intuitive Active Record pattern - just pass arrays!
 - 📖 **Well Documented**: Extensive examples, guides, and API reference
 - ⚡ **Performance**: Built-in pagination, caching support, and optimized queries
@@ -254,7 +254,8 @@ if (Config::isMasquerading()) {
 ```php
 // Support agent helping a student
 Config::asUser($studentId);
-$submissions = Assignment::find($assignmentId)->getSubmission($studentId);
+Assignment::setCourse(Course::find($courseId));
+$submission = Assignment::find($assignmentId)->submissionForUser($studentId);
 Config::stopMasquerading();
 ```
 
@@ -263,8 +264,8 @@ Config::stopMasquerading();
 // Test different user roles
 foreach ($testUsers as $userId => $role) {
     Config::asUser($userId);
-    $canEdit = Course::find($courseId)->canEdit(); // Check permissions as this user
-    echo "User {$userId} ({$role}): " . ($canEdit ? 'Can edit' : 'Cannot edit') . "\n";
+    $visibleCourses = Course::get(); // Courses visible to this user
+    echo "User {$userId} ({$role}): sees " . count($visibleCourses) . " courses\n";
 }
 Config::stopMasquerading();
 ```
@@ -299,7 +300,7 @@ $courses = Course::get(['per_page' => 50]); // First 50 courses
 // 2. paginate() - Get results with pagination metadata
 $result = Course::paginate(['per_page' => 25]);
 echo "Page {$result->getCurrentPage()} of {$result->getTotalPages()}";
-echo "Total courses: {$result->getTotalCount()}";
+echo "Courses on this page: {$result->getCount()}";
 
 // 3. all() - Fetch ALL items from all pages automatically
 $allCourses = Course::all();  // ⚠️ Use with caution on large datasets!
@@ -332,11 +333,11 @@ do {
     }
     
     // Optional: Add delay to respect rate limits
-    if ($batch->hasNextPage()) {
+    if ($batch->hasNext()) {
         sleep(1);
     }
     
-} while ($batch->hasNextPage());
+} while ($batch->hasNext());
 ```
 
 ### Common Pagination Patterns
@@ -353,10 +354,10 @@ foreach ($result->getData() as $course) {
 }
 
 // Pagination controls
-if ($result->hasPreviousPage()) {
+if ($result->hasPrev()) {
     echo "<a href='?page=" . ($page - 1) . "'>Previous</a>";
 }
-if ($result->hasNextPage()) {
+if ($result->hasNext()) {
     echo "<a href='?page=" . ($page + 1) . "'>Next</a>";
 }
 echo "Page {$result->getCurrentPage()} of {$result->getTotalPages()}";
@@ -365,7 +366,8 @@ echo "Page {$result->getCurrentPage()} of {$result->getTotalPages()}";
 #### Pattern 2: Exporting All Data
 ```php
 // For small datasets (< 1000 items)
-$assignments = Assignment::all(['course_id' => 123]);
+Assignment::setCourse(Course::find(123));
+$assignments = Assignment::all();
 exportToCSV($assignments);
 
 // For large datasets - stream to file
@@ -383,7 +385,7 @@ do {
         ]);
     }
     
-} while ($batch->hasNextPage());
+} while ($batch->hasNext());
 
 fclose($csvFile);
 ```
@@ -391,6 +393,7 @@ fclose($csvFile);
 #### Pattern 3: Finding Specific Items
 ```php
 // When you need just a subset
+Assignment::setCourse(Course::find(123));
 $recentAssignments = Assignment::get([
     'per_page' => 10,
     'order_by' => 'due_at'
@@ -413,7 +416,7 @@ do {
         }
     }
     
-} while ($batch->hasNextPage() && !$found);
+} while ($batch->hasNext() && !$found);
 ```
 
 ### PaginationResult Methods
@@ -425,13 +428,14 @@ $result = Course::paginate(['per_page' => 20]);
 
 // Data access
 $courses = $result->getData();           // Array of Course objects
-$total = $result->getTotalCount();       // Total number of courses
+$count = $result->getCount();            // Number of items on this page
+$result->isEmpty();                      // true if the page has no items
 
 // Navigation
-$result->hasNextPage();                  // true/false
-$result->hasPreviousPage();              // true/false
-$result->getNextPage();                  // Fetches next page (returns new PaginationResult)
-$result->getPreviousPage();              // Fetches previous page
+$result->hasNext();                      // true/false
+$result->hasPrev();                      // true/false
+$result->isFirstPage();                  // true/false
+$result->isLastPage();                   // true/false
 
 // Page information
 $result->getCurrentPage();               // Current page number
@@ -440,17 +444,22 @@ $result->getPerPage();                   // Items per page
 
 // URL access (for custom implementations)
 $result->getNextUrl();                   // Next page URL
-$result->getPreviousUrl();               // Previous page URL
+$result->getPrevUrl();               // Previous page URL
 ```
 
 ### Performance Guidelines
 
 ```php
 // 📗 Small datasets (< 100 items): Safe to use all()
+// Course-scoped resources require course context first
+$course = Course::find(123);
+Module::setCourse($course);
+Section::setCourse($course);
 $modules = Module::all();
 $sections = Section::all();
 
 // 📙 Medium datasets (100-1000 items): Consider your use case
+Assignment::setCourse($course);
 $assignments = Assignment::get(['per_page' => 100]);     // If you need subset
 $assignments = Assignment::paginate(['per_page' => 100]); // If processing batches
 $assignments = Assignment::all();                         // If you need everything
@@ -499,7 +508,7 @@ $allCourses = Course::all();
 
 // Get paginated results with metadata (recommended for large datasets)
 $paginated = Course::paginate(['per_page' => 50]);
-echo "Total courses: " . $paginated->getTotalCount();
+echo "Page {$paginated->getCurrentPage()} of {$paginated->getTotalPages()}";
 
 // Find a specific course
 $course = Course::find(123);
@@ -757,13 +766,13 @@ When working with large Canvas instances (universities, enterprise organizations
 
 ```php
 // ✅ GOOD: Memory-efficient for large datasets
-$result = User::paginate(['per_page' => 100]);
-while ($result) {
+$page = 1;
+do {
+    $result = User::paginate(['page' => $page++, 'per_page' => 100]);
     foreach ($result->getData() as $user) {
         // Process batch of 100 users
     }
-    $result = $result->hasNextPage() ? $result->getNextPage() : null;
-}
+} while ($result->hasNext());
 
 // ✅ GOOD: Get only what you need
 $recentCourses = Course::get(['per_page' => 20]); // Just first 20
@@ -777,7 +786,7 @@ $page = 1;
 do {
     $batch = Enrollment::paginate(['page' => $page++, 'per_page' => 500]);
     // Process batch
-} while ($batch->hasNextPage());
+} while ($batch->hasNext());
 ```
 
 **Memory Guidelines:**
@@ -1027,7 +1036,7 @@ $allCourses = Course::all();
 // 3. paginate() - Get results with pagination metadata
 $result = Course::paginate(['per_page' => 50]);
 echo "Page {$result->getCurrentPage()} of {$result->getTotalPages()}";
-echo "Total courses: {$result->getTotalCount()}";
+echo "Courses on this page: {$result->getCount()}";
 
 // Access the data
 foreach ($result->getData() as $course) {
@@ -1035,8 +1044,11 @@ foreach ($result->getData() as $course) {
 }
 
 // Navigate pages
-if ($result->hasNextPage()) {
-    $nextPage = $result->getNextPage();
+if ($result->hasNext()) {
+    $nextPage = Course::paginate([
+        'page' => $result->getCurrentPage() + 1,
+        'per_page' => 50,
+    ]);
 }
 ```
 
@@ -1050,10 +1062,11 @@ $course->name = 'New Name';
 $enrollments = $course->save()->enrollments();
 
 // Chain multiple operations
+Assignment::setCourse($course);
 $assignment = new Assignment();
 $assignment->name = 'Final Project';
-$assignment->points_possible = 100;
-$submissions = $assignment->save()->getSubmissions();
+$assignment->pointsPossible = 100;
+$submissions = $assignment->save()->submissions();
 
 // Error handling with fluent interface
 try {
@@ -1162,7 +1175,7 @@ docker compose exec php composer test     # Run PHPUnit tests
 docker compose exec php composer check    # Run all checks (CS, PHPStan, tests)
 docker compose exec php composer cs       # Check PSR-12 coding standards
 docker compose exec php composer cs-fix   # Fix coding standards automatically
-docker compose exec php composer phpstan  # Run static analysis (level 6)
+docker compose exec php composer phpstan  # Run static analysis (level 8)
 
 # Local development (requires PHP 8.1+)
 composer test      # Run PHPUnit tests
@@ -1175,7 +1188,7 @@ composer phpstan   # Static analysis
 ### Code Quality Tools
 
 - **PHP-CS-Fixer**: Automatically fixes code to comply with PSR-12 standards
-- **PHPStan**: Static analysis at level 6 for maximum type safety
+- **PHPStan**: Static analysis at level 8 for maximum type safety
 - **PHPUnit**: Comprehensive test suite with 2,300+ tests
 - **Strict Types**: All files use `declare(strict_types=1)` for type safety
 
