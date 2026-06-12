@@ -69,6 +69,8 @@ use Exception;
  * ```
  *
  * @package CanvasLMS\Api\Modules
+ *
+ * @phpstan-consistent-constructor
  */
 class ModuleItem extends AbstractBaseApi
 {
@@ -123,14 +125,14 @@ class ModuleItem extends AbstractBaseApi
      *
      * @var int
      */
-    public int $moduleId;
+    public ?int $moduleId = null;
 
     /**
      * Content type (File, Page, Discussion, Assignment, Quiz, SubHeader, ExternalUrl, ExternalTool).
      *
      * @var string
      */
-    public string $type;
+    public ?string $type = null;
 
     /**
      * ID of associated content object (not required for ExternalUrl, Page, SubHeader).
@@ -144,21 +146,21 @@ class ModuleItem extends AbstractBaseApi
      *
      * @var string
      */
-    public string $title;
+    public ?string $title = null;
 
     /**
      * 1-based position in module.
      *
      * @var int
      */
-    public int $position;
+    public ?int $position = null;
 
     /**
      * 0-based hierarchy indent level (0-5 allowed).
      *
      * @var int
      */
-    public int $indent;
+    public ?int $indent = null;
 
     /**
      * Visibility flag (optional, requires permissions).
@@ -172,7 +174,7 @@ class ModuleItem extends AbstractBaseApi
      *
      * @var string
      */
-    public string $htmlUrl;
+    public ?string $htmlUrl = null;
 
     /**
      * Optional API endpoint URL.
@@ -442,9 +444,9 @@ class ModuleItem extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
         self::checkCourse();
@@ -455,7 +457,7 @@ class ModuleItem extends AbstractBaseApi
 
         $moduleItemData = self::parseJsonResponse($response);
 
-        return new self($moduleItemData);
+        return new static($moduleItemData);
     }
 
     /**
@@ -659,9 +661,9 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getModuleId(): int
+    public function getModuleId(): ?int
     {
         return $this->moduleId;
     }
@@ -675,9 +677,9 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getType(): string
+    public function getType(): ?string
     {
         return $this->type;
     }
@@ -707,9 +709,9 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getTitle(): string
+    public function getTitle(): ?string
     {
         return $this->title;
     }
@@ -723,9 +725,9 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getPosition(): int
+    public function getPosition(): ?int
     {
         return $this->position;
     }
@@ -739,9 +741,9 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getIndent(): int
+    public function getIndent(): ?int
     {
         return $this->indent;
     }
@@ -771,9 +773,9 @@ class ModuleItem extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getHtmlUrl(): string
+    public function getHtmlUrl(): ?string
     {
         return $this->htmlUrl;
     }

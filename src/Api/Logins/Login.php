@@ -74,7 +74,7 @@ class Login extends AbstractBaseApi
      *
      * @param array<string, mixed> $params Optional query parameters
      *
-     * @return array<Login> Array of Login objects
+     * @return array<int, static> Array of Login objects
      */
     public static function get(array $params = []): array
     {
@@ -83,7 +83,7 @@ class Login extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return array_map(fn (array $item) => new self($item), $data);
+        return array_map(fn (array $item) => new static($item), $data);
     }
 
     /**
@@ -92,9 +92,9 @@ class Login extends AbstractBaseApi
      *
      * @param int $id The login ID
      *
-     * @return self The Login instance
+     * @return static The Login instance
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         // Canvas doesn't have direct login endpoint by ID
         // We need to fetch all and filter
@@ -140,9 +140,9 @@ class Login extends AbstractBaseApi
      * @param int $accountId The account ID
      * @param int $loginId The login ID
      *
-     * @return self The Login instance
+     * @return static The Login instance
      */
-    public static function findByAccountAndId(int $accountId, int $loginId): self
+    public static function findByAccountAndId(int $accountId, int $loginId): static
     {
         // Canvas doesn't have a direct endpoint for individual login fetch
         // We'll need to get all account logins and filter
@@ -248,7 +248,7 @@ class Login extends AbstractBaseApi
      * @param int $contextId Account or User ID
      * @param array<string, mixed> $params Query parameters
      *
-     * @return array<Login>
+     * @return array<int, static>
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
@@ -257,7 +257,7 @@ class Login extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return array_map(fn (array $item) => new self($item), $data);
+        return array_map(fn (array $item) => new static($item), $data);
     }
 
     /**

@@ -19,6 +19,8 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * @see https://canvas.instructure.com/doc/api/groups.html#group-memberships
  *
  * @package CanvasLMS\Api\Groups
+ *
+ * @phpstan-consistent-constructor
  */
 class GroupMembership extends AbstractBaseApi
 {
@@ -95,9 +97,9 @@ class GroupMembership extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         if (!isset($params['group_id'])) {
             throw new CanvasApiException(
@@ -114,7 +116,7 @@ class GroupMembership extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return new self($data);
+        return new static($data);
     }
 
     /**

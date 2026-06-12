@@ -68,6 +68,8 @@ use CanvasLMS\Objects\PageRevision;
  * ```
  *
  * @package CanvasLMS\Api\Pages
+ *
+ * @phpstan-consistent-constructor
  */
 class Page extends AbstractBaseApi
 {
@@ -808,9 +810,9 @@ class Page extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkCourse();
         self::checkApiClient();
@@ -842,9 +844,9 @@ class Page extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function findByUrl(string $url): self
+    public static function findByUrl(string $url): static
     {
         self::checkCourse();
         self::checkApiClient();
@@ -853,7 +855,7 @@ class Page extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint);
         $pageData = self::parseJsonResponse($response);
 
-        return new self($pageData);
+        return new static($pageData);
     }
 
     /**
@@ -914,7 +916,7 @@ class Page extends AbstractBaseApi
         $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $pageData = self::parseJsonResponse($response);
 
-        return new self($pageData);
+        return new static($pageData);
     }
 
     /**
@@ -940,7 +942,7 @@ class Page extends AbstractBaseApi
         $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $pageData = self::parseJsonResponse($response);
 
-        return new self($pageData);
+        return new static($pageData);
     }
 
     /**
@@ -1216,7 +1218,7 @@ class Page extends AbstractBaseApi
         $response = self::getApiClient()->post($endpoint);
         $pageData = self::parseJsonResponse($response);
 
-        return new self($pageData);
+        return new static($pageData);
     }
 
     /**
@@ -1303,7 +1305,7 @@ class Page extends AbstractBaseApi
         $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $pageData = self::parseJsonResponse($response);
 
-        return new self($pageData);
+        return new static($pageData);
     }
 
     // Relationship Methods

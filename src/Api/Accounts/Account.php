@@ -221,9 +221,9 @@ class Account extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int|string $id, array $params = []): self
+    public static function find(int|string $id, array $params = []): static
     {
         self::checkApiClient();
 
@@ -231,7 +231,7 @@ class Account extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseData = self::parseJsonResponse($response);
 
-        return new self($responseData);
+        return new static($responseData);
     }
 
     /**

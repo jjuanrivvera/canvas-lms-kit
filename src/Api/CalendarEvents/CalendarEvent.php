@@ -72,6 +72,8 @@ use DateTime;
  * @see https://canvas.instructure.com/doc/api/calendar_events.html
  *
  * @package CanvasLMS\Api\CalendarEvents
+ *
+ * @phpstan-consistent-constructor
  */
 class CalendarEvent extends AbstractBaseApi
 {
@@ -433,16 +435,16 @@ class CalendarEvent extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
         $endpoint = sprintf('calendar_events/%d', $id);
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return new self($data);
+        return new static($data);
     }
 
     /**

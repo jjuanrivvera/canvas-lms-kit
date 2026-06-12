@@ -59,6 +59,8 @@ use CanvasLMS\Pagination\PaginatedResponse;
  * ```
  *
  * @package CanvasLMS\Api\Rubrics
+ *
+ * @phpstan-consistent-constructor
  */
 class Rubric extends AbstractBaseApi
 {
@@ -247,9 +249,9 @@ class Rubric extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         $accountId = Config::getAccountId();
 
@@ -266,21 +268,21 @@ class Rubric extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
     public static function findByContext(
         string $contextType,
         ?int $contextId,
         int $id,
         array $params = []
-    ): self {
+    ): static {
         self::checkApiClient();
 
         $endpoint = sprintf('%s/%d/rubrics/%d', $contextType, $contextId, $id);
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return new self($data);
+        return new static($data);
     }
 
     /**

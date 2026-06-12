@@ -23,6 +23,8 @@ use DateTime;
  * @package CanvasLMS\Api\Conferences
  *
  * @see https://canvas.instructure.com/doc/api/conferences.html
+ *
+ * @phpstan-consistent-constructor
  */
 class Conference extends AbstractBaseApi
 {
@@ -193,16 +195,16 @@ class Conference extends AbstractBaseApi
      *
      * @param int $id The conference ID
      *
-     * @return self The Conference object
+     * @return static The Conference object
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
 
         $response = self::getApiClient()->get(sprintf('conferences/%d', $id));
         $data = self::parseJsonResponse($response);
 
-        $conference = new self($data);
+        $conference = new static($data);
         $conference->processRecordings($data);
 
         return $conference;

@@ -155,9 +155,9 @@ class OutcomeGroup extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         $accountId = Config::getAccountId();
 
@@ -177,9 +177,9 @@ class OutcomeGroup extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function findByContext(?string $contextType, ?int $contextId, int $id): self
+    public static function findByContext(?string $contextType, ?int $contextId, int $id): static
     {
         if ($contextType === null || $contextId === null) {
             return self::findGlobal($id);
@@ -188,7 +188,7 @@ class OutcomeGroup extends AbstractBaseApi
         $endpoint = sprintf('%s/%d/outcome_groups/%d', $contextType, $contextId, $id);
         $response = self::getApiClient()->get($endpoint);
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -198,14 +198,14 @@ class OutcomeGroup extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function findGlobal(int $id): self
+    public static function findGlobal(int $id): static
     {
         $endpoint = sprintf('global/outcome_groups/%d', $id);
         $response = self::getApiClient()->get($endpoint);
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -223,7 +223,7 @@ class OutcomeGroup extends AbstractBaseApi
         $endpoint = sprintf('%s/%d/root_outcome_group', $contextType, $contextId);
         $response = self::getApiClient()->get($endpoint);
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -237,7 +237,7 @@ class OutcomeGroup extends AbstractBaseApi
     {
         $response = self::getApiClient()->get('global/root_outcome_group');
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -284,7 +284,7 @@ class OutcomeGroup extends AbstractBaseApi
             'multipart' => $data->toApiArray(),
         ]);
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -316,7 +316,7 @@ class OutcomeGroup extends AbstractBaseApi
             'multipart' => $data->toApiArray(),
         ]);
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**

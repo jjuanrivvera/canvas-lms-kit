@@ -116,9 +116,9 @@ class MigrationIssue extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         throw new CanvasApiException(
             'Direct find() not supported for MigrationIssue. Use findInMigration() instead.'

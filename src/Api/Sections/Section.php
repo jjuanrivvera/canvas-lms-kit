@@ -55,6 +55,8 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * ```
  *
  * @package CanvasLMS\Api\Sections
+ *
+ * @phpstan-consistent-constructor
  */
 class Section extends AbstractBaseApi
 {
@@ -220,9 +222,9 @@ class Section extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
 
@@ -236,7 +238,7 @@ class Section extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return new self($data);
+        return new static($data);
     }
 
     /**

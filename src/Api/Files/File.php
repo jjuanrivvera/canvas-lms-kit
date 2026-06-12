@@ -476,9 +476,9 @@ class File extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
 
@@ -486,7 +486,7 @@ class File extends AbstractBaseApi
 
         $fileData = self::parseJsonResponse($response);
 
-        return new self($fileData);
+        return new static($fileData);
     }
 
     /**

@@ -22,9 +22,15 @@ use CanvasLMS\Interfaces\HttpClientInterface;
  * @package CanvasLMS\Api\FeatureFlags
  *
  * @see https://canvas.instructure.com/doc/api/feature_flags.html
+ *
+ * @phpstan-consistent-constructor
  */
 class FeatureFlag
 {
+    public function __construct()
+    {
+    }
+
     /**
      * The symbolic name of the feature
      *
@@ -239,9 +245,9 @@ class FeatureFlag
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(string $featureName): self
+    public static function find(string $featureName): static
     {
         $accountId = Config::getAccountId();
 
@@ -257,9 +263,9 @@ class FeatureFlag
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function findByContext(string $contextType, int $contextId, string $featureName): self
+    public static function findByContext(string $contextType, int $contextId, string $featureName): static
     {
         self::validateContextType($contextType);
 
@@ -267,7 +273,7 @@ class FeatureFlag
         $response = self::getApiClient()->get($endpoint);
         $featureData = self::parseJsonResponse($response);
 
-        $feature = new self();
+        $feature = new static();
         self::hydrateProperties($feature, $featureData);
         $feature->contextType = self::normalizeContextType($contextType);
         $feature->contextId = $contextId;
@@ -322,7 +328,7 @@ class FeatureFlag
         ]);
         $featureData = self::parseJsonResponse($response);
 
-        $feature = new self();
+        $feature = new static();
         self::hydrateProperties($feature, $featureData);
         $feature->contextType = self::normalizeContextType($contextType);
         $feature->contextId = $contextId;

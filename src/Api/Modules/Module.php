@@ -110,6 +110,8 @@ use Exception;
  * ```
  *
  * @package CanvasLMS\Api\Modules
+ *
+ * @phpstan-consistent-constructor
  */
 class Module extends AbstractBaseApi
 {
@@ -150,21 +152,21 @@ class Module extends AbstractBaseApi
      *
      * @var string
      */
-    public string $workflowState;
+    public ?string $workflowState = null;
 
     /**
      * The position of this module in the course (1-based).
      *
      * @var int
      */
-    public int $position;
+    public ?int $position = null;
 
     /**
      * The name of this module.
      *
      * @var string
      */
-    public string $name;
+    public ?string $name = null;
 
     /**
      * The date this module will unlock (Optional).
@@ -178,7 +180,7 @@ class Module extends AbstractBaseApi
      *
      * @var bool
      */
-    public bool $requireSequentialProgress;
+    public ?bool $requireSequentialProgress = null;
 
     /**
      * Whether module requires all required items or one required item to be
@@ -193,21 +195,21 @@ class Module extends AbstractBaseApi
      *
      * @var int[]
      */
-    public array $prerequisiteModuleIds;
+    public ?array $prerequisiteModuleIds = null;
 
     /**
      * The number of items in the module.
      *
      * @var int
      */
-    public int $itemsCount;
+    public ?int $itemsCount = null;
 
     /**
      * The API URL to retrieve this module's items.
      *
      * @var string
      */
-    public string $itemsUrl;
+    public ?string $itemsUrl = null;
 
     /**
      * The contents of this module, as an array of Module Items.
@@ -409,9 +411,9 @@ class Module extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
         self::checkCourse();
@@ -422,7 +424,7 @@ class Module extends AbstractBaseApi
 
         $moduleData = self::parseJsonResponse($response);
 
-        return new self($moduleData);
+        return new static($moduleData);
     }
 
     /**
@@ -489,9 +491,9 @@ class Module extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getWorkflowState(): string
+    public function getWorkflowState(): ?string
     {
         return $this->workflowState;
     }
@@ -505,9 +507,9 @@ class Module extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getPosition(): int
+    public function getPosition(): ?int
     {
         return $this->position;
     }
@@ -521,9 +523,9 @@ class Module extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -553,9 +555,9 @@ class Module extends AbstractBaseApi
     }
 
     /**
-     * @return bool
+     * @return bool|null
      */
-    public function isRequireSequentialProgress(): bool
+    public function isRequireSequentialProgress(): ?bool
     {
         return $this->requireSequentialProgress;
     }
@@ -571,7 +573,7 @@ class Module extends AbstractBaseApi
     /**
      * @return mixed[]
      */
-    public function getPrerequisiteModuleIds(): array
+    public function getPrerequisiteModuleIds(): ?array
     {
         return $this->prerequisiteModuleIds;
     }
@@ -585,9 +587,9 @@ class Module extends AbstractBaseApi
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getItemsCount(): int
+    public function getItemsCount(): ?int
     {
         return $this->itemsCount;
     }
@@ -601,9 +603,9 @@ class Module extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getItemsUrl(): string
+    public function getItemsUrl(): ?string
     {
         return $this->itemsUrl;
     }

@@ -170,13 +170,13 @@ class Outcome extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         $response = self::getApiClient()->get(sprintf('outcomes/%d', $id));
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**

@@ -223,9 +223,9 @@ class MediaObject extends AbstractBaseApi
      *
      * @throws CanvasApiException Always throws as Canvas doesn't support this operation
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         throw new CanvasApiException('Direct media object retrieval is not supported by Canvas API');
     }

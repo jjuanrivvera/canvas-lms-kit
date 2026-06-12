@@ -70,6 +70,8 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * ```
  *
  * @package CanvasLMS\Api\Assignments
+ *
+ * @phpstan-consistent-constructor
  */
 class Assignment extends AbstractBaseApi
 {
@@ -1344,9 +1346,9 @@ class Assignment extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkCourse();
         self::checkApiClient();
@@ -1355,7 +1357,7 @@ class Assignment extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $assignmentData = self::parseJsonResponse($response);
 
-        return new self($assignmentData);
+        return new static($assignmentData);
     }
 
     /**

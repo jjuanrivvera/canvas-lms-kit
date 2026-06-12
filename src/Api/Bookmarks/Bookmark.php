@@ -114,9 +114,9 @@ class Bookmark extends AbstractBaseApi
      *
      * @param int $id Bookmark ID
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         $response = self::getApiClient()->get(
             self::getEndpoint() . '/' . $id
@@ -124,7 +124,7 @@ class Bookmark extends AbstractBaseApi
 
         $bookmarkData = self::parseJsonResponse($response);
 
-        return new self($bookmarkData);
+        return new static($bookmarkData);
     }
 
     /**
