@@ -41,8 +41,10 @@ class LinkHeaderParser
             return $links;
         }
 
-        // Split by comma to get individual link entries
-        $linkEntries = explode(',', $linkHeader);
+        // Split on commas only outside <...>: URLs may contain commas in
+        // query parameters (e.g. context_codes), and a naive split would
+        // break the entry mid-URL and silently drop the pagination link
+        $linkEntries = preg_split('/,(?![^<]*>)/', $linkHeader) ?: [];
 
         foreach ($linkEntries as $linkEntry) {
             $linkEntry = trim($linkEntry);

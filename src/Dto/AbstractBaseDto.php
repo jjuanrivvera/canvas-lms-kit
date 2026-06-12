@@ -176,19 +176,38 @@ abstract class AbstractBaseDto
                 foreach ($value as $arrayValue) {
                     $modifiedProperties[] = [
                         'name' => $propertyName . '[]',
-                        'contents' => $arrayValue,
+                        'contents' => self::formatMultipartValue($arrayValue),
                     ];
                 }
                 continue;
             }
 
-            // Handle scalar values (int, string, bool) as they don't need special treatment.
             $modifiedProperties[] = [
                 'name' => $propertyName,
-                'contents' => $value,
+                'contents' => self::formatMultipartValue($value),
             ];
         }
 
         return $modifiedProperties;
+    }
+
+    /**
+     * Format a value for multipart form contents
+     *
+     * Booleans must be converted explicitly: Guzzle's multipart encoder
+     * string-casts contents, turning false into an empty string instead of
+     * 'false', which Canvas may interpret differently than an unset flag.
+     *
+     * @param mixed $value The value to format
+     *
+     * @return mixed
+     */
+    protected static function formatMultipartValue(mixed $value): mixed
+    {
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        return $value;
     }
 }

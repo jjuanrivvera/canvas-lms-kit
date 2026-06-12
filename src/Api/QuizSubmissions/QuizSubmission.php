@@ -852,7 +852,9 @@ class QuizSubmission extends AbstractBaseApi
             foreach ($data as $key => $value) {
                 $requestData[] = [
                     'name' => $key,
-                    'contents' => $value,
+                    // Booleans must be stringified: Guzzle's multipart encoder
+                    // turns false into an empty string
+                    'contents' => is_bool($value) ? ($value ? 'true' : 'false') : $value,
                 ];
             }
         }

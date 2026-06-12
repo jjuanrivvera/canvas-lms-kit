@@ -165,11 +165,11 @@ class CreateAnnouncementDTOTest extends TestCase
                 $titleFound = true;
             }
             if ($field['name'] === 'discussion_topic[is_announcement]') {
-                $this->assertEquals('1', $field['contents']);
+                $this->assertSame('true', $field['contents']);
                 $isAnnouncementFound = true;
             }
             if ($field['name'] === 'discussion_topic[require_initial_post]') {
-                $this->assertEquals('', $field['contents']);
+                $this->assertSame('false', $field['contents']);
                 $requireInitialPostFound = true;
             }
         }

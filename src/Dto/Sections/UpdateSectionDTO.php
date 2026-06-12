@@ -100,7 +100,7 @@ class UpdateSectionDTO extends AbstractBaseDto implements DTOInterface
                 foreach ($value as $arrayValue) {
                     $modifiedProperties[] = [
                         'name' => $propertyName . '[]',
-                        'contents' => $arrayValue,
+                        'contents' => self::formatMultipartValue($arrayValue),
                     ];
                 }
                 continue;
@@ -109,7 +109,7 @@ class UpdateSectionDTO extends AbstractBaseDto implements DTOInterface
             // Handle regular values
             $modifiedProperties[] = [
                 'name' => $propertyName,
-                'contents' => $value,
+                'contents' => self::formatMultipartValue($value),
             ];
         }
 
@@ -117,7 +117,7 @@ class UpdateSectionDTO extends AbstractBaseDto implements DTOInterface
         if ($this->overrideSisStickiness !== null) {
             $modifiedProperties[] = [
                 'name' => 'override_sis_stickiness',
-                'contents' => $this->overrideSisStickiness,
+                'contents' => self::formatMultipartValue($this->overrideSisStickiness),
             ];
         }
 
