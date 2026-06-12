@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Http;
 
+use CanvasLMS\Cache\Adapters\APCuAdapter;
+use CanvasLMS\Cache\Adapters\FileSystemAdapter;
+use CanvasLMS\Cache\Adapters\InMemoryAdapter;
 use CanvasLMS\Config;
+use CanvasLMS\Http\Middleware\CacheMiddleware;
 use CanvasLMS\Http\Middleware\LoggingMiddleware;
 use CanvasLMS\Http\Middleware\RateLimitMiddleware;
 use CanvasLMS\Http\Middleware\RetryMiddleware;
@@ -120,6 +124,12 @@ final class ApiClientRegistry
 
         // If middleware config is empty, HttpClient will use defaults
         if (!empty($middlewareConfig)) {
+            // Cache goes first so cache hits short-circuit the retry and
+            // rate-limit layers entirely
+            if (isset($middlewareConfig['cache'])) {
+                $middleware[] = self::createCacheMiddleware($middlewareConfig['cache']);
+            }
+
             // Build middleware instances from configuration
             if (isset($middlewareConfig['retry'])) {
                 $middleware[] = new RetryMiddleware($middlewareConfig['retry']);
@@ -137,5 +147,39 @@ final class ApiClientRegistry
         }
 
         return new HttpClient(null, $logger, $middleware);
+    }
+
+    /**
+     * Build a CacheMiddleware from Config::setMiddleware()'s 'cache' entry.
+     *
+     * Accepts an 'adapter' as either an instance or a shorthand string
+     * ('memory', 'file', 'apcu'); 'cache_dir' applies to the file adapter.
+     * Configuring the cache implies enabling it unless 'enabled' is set
+     * explicitly.
+     *
+     * @param array<string, mixed> $config Cache middleware configuration
+     *
+     * @return CacheMiddleware
+     */
+    private static function createCacheMiddleware(array $config): CacheMiddleware
+    {
+        $config['enabled'] ??= true;
+
+        if (isset($config['adapter']) && is_string($config['adapter'])) {
+            $config['adapter'] = match ($config['adapter']) {
+                'memory' => new InMemoryAdapter(),
+                'file', 'filesystem' => new FileSystemAdapter($config['cache_dir'] ?? '/tmp/canvas-cache'),
+                'apcu' => new APCuAdapter(),
+                default => throw new \InvalidArgumentException(sprintf(
+                    "Unknown cache adapter '%s'. Use 'memory', 'file', 'apcu', " .
+                    'or pass a CacheAdapterInterface instance.',
+                    $config['adapter']
+                )),
+            };
+        }
+
+        unset($config['cache_dir']);
+
+        return new CacheMiddleware($config);
     }
 }

@@ -96,11 +96,9 @@ class Login extends AbstractBaseApi
      */
     public static function find(int $id, array $params = []): static
     {
-        // Canvas doesn't have direct login endpoint by ID
-        // We need to fetch all and filter
-        $logins = self::get();
-
-        foreach ($logins as $login) {
+        // Canvas has no direct login endpoint by ID, so scan account
+        // logins; stream() follows pagination and stops at a match
+        foreach (self::stream(array_merge($params, ['per_page' => 100])) as $login) {
             if ($login->id === $id) {
                 return $login;
             }
@@ -144,15 +142,19 @@ class Login extends AbstractBaseApi
      */
     public static function findByAccountAndId(int $accountId, int $loginId): static
     {
-        // Canvas doesn't have a direct endpoint for individual login fetch
-        // We'll need to get all account logins and filter
-        $logins = self::fetchByContext('accounts', $accountId);
+        // Canvas doesn't have a direct endpoint for individual login fetch;
+        // walk the paginated account logins until a match
+        $paginated = self::fetchByContextPaginated('accounts', $accountId, ['per_page' => 100]);
 
-        foreach ($logins as $login) {
-            if ($login->id === $loginId) {
-                return $login;
+        do {
+            foreach ($paginated->getJsonData() as $item) {
+                $login = new static($item);
+                if ($login->id === $loginId) {
+                    return $login;
+                }
             }
-        }
+            $paginated = $paginated->getNext();
+        } while ($paginated !== null);
 
         throw new CanvasApiException("Login with ID {$loginId} not found in account {$accountId}");
     }

@@ -817,22 +817,14 @@ class Page extends AbstractBaseApi
         self::checkCourse();
         self::checkApiClient();
 
-        // First, fetch all pages to find the one with matching pageId
-        // Canvas API doesn't provide direct page lookup by numeric ID
-        $endpoint = sprintf('courses/%d/pages', self::getContextCourseId());
-        $response = self::getApiClient()->get($endpoint);
-        $pagesData = self::parseJsonResponse($response);
-
-        foreach ($pagesData as $pageData) {
-            if (isset($pageData['page_id']) && $pageData['page_id'] === $id) {
+        // Canvas has no direct page lookup by numeric ID, so scan the
+        // course pages; stream() follows pagination and stops at a match
+        foreach (self::stream(array_merge($params, ['per_page' => 100])) as $page) {
+            if ($page->pageId === $id) {
                 // Found the page, now fetch full details by URL
-                return self::findByUrl($pageData['url']);
+                return self::findByUrl((string) $page->url);
             }
         }
-
-        // If not found in first page, we need to check all pages
-        // For simplicity in testing, we'll just throw the exception here
-        // In a real implementation, you'd paginate through all results
 
         throw new CanvasApiException("Page with ID {$id} not found in course " . self::getContextCourseId());
     }

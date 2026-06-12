@@ -11,6 +11,7 @@ use CanvasLMS\Dto\Pages\UpdatePageDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Objects\PageRevision;
+use CanvasLMS\Pagination\PaginatedResponse;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -190,19 +191,16 @@ class PageTest extends TestCase
             'published' => true,
         ];
 
-        // Mock for list request - simplified for initial fetch
-        $listResponseMock = $this->createMock(ResponseInterface::class);
-        $listStreamMock = $this->createMock(StreamInterface::class);
+        // List request goes through stream()/getPaginated; the detail
+        // request (findByUrl) uses a plain get
+        $mockPaginated = $this->createMock(PaginatedResponse::class);
+        $mockPaginated->method('getJsonData')->willReturn($pagesListResponse);
+        $mockPaginated->method('getNext')->willReturn(null);
 
-        $listStreamMock->expects($this->once())
-            ->method('getContents')
-            ->willReturn(json_encode($pagesListResponse));
+        $this->httpClientMock->expects($this->once())
+            ->method('getPaginated')
+            ->willReturn($mockPaginated);
 
-        $listResponseMock->expects($this->once())
-            ->method('getBody')
-            ->willReturn($listStreamMock);
-
-        // Mock for detail request
         $detailResponseMock = $this->createMock(ResponseInterface::class);
         $detailStreamMock = $this->createMock(StreamInterface::class);
 
@@ -214,15 +212,10 @@ class PageTest extends TestCase
             ->method('getBody')
             ->willReturn($detailStreamMock);
 
-        $this->httpClientMock->expects($this->exactly(2))
+        $this->httpClientMock->expects($this->once())
             ->method('get')
-            ->willReturnCallback(function ($endpoint, $options = []) use ($listResponseMock, $detailResponseMock) {
-                if (str_contains($endpoint, 'pages/test-page')) {
-                    return $detailResponseMock;
-                }
-
-                return $listResponseMock;
-            });
+            ->with($this->stringContains('pages/test-page'))
+            ->willReturn($detailResponseMock);
 
         Page::setApiClient($this->httpClientMock);
         Page::setCourse($this->course);
@@ -242,23 +235,13 @@ class PageTest extends TestCase
             ['page_id' => 200, 'url' => 'another-page', 'title' => 'Another Page'],
         ];
 
-        $responseMock = $this->createMock(ResponseInterface::class);
-        $streamMock = $this->createMock(StreamInterface::class);
-
-        $streamMock->expects($this->once())
-            ->method('getContents')
-            ->willReturn(json_encode($pagesListResponse));
-
-        $responseMock->expects($this->once())
-            ->method('getBody')
-            ->willReturn($streamMock);
-
-        // No need to check headers in simplified implementation
+        $mockPaginated = $this->createMock(PaginatedResponse::class);
+        $mockPaginated->method('getJsonData')->willReturn($pagesListResponse);
+        $mockPaginated->method('getNext')->willReturn(null);
 
         $this->httpClientMock->expects($this->once())
-            ->method('get')
-            ->with('courses/123/pages')
-            ->willReturn($responseMock);
+            ->method('getPaginated')
+            ->willReturn($mockPaginated);
 
         Page::setApiClient($this->httpClientMock);
         Page::setCourse($this->course);

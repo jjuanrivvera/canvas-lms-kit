@@ -207,9 +207,9 @@ class DeveloperKey extends AbstractBaseApi
      */
     public static function find(int $id, array $params = []): static
     {
-        $keys = self::get();
-
-        foreach ($keys as $key) {
+        // Canvas has no direct developer-key-by-ID endpoint; stream()
+        // follows pagination and stops at a match
+        foreach (self::stream(array_merge($params, ['per_page' => 100])) as $key) {
             if ($key->id === $id) {
                 return $key;
             }
@@ -264,17 +264,22 @@ class DeveloperKey extends AbstractBaseApi
     /**
      * Update this developer key instance
      *
-     * @param array<string, mixed>|UpdateDeveloperKeyDTO $data Update data
+     * When called without arguments the current object state is sent,
+     * matching the zero-argument save() contract of other resources.
+     *
+     * @param array<string, mixed>|UpdateDeveloperKeyDTO|null $data Update data (defaults to object state)
      *
      * @throws CanvasApiException If update fails or key has no ID
      *
      * @return self The updated DeveloperKey instance
      */
-    public function save(array|UpdateDeveloperKeyDTO $data): self
+    public function save(array|UpdateDeveloperKeyDTO|null $data = null): self
     {
         if (!$this->id) {
             throw new CanvasApiException('Developer key must have an ID to update');
         }
+
+        $data ??= array_filter($this->toDtoArray(), static fn ($value) => $value !== null);
 
         $updatedKey = self::update($this->id, $data);
 
