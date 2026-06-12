@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `AbstractBaseApi::stream()`: Generator-based pagination that yields hydrated objects page by page, a memory-safe alternative to `all()` for large datasets
+- Cache middleware is now reachable through configuration: `Config::setMiddleware(['cache' => ['adapter' => 'memory'|'file'|'apcu', ...]])` wires `CacheMiddleware` into the HTTP client (the cache subsystem previously had no public activation path)
+- `AbstractBaseApi::overrideApiClient()` scopes an HTTP client to a single resource class, and `resetApiClients()` clears all client state (intended for test teardown)
+- `BrandConfig::setApiClient()` and `SharedBrandConfig::setApiClient()` for test isolation
+- `composer audit`, PHP 8.4, and php-cs-fixer added to CI; release workflow now verifies the tag matches `Version::VERSION` and the CHANGELOG before publishing
+- Dependabot configuration for Composer and GitHub Actions ecosystems
+
+### Changed
+- `find()` returns `static` (late static binding) across all resources so subclasses receive instances of their own type; previously a mix of `self` and concrete class names
+- 27 model properties on `Course`, `User`, `Module`, `ModuleItem`, and `ModuleAssignmentOverride` are now nullable with `null` defaults; Canvas omits optional fields and accessing an unset typed property previously threw "must not be accessed before initialization". Corresponding getters return nullable types
+- `Course::getStudentCount()`, `getTeacherCount()`, and `getTotalEnrollmentCount()` read totals from pagination metadata (one request with `per_page=1`) instead of fetching every enrollment page
+- `DeveloperKey::save()` data parameter is now optional, defaulting to object state like other resources
+- Property hydration computes reflection type maps once per class instead of per property per object, and `populate()` now applies the same scalar coercion as the constructor
+- `FeatureFlag`, `Analytics`, `BrandConfig`, and `SharedBrandConfig` resolve their HTTP clients through the shared registry, so configured middleware (retry, rate limiting, logging) now applies to them
+- `guzzlehttp/guzzle` minimum raised to `^7.4.5` (security advisories in 7.3.x); `psr/http-message` added as an explicit dependency
+- `FileSystemAdapter` defaults to owner-only permissions (0700 directories, 0600 files) since cached Canvas responses can contain PII
+
+### Fixed
+- `FileSystemAdapter::deleteByPattern()` matched wildcard patterns against md5-hashed filenames and never deleted anything, leaving cache invalidation on mutations silently broken; the original key is now stored in the cache envelope and matched directly
+- DTO `toApiArray()` serializes booleans as `'true'`/`'false'` strings; Guzzle's multipart encoder turned `false` into an empty string, which could fail to clear flags on Canvas
+- OAuth `revokeToken()`/`getSessionToken()` no longer have their manually-set Authorization header overwritten by the configured credential, and OAuth endpoint errors (e.g. `invalid_grant`) now surface in exception messages instead of a generic "Invalid response"
+- `LinkHeaderParser` splits entries only on commas outside angle brackets; pagination URLs containing commas (e.g. `context_codes`) previously broke mid-URL and silently truncated multi-page fetches
+- `Page::find()`, `Login::find()`/`findByAccountAndId()`, and `DeveloperKey::find()` follow pagination instead of scanning only the first page of results
+- `InMemoryAdapter` memory accounting no longer drifts when entries expire or are deleted by pattern
+- `Account::find()` encodes string IDs, and context type parameters are validated against the contexts Canvas supports before URL interpolation
+- `Submission::find()` constructs via `new static`, honoring its declared return type for subclasses
+- `Version::VERSION` corrected to match the released tag (was stale at 1.5.3 since v1.6.0)
+
 ## [1.6.1] - 2025-10-22
 
 ### Fixed

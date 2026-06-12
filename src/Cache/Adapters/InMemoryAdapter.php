@@ -59,7 +59,7 @@ class InMemoryAdapter implements CacheAdapterInterface
         $entry = $this->cache[$key];
 
         // Check expiration
-        if ($entry['expires'] > 0 && $entry['expires'] < time()) {
+        if ($entry['expires'] > 0 && $entry['expires'] < $this->currentTime()) {
             $this->removeEntry($key);
             $this->stats['misses']++;
 
@@ -84,7 +84,7 @@ class InMemoryAdapter implements CacheAdapterInterface
             $this->evictOldest();
         }
 
-        $expires = $ttl > 0 ? time() + $ttl : 0;
+        $expires = $ttl > 0 ? $this->currentTime() + $ttl : 0;
 
         // Size is computed once at write time and stored with the entry so
         // reads/deletes never pay a serialize() just to track memory
@@ -138,7 +138,7 @@ class InMemoryAdapter implements CacheAdapterInterface
         $entry = $this->cache[$key];
 
         // Check expiration
-        if ($entry['expires'] > 0 && $entry['expires'] < time()) {
+        if ($entry['expires'] > 0 && $entry['expires'] < $this->currentTime()) {
             $this->removeEntry($key);
 
             return false;
@@ -202,7 +202,7 @@ class InMemoryAdapter implements CacheAdapterInterface
      */
     private function cleanExpired(): void
     {
-        $now = time();
+        $now = $this->currentTime();
 
         foreach ($this->cache as $key => $entry) {
             if ($entry['expires'] > 0 && $entry['expires'] < $now) {
@@ -240,5 +240,16 @@ class InMemoryAdapter implements CacheAdapterInterface
             $this->cacheMemoryUsage -= $this->cache[$key]['size'];
             unset($this->cache[$key]);
         }
+    }
+
+    /**
+     * Current Unix timestamp; a seam so tests can control TTL expiry
+     * without real sleeps.
+     *
+     * @return int
+     */
+    protected function currentTime(): int
+    {
+        return time();
     }
 }

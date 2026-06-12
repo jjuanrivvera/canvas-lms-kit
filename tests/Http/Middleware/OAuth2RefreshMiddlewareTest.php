@@ -123,30 +123,99 @@ class OAuth2RefreshMiddlewareTest extends TestCase
     }
 
     /**
-     * Test retry on 401 response - simplified version
-     * Note: Full integration testing of Guzzle middleware promises is complex
-     * This test validates the middleware configuration
+     * Test the full 401 -> refresh -> retry flow
      */
     public function testRetryOn401Response(): void
     {
         Config::setOAuthToken('expired_token');
         Config::setOAuthRefreshToken('refresh_token');
-        Config::setOAuthExpiresAt(time() + 3600); // Token appears valid
+        Config::setOAuthExpiresAt(time() + 3600); // Token appears valid, server rejects it
 
-        // Configure middleware for retry
-        $this->middleware->configure(['retry_on_401' => true]);
+        // OAuth token endpoint returns a fresh token during the retry
+        $mockOAuthClient = $this->createMock(\CanvasLMS\Interfaces\HttpClientInterface::class);
+        $mockOAuthClient->expects($this->once())
+            ->method('request')
+            ->with(
+                $this->equalTo('POST'),
+                $this->stringContains('/login/oauth2/token'),
+                $this->arrayHasKey('form_params')
+            )
+            ->willReturn(new Response(200, [], json_encode([
+                'access_token' => 'refreshed_token',
+                'expires_in' => 3600,
+            ])));
+        \CanvasLMS\Auth\OAuth::setHttpClient($mockOAuthClient);
 
-        // Verify configuration was applied
-        $reflection = new \ReflectionClass($this->middleware);
-        $configProperty = $reflection->getProperty('config');
-        $configProperty->setAccessible(true);
-        $config = $configProperty->getValue($this->middleware);
+        // First call 401s, the retried call succeeds
+        $this->mockHandler->append(
+            new RequestException(
+                'Unauthorized',
+                new Request('GET', '/api/v1/courses'),
+                new Response(401, [], json_encode(['errors' => [['message' => 'Invalid access token']]]))
+            ),
+            new Response(200, [], json_encode(['courses' => []]))
+        );
 
-        $this->assertTrue($config['retry_on_401']);
+        $client = new Client([
+            'handler' => $this->handlerStack,
+            'base_uri' => 'https://canvas.test.com',
+        ]);
 
-        // The actual retry logic is tested in integration tests
-        // where the full HTTP client stack is available
-        $this->assertTrue(true);
+        $response = $client->get('/api/v1/courses', [
+            'headers' => ['Authorization' => 'Bearer expired_token'],
+        ]);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('refreshed_token', Config::getOAuthToken());
+
+        // Both queued responses were consumed (the request really was retried)
+        $this->assertEquals(0, $this->mockHandler->count());
+
+        // The retried request carried the refreshed token
+        $lastRequest = $this->mockHandler->getLastRequest();
+        $this->assertEquals('Bearer refreshed_token', $lastRequest->getHeaderLine('Authorization'));
+    }
+
+    /**
+     * Test that a failed refresh after a 401 rethrows the original error
+     */
+    public function testRetryOn401RethrowsWhenRefreshFails(): void
+    {
+        Config::setOAuthToken('expired_token');
+        Config::setOAuthRefreshToken('bad_refresh_token');
+        Config::setOAuthExpiresAt(time() + 3600);
+
+        // Refresh attempt fails at the token endpoint
+        $mockOAuthClient = $this->createMock(\CanvasLMS\Interfaces\HttpClientInterface::class);
+        $mockOAuthClient->expects($this->once())
+            ->method('request')
+            ->willReturn(new Response(401, [], json_encode([
+                'error' => 'invalid_grant',
+                'error_description' => 'refresh token revoked',
+            ])));
+        \CanvasLMS\Auth\OAuth::setHttpClient($mockOAuthClient);
+
+        $this->mockHandler->append(
+            new RequestException(
+                'Unauthorized',
+                new Request('GET', '/api/v1/courses'),
+                new Response(401)
+            )
+        );
+
+        $client = new Client([
+            'handler' => $this->handlerStack,
+            'base_uri' => 'https://canvas.test.com',
+        ]);
+
+        try {
+            $client->get('/api/v1/courses', [
+                'headers' => ['Authorization' => 'Bearer expired_token'],
+            ]);
+            $this->fail('Expected the original 401 RequestException to be rethrown');
+        } catch (RequestException $e) {
+            $this->assertEquals(401, $e->getResponse()->getStatusCode());
+        }
     }
 
     /**

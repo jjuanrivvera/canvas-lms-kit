@@ -323,7 +323,12 @@ foreach ($allUsers as $user) {
     processUser($user);
 }
 
-// ✅ CORRECT - Process in batches using paginate()
+// ✅ BEST - stream() lazily yields one object at a time across all pages
+foreach (User::stream(['per_page' => 100]) as $user) {
+    processUser($user);
+}
+
+// ✅ ALSO CORRECT - Process in batches using paginate()
 $page = 1;
 do {
     $batch = User::paginate(['page' => $page++, 'per_page' => 100]);

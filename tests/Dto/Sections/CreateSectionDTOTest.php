@@ -118,9 +118,9 @@ class CreateSectionDTOTest extends TestCase
     {
         $dto = new CreateSectionDTO(['name' => 'Valid Section']);
 
-        // Should not throw an exception
+        // The contract is simply that no exception is thrown
+        $this->expectNotToPerformAssertions();
         $dto->validate();
-        $this->assertTrue(true);
     }
 
     public function testValidateWithEmptyName(): void
