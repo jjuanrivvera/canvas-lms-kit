@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit config — PHP library.
+reviews:
+  profile: chill
+  poem: false
+  sequence_diagrams: false
+  auto_review:
+    ignore_title_keywords: ["WIP", "release:", "build(deps)"]
+  path_filters:
+    - "!vendor/**"
+    - "!**/*.lock"
+  path_instructions:
+    - path: "**/*.php"
+      instructions: |
+        Follow AGENTS.md / CONTRIBUTING.md. Comments explain WHY, not WHAT. PSR-12. No secrets in code.
+        Flag SQL built by string concatenation, unvalidated input, and missing type hints/return types.
+knowledge_base:
+  code_guidelines:
+    enabled: true
