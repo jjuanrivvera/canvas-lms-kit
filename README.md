@@ -665,6 +665,28 @@ $file = File::upload([
 ]);
 ```
 
+#### Finding Who Uploaded a File
+
+Pass Canvas's `include[]=user` option when listing a course's files to get the uploader
+alongside each file - handy for tracking down who to contact about a given file:
+
+```php
+use CanvasLMS\Api\Courses\Course;
+
+$course = Course::find(123);
+
+// 'include' arrays are normalized to Canvas's include[]=user query form automatically
+$files = $course->files(['include' => ['user']]);
+
+foreach ($files as $file) {
+    $uploader = $file->getUser(); // CanvasLMS\Objects\UserDisplay|null
+
+    if ($uploader !== null) {
+        echo "{$file->getDisplayName()} uploaded by {$uploader->displayName} ({$uploader->htmlUrl})\n";
+    }
+}
+```
+
 ### Feature Flags
 
 ```php

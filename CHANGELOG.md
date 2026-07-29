@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `File::getUser()`/`setUser()` expose the uploader of a file as a `CanvasLMS\Objects\UserDisplay` (id, `displayName`, `avatarImageUrl`, `htmlUrl`, `pronouns`, `anonymousId`) when the listing request includes `include[]=user`, e.g. `$course->files(['include' => ['user']])`; useful for tracking down who uploaded a given file (copyright/ownership follow-up). Returns `null` when the include was not requested
+- `File::fetchByContext()`, `fetchCourseFiles()`, `get()`, `paginate()`, and `all()` now normalize a caller-friendly `['include' => [...]]` array parameter into Canvas's `include[]=...` query form, so both `['include' => ['user']]` and the SDK-wide `['include[]' => ['user']]` convention work
+
 ## [1.7.0] - 2026-06-11
 
 ### Added
