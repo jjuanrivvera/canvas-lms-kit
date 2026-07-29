@@ -3070,7 +3070,21 @@ class Course extends AbstractBaseApi
     /**
      * Get files for this course
      *
-     * @param array<string, mixed> $params Query parameters
+     * @example
+     * ```php
+     * // Find who uploaded each file (e.g. for a copyright takedown request)
+     * $files = $course->files(['include' => ['user']]);
+     * foreach ($files as $file) {
+     *     $uploader = $file->getUser();
+     *     if ($uploader !== null) {
+     *         echo "{$file->getDisplayName()} uploaded by {$uploader->displayName}\n";
+     *     }
+     * }
+     * ```
+     *
+     * @param array<string, mixed> $params Query parameters. Supports Canvas's `include[]`
+     *                                     options - e.g. `['include' => ['user']]` embeds
+     *                                     the uploader on each file (see `File::getUser()`)
      *
      * @throws CanvasApiException
      *
