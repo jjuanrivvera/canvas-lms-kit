@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Api;
 
-use CanvasLMS\Config;
+use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Http\ApiClientRegistry;
 use CanvasLMS\Http\HttpClient;
-use CanvasLMS\Http\Middleware\LoggingMiddleware;
-use CanvasLMS\Http\Middleware\RateLimitMiddleware;
-use CanvasLMS\Http\Middleware\RetryMiddleware;
 use CanvasLMS\Interfaces\ApiInterface;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
@@ -29,11 +27,6 @@ use InvalidArgumentException;
 abstract class AbstractBaseApi implements ApiInterface
 {
     /**
-     * @var HttpClientInterface
-     */
-    protected static ?HttpClientInterface $apiClient = null;
-
-    /**
      * Define method aliases
      *
      * @var array<string, string[]>
@@ -46,50 +39,101 @@ abstract class AbstractBaseApi implements ApiInterface
     ];
 
     /**
+     * Cached property-to-builtin-type maps, keyed by class name.
+     *
+     * Hydrating large result sets previously created a ReflectionClass per
+     * property per object; the map is now computed once per class.
+     *
+     * @var array<class-string, array<string, string|null>>
+     */
+    private static array $propertyTypeCache = [];
+
+    /**
      * BaseApi constructor.
      *
      * @param mixed[] $data
      */
     public function __construct(array $data)
     {
+        $this->hydrate($data);
+    }
+
+    /**
+     * Get the builtin type name for each property of this class.
+     *
+     * @return array<string, string|null> Property name => builtin type name,
+     *                                    or null for non-builtin/untyped properties
+     */
+    private static function getPropertyTypeMap(): array
+    {
+        $class = static::class;
+
+        if (!isset(self::$propertyTypeCache[$class])) {
+            $map = [];
+            $reflection = new \ReflectionClass($class);
+
+            foreach ($reflection->getProperties() as $property) {
+                $type = $property->getType();
+                $map[$property->getName()] = $type instanceof \ReflectionNamedType && $type->isBuiltin()
+                    ? $type->getName()
+                    : null;
+            }
+
+            self::$propertyTypeCache[$class] = $map;
+        }
+
+        return self::$propertyTypeCache[$class];
+    }
+
+    /**
+     * Assign API response data to properties with type coercion.
+     *
+     * Shared by the constructor and populate() so objects keep the same
+     * type guarantees after save()/update() round-trips as on creation.
+     *
+     * @param mixed[] $data
+     *
+     * @return void
+     */
+    protected function hydrate(array $data): void
+    {
+        $typeMap = self::getPropertyTypeMap();
+
         foreach ($data as $key => $value) {
             $key = lcfirst(str_replace('_', '', ucwords($key, '_')));
 
-            if (property_exists($this, $key) && !is_null($value)) {
-                // Handle type conversion for strict_types compatibility
-                $reflection = new \ReflectionClass($this);
-                if ($reflection->hasProperty($key)) {
-                    $property = $reflection->getProperty($key);
-                    $type = $property->getType();
-
-                    if ($type instanceof \ReflectionNamedType && $type->isBuiltin()) {
-                        switch ($type->getName()) {
-                            case 'int':
-                                $value = is_numeric($value) ? (int) $value : null;
-                                break;
-                            case 'float':
-                                $value = is_numeric($value) ? (float) $value : null;
-                                break;
-                            case 'string':
-                                $value = is_scalar($value) ? (string) $value : null;
-                                break;
-                            case 'bool':
-                                $value = (bool) $value;
-                                break;
-                        }
-                    } else {
-                        // For non-builtin types (like DateTime), use castValue()
-                        $value = $this->castValue($key, $value);
-                    }
-                }
-
-                $this->{$key} = $value;
+            if (!array_key_exists($key, $typeMap) || is_null($value)) {
+                continue;
             }
+
+            $builtinType = $typeMap[$key];
+
+            if ($builtinType !== null) {
+                // Coerce scalars for strict_types compatibility
+                $value = match ($builtinType) {
+                    'int' => is_numeric($value) ? (int) $value : null,
+                    'float' => is_numeric($value) ? (float) $value : null,
+                    'string' => is_scalar($value) ? (string) $value : null,
+                    'bool' => (bool) $value,
+                    default => $value,
+                };
+            } else {
+                // For non-builtin types (like DateTime), use castValue()
+                $value = $this->castValue($key, $value);
+            }
+
+            $this->{$key} = $value;
         }
     }
 
     /**
-     * Set the API client
+     * Set the shared default API client used by ALL resource classes.
+     *
+     * Calling this on any resource (e.g. Course::setApiClient()) replaces
+     * the client for every resource, because relationship methods cross
+     * class boundaries ($course->enrollments() calls Enrollment internally).
+     * Use overrideApiClient() to scope a client to a single class, and
+     * resetApiClients() in test teardown to avoid state leaking.
      *
      * @param HttpClientInterface $apiClient
      *
@@ -97,7 +141,55 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     public static function setApiClient(HttpClientInterface $apiClient): void
     {
-        self::$apiClient = $apiClient;
+        ApiClientRegistry::setDefault($apiClient);
+    }
+
+    /**
+     * Set an API client for this class only, leaving other resources on
+     * the shared default.
+     *
+     * @param HttpClientInterface $apiClient
+     *
+     * @return void
+     */
+    public static function overrideApiClient(HttpClientInterface $apiClient): void
+    {
+        ApiClientRegistry::setFor(static::class, $apiClient);
+    }
+
+    /**
+     * Clear the shared default client and all per-class overrides.
+     *
+     * @return void
+     */
+    public static function resetApiClients(): void
+    {
+        ApiClientRegistry::reset();
+    }
+
+    /**
+     * Validate a context type path segment against an allowlist.
+     *
+     * Context types are interpolated into URL paths; validating against the
+     * contexts Canvas actually supports prevents crafted values from
+     * injecting extra path segments or query parameters.
+     *
+     * @param string|null $contextType The context type (plural, e.g. 'courses'); null is ignored
+     * @param array<int, string> $allowed Allowed context types
+     *
+     * @throws CanvasApiException If the context type is not allowed
+     *
+     * @return void
+     */
+    protected static function validateContext(?string $contextType, array $allowed): void
+    {
+        if ($contextType !== null && !in_array($contextType, $allowed, true)) {
+            throw new CanvasApiException(sprintf(
+                "Invalid context type '%s'. Allowed context types: %s",
+                $contextType,
+                implode(', ', $allowed)
+            ));
+        }
     }
 
     /**
@@ -107,9 +199,7 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     protected static function checkApiClient(): void
     {
-        if (!isset(self::$apiClient)) {
-            self::$apiClient = self::createConfiguredHttpClient();
-        }
+        static::getApiClient();
     }
 
     /**
@@ -119,11 +209,7 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     protected static function getApiClient(): HttpClientInterface
     {
-        if (self::$apiClient === null) {
-            self::$apiClient = self::createConfiguredHttpClient();
-        }
-
-        return self::$apiClient;
+        return ApiClientRegistry::resolve(static::class);
     }
 
     /**
@@ -133,35 +219,7 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     protected static function createConfiguredHttpClient(): HttpClient
     {
-        $middlewareConfig = Config::getMiddleware();
-        $middleware = [];
-        $logger = null;
-
-        // Check if logging is configured
-        if (isset($middlewareConfig['logging']) && $middlewareConfig['logging']['enabled'] !== false) {
-            // Use the configured logger from Config, defaults to NullLogger if not configured
-            $logger = Config::getLogger();
-        }
-
-        // If middleware config is empty, HttpClient will use defaults
-        if (!empty($middlewareConfig)) {
-            // Build middleware instances from configuration
-            if (isset($middlewareConfig['retry'])) {
-                $middleware[] = new RetryMiddleware($middlewareConfig['retry']);
-            }
-
-            if (isset($middlewareConfig['rate_limit'])) {
-                $middleware[] = new RateLimitMiddleware($middlewareConfig['rate_limit']);
-            }
-
-            if (isset($middlewareConfig['logging']) && $logger !== null) {
-                $loggingConfig = $middlewareConfig['logging'];
-                unset($loggingConfig['enabled']); // Remove the enabled flag
-                $middleware[] = new LoggingMiddleware($logger, $loggingConfig);
-            }
-        }
-
-        return new HttpClient(null, $logger, $middleware);
+        return ApiClientRegistry::createConfiguredHttpClient();
     }
 
     /**
@@ -194,13 +252,7 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     protected function populate(array $data): void
     {
-        foreach ($data as $key => $value) {
-            // Convert snake_case keys to camelCase to match property names
-            $key = lcfirst(str_replace('_', '', ucwords($key, '_')));
-            if (property_exists($this, $key) && !is_null($value)) {
-                $this->{$key} = $this->castValue($key, $value);
-            }
-        }
+        $this->hydrate($data);
     }
 
     /**
@@ -369,6 +421,38 @@ abstract class AbstractBaseApi implements ApiInterface
     }
 
     /**
+     * Stream all items across all pages one at a time.
+     *
+     * Unlike all(), only one page of raw data is held in memory at a time,
+     * making this safe for very large datasets (e.g. tens of thousands of
+     * enrollments):
+     *
+     * ```php
+     * foreach (User::stream(['per_page' => 100]) as $user) {
+     *     processUser($user);
+     * }
+     * ```
+     *
+     * @param mixed[] $params Query parameters for the request
+     *
+     * @throws CanvasApiException
+     *
+     * @return \Generator<int, static>
+     */
+    public static function stream(array $params = []): \Generator
+    {
+        static::checkApiClient();
+        $paginatedResponse = self::getPaginatedResponse(static::getEndpoint(), $params);
+
+        do {
+            foreach ($paginatedResponse->getJsonData() as $item) {
+                yield new static($item);
+            }
+            $paginatedResponse = $paginatedResponse->getNext();
+        } while ($paginatedResponse !== null);
+    }
+
+    /**
      * Get paginated results with metadata
      *
      * @param array<string, mixed> $params Query parameters
@@ -406,12 +490,35 @@ abstract class AbstractBaseApi implements ApiInterface
      */
     public static function __callStatic($name, $arguments)
     {
-        foreach (static::$methodAliases as $method => $aliases) {
-            if (is_array($aliases) && in_array($name, $aliases, true)) {
-                return static::{$method}(...$arguments);
-            }
+        $method = static::getAliasMap()[$name] ?? null;
+
+        if ($method !== null) {
+            return static::{$method}(...$arguments);
         }
 
         throw new InvalidArgumentException("Method $name does not exist");
+    }
+
+    /**
+     * Build a flat alias-to-method lookup from $methodAliases.
+     *
+     * @return array<string, string>
+     */
+    protected static function getAliasMap(): array
+    {
+        static $maps = [];
+        $class = static::class;
+
+        if (!isset($maps[$class])) {
+            $map = [];
+            foreach (static::$methodAliases as $method => $aliases) {
+                foreach ($aliases as $alias) {
+                    $map[$alias] = $method;
+                }
+            }
+            $maps[$class] = $map;
+        }
+
+        return $maps[$class];
     }
 }

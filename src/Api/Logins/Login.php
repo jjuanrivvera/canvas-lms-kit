@@ -74,7 +74,7 @@ class Login extends AbstractBaseApi
      *
      * @param array<string, mixed> $params Optional query parameters
      *
-     * @return array<Login> Array of Login objects
+     * @return array<int, static> Array of Login objects
      */
     public static function get(array $params = []): array
     {
@@ -83,7 +83,7 @@ class Login extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return array_map(fn (array $item) => new self($item), $data);
+        return array_map(fn (array $item) => new static($item), $data);
     }
 
     /**
@@ -92,15 +92,13 @@ class Login extends AbstractBaseApi
      *
      * @param int $id The login ID
      *
-     * @return self The Login instance
+     * @return static The Login instance
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
-        // Canvas doesn't have direct login endpoint by ID
-        // We need to fetch all and filter
-        $logins = self::get();
-
-        foreach ($logins as $login) {
+        // Canvas has no direct login endpoint by ID, so scan account
+        // logins; stream() follows pagination and stops at a match
+        foreach (self::stream(array_merge($params, ['per_page' => 100])) as $login) {
             if ($login->id === $id) {
                 return $login;
             }
@@ -140,19 +138,23 @@ class Login extends AbstractBaseApi
      * @param int $accountId The account ID
      * @param int $loginId The login ID
      *
-     * @return self The Login instance
+     * @return static The Login instance
      */
-    public static function findByAccountAndId(int $accountId, int $loginId): self
+    public static function findByAccountAndId(int $accountId, int $loginId): static
     {
-        // Canvas doesn't have a direct endpoint for individual login fetch
-        // We'll need to get all account logins and filter
-        $logins = self::fetchByContext('accounts', $accountId);
+        // Canvas doesn't have a direct endpoint for individual login fetch;
+        // walk the paginated account logins until a match
+        $paginated = self::fetchByContextPaginated('accounts', $accountId, ['per_page' => 100]);
 
-        foreach ($logins as $login) {
-            if ($login->id === $loginId) {
-                return $login;
+        do {
+            foreach ($paginated->getJsonData() as $item) {
+                $login = new static($item);
+                if ($login->id === $loginId) {
+                    return $login;
+                }
             }
-        }
+            $paginated = $paginated->getNext();
+        } while ($paginated !== null);
 
         throw new CanvasApiException("Login with ID {$loginId} not found in account {$accountId}");
     }
@@ -248,16 +250,17 @@ class Login extends AbstractBaseApi
      * @param int $contextId Account or User ID
      * @param array<string, mixed> $params Query parameters
      *
-     * @return array<Login>
+     * @return array<int, static>
      */
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
+        self::validateContext($contextType, ['accounts', 'users']);
         self::checkApiClient();
         $endpoint = sprintf('%s/%d/logins', $contextType, $contextId);
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        return array_map(fn (array $item) => new self($item), $data);
+        return array_map(fn (array $item) => new static($item), $data);
     }
 
     /**
@@ -274,6 +277,7 @@ class Login extends AbstractBaseApi
         int $contextId,
         array $params = []
     ): PaginatedResponse {
+        self::validateContext($contextType, ['accounts', 'users']);
         $endpoint = sprintf('%s/%d/logins', $contextType, $contextId);
 
         return self::getPaginatedResponse($endpoint, $params);

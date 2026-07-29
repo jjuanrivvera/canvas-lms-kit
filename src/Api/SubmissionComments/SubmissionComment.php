@@ -332,7 +332,7 @@ class SubmissionComment extends AbstractBaseApi
      *
      * @throws Exception
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         throw new Exception(
             'SubmissionComment::find() is not supported by Canvas API. Comments are retrieved through submissions.'

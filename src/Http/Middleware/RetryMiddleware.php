@@ -154,8 +154,16 @@ class RetryMiddleware extends AbstractMiddleware
         $options['retry_attempt']++;
         $delay = $this->calculateDelay($options['retry_attempt']);
 
-        // Sleep for the calculated delay
-        usleep($delay * 1000);
+        // Sleep for the calculated delay (milliseconds); usleep is
+        // unreliable beyond ~1s on some platforms, so split the wait
+        $seconds = intdiv($delay, 1000);
+        $microseconds = ($delay % 1000) * 1000;
+        if ($seconds > 0) {
+            sleep($seconds);
+        }
+        if ($microseconds > 0) {
+            usleep($microseconds);
+        }
 
         // Reset the request body if needed
         if ($request->getBody()->isSeekable()) {

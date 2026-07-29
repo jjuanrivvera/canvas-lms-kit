@@ -13,6 +13,7 @@ use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Traits\ActivityLoggingTrait;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * OAuth 2.0 authentication utility for Canvas LMS
@@ -122,6 +123,16 @@ class OAuth
                 'skipAuth' => true,
             ]);
 
+            if ($response->getStatusCode() >= 400) {
+                $error = self::extractOAuthError($response);
+                $logger->error('OAuth: Failed to exchange authorization code', [
+                    'status' => $response->getStatusCode(),
+                    'error' => $error,
+                ]);
+
+                throw new CanvasApiException('OAuth code exchange failed: ' . $error);
+            }
+
             $body = $response->getBody()->getContents();
 
             if (!$body) {
@@ -220,6 +231,16 @@ class OAuth
                 'skipAuth' => true,
             ]);
 
+            if ($response->getStatusCode() >= 400) {
+                $error = self::extractOAuthError($response);
+                $logger->error('OAuth: Failed to refresh token', [
+                    'status' => $response->getStatusCode(),
+                    'error' => $error,
+                ]);
+
+                throw new OAuthRefreshFailedException('Token refresh failed: ' . $error);
+            }
+
             $body = $response->getBody()->getContents();
 
             if (!$body) {
@@ -293,11 +314,14 @@ class OAuth
         try {
             $client = self::getClient();
 
-            // Note: This endpoint requires authentication, so no skipAuth
+            // The OAuth token being revoked is set manually; skipAuth prevents
+            // HttpClient from overwriting it with the configured credential
+            // (which would be the API key in api_key auth mode)
             $options = [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $token,
                 ],
+                'skipAuth' => true,
             ];
 
             if ($expireSessions) {
@@ -307,7 +331,17 @@ class OAuth
             // HttpClient now handles OAuth URLs properly
             $response = $client->request('DELETE', '/login/oauth2/token', $options);
 
-            // Clear stored tokens
+            if ($response->getStatusCode() >= 400) {
+                $error = self::extractOAuthError($response);
+                $logger->error('OAuth: Failed to revoke token', [
+                    'status' => $response->getStatusCode(),
+                    'error' => $error,
+                ]);
+
+                throw new CanvasApiException('Token revocation failed: ' . $error);
+            }
+
+            // Clear stored tokens only after Canvas confirms the revocation
             Config::clearOAuthTokens();
 
             $logger->info('OAuth: Successfully revoked token', [
@@ -358,12 +392,14 @@ class OAuth
         try {
             $client = self::getClient();
 
-            // Note: This endpoint requires authentication, so no skipAuth
+            // The OAuth token is set manually; skipAuth prevents HttpClient
+            // from overwriting it with the configured credential
             $options = [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $token,
                 ],
                 'json' => [],
+                'skipAuth' => true,
             ];
 
             if ($returnTo) {
@@ -372,6 +408,12 @@ class OAuth
 
             // Note: session_token is a regular API endpoint (gets /api/v1/ prefix)
             $response = $client->request('POST', '/login/session_token', $options);
+
+            if ($response->getStatusCode() >= 400) {
+                $error = self::extractOAuthError($response);
+
+                throw new CanvasApiException('Session token creation failed: ' . $error);
+            }
 
             $body = $response->getBody()->getContents();
 
@@ -406,6 +448,36 @@ class OAuth
     public static function setHttpClient(?HttpClientInterface $client): void
     {
         self::$httpClient = $client;
+    }
+
+    /**
+     * Extract a readable error description from an OAuth endpoint error response
+     *
+     * Prefers the structured OAuth error fields (error, error_description) and
+     * falls back to the HTTP status so raw response bodies never leak into
+     * exception messages.
+     *
+     * @param ResponseInterface $response The error response
+     *
+     * @return string
+     */
+    private static function extractOAuthError(ResponseInterface $response): string
+    {
+        $body = (string) $response->getBody();
+        $data = $body !== '' ? json_decode($body, true) : null;
+
+        if (is_array($data)) {
+            $parts = array_filter([
+                $data['error'] ?? null,
+                $data['error_description'] ?? null,
+            ], 'is_string');
+
+            if ($parts !== []) {
+                return implode(': ', $parts);
+            }
+        }
+
+        return 'HTTP ' . $response->getStatusCode();
     }
 
     /**

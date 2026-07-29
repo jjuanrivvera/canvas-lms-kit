@@ -618,6 +618,56 @@ class FileTest extends TestCase
         $this->assertFalse($file->isHidden());
     }
 
+    public function testConstructorHydratesNestedUserObject(): void
+    {
+        $file = new File([
+            'id' => 123,
+            'display_name' => 'Test File',
+            'user' => [
+                'id' => 555,
+                'display_name' => 'Jane Lecturer',
+                'avatar_image_url' => 'https://example.com/avatar.png',
+                'html_url' => 'https://example.com/users/555',
+                'pronouns' => 'she/her',
+                'anonymous_id' => 'xyz789',
+            ],
+        ]);
+
+        $uploader = $file->getUser();
+
+        $this->assertInstanceOf(\CanvasLMS\Objects\UserDisplay::class, $uploader);
+        $this->assertSame(555, $uploader->id);
+        $this->assertSame('Jane Lecturer', $uploader->displayName);
+        $this->assertSame('https://example.com/avatar.png', $uploader->avatarImageUrl);
+        $this->assertSame('https://example.com/users/555', $uploader->htmlUrl);
+        $this->assertSame('she/her', $uploader->pronouns);
+        $this->assertSame('xyz789', $uploader->anonymousId);
+    }
+
+    public function testGetUserReturnsNullWhenNotIncluded(): void
+    {
+        $file = new File([
+            'id' => 123,
+            'display_name' => 'Test File',
+        ]);
+
+        $this->assertNull($file->getUser());
+    }
+
+    public function testSetUser(): void
+    {
+        $file = new File(['id' => 123]);
+        $this->assertNull($file->getUser());
+
+        $uploader = new \CanvasLMS\Objects\UserDisplay(['id' => 42, 'display_name' => 'Manual Uploader']);
+        $file->setUser($uploader);
+
+        $this->assertSame($uploader, $file->getUser());
+
+        $file->setUser(null);
+        $this->assertNull($file->getUser());
+    }
+
     /**
      * Test file upload to S3 with external URLs
      */

@@ -103,7 +103,9 @@ class TtlStrategy
     private function getTtlForPath(string $path): int
     {
         foreach ($this->rules as $pattern => $ttl) {
-            if (preg_match('#' . $pattern . '#i', $path)) {
+            // Suppress and skip invalid patterns: a bad user rule must not
+            // silently disable every rule after it
+            if (@preg_match('#' . $pattern . '#i', $path) === 1) {
                 return $ttl;
             }
         }
@@ -121,6 +123,10 @@ class TtlStrategy
      */
     public function addRule(string $pattern, int $ttl): void
     {
+        if (@preg_match('#' . $pattern . '#i', '') === false) {
+            throw new \InvalidArgumentException("Invalid TTL rule pattern: {$pattern}");
+        }
+
         $this->rules[$pattern] = $ttl;
     }
 

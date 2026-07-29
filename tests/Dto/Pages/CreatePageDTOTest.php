@@ -162,9 +162,9 @@ class CreatePageDTOTest extends TestCase
             $valueMap[$item['name']] = $item['contents'];
         }
 
-        $this->assertEquals(true, $valueMap['wiki_page[published]']);
-        $this->assertEquals(false, $valueMap['wiki_page[front_page]']);
-        $this->assertEquals(true, $valueMap['wiki_page[notify_of_update]']);
+        $this->assertSame('true', $valueMap['wiki_page[published]']);
+        $this->assertSame('false', $valueMap['wiki_page[front_page]']);
+        $this->assertSame('true', $valueMap['wiki_page[notify_of_update]']);
     }
 
     public function testApiPropertyName(): void

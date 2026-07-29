@@ -71,6 +71,8 @@ use CanvasLMS\Pagination\PaginationResult;
  * ```
  *
  * @package CanvasLMS\Api\DiscussionTopics
+ *
+ * @phpstan-consistent-constructor
  */
 class DiscussionTopic extends AbstractBaseApi
 {
@@ -1541,9 +1543,9 @@ class DiscussionTopic extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkCourse();
         self::checkApiClient();
@@ -1552,7 +1554,7 @@ class DiscussionTopic extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $discussionData = self::parseJsonResponse($response);
 
-        return new self($discussionData);
+        return new static($discussionData);
     }
 
     /**

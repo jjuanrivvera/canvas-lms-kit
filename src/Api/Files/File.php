@@ -8,6 +8,7 @@ use CanvasLMS\Api\AbstractBaseApi;
 use CanvasLMS\Config;
 use CanvasLMS\Dto\Files\UploadFileDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
+use CanvasLMS\Objects\UserDisplay;
 use CanvasLMS\Pagination\PaginationResult;
 use Exception;
 
@@ -54,9 +55,15 @@ use Exception;
  *
  * // Fetch all files from all pages
  * $allFiles = File::all(['per_page' => 50]);
+ *
+ * // Fetch course files together with the uploader (Canvas include[]=user)
+ * $files = File::fetchCourseFiles(456, ['include' => ['user']]);
+ * $uploader = $files[0]->getUser(); // UserDisplay|null
  * ```
  *
  * @package CanvasLMS\Api\Files
+ *
+ * @phpstan-consistent-constructor
  */
 class File extends AbstractBaseApi
 {
@@ -187,6 +194,14 @@ class File extends AbstractBaseApi
     public ?string $thumbnailUrl = null;
 
     /**
+     * The user who uploaded the file. Only present when the listing request includes
+     * `include[]=user` (e.g. `$course->files(['include' => ['user']])`).
+     *
+     * @var UserDisplay|null
+     */
+    public ?UserDisplay $user = null;
+
+    /**
      * Context type where the file belongs
      *
      * @var string|null
@@ -242,6 +257,28 @@ class File extends AbstractBaseApi
     public function setContextId(?int $contextId): void
     {
         $this->contextId = $contextId;
+    }
+
+    /**
+     * Constructor override to hydrate the nested `user` object (present only when the
+     * response was requested with `include[]=user`).
+     *
+     * @param mixed[] $data
+     */
+    public function __construct(array $data)
+    {
+        $userData = null;
+
+        if (isset($data['user']) && is_array($data['user'])) {
+            $userData = $data['user'];
+            unset($data['user']);
+        }
+
+        parent::__construct($data);
+
+        if ($userData !== null) {
+            $this->user = new UserDisplay($userData);
+        }
     }
 
     /**
@@ -476,9 +513,9 @@ class File extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
 
@@ -486,7 +523,7 @@ class File extends AbstractBaseApi
 
         $fileData = self::parseJsonResponse($response);
 
-        return new self($fileData);
+        return new static($fileData);
     }
 
     /**
@@ -501,6 +538,36 @@ class File extends AbstractBaseApi
     }
 
     /**
+     * Normalize a caller-friendly `include` array parameter into Canvas's bracketed
+     * `include[]` query form.
+     *
+     * Canvas expects repeated `include[]=value` query parameters for multi-value
+     * includes (e.g. `include[]=user`, `include[]=usage_rights`). Guzzle's query
+     * builder does not append the brackets automatically for a plain array value
+     * (it repeats the given key verbatim), so a friendlier `['include' => ['user']]`
+     * has to be rewritten to `['include[]' => ['user']]` before it reaches the HTTP
+     * client. The `include[]` key form (used elsewhere in this SDK, e.g.
+     * `Course::enrollments()`) is passed through untouched.
+     *
+     * @param array<string, mixed> $params Query parameters
+     *
+     * @return array<string, mixed>
+     */
+    private static function normalizeIncludeParam(array $params): array
+    {
+        if (isset($params['include']) && is_array($params['include'])) {
+            $existing = isset($params['include[]']) && is_array($params['include[]'])
+                ? $params['include[]']
+                : [];
+
+            $params['include[]'] = array_merge($existing, $params['include']);
+            unset($params['include']);
+        }
+
+        return $params;
+    }
+
+    /**
      * Get first page of files from current user's personal files.
      * Overrides base to set context information.
      *
@@ -510,7 +577,7 @@ class File extends AbstractBaseApi
      */
     public static function get(array $params = []): array
     {
-        $files = parent::get($params);
+        $files = parent::get(self::normalizeIncludeParam($params));
 
         // Set context information on each file
         foreach ($files as $file) {
@@ -531,7 +598,7 @@ class File extends AbstractBaseApi
      */
     public static function paginate(array $params = []): PaginationResult
     {
-        $paginatedResponse = parent::getPaginatedResponse(self::getEndpoint(), $params);
+        $paginatedResponse = parent::getPaginatedResponse(self::getEndpoint(), self::normalizeIncludeParam($params));
 
         // Convert data to models with context information
         $data = [];
@@ -555,7 +622,7 @@ class File extends AbstractBaseApi
      */
     public static function all(array $params = []): array
     {
-        $files = parent::all($params);
+        $files = parent::all(self::normalizeIncludeParam($params));
 
         // Set context information on each file
         foreach ($files as $file) {
@@ -571,7 +638,9 @@ class File extends AbstractBaseApi
      *
      * @param string $contextType Context type ('courses', 'groups', 'users', 'folders')
      * @param int $contextId Context ID (course_id, group_id, user_id, or folder_id)
-     * @param array<string, mixed> $params Query parameters
+     * @param array<string, mixed> $params Query parameters. Supports Canvas's `include[]`
+     *                                     options (e.g. `['include' => ['user']]` to embed
+     *                                     the uploader, accessible via `File::getUser()`)
      *
      * @throws CanvasApiException
      *
@@ -580,7 +649,7 @@ class File extends AbstractBaseApi
     public static function fetchByContext(string $contextType, int $contextId, array $params = []): array
     {
         $endpoint = sprintf('%s/%d/files', $contextType, $contextId);
-        $paginatedResponse = self::getPaginatedResponse($endpoint, $params);
+        $paginatedResponse = self::getPaginatedResponse($endpoint, self::normalizeIncludeParam($params));
 
         $allData = [];
         do {
@@ -606,8 +675,21 @@ class File extends AbstractBaseApi
     /**
      * Fetch files for a course
      *
+     * @example
+     * ```php
+     * // Get uploader info alongside each file (copyright/ownership lookups)
+     * $files = File::fetchCourseFiles(456, ['include' => ['user']]);
+     * foreach ($files as $file) {
+     *     $uploader = $file->getUser();
+     *     if ($uploader !== null) {
+     *         echo "{$file->getDisplayName()} uploaded by {$uploader->displayName}\n";
+     *     }
+     * }
+     * ```
+     *
      * @param int $courseId
-     * @param mixed[] $params
+     * @param mixed[] $params Query parameters. Supports `['include' => ['user']]` to embed
+     *                        the uploader (accessible via `File::getUser()`)
      *
      * @throws CanvasApiException
      *
@@ -917,6 +999,29 @@ class File extends AbstractBaseApi
     public function setHidden(bool $hidden): void
     {
         $this->hidden = $hidden;
+    }
+
+    /**
+     * Get the user who uploaded the file.
+     *
+     * Only populated when the file was fetched with `include[]=user`
+     * (e.g. `$course->files(['include' => ['user']])`); returns null otherwise.
+     *
+     * @return UserDisplay|null
+     */
+    public function getUser(): ?UserDisplay
+    {
+        return $this->user;
+    }
+
+    /**
+     * Set the uploader of the file
+     *
+     * @param UserDisplay|null $user
+     */
+    public function setUser(?UserDisplay $user): void
+    {
+        $this->user = $user;
     }
 
     // Relationship Methods

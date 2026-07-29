@@ -85,7 +85,7 @@ class UpdateTabDTOTest extends TestCase
         // The AbstractBaseDto creates multipart form data format
         $expected = [
             ['name' => 'tab[position]', 'contents' => 3],
-            ['name' => 'tab[hidden]', 'contents' => false],
+            ['name' => 'tab[hidden]', 'contents' => 'false'],
         ];
 
         $this->assertEquals($expected, $result);

@@ -88,6 +88,13 @@ class PaginatedResponse
     private ?string $bodyCache = null;
 
     /**
+     * Cached decoded JSON body
+     *
+     * @var mixed[]|null
+     */
+    private ?array $jsonCache = null;
+
+    /**
      * PaginatedResponse constructor
      *
      * @param ResponseInterface $response The HTTP response
@@ -147,10 +154,12 @@ class PaginatedResponse
      */
     public function getJsonData(): array
     {
-        $body = $this->getBody();
-        $data = json_decode($body, true);
+        if ($this->jsonCache === null) {
+            $data = json_decode($this->getBody(), true);
+            $this->jsonCache = is_array($data) ? $data : [];
+        }
 
-        return is_array($data) ? $data : [];
+        return $this->jsonCache;
     }
 
     /**
@@ -474,7 +483,8 @@ class PaginatedResponse
     {
         $this->logger->info('Pagination: Starting to fetch all pages');
 
-        $allData = [];
+        $pages = [];
+        $totalItems = 0;
         $currentResponse = $this;
         $pageCount = 0;
         $startTime = microtime(true);
@@ -482,18 +492,23 @@ class PaginatedResponse
         do {
             $pageCount++;
             $data = $currentResponse->getJsonData();
-            $itemCount = count((array) $data);
+            $itemCount = count($data);
+            $totalItems += $itemCount;
 
             $this->logger->debug('Pagination: Processing page', [
                 'page_number' => $pageCount,
                 'items_on_page' => $itemCount,
-                'total_items_so_far' => count($allData) + $itemCount,
+                'total_items_so_far' => $totalItems,
             ]);
 
-            $allData = array_merge($allData, $data);
+            // Collect pages and merge once at the end: merging per page
+            // copies the accumulated array on every iteration
+            $pages[] = $data;
 
             $currentResponse = $currentResponse->getNext();
         } while ($currentResponse !== null);
+
+        $allData = array_merge(...$pages);
 
         $duration = microtime(true) - $startTime;
 

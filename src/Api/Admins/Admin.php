@@ -158,9 +158,9 @@ class Admin extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $userId, array $params = []): self
+    public static function find(int $userId, array $params = []): static
     {
         self::checkApiClient();
 
@@ -187,7 +187,7 @@ class Admin extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return array<int, self>
+     * @return array<int, static>
      */
     public static function get(array $params = []): array
     {
@@ -205,7 +205,7 @@ class Admin extends AbstractBaseApi
         $responseData = self::parseJsonResponse($response);
 
         return array_map(function ($item) use ($accountId) {
-            $admin = new self($item);
+            $admin = new static($item);
             $admin->accountId = $accountId;
 
             return $admin;
@@ -219,7 +219,7 @@ class Admin extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return array<int, self>
+     * @return array<int, static>
      */
     public static function all(array $params = []): array
     {
@@ -238,7 +238,7 @@ class Admin extends AbstractBaseApi
 
         $admins = [];
         foreach ($allData as $item) {
-            $admin = new self($item);
+            $admin = new static($item);
             $admin->accountId = $accountId;
             $admins[] = $admin;
         }
@@ -272,7 +272,7 @@ class Admin extends AbstractBaseApi
         // Convert data to models with account ID
         $data = [];
         foreach ($paginatedResponse->getJsonData() as $item) {
-            $admin = new self($item);
+            $admin = new static($item);
             $admin->accountId = $accountId;
             $data[] = $admin;
         }

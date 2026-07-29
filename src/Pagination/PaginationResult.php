@@ -13,11 +13,11 @@ namespace CanvasLMS\Pagination;
  *
  * Usage:
  * ```php
- * $result = Course::fetchAllPaginated(['per_page' => 50]);
+ * $result = Course::paginate(['per_page' => 50]);
  * $courses = $result->getData();
  *
  * if ($result->hasNext()) {
- *     $nextResult = $result->getNext();
+ *     $next = Course::paginate(['page' => $result->getCurrentPage() + 1, 'per_page' => 50]);
  * }
  *
  * echo "Page {$result->getCurrentPage()} of {$result->getTotalPages()}";

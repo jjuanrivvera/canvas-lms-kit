@@ -82,7 +82,7 @@ class UpdateSectionDTOTest extends TestCase
 
         $expected = [
             'course_section[name]' => 'Section with Override',
-            'override_sis_stickiness' => false,
+            'override_sis_stickiness' => 'false',
         ];
 
         $this->assertEquals($expected, $formattedArray);
@@ -209,8 +209,8 @@ class UpdateSectionDTOTest extends TestCase
             $formattedArray1[$item['name']] = $item['contents'];
         }
 
-        $this->assertTrue($formattedArray1['course_section[restrict_enrollments_to_section_dates]']);
-        $this->assertTrue($formattedArray1['override_sis_stickiness']);
+        $this->assertSame('true', $formattedArray1['course_section[restrict_enrollments_to_section_dates]']);
+        $this->assertSame('true', $formattedArray1['override_sis_stickiness']);
 
         // Test with false
         $dto2 = new UpdateSectionDTO([
@@ -226,8 +226,8 @@ class UpdateSectionDTOTest extends TestCase
             $formattedArray2[$item['name']] = $item['contents'];
         }
 
-        $this->assertFalse($formattedArray2['course_section[restrict_enrollments_to_section_dates]']);
-        $this->assertFalse($formattedArray2['override_sis_stickiness']);
+        $this->assertSame('false', $formattedArray2['course_section[restrict_enrollments_to_section_dates]']);
+        $this->assertSame('false', $formattedArray2['override_sis_stickiness']);
     }
 
     public function testDefaultValues(): void
@@ -269,8 +269,8 @@ class UpdateSectionDTOTest extends TestCase
             'course_section[integration_id]' => 'INT-COMPLETE-001',
             'course_section[start_at]' => '2024-01-01T00:00:00+00:00',
             'course_section[end_at]' => '2024-12-31T23:59:59+00:00',
-            'course_section[restrict_enrollments_to_section_dates]' => true,
-            'override_sis_stickiness' => false,
+            'course_section[restrict_enrollments_to_section_dates]' => 'true',
+            'override_sis_stickiness' => 'false',
         ];
 
         $this->assertEquals($expected, $formattedArray);

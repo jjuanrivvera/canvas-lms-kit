@@ -192,9 +192,9 @@ class ConfigTest extends TestCase
         Config::setBaseUrl('https://valid.canvas.com');
         Config::setApiVersion('v1');
 
-        // Should not throw exception
+        // The contract is simply that no exception is thrown
+        $this->expectNotToPerformAssertions();
         Config::validate();
-        $this->assertTrue(true);
     }
 
     public function testValidateConfigurationMissingApiKey(): void

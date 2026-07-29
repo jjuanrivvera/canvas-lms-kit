@@ -167,7 +167,7 @@ class UpdateQuizDTOTest extends TestCase
             }
         }
         $this->assertNotNull($publishedEntry);
-        $this->assertEquals('0', $publishedEntry['contents']); // false converts to '0'
+        $this->assertSame('false', $publishedEntry['contents']);
     }
 
     public function testApiPropertyName(): void
@@ -256,10 +256,10 @@ class UpdateQuizDTOTest extends TestCase
             $entryMap[$entry['name']] = $entry['contents'];
         }
 
-        $this->assertEquals('1', $entryMap['quiz[published]']);
-        $this->assertEquals('0', $entryMap['quiz[shuffle_answers]']);
-        $this->assertEquals('1', $entryMap['quiz[one_question_at_a_time]']);
-        $this->assertEquals('0', $entryMap['quiz[require_lockdown_browser]']);
+        $this->assertSame('true', $entryMap['quiz[published]']);
+        $this->assertSame('false', $entryMap['quiz[shuffle_answers]']);
+        $this->assertSame('true', $entryMap['quiz[one_question_at_a_time]']);
+        $this->assertSame('false', $entryMap['quiz[require_lockdown_browser]']);
     }
 
     public function testNumericValues(): void

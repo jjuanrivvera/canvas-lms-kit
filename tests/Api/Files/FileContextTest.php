@@ -124,6 +124,135 @@ class FileContextTest extends TestCase
         $this->assertEquals(789, $files[0]->getContextId());
     }
 
+    public function testFetchByContextForCourseForwardsIncludeUserAsBracketedParam(): void
+    {
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn([
+                ['id' => 3, 'filename' => 'syllabus.pdf', 'display_name' => 'Course Syllabus'],
+            ]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
+        $this->mockClient->expects($this->once())
+            ->method('getPaginated')
+            ->with('courses/123/files', ['query' => ['include[]' => ['user']]])
+            ->willReturn($mockPaginatedResponse);
+
+        $files = File::fetchByContext('courses', 123, ['include' => ['user']]);
+
+        $this->assertCount(1, $files);
+    }
+
+    public function testFetchCourseFilesForwardsIncludeUserAsBracketedParam(): void
+    {
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn([
+                ['id' => 5, 'filename' => 'lecture.pdf', 'display_name' => 'Lecture Notes'],
+            ]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
+        $this->mockClient->expects($this->once())
+            ->method('getPaginated')
+            ->with('courses/789/files', ['query' => ['include[]' => ['user']]])
+            ->willReturn($mockPaginatedResponse);
+
+        File::fetchCourseFiles(789, ['include' => ['user']]);
+    }
+
+    public function testFetchByContextPreservesExistingBracketedIncludeParam(): void
+    {
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn([]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
+        // Callers may also use the SDK-wide 'include[]' literal-key convention directly
+        // (as documented on Course::enrollments()); it must pass through untouched and
+        // merge with any plain 'include' array given alongside it.
+        $this->mockClient->expects($this->once())
+            ->method('getPaginated')
+            ->with('courses/123/files', ['query' => ['include[]' => ['usage_rights', 'user']]])
+            ->willReturn($mockPaginatedResponse);
+
+        File::fetchByContext('courses', 123, [
+            'include[]' => ['usage_rights'],
+            'include' => ['user'],
+        ]);
+    }
+
+    public function testFileExposesUploaderWhenIncludeUserRequested(): void
+    {
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn([
+                [
+                    'id' => 3,
+                    'filename' => 'infringing-material.pdf',
+                    'display_name' => 'Infringing Material',
+                    'user' => [
+                        'id' => 555,
+                        'display_name' => 'Jane Lecturer',
+                        'avatar_image_url' => 'https://canvas.example.com/avatars/555.png',
+                        'html_url' => 'https://canvas.example.com/users/555',
+                        'pronouns' => 'she/her',
+                        'anonymous_id' => 'xyz789',
+                    ],
+                ],
+            ]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
+        $this->mockClient->expects($this->once())
+            ->method('getPaginated')
+            ->with('courses/123/files', ['query' => ['include[]' => ['user']]])
+            ->willReturn($mockPaginatedResponse);
+
+        $files = File::fetchByContext('courses', 123, ['include' => ['user']]);
+
+        $uploader = $files[0]->getUser();
+        $this->assertNotNull($uploader);
+        $this->assertSame(555, $uploader->id);
+        $this->assertSame('Jane Lecturer', $uploader->displayName);
+        $this->assertSame('https://canvas.example.com/avatars/555.png', $uploader->avatarImageUrl);
+        $this->assertSame('https://canvas.example.com/users/555', $uploader->htmlUrl);
+        $this->assertSame('she/her', $uploader->pronouns);
+        $this->assertSame('xyz789', $uploader->anonymousId);
+    }
+
+    public function testFileUserIsNullWithoutIncludeUser(): void
+    {
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn([
+                ['id' => 3, 'filename' => 'syllabus.pdf', 'display_name' => 'Course Syllabus'],
+            ]);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
+        $this->mockClient->expects($this->once())
+            ->method('getPaginated')
+            ->with('courses/123/files', ['query' => []])
+            ->willReturn($mockPaginatedResponse);
+
+        $files = File::fetchByContext('courses', 123);
+
+        $this->assertNull($files[0]->getUser());
+    }
+
     public function testUploadToContextForCourse(): void
     {
         // Create a temporary file

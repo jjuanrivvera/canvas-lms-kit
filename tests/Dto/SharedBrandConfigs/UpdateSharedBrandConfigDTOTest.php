@@ -77,9 +77,9 @@ class UpdateSharedBrandConfigDTOTest extends TestCase
             'name' => 'Valid Name',
         ]);
 
-        // Act & Assert - No exception should be thrown
+        // Act & Assert - the contract is simply that no exception is thrown
+        $this->expectNotToPerformAssertions();
         $dto->validate();
-        $this->assertTrue(true);
     }
 
     public function testValidatePassesWithOnlyMd5(): void
@@ -89,9 +89,9 @@ class UpdateSharedBrandConfigDTOTest extends TestCase
             'brand_config_md5' => 'valid_hash',
         ]);
 
-        // Act & Assert - No exception should be thrown
+        // Act & Assert - the contract is simply that no exception is thrown
+        $this->expectNotToPerformAssertions();
         $dto->validate();
-        $this->assertTrue(true);
     }
 
     public function testValidatePassesWithBothFields(): void
@@ -102,9 +102,9 @@ class UpdateSharedBrandConfigDTOTest extends TestCase
             'brand_config_md5' => 'valid_hash',
         ]);
 
-        // Act & Assert - No exception should be thrown
+        // Act & Assert - the contract is simply that no exception is thrown
+        $this->expectNotToPerformAssertions();
         $dto->validate();
-        $this->assertTrue(true);
     }
 
     public function testToApiArrayWithOnlyName(): void

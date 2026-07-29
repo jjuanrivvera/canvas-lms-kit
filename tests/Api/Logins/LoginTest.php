@@ -8,6 +8,7 @@ use CanvasLMS\Api\Logins\Login;
 use CanvasLMS\Config;
 use CanvasLMS\Dto\Logins\CreateLoginDTO;
 use CanvasLMS\Http\HttpClient;
+use CanvasLMS\Pagination\PaginatedResponse;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 
@@ -77,12 +78,14 @@ class LoginTest extends TestCase
      */
     public function testFind(array $loginData): void
     {
-        $response = new Response(200, [], json_encode([$loginData]));
+        $mockPaginated = $this->createMock(PaginatedResponse::class);
+        $mockPaginated->method('getJsonData')->willReturn([$loginData]);
+        $mockPaginated->method('getNext')->willReturn(null);
 
         $this->httpClientMock
-            ->method('get')
+            ->method('getPaginated')
             ->with('accounts/1/logins')
-            ->willReturn($response);
+            ->willReturn($mockPaginated);
 
         $login = Login::find(2);
 
@@ -96,11 +99,13 @@ class LoginTest extends TestCase
      */
     public function testFindThrowsExceptionWhenNotFound(): void
     {
-        $response = new Response(200, [], json_encode([]));
+        $mockPaginated = $this->createMock(PaginatedResponse::class);
+        $mockPaginated->method('getJsonData')->willReturn([]);
+        $mockPaginated->method('getNext')->willReturn(null);
 
         $this->httpClientMock
-            ->method('get')
-            ->willReturn($response);
+            ->method('getPaginated')
+            ->willReturn($mockPaginated);
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Login with ID 999 not found');

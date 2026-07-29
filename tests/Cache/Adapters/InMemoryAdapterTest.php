@@ -82,19 +82,20 @@ class InMemoryAdapterTest extends TestCase
 
     public function testTtlExpiration(): void
     {
+        $adapter = $this->createAdapterWithControllableClock();
         $key = 'expiring-key';
         $data = ['test' => 'data'];
 
-        // Set with 1 second TTL
-        $this->adapter->set($key, $data, 1);
-        $this->assertTrue($this->adapter->has($key));
-        $this->assertSame($data, $this->adapter->get($key));
+        // Set with 60 second TTL
+        $adapter->set($key, $data, 60);
+        $this->assertTrue($adapter->has($key));
+        $this->assertSame($data, $adapter->get($key));
 
-        // Wait for expiration
-        sleep(2);
+        // Advance the clock past expiry instead of sleeping
+        $adapter->advanceClock(61);
 
-        $this->assertFalse($this->adapter->has($key));
-        $this->assertNull($this->adapter->get($key));
+        $this->assertFalse($adapter->has($key));
+        $this->assertNull($adapter->get($key));
     }
 
     public function testDeleteByPattern(): void
@@ -172,22 +173,23 @@ class InMemoryAdapterTest extends TestCase
 
     public function testExpiredEntriesCleanup(): void
     {
-        $this->adapter->set('permanent', ['data'], 0); // No expiry
-        $this->adapter->set('expiring1', ['data'], 1); // 1 second
-        $this->adapter->set('expiring2', ['data'], 1); // 1 second
+        $adapter = $this->createAdapterWithControllableClock();
+        $adapter->set('permanent', ['data'], 0); // No expiry
+        $adapter->set('expiring1', ['data'], 60);
+        $adapter->set('expiring2', ['data'], 60);
 
-        $stats = $this->adapter->getStats();
+        $stats = $adapter->getStats();
         $this->assertEquals(3, $stats['entries']);
 
-        sleep(2);
+        $adapter->advanceClock(61);
 
         // Getting stats should clean expired entries
-        $stats = $this->adapter->getStats();
+        $stats = $adapter->getStats();
         $this->assertEquals(1, $stats['entries']); // Only permanent remains
 
-        $this->assertTrue($this->adapter->has('permanent'));
-        $this->assertFalse($this->adapter->has('expiring1'));
-        $this->assertFalse($this->adapter->has('expiring2'));
+        $this->assertTrue($adapter->has('permanent'));
+        $this->assertFalse($adapter->has('expiring1'));
+        $this->assertFalse($adapter->has('expiring2'));
     }
 
     public function testComplexPatternMatching(): void
@@ -205,5 +207,27 @@ class InMemoryAdapterTest extends TestCase
         $this->assertFalse($this->adapter->has('canvas:v1:GET:/courses/123'));
         $this->assertTrue($this->adapter->has('canvas:v1:POST:/courses'));
         $this->assertTrue($this->adapter->has('canvas:v1:GET:/users'));
+    }
+
+    /**
+     * Build an adapter whose clock the test can advance directly.
+     *
+     * @return InMemoryAdapter&object{advanceClock: callable}
+     */
+    private function createAdapterWithControllableClock(): InMemoryAdapter
+    {
+        return new class () extends InMemoryAdapter {
+            private int $offset = 0;
+
+            public function advanceClock(int $seconds): void
+            {
+                $this->offset += $seconds;
+            }
+
+            protected function currentTime(): int
+            {
+                return time() + $this->offset;
+            }
+        };
     }
 }

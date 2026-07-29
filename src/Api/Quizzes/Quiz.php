@@ -69,6 +69,8 @@ use CanvasLMS\Exceptions\CanvasApiException;
  * ```
  *
  * @package CanvasLMS\Api\Quizzes
+ *
+ * @phpstan-consistent-constructor
  */
 class Quiz extends AbstractBaseApi
 {
@@ -1122,9 +1124,9 @@ class Quiz extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkCourse();
         self::checkApiClient();
@@ -1133,7 +1135,7 @@ class Quiz extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint);
         $quizData = self::parseJsonResponse($response);
 
-        return new self($quizData);
+        return new static($quizData);
     }
 
     /**

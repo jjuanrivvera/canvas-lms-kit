@@ -13,7 +13,6 @@ use CanvasLMS\Pagination\PaginatedResponse;
 use CanvasLMS\Pagination\PaginationResult;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 
 class BookmarkTest extends TestCase
 {
@@ -28,10 +27,7 @@ class BookmarkTest extends TestCase
 
     protected function tearDown(): void
     {
-        $reflection = new ReflectionClass(AbstractBaseApi::class);
-        $property = $reflection->getProperty('apiClient');
-        $property->setAccessible(true);
-        $property->setValue(null, null);
+        AbstractBaseApi::resetApiClients();
         parent::tearDown();
     }
 

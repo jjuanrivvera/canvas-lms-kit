@@ -129,7 +129,7 @@ class UpdateTabDTO extends AbstractBaseDto
         if ($this->hidden !== null) {
             $modifiedProperties[] = [
                 'name' => 'tab[hidden]',
-                'contents' => $this->hidden,
+                'contents' => self::formatMultipartValue($this->hidden),
             ];
         }
 

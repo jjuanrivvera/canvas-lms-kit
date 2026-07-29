@@ -47,6 +47,8 @@ use Exception;
  * ```
  *
  * @package CanvasLMS\Api\Progress
+ *
+ * @phpstan-consistent-constructor
  */
 class Progress extends AbstractBaseApi
 {
@@ -169,16 +171,16 @@ class Progress extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return Progress
+     * @return static
      */
-    public static function find(int $id, array $params = []): Progress
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
 
         $response = self::getApiClient()->get("/progress/{$id}");
         $data = self::parseJsonResponse($response);
 
-        return new self($data);
+        return new static($data);
     }
 
     /**

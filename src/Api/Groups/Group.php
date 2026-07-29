@@ -188,9 +188,9 @@ class Group extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
 
@@ -198,7 +198,7 @@ class Group extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint);
         $data = self::parseJsonResponse($response);
 
-        return new self($data);
+        return new static($data);
     }
 
     /**

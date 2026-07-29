@@ -151,7 +151,7 @@ class UpdateAnnouncementDTOTest extends TestCase
                     $titleFound = true;
                 }
                 if ($field['name'] === 'discussion_topic[locked]') {
-                    $this->assertEquals('1', $field['contents']);
+                    $this->assertSame('true', $field['contents']);
                     $lockedFound = true;
                 }
             }

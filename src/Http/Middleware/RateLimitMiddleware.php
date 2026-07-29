@@ -91,8 +91,9 @@ class RateLimitMiddleware extends AbstractMiddleware
                         ));
                     }
 
-                    // Wait for the bucket to refill
-                    usleep($delay * 1000000);
+                    // Wait for the bucket to refill; sleep() instead of
+                    // usleep(), which is unreliable beyond ~1s on some platforms
+                    sleep($delay);
                 }
 
                 // Pre-charge the initial cost

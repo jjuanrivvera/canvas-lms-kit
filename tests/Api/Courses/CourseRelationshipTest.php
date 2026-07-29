@@ -254,6 +254,71 @@ class CourseRelationshipTest extends TestCase
         $this->assertEquals(1, $files[0]->id);
     }
 
+    public function testFilesForwardsIncludeUserAsBracketedQueryParam(): void
+    {
+        $responseData = [
+            ['id' => 1, 'display_name' => 'file1.pdf', 'filename' => 'file1.pdf'],
+        ];
+
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($responseData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
+        $this->httpClient
+            ->expects($this->once())
+            ->method('getPaginated')
+            ->with('courses/123/files', ['query' => ['include[]' => ['user']]])
+            ->willReturn($mockPaginatedResponse);
+
+        $files = $this->course->files(['include' => ['user']]);
+
+        $this->assertCount(1, $files);
+    }
+
+    public function testFilesExposesUploaderWhenIncludeUserRequested(): void
+    {
+        $responseData = [
+            [
+                'id' => 1,
+                'display_name' => 'infringing-material.pdf',
+                'filename' => 'infringing-material.pdf',
+                'user' => [
+                    'id' => 555,
+                    'display_name' => 'Jane Lecturer',
+                    'avatar_image_url' => 'https://canvas.example.com/avatars/555.png',
+                    'html_url' => 'https://canvas.example.com/users/555',
+                ],
+            ],
+        ];
+
+        $mockPaginatedResponse = $this->createMock(\CanvasLMS\Pagination\PaginatedResponse::class);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getJsonData')
+            ->willReturn($responseData);
+        $mockPaginatedResponse->expects($this->once())
+            ->method('getNext')
+            ->willReturn(null);
+
+        $this->httpClient
+            ->expects($this->once())
+            ->method('getPaginated')
+            ->with('courses/123/files', ['query' => ['include[]' => ['user']]])
+            ->willReturn($mockPaginatedResponse);
+
+        $files = $this->course->files(['include' => ['user']]);
+
+        $uploader = $files[0]->getUser();
+        $this->assertNotNull($uploader);
+        $this->assertSame(555, $uploader->id);
+        $this->assertSame('Jane Lecturer', $uploader->displayName);
+        $this->assertSame('https://canvas.example.com/avatars/555.png', $uploader->avatarImageUrl);
+        $this->assertSame('https://canvas.example.com/users/555', $uploader->htmlUrl);
+    }
+
     public function testRubricsReturnsArrayOfRubrics(): void
     {
         $responseData = [

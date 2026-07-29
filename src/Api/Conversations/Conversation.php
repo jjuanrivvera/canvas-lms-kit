@@ -38,6 +38,8 @@ use CanvasLMS\Objects\ConversationParticipant;
  * @property bool|null $visible Whether the conversation is visible under current scope/filter
  * @property string|null $contextName Name of the course or group in which the conversation is occurring
  * @property array<array<string, mixed>>|null $messages Array of messages in the conversation
+ *
+ * @phpstan-consistent-constructor
  */
 class Conversation extends AbstractBaseApi
 {
@@ -155,9 +157,9 @@ class Conversation extends AbstractBaseApi
      *                      - filter[]: Used for generating "visible" in response
      *                      - filter_mode: and, or, default or
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
 
@@ -169,7 +171,7 @@ class Conversation extends AbstractBaseApi
         $response = self::getApiClient()->get(self::$endpoint . '/' . $id, $params);
         $data = self::parseJsonResponse($response);
 
-        return new self($data);
+        return new static($data);
     }
 
     /**

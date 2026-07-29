@@ -278,12 +278,14 @@ class DeveloperKeyTest extends TestCase
             ],
         ];
 
-        $response = new Response(200, [], json_encode($expectedResponse));
+        $mockPaginated = $this->createMock(PaginatedResponse::class);
+        $mockPaginated->method('getJsonData')->willReturn($expectedResponse);
+        $mockPaginated->method('getNext')->willReturn(null);
 
         $this->httpClientMock->expects($this->once())
-            ->method('get')
-            ->with('accounts/1/developer_keys', ['query' => []])
-            ->willReturn($response);
+            ->method('getPaginated')
+            ->with('accounts/1/developer_keys', ['query' => ['per_page' => 100]])
+            ->willReturn($mockPaginated);
 
         $key = DeveloperKey::find(2);
 
@@ -302,11 +304,13 @@ class DeveloperKeyTest extends TestCase
             ],
         ];
 
-        $response = new Response(200, [], json_encode($expectedResponse));
+        $mockPaginated = $this->createMock(PaginatedResponse::class);
+        $mockPaginated->method('getJsonData')->willReturn($expectedResponse);
+        $mockPaginated->method('getNext')->willReturn(null);
 
         $this->httpClientMock->expects($this->once())
-            ->method('get')
-            ->willReturn($response);
+            ->method('getPaginated')
+            ->willReturn($mockPaginated);
 
         $this->expectException(CanvasApiException::class);
         $this->expectExceptionMessage('Developer key with ID 999 not found');

@@ -66,6 +66,8 @@ use CanvasLMS\Pagination\PaginatedResponse;
  * ```
  *
  * @package CanvasLMS\Api\ExternalTools
+ *
+ * @phpstan-consistent-constructor
  */
 class ExternalTool extends AbstractBaseApi
 {
@@ -1088,9 +1090,9 @@ class ExternalTool extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         $accountId = Config::getAccountId();
 
@@ -1106,9 +1108,9 @@ class ExternalTool extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function findByContext(string $contextType, int $contextId, int $id): self
+    public static function findByContext(string $contextType, int $contextId, int $id): static
     {
         self::checkApiClient();
 
@@ -1116,7 +1118,7 @@ class ExternalTool extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint);
         $toolData = self::parseJsonResponse($response);
 
-        $tool = new self($toolData);
+        $tool = new static($toolData);
         // Set context information
         $tool->contextType = rtrim($contextType, 's'); // Remove trailing 's'
         $tool->contextId = $contextId;
@@ -1278,7 +1280,7 @@ class ExternalTool extends AbstractBaseApi
         $response = self::getApiClient()->post($endpoint, ['multipart' => $data->toApiArray()]);
         $toolData = self::parseJsonResponse($response);
 
-        $tool = new self($toolData);
+        $tool = new static($toolData);
         // Set context information
         $tool->contextType = rtrim($contextType, 's'); // Remove trailing 's'
         $tool->contextId = $contextId;
@@ -1331,7 +1333,7 @@ class ExternalTool extends AbstractBaseApi
         $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $toolData = self::parseJsonResponse($response);
 
-        $tool = new self($toolData);
+        $tool = new static($toolData);
         // Set context information
         $tool->contextType = rtrim($contextType, 's'); // Remove trailing 's'
         $tool->contextId = $contextId;

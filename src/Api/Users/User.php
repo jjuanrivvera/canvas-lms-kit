@@ -105,7 +105,7 @@ class User extends AbstractBaseApi
      *
      * @var string
      */
-    public string $name;
+    public ?string $name = null;
 
     /**
      * The name of the user that it should be used for sorting groups of users, such
@@ -113,21 +113,21 @@ class User extends AbstractBaseApi
      *
      * @var string
      */
-    public string $sortableName;
+    public ?string $sortableName = null;
 
     /**
      * The last name of the user.
      *
      * @var string
      */
-    public string $lastName;
+    public ?string $lastName = null;
 
     /**
      * The first name of the user.
      *
      * @var string
      */
-    public string $firstName;
+    public ?string $firstName = null;
 
     /**
      * A short name the user has selected, for use in conversations or other less
@@ -135,7 +135,7 @@ class User extends AbstractBaseApi
      *
      * @var string
      */
-    public string $shortName;
+    public ?string $shortName = null;
 
     /**
      * The SIS ID associated with the user. This field is only included if the user
@@ -167,7 +167,7 @@ class User extends AbstractBaseApi
      *
      * @var string
      */
-    public string $loginId;
+    public ?string $loginId = null;
 
     /**
      * If avatars are enabled, this field will be included and contain a url to
@@ -373,15 +373,15 @@ class User extends AbstractBaseApi
      *
      * @throws CanvasApiException
      *
-     * @return self
+     * @return static
      */
-    public static function find(int $id, array $params = []): self
+    public static function find(int $id, array $params = []): static
     {
         self::checkApiClient();
 
         $response = self::getApiClient()->get("/users/{$id}");
 
-        return new self(self::parseJsonResponse($response));
+        return new static(self::parseJsonResponse($response));
     }
 
     /**
@@ -716,9 +716,9 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -732,9 +732,9 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getSortableName(): string
+    public function getSortableName(): ?string
     {
         return $this->sortableName;
     }
@@ -748,9 +748,9 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getLastName(): string
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }
@@ -764,9 +764,9 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getFirstName(): string
+    public function getFirstName(): ?string
     {
         return $this->firstName;
     }
@@ -780,9 +780,9 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getShortName(): string
+    public function getShortName(): ?string
     {
         return $this->shortName;
     }
@@ -844,9 +844,9 @@ class User extends AbstractBaseApi
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getLoginId(): string
+    public function getLoginId(): ?string
     {
         return $this->loginId;
     }

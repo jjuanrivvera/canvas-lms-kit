@@ -40,6 +40,10 @@ class FileSystemAdapter implements CacheAdapterInterface
     /**
      * Constructor.
      *
+     * Cached API responses can contain PII (names, emails, grades), so files
+     * and directories default to owner-only permissions. Prefer a dedicated
+     * application cache path over a shared /tmp on multi-user hosts.
+     *
      * @param string $cacheDir        Cache directory path
      * @param bool   $compression     Enable gzip compression
      * @param int    $dirPermissions  Directory permissions (octal)
@@ -48,8 +52,8 @@ class FileSystemAdapter implements CacheAdapterInterface
     public function __construct(
         string $cacheDir = '/tmp/canvas-cache',
         bool $compression = true,
-        int $dirPermissions = 0755,
-        int $filePermissions = 0644
+        int $dirPermissions = 0700,
+        int $filePermissions = 0600
     ) {
         $this->cacheDir = rtrim($cacheDir, '/');
         $this->compression = $compression && function_exists('gzencode') && function_exists('gzdecode');
@@ -92,7 +96,9 @@ class FileSystemAdapter implements CacheAdapterInterface
             }
         }
 
-        $data = @unserialize($content);
+        // allowed_classes=false: the envelope is pure arrays/scalars, and the
+        // cache dir may be writable by others, so object injection must be off
+        $data = @unserialize($content, ['allowed_classes' => false]);
         if ($data === false || !is_array($data)) {
             @unlink($filepath);
             $this->stats['misses']++;
@@ -133,6 +139,9 @@ class FileSystemAdapter implements CacheAdapterInterface
         $expires = $ttl > 0 ? time() + $ttl : 0;
 
         $cacheData = [
+            // Original key kept in the envelope: filenames are md5 hashes,
+            // so pattern-based invalidation needs the key to match against
+            'key' => $key,
             'value' => $data,
             'expires' => $expires,
             'created' => time(),
@@ -215,9 +224,9 @@ class FileSystemAdapter implements CacheAdapterInterface
                 continue;
             }
 
-            // Extract key from filename
-            $filename = $file->getBasename('.cache');
-            if (preg_match($regex, $filename)) {
+            // Filenames are md5 hashes; the original key lives in the envelope
+            $key = $this->readCacheKey($file->getPathname());
+            if ($key !== null && preg_match($regex, $key)) {
                 if (@unlink($file->getPathname())) {
                     $deleted++;
                 }
@@ -225,6 +234,35 @@ class FileSystemAdapter implements CacheAdapterInterface
         }
 
         return $deleted;
+    }
+
+    /**
+     * Read the original cache key stored in a cache file's envelope.
+     *
+     * @param string $filepath The cache file path
+     *
+     * @return string|null The original key, or null if unreadable
+     */
+    private function readCacheKey(string $filepath): ?string
+    {
+        $content = @file_get_contents($filepath);
+        if ($content === false) {
+            return null;
+        }
+
+        if ($this->compression) {
+            $content = @gzdecode($content);
+            if ($content === false) {
+                return null;
+            }
+        }
+
+        $data = @unserialize($content, ['allowed_classes' => false]);
+        if (!is_array($data) || !isset($data['key']) || !is_string($data['key'])) {
+            return null;
+        }
+
+        return $data['key'];
     }
 
     /**
@@ -372,7 +410,7 @@ class FileSystemAdapter implements CacheAdapterInterface
                 }
             }
 
-            $data = @unserialize($content);
+            $data = @unserialize($content, ['allowed_classes' => false]);
             if ($data === false || !is_array($data)) {
                 @unlink($file->getPathname());
                 $cleaned++;

@@ -416,7 +416,7 @@ class QuizSubmissionTest extends TestCase
 
         $expectedRequestData = [
             ['name' => 'access_code', 'contents' => 'secret123'],
-            ['name' => 'preview', 'contents' => false],
+            ['name' => 'preview', 'contents' => 'false'],
         ];
 
         $this->httpClient->expects($this->once())

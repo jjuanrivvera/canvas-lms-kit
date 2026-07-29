@@ -274,7 +274,7 @@ class CreateCourseDTO extends AbstractBaseDto implements DTOInterface
             // Rename keys to this format course[{key}]
             $modifiedProperties[] = [
                 'name' => 'course[' . Str::toSnakeCase($key) . ']',
-                'contents' => $value,
+                'contents' => self::formatMultipartValue($value),
             ];
         }
 

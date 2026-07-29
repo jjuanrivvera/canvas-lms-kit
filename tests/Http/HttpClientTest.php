@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Http;
 
 use CanvasLMS\Config;
+use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Pagination\PaginatedResponse;
 use GuzzleHttp\Client;
@@ -518,5 +519,74 @@ class HttpClientTest extends TestCase
 
         // Reset timeout to default
         Config::setTimeout(30);
+    }
+
+    /**
+     * @dataProvider httpErrorStatusProvider
+     */
+    public function testHttpErrorsAreWrappedInCanvasApiException(int $status, string $body): void
+    {
+        $mock = new MockHandler([
+            new Response($status, [], $body),
+        ]);
+
+        $guzzleClient = new Client(['handler' => HandlerStack::create($mock)]);
+        $httpClient = new HttpClient($guzzleClient, $this->loggerMock);
+
+        try {
+            $httpClient->get('/endpoint');
+            $this->fail("Expected CanvasApiException for HTTP {$status}");
+        } catch (CanvasApiException $e) {
+            $this->assertSame($status, $e->getCode());
+        }
+    }
+
+    /**
+     * @return array<string, array{int, string}>
+     */
+    public static function httpErrorStatusProvider(): array
+    {
+        return [
+            '401 unauthorized' => [401, json_encode(['errors' => [['message' => 'Invalid access token']]])],
+            '403 forbidden' => [403, json_encode(['errors' => [['message' => 'Insufficient permission']]])],
+            '404 not found' => [404, json_encode(['errors' => [['message' => 'Not found']]])],
+            '422 unprocessable' => [422, json_encode(['errors' => ['name' => [['message' => 'Required']]]])],
+            '500 server error' => [500, ''],
+            '503 unavailable' => [503, ''],
+        ];
+    }
+
+    public function testCanvasErrorsArePreservedInException(): void
+    {
+        $errors = [['message' => 'Course name is required', 'field' => 'name']];
+        $mock = new MockHandler([
+            new Response(422, [], json_encode(['errors' => $errors])),
+        ]);
+
+        $guzzleClient = new Client(['handler' => HandlerStack::create($mock)]);
+        $httpClient = new HttpClient($guzzleClient, $this->loggerMock);
+
+        try {
+            $httpClient->post('/endpoint', []);
+            $this->fail('Expected CanvasApiException');
+        } catch (CanvasApiException $e) {
+            $this->assertSame($errors, $e->getErrors());
+        }
+    }
+
+    public function testConnectionErrorsAreWrappedInCanvasApiException(): void
+    {
+        $mock = new MockHandler([
+            new \GuzzleHttp\Exception\ConnectException(
+                'Connection refused',
+                new \GuzzleHttp\Psr7\Request('GET', '/endpoint')
+            ),
+        ]);
+
+        $guzzleClient = new Client(['handler' => HandlerStack::create($mock)]);
+        $httpClient = new HttpClient($guzzleClient, $this->loggerMock);
+
+        $this->expectException(CanvasApiException::class);
+        $httpClient->get('/endpoint');
     }
 }

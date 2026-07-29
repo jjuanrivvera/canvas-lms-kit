@@ -166,7 +166,7 @@ class UpdateSubmissionDTOTest extends TestCase
         $apiArray = $dto->toApiArray();
 
         $this->assertIsArray($apiArray);
-        $this->assertContains(['name' => 'submission[excuse]', 'contents' => true], $apiArray);
+        $this->assertContains(['name' => 'submission[excuse]', 'contents' => 'true'], $apiArray);
         $this->assertContains(['name' => 'submission[comment]', 'contents' => 'Excused due to illness'], $apiArray);
     }
 
@@ -227,7 +227,7 @@ class UpdateSubmissionDTOTest extends TestCase
 
         $this->assertIsArray($apiArray);
         $this->assertContains(['name' => 'submission[posted_grade]', 'contents' => '80'], $apiArray);
-        $this->assertContains(['name' => 'submission[late]', 'contents' => true], $apiArray);
+        $this->assertContains(['name' => 'submission[late]', 'contents' => 'true'], $apiArray);
         $this->assertContains(['name' => 'submission[points_deducted]', 'contents' => 10.0], $apiArray);
         $this->assertContains(['name' => 'submission[comment]', 'contents' => 'Grade reduced due to late submission'], $apiArray);
     }
@@ -304,9 +304,9 @@ class UpdateSubmissionDTOTest extends TestCase
 
         $apiArray = $dto->toApiArray();
 
-        $this->assertContains(['name' => 'submission[excuse]', 'contents' => true], $apiArray);
-        $this->assertContains(['name' => 'submission[group_comment]', 'contents' => false], $apiArray);
-        $this->assertContains(['name' => 'submission[late]', 'contents' => true], $apiArray);
+        $this->assertContains(['name' => 'submission[excuse]', 'contents' => 'true'], $apiArray);
+        $this->assertContains(['name' => 'submission[group_comment]', 'contents' => 'false'], $apiArray);
+        $this->assertContains(['name' => 'submission[late]', 'contents' => 'true'], $apiArray);
     }
 
     public function testNumericValuesInApiArray(): void

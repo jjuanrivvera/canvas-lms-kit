@@ -194,10 +194,11 @@ class EdgeCaseTest extends TestCase
         // Execute - all() should handle timeout and return partial results
         $modules = Course::all();
 
-        // With timeout, we should get at least the first page
-        // The actual behavior depends on error handling implementation
-        // For now, we expect it to fail gracefully and return what it has
-        $this->assertNotNull($modules);
+        // The first page was fetched successfully before the timeout, so
+        // exactly its two items must be returned
+        $this->assertCount(2, $modules);
+        $this->assertEquals('Module 1', $modules[0]->name);
+        $this->assertEquals('Module 2', $modules[1]->name);
     }
 
     /**

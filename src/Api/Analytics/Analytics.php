@@ -6,7 +6,7 @@ namespace CanvasLMS\Api\Analytics;
 
 use CanvasLMS\Config;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Http\HttpClient;
+use CanvasLMS\Http\ApiClientRegistry;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -21,8 +21,6 @@ use Psr\Log\NullLogger;
  */
 class Analytics
 {
-    private static ?HttpClientInterface $httpClient = null;
-
     private static LoggerInterface $logger;
 
     /**
@@ -42,7 +40,7 @@ class Analytics
      */
     public static function setHttpClient(HttpClientInterface $client): void
     {
-        self::$httpClient = $client;
+        ApiClientRegistry::setFor(self::class, $client);
     }
 
     /**
@@ -62,11 +60,7 @@ class Analytics
      */
     private static function getHttpClient(): HttpClientInterface
     {
-        if (self::$httpClient === null) {
-            self::$httpClient = new HttpClient();
-        }
-
-        return self::$httpClient;
+        return ApiClientRegistry::resolve(self::class);
     }
 
     /**

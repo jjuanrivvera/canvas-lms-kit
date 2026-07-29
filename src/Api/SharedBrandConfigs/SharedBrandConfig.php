@@ -8,7 +8,8 @@ use CanvasLMS\Config;
 use CanvasLMS\Dto\SharedBrandConfigs\CreateSharedBrandConfigDTO;
 use CanvasLMS\Dto\SharedBrandConfigs\UpdateSharedBrandConfigDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
-use CanvasLMS\Http\HttpClient;
+use CanvasLMS\Http\ApiClientRegistry;
+use CanvasLMS\Interfaces\HttpClientInterface;
 
 /**
  * SharedBrandConfig API
@@ -28,6 +29,18 @@ use CanvasLMS\Http\HttpClient;
  */
 class SharedBrandConfig
 {
+    /**
+     * Set the API client for this class
+     *
+     * @param HttpClientInterface $client
+     *
+     * @return void
+     */
+    public static function setApiClient(HttpClientInterface $client): void
+    {
+        ApiClientRegistry::setFor(self::class, $client);
+    }
+
     /**
      * The shared brand config identifier
      */
@@ -117,7 +130,7 @@ class SharedBrandConfig
             $data = new CreateSharedBrandConfigDTO($data);
         }
 
-        $httpClient = new HttpClient();
+        $httpClient = ApiClientRegistry::resolve(self::class);
         $accountId = Config::getAccountId();
 
         try {
@@ -178,7 +191,7 @@ class SharedBrandConfig
             $data = new UpdateSharedBrandConfigDTO($data);
         }
 
-        $httpClient = new HttpClient();
+        $httpClient = ApiClientRegistry::resolve(self::class);
         $accountId = Config::getAccountId();
 
         try {
@@ -235,7 +248,7 @@ class SharedBrandConfig
      */
     public static function delete(int $id): self
     {
-        $httpClient = new HttpClient();
+        $httpClient = ApiClientRegistry::resolve(self::class);
 
         try {
             // NOTE: Different endpoint pattern - no account_id in path!

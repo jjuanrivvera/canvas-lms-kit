@@ -75,7 +75,7 @@ class CreateQuizSubmissionDTOTest extends TestCase
             }
         }
         $this->assertNotNull($previewEntry);
-        $this->assertEquals('1', $previewEntry['contents']); // true converts to '1'
+        $this->assertSame('true', $previewEntry['contents']);
     }
 
     public function testApiPropertyName(): void
@@ -142,7 +142,7 @@ class CreateQuizSubmissionDTOTest extends TestCase
             $entryMap[$entry['name']] = $entry['contents'];
         }
 
-        $this->assertEquals('1', $entryMap['quiz_submission[preview]']);
+        $this->assertSame('true', $entryMap['quiz_submission[preview]']);
 
         // Test false value
         $dto = new CreateQuizSubmissionDTO([
@@ -156,6 +156,6 @@ class CreateQuizSubmissionDTOTest extends TestCase
             $entryMap[$entry['name']] = $entry['contents'];
         }
 
-        $this->assertEquals('0', $entryMap['quiz_submission[preview]']);
+        $this->assertSame('false', $entryMap['quiz_submission[preview]']);
     }
 }

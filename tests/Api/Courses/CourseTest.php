@@ -12,6 +12,7 @@ use CanvasLMS\Dto\Courses\UpdateCourseDTO;
 use CanvasLMS\Exceptions\CanvasApiException;
 use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Pagination\PaginatedResponse;
+use CanvasLMS\Pagination\PaginationResult;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 
@@ -1075,35 +1076,21 @@ class CourseTest extends TestCase
         $courseData = ['id' => 123, 'name' => 'Test Course'];
         $course = new Course($courseData);
 
-        $enrollmentData = [
-            [
-                'id' => 1,
-                'user_id' => 101,
-                'course_id' => 123,
-                'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active',
-            ],
-            [
-                'id' => 2,
-                'user_id' => 102,
-                'course_id' => 123,
-                'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active',
-            ],
-        ];
+        // Counting now reads pagination metadata with per_page=1: the last
+        // page number equals the total item count
+        $linkHeader = '<https://canvas.test/api/v1/courses/123/enrollments?page=1&per_page=1>; rel="current", ' .
+            '<https://canvas.test/api/v1/courses/123/enrollments?page=2&per_page=1>; rel="last"';
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('getJsonData')
-            ->willReturn($enrollmentData);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('getNext')
-            ->willReturn(null); // No more pages
+        $mockPaginatedResponse->method('getJsonData')->willReturn([['id' => 1]]);
+        $mockPaginatedResponse->method('toPaginationResult')->willReturnCallback(
+            fn (array $data) => PaginationResult::fromLinkHeader($data, $linkHeader)
+        );
 
         $this->httpClientMock
             ->expects($this->once())
             ->method('getPaginated')
-            ->with('courses/123/enrollments', ['query' => ['type[]' => ['StudentEnrollment']]])
+            ->with('courses/123/enrollments', ['query' => ['type[]' => ['StudentEnrollment'], 'per_page' => 1]])
             ->willReturn($mockPaginatedResponse);
 
         $count = $course->getStudentCount();
@@ -1119,28 +1106,21 @@ class CourseTest extends TestCase
         $courseData = ['id' => 123, 'name' => 'Test Course'];
         $course = new Course($courseData);
 
-        $enrollmentData = [
-            [
-                'id' => 1,
-                'user_id' => 101,
-                'course_id' => 123,
-                'type' => 'TeacherEnrollment',
-                'enrollment_state' => 'active',
-            ],
-        ];
+        // Counting now reads pagination metadata with per_page=1: the last
+        // page number equals the total item count
+        $linkHeader = '<https://canvas.test/api/v1/courses/123/enrollments?page=1&per_page=1>; rel="current", ' .
+            '<https://canvas.test/api/v1/courses/123/enrollments?page=1&per_page=1>; rel="last"';
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('getJsonData')
-            ->willReturn($enrollmentData);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('getNext')
-            ->willReturn(null); // No more pages
+        $mockPaginatedResponse->method('getJsonData')->willReturn([['id' => 1]]);
+        $mockPaginatedResponse->method('toPaginationResult')->willReturnCallback(
+            fn (array $data) => PaginationResult::fromLinkHeader($data, $linkHeader)
+        );
 
         $this->httpClientMock
             ->expects($this->once())
             ->method('getPaginated')
-            ->with('courses/123/enrollments', ['query' => ['type[]' => ['TeacherEnrollment']]])
+            ->with('courses/123/enrollments', ['query' => ['type[]' => ['TeacherEnrollment'], 'per_page' => 1]])
             ->willReturn($mockPaginatedResponse);
 
         $count = $course->getTeacherCount();
@@ -1156,35 +1136,21 @@ class CourseTest extends TestCase
         $courseData = ['id' => 123, 'name' => 'Test Course'];
         $course = new Course($courseData);
 
-        $enrollmentData = [
-            [
-                'id' => 1,
-                'user_id' => 101,
-                'course_id' => 123,
-                'type' => 'StudentEnrollment',
-                'enrollment_state' => 'active',
-            ],
-            [
-                'id' => 2,
-                'user_id' => 102,
-                'course_id' => 123,
-                'type' => 'TeacherEnrollment',
-                'enrollment_state' => 'active',
-            ],
-        ];
+        // Counting now reads pagination metadata with per_page=1: the last
+        // page number equals the total item count
+        $linkHeader = '<https://canvas.test/api/v1/courses/123/enrollments?page=1&per_page=1>; rel="current", ' .
+            '<https://canvas.test/api/v1/courses/123/enrollments?page=2&per_page=1>; rel="last"';
 
         $mockPaginatedResponse = $this->createMock(PaginatedResponse::class);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('getJsonData')
-            ->willReturn($enrollmentData);
-        $mockPaginatedResponse->expects($this->once())
-            ->method('getNext')
-            ->willReturn(null); // No more pages
+        $mockPaginatedResponse->method('getJsonData')->willReturn([['id' => 1]]);
+        $mockPaginatedResponse->method('toPaginationResult')->willReturnCallback(
+            fn (array $data) => PaginationResult::fromLinkHeader($data, $linkHeader)
+        );
 
         $this->httpClientMock
             ->expects($this->once())
             ->method('getPaginated')
-            ->with('courses/123/enrollments', ['query' => []])
+            ->with('courses/123/enrollments', ['query' => ['per_page' => 1]])
             ->willReturn($mockPaginatedResponse);
 
         $count = $course->getTotalEnrollmentCount();

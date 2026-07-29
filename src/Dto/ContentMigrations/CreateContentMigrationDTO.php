@@ -95,7 +95,7 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
             foreach ($this->preAttachment as $key => $value) {
                 $result[] = [
                     'name' => 'pre_attachment[' . $key . ']',
-                    'contents' => (string) $value,
+                    'contents' => is_bool($value) ? ($value ? '1' : '0') : (string) $value,
                 ];
             }
         }
@@ -108,13 +108,13 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
                     foreach ($value as $subKey => $subValue) {
                         $result[] = [
                             'name' => 'settings[' . $key . '][' . $subKey . ']',
-                            'contents' => (string) $subValue,
+                            'contents' => is_bool($subValue) ? ($subValue ? '1' : '0') : (string) $subValue,
                         ];
                     }
                 } else {
                     $result[] = [
                         'name' => 'settings[' . $key . ']',
-                        'contents' => (string) $value,
+                        'contents' => is_bool($value) ? ($value ? '1' : '0') : (string) $value,
                     ];
                 }
             }
@@ -128,13 +128,13 @@ class CreateContentMigrationDTO extends AbstractBaseDto implements DTOInterface
                     foreach ($value as $day => $substitution) {
                         $result[] = [
                             'name' => 'date_shift_options[day_substitutions][' . $day . ']',
-                            'contents' => (string) $substitution,
+                            'contents' => is_bool($substitution) ? ($substitution ? '1' : '0') : (string) $substitution,
                         ];
                     }
                 } else {
                     $result[] = [
                         'name' => 'date_shift_options[' . $key . ']',
-                        'contents' => (string) $value,
+                        'contents' => is_bool($value) ? ($value ? '1' : '0') : (string) $value,
                     ];
                 }
             }
