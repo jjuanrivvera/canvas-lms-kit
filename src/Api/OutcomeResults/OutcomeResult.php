@@ -116,7 +116,7 @@ class OutcomeResult extends AbstractBaseApi
             foreach ($data['outcome_results'] as $resultData) {
                 $results[] = new self($resultData);
             }
-        } elseif (is_array($data) && !empty($data)) {
+        } elseif (!empty($data)) {
             // Direct array response
             foreach ($data as $resultData) {
                 if (is_array($resultData)) {

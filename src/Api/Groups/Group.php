@@ -416,9 +416,9 @@ class Group extends AbstractBaseApi
     public function addUser(int $userId): bool
     {
         try {
-            $membership = $this->createMembership(['user_id' => $userId]);
+            $this->createMembership(['user_id' => $userId]);
 
-            return $membership !== null;
+            return true;
         } catch (\Exception) {
             return false;
         }

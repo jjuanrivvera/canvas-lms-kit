@@ -150,10 +150,6 @@ class GradebookHistory extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseBody = self::parseJsonResponse($response);
 
-        if (!is_array($responseBody)) {
-            return [];
-        }
-
         return array_map(
             fn ($dayData) => new GradebookHistoryDay($dayData),
             $responseBody
@@ -186,10 +182,6 @@ class GradebookHistory extends AbstractBaseApi
 
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseBody = self::parseJsonResponse($response);
-
-        if (!is_array($responseBody)) {
-            return [];
-        }
 
         return array_map(
             fn ($graderData) => new GradebookHistoryGrader($graderData),
@@ -231,10 +223,6 @@ class GradebookHistory extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseBody = self::parseJsonResponse($response);
 
-        if (!is_array($responseBody)) {
-            return [];
-        }
-
         return array_map(
             fn ($historyData) => new SubmissionHistory($historyData),
             $responseBody
@@ -265,10 +253,6 @@ class GradebookHistory extends AbstractBaseApi
 
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $responseBody = self::parseJsonResponse($response);
-
-        if (!is_array($responseBody)) {
-            return [];
-        }
 
         return array_map(
             fn ($versionData) => new SubmissionVersion($versionData),
@@ -328,10 +312,8 @@ class GradebookHistory extends AbstractBaseApi
             $response = self::getApiClient()->get($nextUrl, $nextParams);
             $responseBody = self::parseJsonResponse($response);
 
-            if (is_array($responseBody)) {
-                foreach ($responseBody as $versionData) {
-                    $allVersions[] = new SubmissionVersion($versionData);
-                }
+            foreach ($responseBody as $versionData) {
+                $allVersions[] = new SubmissionVersion($versionData);
             }
 
             // Get next page URL from Link header
@@ -344,7 +326,7 @@ class GradebookHistory extends AbstractBaseApi
                     // Extract just the path from the full URL
                     $parsedUrl = parse_url($matches[1]);
                     $nextUrl = is_array($parsedUrl) && isset($parsedUrl['path']) ? $parsedUrl['path'] : null;
-                    if ($nextUrl && is_array($parsedUrl) && isset($parsedUrl['query'])) {
+                    if ($nextUrl && isset($parsedUrl['query'])) {
                         $queryParams = [];
                         parse_str($parsedUrl['query'], $queryParams);
                         $nextParams = ['query' => $queryParams];

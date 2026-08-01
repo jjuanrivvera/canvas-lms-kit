@@ -362,9 +362,11 @@ class RubricAssessment extends AbstractBaseApi
             throw new CanvasApiException('Cannot delete rubric assessment without association ID');
         }
 
+        $rubricAssociationId = $this->rubricAssociationId;
+
         self::checkApiClient();
 
-        $baseEndpoint = self::getResourceEndpoint($this->rubricAssociationId);
+        $baseEndpoint = self::getResourceEndpoint($rubricAssociationId);
         $endpoint = sprintf('%s/%d', $baseEndpoint, $this->id);
 
         $response = self::getApiClient()->delete($endpoint);
@@ -391,10 +393,8 @@ class RubricAssessment extends AbstractBaseApi
             }
 
             $associationId = $rubricAssociationId ?? $this->rubricAssociationId;
-
-            // Ensure associationId is not null before calling update
-            if ($associationId === null) {
-                throw new CanvasApiException('Rubric association ID cannot be null');
+            if (!$associationId) {
+                throw new CanvasApiException('Rubric association ID required for update');
             }
 
             $dto = new UpdateRubricAssessmentDTO();
@@ -418,10 +418,8 @@ class RubricAssessment extends AbstractBaseApi
             }
 
             $associationId = $rubricAssociationId ?? $this->rubricAssociationId;
-
-            // Ensure associationId is not null before calling create
-            if ($associationId === null) {
-                throw new CanvasApiException('Rubric association ID cannot be null');
+            if (!$associationId) {
+                throw new CanvasApiException('Rubric association ID required for create');
             }
 
             $dto = new CreateRubricAssessmentDTO();

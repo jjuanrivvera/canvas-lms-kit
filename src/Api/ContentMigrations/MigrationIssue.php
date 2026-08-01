@@ -152,10 +152,6 @@ class MigrationIssue extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint);
         $data = self::parseJsonResponse($response);
 
-        if (!is_array($data)) {
-            throw new CanvasApiException('Invalid response data from API');
-        }
-
         return new self($data);
     }
 
@@ -310,10 +306,6 @@ class MigrationIssue extends AbstractBaseApi
         );
         $response = self::getApiClient()->put($endpoint, ['multipart' => $data->toApiArray()]);
         $issueData = self::parseJsonResponse($response);
-
-        if (!is_array($issueData)) {
-            throw new CanvasApiException('Invalid response data from API');
-        }
 
         return new self($issueData);
     }

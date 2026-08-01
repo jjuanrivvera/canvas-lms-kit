@@ -184,10 +184,6 @@ class ContentMigration extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint);
         $data = self::parseJsonResponse($response);
 
-        if (!is_array($data)) {
-            throw new CanvasApiException('Invalid response data from API');
-        }
-
         return new self($data);
     }
 
@@ -704,6 +700,8 @@ class ContentMigration extends AbstractBaseApi
      * @param string $filePath Path to the file to upload
      * @param resource|null &$fileResource Reference to store the file resource
      *
+     * @param-out resource $fileResource
+     *
      * @throws CanvasApiException
      *
      * @return array<array<string, mixed>> Multipart data array
@@ -720,10 +718,11 @@ class ContentMigration extends AbstractBaseApi
         }
 
         // Open file resource
-        $fileResource = fopen($filePath, 'rb');
-        if (!$fileResource) {
+        $resource = fopen($filePath, 'rb');
+        if (!$resource) {
             throw new CanvasApiException("Failed to open file: {$filePath}");
         }
+        $fileResource = $resource;
 
         // Add file data
         $multipartData[] = [

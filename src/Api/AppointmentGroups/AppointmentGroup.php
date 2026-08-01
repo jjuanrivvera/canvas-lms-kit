@@ -428,23 +428,41 @@ class AppointmentGroup extends AbstractBaseApi
                 throw new CanvasApiException('Title is required to create an appointment group');
             }
 
-            // Map properties to DTO
-            $properties = [
-                'contextCodes', 'subContextCodes', 'title', 'description',
-                'locationName', 'locationAddress',
-                'participantsPerAppointment', 'minAppointmentsPerParticipant',
-                'maxAppointmentsPerParticipant', 'newAppointments',
-                'participantVisibility', 'allowObserverSignup',
-            ];
-
-            foreach ($properties as $property) {
-                if (
-                    property_exists($this, $property) &&
-                    property_exists($dto, $property) &&
-                    $this->{$property} !== null
-                ) {
-                    $dto->{$property} = $this->{$property};
-                }
+            // Map set (non-null) properties onto the DTO. Explicit assignments keep this
+            // type-safe under static analysis; a dynamic property loop widens every value
+            // to the union of all property types and trips PHPStan's assign.propertyType.
+            // contextCodes and title are guaranteed non-null by the guard clauses above.
+            $dto->contextCodes = $this->contextCodes;
+            $dto->title = $this->title;
+            if ($this->subContextCodes !== null) {
+                $dto->subContextCodes = $this->subContextCodes;
+            }
+            if ($this->description !== null) {
+                $dto->description = $this->description;
+            }
+            if ($this->locationName !== null) {
+                $dto->locationName = $this->locationName;
+            }
+            if ($this->locationAddress !== null) {
+                $dto->locationAddress = $this->locationAddress;
+            }
+            if ($this->participantsPerAppointment !== null) {
+                $dto->participantsPerAppointment = $this->participantsPerAppointment;
+            }
+            if ($this->minAppointmentsPerParticipant !== null) {
+                $dto->minAppointmentsPerParticipant = $this->minAppointmentsPerParticipant;
+            }
+            if ($this->maxAppointmentsPerParticipant !== null) {
+                $dto->maxAppointmentsPerParticipant = $this->maxAppointmentsPerParticipant;
+            }
+            if ($this->newAppointments !== null) {
+                $dto->newAppointments = $this->newAppointments;
+            }
+            if ($this->participantVisibility !== null) {
+                $dto->participantVisibility = $this->participantVisibility;
+            }
+            if ($this->allowObserverSignup !== null) {
+                $dto->allowObserverSignup = $this->allowObserverSignup;
             }
 
             $created = self::create($dto);
@@ -591,7 +609,7 @@ class AppointmentGroup extends AbstractBaseApi
 
         return array_map(function ($appointment) use ($fetchFresh) {
             // If fresh data requested and we have an ID, fetch from API
-            if ($fetchFresh && is_array($appointment) && isset($appointment['id'])) {
+            if ($fetchFresh && isset($appointment['id'])) {
                 return CalendarEvent::find($appointment['id']);
             }
 

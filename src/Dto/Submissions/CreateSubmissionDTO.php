@@ -202,7 +202,7 @@ class CreateSubmissionDTO extends AbstractBaseDto implements DTOInterface
         if ($fileIds !== null) {
             // Validate that all file IDs are positive integers
             foreach ($fileIds as $fileId) {
-                if (!is_int($fileId) || $fileId <= 0) {
+                if ($fileId <= 0) {
                     throw new InvalidArgumentException('File IDs must be positive integers');
                 }
             }

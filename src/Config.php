@@ -40,14 +40,14 @@ class Config
     private static string $activeContext = 'default';
 
     /**
-     * @var string|null
+     * @var string
      */
-    private static ?string $apiVersion = 'v1';
+    private static string $apiVersion = 'v1';
 
     /**
-     * @var int|null
+     * @var int
      */
-    private static ?int $timeout = 30;
+    private static int $timeout = 30;
 
     /**
      * @var string|null

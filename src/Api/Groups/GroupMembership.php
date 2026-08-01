@@ -531,8 +531,9 @@ class GroupMembership extends AbstractBaseApi
     public function getUser(): ?User
     {
         if ($this->user === null && $this->userId !== null) {
+            $userId = $this->userId;
             self::checkApiClient();
-            $this->user = User::find($this->userId);
+            $this->user = User::find($userId);
         }
 
         return $this->user;

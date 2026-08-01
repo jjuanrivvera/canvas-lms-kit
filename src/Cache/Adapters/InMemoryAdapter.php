@@ -221,9 +221,7 @@ class InMemoryAdapter implements CacheAdapterInterface
         if (!empty($this->cache)) {
             reset($this->cache);
             $oldestKey = key($this->cache);
-            if ($oldestKey !== null) {
-                $this->removeEntry($oldestKey);
-            }
+            $this->removeEntry($oldestKey);
         }
     }
 

@@ -1458,7 +1458,7 @@ class Assignment extends AbstractBaseApi
         if ($this->allowedExtensions !== null && !empty($this->allowedExtensions)) {
             foreach ($this->allowedExtensions as $extension) {
                 // Basic validation for file extensions
-                if (!is_string($extension) || !preg_match('/^[a-zA-Z0-9]+$/', $extension)) {
+                if (!preg_match('/^[a-zA-Z0-9]+$/', $extension)) {
                     throw new CanvasApiException("Invalid file extension: {$extension}");
                 }
             }
