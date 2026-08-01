@@ -6,6 +6,7 @@ namespace CanvasLMS\Http\Middleware;
 
 use CanvasLMS\Auth\OAuth;
 use CanvasLMS\Config;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -84,7 +85,7 @@ class OAuth2RefreshMiddleware extends AbstractMiddleware
                         },
                         function ($reason) use ($handler, $request, $options) {
                             if ($reason instanceof RequestException) {
-                                $response = $reason->getResponse();
+                                $response = $reason instanceof BadResponseException ? $reason->getResponse() : null;
                                 if ($response && $response->getStatusCode() === 401) {
                                     // Try refreshing token
                                     try {

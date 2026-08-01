@@ -10,7 +10,7 @@ use CanvasLMS\Exceptions\MissingApiKeyException;
 use CanvasLMS\Exceptions\MissingBaseUrlException;
 use CanvasLMS\Http\HttpClient;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\BadResponseException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -268,7 +268,7 @@ class HttpClientRawUrlTest extends TestCase
         $mockErrorResponse->method('getBody')
             ->willReturn($mockErrorStream);
 
-        $exception = new RequestException(
+        $exception = new BadResponseException(
             'Not Found',
             $mockRequest,
             $mockErrorResponse

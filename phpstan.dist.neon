@@ -3,3 +3,11 @@ parameters:
 	paths:
 		- src
 	tmpDir: tmp
+	ignoreErrors:
+		# GuzzleHttp\HandlerStack declares @template only on Guzzle 8, not on Guzzle 7.
+		# Annotating the generic would fail the lowest-deps (Guzzle 7) run, so we ignore
+		# the missing-type-params report and let it match only on the Guzzle 8 run.
+		-
+			message: '#with generic class GuzzleHttp\\HandlerStack does not specify its types#'
+			path: src/Http/HttpClient.php
+			reportUnmatched: false

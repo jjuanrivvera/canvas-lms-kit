@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CanvasLMS\Http\Middleware;
 
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise\Create;
@@ -105,7 +106,7 @@ class RetryMiddleware extends AbstractMiddleware
         }
 
         if ($reason instanceof RequestException) {
-            $response = $reason->getResponse();
+            $response = $reason instanceof BadResponseException ? $reason->getResponse() : null;
             if ($response !== null) {
                 return $this->shouldRetry($attempt, $response, null);
             }

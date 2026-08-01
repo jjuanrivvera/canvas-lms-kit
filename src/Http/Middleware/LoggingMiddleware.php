@@ -226,7 +226,7 @@ class LoggingMiddleware extends AbstractMiddleware
         }
 
         // Add response details if available
-        if ($reason instanceof \GuzzleHttp\Exception\RequestException && $reason->hasResponse()) {
+        if ($reason instanceof \GuzzleHttp\Exception\BadResponseException) {
             $response = $reason->getResponse();
             if ($response !== null) {
                 $context['status_code'] = $response->getStatusCode();
