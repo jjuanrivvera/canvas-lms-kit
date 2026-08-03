@@ -7,6 +7,7 @@ namespace CanvasLMS\Tests\Http\Middleware;
 use CanvasLMS\Config;
 use CanvasLMS\Http\Middleware\OAuth2RefreshMiddleware;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -148,7 +149,7 @@ class OAuth2RefreshMiddlewareTest extends TestCase
 
         // First call 401s, the retried call succeeds
         $this->mockHandler->append(
-            new RequestException(
+            new BadResponseException(
                 'Unauthorized',
                 new Request('GET', '/api/v1/courses'),
                 new Response(401, [], json_encode(['errors' => [['message' => 'Invalid access token']]]))
@@ -196,7 +197,7 @@ class OAuth2RefreshMiddlewareTest extends TestCase
         \CanvasLMS\Auth\OAuth::setHttpClient($mockOAuthClient);
 
         $this->mockHandler->append(
-            new RequestException(
+            new BadResponseException(
                 'Unauthorized',
                 new Request('GET', '/api/v1/courses'),
                 new Response(401)
@@ -230,7 +231,7 @@ class OAuth2RefreshMiddlewareTest extends TestCase
         $this->middleware->configure(['retry_on_401' => false]);
 
         $this->mockHandler->append(
-            new RequestException(
+            new BadResponseException(
                 'Unauthorized',
                 new Request('GET', '/api/v1/courses'),
                 new Response(401)
@@ -316,7 +317,7 @@ class OAuth2RefreshMiddlewareTest extends TestCase
         Config::setOAuthToken('valid_token');
 
         $this->mockHandler->append(
-            new RequestException(
+            new BadResponseException(
                 'Server Error',
                 new Request('GET', '/api/v1/courses'),
                 new Response(500, [], json_encode(['error' => 'internal_server_error']))

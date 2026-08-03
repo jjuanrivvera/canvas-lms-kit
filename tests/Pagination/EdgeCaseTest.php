@@ -9,6 +9,7 @@ use CanvasLMS\Api\Enrollments\Enrollment;
 use CanvasLMS\Config;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
@@ -125,7 +126,7 @@ class EdgeCaseTest extends TestCase
         $mockFirstResponse->method('getHeader')->with('Link')->willReturn([$linkHeader]);
 
         // Second call - rate limited (429)
-        $rateLimitException = new RequestException(
+        $rateLimitException = new BadResponseException(
             'Too Many Requests',
             new Request('GET', '/courses?page=2'),
             new Response(429, ['Retry-After' => '2'])
@@ -176,10 +177,7 @@ class EdgeCaseTest extends TestCase
         // Second page - timeout
         $timeoutException = new RequestException(
             'Connection timeout',
-            new Request('GET', '/courses/1/modules?page=2'),
-            null,
-            null,
-            ['errno' => CURLE_OPERATION_TIMEDOUT]
+            new Request('GET', '/courses/1/modules?page=2')
         );
 
         $this->mockHttpClient->expects($this->once())

@@ -14,6 +14,7 @@ use CanvasLMS\Http\Middleware\MiddlewareInterface;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Pagination\PaginatedResponse;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
@@ -328,8 +329,9 @@ class HttpClient implements HttpClientInterface
         } catch (RequestException $e) {
             $this->logger->error($e->getMessage());
             $errors = [];
-            if ($e->getResponse()) {
-                $body = $e->getResponse()->getBody()->getContents();
+            $response = $e instanceof BadResponseException ? $e->getResponse() : null;
+            if ($response !== null) {
+                $body = $response->getBody()->getContents();
                 if ($body) {
                     $decoded = json_decode($body, true);
                     if (is_array($decoded) && isset($decoded['errors'])) {
@@ -465,8 +467,9 @@ class HttpClient implements HttpClientInterface
         } catch (RequestException $e) {
             $this->logger->error($e->getMessage());
             $errors = [];
-            if ($e->getResponse()) {
-                $body = $e->getResponse()->getBody()->getContents();
+            $response = $e instanceof BadResponseException ? $e->getResponse() : null;
+            if ($response !== null) {
+                $body = $response->getBody()->getContents();
                 if ($body) {
                     $decoded = json_decode($body, true);
                     if (is_array($decoded) && isset($decoded['errors'])) {

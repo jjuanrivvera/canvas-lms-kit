@@ -303,7 +303,7 @@ class RateLimitMiddleware extends AbstractMiddleware
     private function isRateLimitError($reason): bool
     {
         if ($reason instanceof \GuzzleHttp\Exception\RequestException) {
-            $response = $reason->getResponse();
+            $response = $reason instanceof \GuzzleHttp\Exception\BadResponseException ? $reason->getResponse() : null;
             if ($response && $response->getStatusCode() === 403) {
                 // Check for Canvas rate limit indicators
                 if ($response->hasHeader('X-Rate-Limit-Remaining')) {

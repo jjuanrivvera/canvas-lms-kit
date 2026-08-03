@@ -12,6 +12,7 @@ use CanvasLMS\Http\HttpClient;
 use CanvasLMS\Interfaces\HttpClientInterface;
 use CanvasLMS\Traits\ActivityLoggingTrait;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 
@@ -173,7 +174,7 @@ class OAuth
                 'error' => $e->getMessage(),
                 'code' => $e->getCode(),
             ]);
-            $response = $e->getResponse();
+            $response = $e instanceof BadResponseException ? $e->getResponse() : null;
             if ($response) {
                 $error = $response->getBody()->getContents();
             } else {
@@ -266,7 +267,7 @@ class OAuth
 
             return $data;
         } catch (RequestException $e) {
-            $response = $e->getResponse();
+            $response = $e instanceof BadResponseException ? $e->getResponse() : null;
             if ($response) {
                 $error = $response->getBody()->getContents();
             } else {
@@ -356,7 +357,7 @@ class OAuth
                 'error' => $e->getMessage(),
                 'code' => $e->getCode(),
             ]);
-            $response = $e->getResponse();
+            $response = $e instanceof BadResponseException ? $e->getResponse() : null;
             if ($response) {
                 $error = $response->getBody()->getContents();
             } else {
@@ -429,7 +430,7 @@ class OAuth
 
             return $data['session_url'];
         } catch (RequestException $e) {
-            $response = $e->getResponse();
+            $response = $e instanceof BadResponseException ? $e->getResponse() : null;
             if ($response) {
                 $error = $response->getBody()->getContents();
             } else {
