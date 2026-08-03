@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-08-03
+
+### Added
+- **Guzzle 8 support.** The SDK now allows `guzzlehttp/guzzle: ^7.4.5 || ^8.0.0` and is compatible with both major versions. Guzzle 8 moved `getResponse()`/`hasResponse()` off `RequestException` onto `BadResponseException`, so every response access on a request exception is now guarded with `instanceof BadResponseException` — correct on Guzzle 7 and 8 alike.
+
+### Changed
+- **Static analysis upgraded to PHPStan 2** (level 8). Resolved every finding the stricter analyzer surfaced by fixing root causes — removed redundant `is_array`/`instanceof`/dead null comparisons, added real null-safety guards (nullable properties captured into locals after their guard clauses, guarded `foreach`/id lookups), tightened `Config::$apiVersion`/`$timeout` to non-nullable, and made `RateLimitMiddleware` bucket writes shape-complete. No baseline, no suppressions.
+- CI now proves both dependency floors green: **lowest** (Guzzle 7 + PHPStan 1) and **highest** (Guzzle 8 + PHPStan 2), with the full 2500+ test suite passing on each.
+
 ## [1.8.0] - 2026-07-28
 
 ### Added
