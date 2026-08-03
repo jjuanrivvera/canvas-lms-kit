@@ -225,21 +225,25 @@ class LoggingMiddleware extends AbstractMiddleware
             $context['elapsed_time'] = round($elapsed * 1000, 2) . 'ms';
         }
 
-        // Add response details if available
-        if ($reason instanceof \GuzzleHttp\Exception\BadResponseException) {
-            $response = $reason->getResponse();
-            if ($response !== null) {
-                $context['status_code'] = $response->getStatusCode();
-                $context['headers'] = $this->sanitizeHeaders($response->getHeaders());
+        // Add response details if available. The ternary keeps $response typed as
+        // ?ResponseInterface across Guzzle versions (Guzzle 8's BadResponseException
+        // narrows getResponse() to non-null, which would make a direct !== null check
+        // always-true under PHPStan; Guzzle 7 still needs the guard), so one form works
+        // for both the lowest- and highest-deps CI runs.
+        $response = $reason instanceof \GuzzleHttp\Exception\BadResponseException
+            ? $reason->getResponse()
+            : null;
+        if ($response !== null) {
+            $context['status_code'] = $response->getStatusCode();
+            $context['headers'] = $this->sanitizeHeaders($response->getHeaders());
 
-                $body = (string) $response->getBody();
-                if ($body) {
-                    $maxLength = $this->getConfig('max_body_length', 1000);
-                    if (strlen($body) > $maxLength) {
-                        $context['response_body'] = substr($body, 0, $maxLength) . '... (truncated)';
-                    } else {
-                        $context['response_body'] = $body;
-                    }
+            $body = (string) $response->getBody();
+            if ($body) {
+                $maxLength = $this->getConfig('max_body_length', 1000);
+                if (strlen($body) > $maxLength) {
+                    $context['response_body'] = substr($body, 0, $maxLength) . '... (truncated)';
+                } else {
+                    $context['response_body'] = $body;
                 }
             }
         }
