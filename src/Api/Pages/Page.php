@@ -994,10 +994,12 @@ class Page extends AbstractBaseApi
             throw new CanvasApiException('Page URL is required for deletion');
         }
 
+        $url = $this->url;
+
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/pages/%s', self::getContextCourseId(), urlencode($this->url));
+        $endpoint = sprintf('courses/%d/pages/%s', self::getContextCourseId(), urlencode($url));
         self::getApiClient()->delete($endpoint);
 
         return $this;
@@ -1229,6 +1231,8 @@ class Page extends AbstractBaseApi
             throw new CanvasApiException('Page URL is required');
         }
 
+        $url = $this->url;
+
         self::checkCourse();
         self::checkApiClient();
 
@@ -1236,7 +1240,7 @@ class Page extends AbstractBaseApi
         $endpoint = sprintf(
             'courses/%d/pages/%s/revisions/%s',
             self::getContextCourseId(),
-            rawurlencode($this->url),
+            rawurlencode($url),
             $revisionId
         );
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
@@ -1260,13 +1264,15 @@ class Page extends AbstractBaseApi
             throw new CanvasApiException('Page URL is required');
         }
 
+        $url = $this->url;
+
         self::checkCourse();
         self::checkApiClient();
 
         $endpoint = sprintf(
             'courses/%d/pages/%s/revisions/%d',
             self::getContextCourseId(),
-            rawurlencode($this->url),
+            rawurlencode($url),
             $revisionId
         );
         $response = self::getApiClient()->post($endpoint);
@@ -1327,10 +1333,12 @@ class Page extends AbstractBaseApi
             throw new CanvasApiException('Page URL is required');
         }
 
+        $url = $this->url;
+
         self::checkCourse();
         self::checkApiClient();
 
-        $endpoint = sprintf('courses/%d/pages/%s/revisions', self::getContextCourseId(), rawurlencode($this->url));
+        $endpoint = sprintf('courses/%d/pages/%s/revisions', self::getContextCourseId(), rawurlencode($url));
         $response = self::getApiClient()->get($endpoint);
         $revisionsData = self::parseJsonResponse($response);
 

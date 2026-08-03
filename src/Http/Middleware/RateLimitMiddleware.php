@@ -241,8 +241,9 @@ class RateLimitMiddleware extends AbstractMiddleware
     private function consumeFromBucket(string $bucketKey, int $cost): void
     {
         $bucket = $this->getBucket($bucketKey);
-        self::$buckets[$bucketKey]['remaining'] = max(0, $bucket['remaining'] - $cost);
-        self::$buckets[$bucketKey]['cost'] = $cost;
+        $bucket['remaining'] = max(0, $bucket['remaining'] - $cost);
+        $bucket['cost'] = $cost;
+        self::$buckets[$bucketKey] = $bucket;
     }
 
     /**

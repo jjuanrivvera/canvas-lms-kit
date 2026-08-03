@@ -264,10 +264,6 @@ class Section extends AbstractBaseApi
         $response = self::getApiClient()->get($endpoint, ['query' => $params]);
         $data = self::parseJsonResponse($response);
 
-        if (!is_array($data)) {
-            return [];
-        }
-
         return array_map(fn ($item) => new self($item), $data);
     }
 
@@ -288,10 +284,6 @@ class Section extends AbstractBaseApi
         $endpoint = sprintf('courses/%d/sections', self::getContextCourseId());
         $paginatedResponse = self::getApiClient()->getPaginated($endpoint, ['query' => $params]);
         $data = $paginatedResponse->all();
-
-        if (!is_array($data)) {
-            return [];
-        }
 
         return array_map(fn ($item) => new self($item), $data);
     }

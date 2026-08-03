@@ -188,14 +188,14 @@ class CreateCalendarEventDTO extends AbstractBaseDto
         // Handle child event data
         if ($this->childEventData !== null) {
             foreach ($this->childEventData as $identifier => $childData) {
-                if (isset($childData['start_at']) && $childData['start_at'] instanceof DateTime) {
+                if (isset($childData['start_at'])) {
                     $data[] = [
                         'name' => "calendar_event[child_event_data][$identifier][start_at]",
                         'contents' => $childData['start_at']->format(DateTime::ATOM),
                     ];
                 }
 
-                if (isset($childData['end_at']) && $childData['end_at'] instanceof DateTime) {
+                if (isset($childData['end_at'])) {
                     $data[] = [
                         'name' => "calendar_event[child_event_data][$identifier][end_at]",
                         'contents' => $childData['end_at']->format(DateTime::ATOM),

@@ -27,13 +27,13 @@ class UpdateMediaTracksDTO extends AbstractBaseDto
         'metadata',
     ];
 
-    /** @var array<array<string, mixed>> */
+    /** @var array<mixed> */
     public array $tracks = [];
 
     /**
      * Constructor
      *
-     * @param array<array<string, mixed>> $tracks Array of track data
+     * @param array<mixed> $tracks Array of track data (validated at runtime)
      */
     public function __construct(array $tracks = [])
     {
@@ -90,7 +90,7 @@ class UpdateMediaTracksDTO extends AbstractBaseDto
     /**
      * Convert the DTO to an array for API request
      *
-     * @return array<array<string, mixed>>
+     * @return array<mixed>
      */
     public function toArray(): array
     {

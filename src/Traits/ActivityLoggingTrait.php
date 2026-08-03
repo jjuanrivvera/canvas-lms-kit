@@ -100,9 +100,7 @@ trait ActivityLoggingTrait
         ], $context);
 
         // Add stack trace for non-production environments (can be configured)
-        if (Config::getLogger() !== null) {
-            $enrichedContext['stack_trace'] = $exception->getTraceAsString();
-        }
+        $enrichedContext['stack_trace'] = $exception->getTraceAsString();
 
         $logger->error("API Error in {$operation}: {$exception->getMessage()}", $enrichedContext);
     }

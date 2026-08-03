@@ -955,7 +955,6 @@ class Module extends AbstractBaseApi
             // Check if item is completed based on completion_requirement
             if (
                 isset($item->completionRequirement) &&
-                $item->completionRequirement instanceof \CanvasLMS\Objects\CompletionRequirement &&
                 $item->completionRequirement->completed === true
             ) {
                 $completedCount++;
@@ -995,7 +994,7 @@ class Module extends AbstractBaseApi
         self::checkCourse();
 
         $prerequisites = [];
-        foreach ($this->prerequisiteModuleIds as $moduleId) {
+        foreach ($this->prerequisiteModuleIds ?? [] as $moduleId) {
             try {
                 $prerequisites[] = self::find($moduleId);
             } catch (\Exception $e) {
