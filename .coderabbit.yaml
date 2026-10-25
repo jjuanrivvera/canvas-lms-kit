@@ -1,19 +1,63 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
-# CodeRabbit config — PHP library.
+# CodeRabbit is the only automated pull request reviewer.
+# Chill keeps reviews on design and bugs; CI already enforces PSR-12,
+# PHP-CS-Fixer, and PHPStan level 8.
+# Skip WIP, release:, and build(deps) titles on purpose. Dependabot opens
+# dependency PRs as "build(deps): ...". Those bumps are mechanical, and CI
+# (tests, PHPStan, coding standards, composer audit) already gates them.
+# Do not add ignore_usernames for bots: a non-dependency bot PR should
+# still be reviewed. @coderabbitai review still runs on a skipped title.
 reviews:
   profile: chill
   poem: false
   sequence_diagrams: false
   auto_review:
-    ignore_title_keywords: ["WIP", "release:", "build(deps)"]
+    ignore_title_keywords:
+      - "WIP"
+      - "release:"
+      - "build(deps)"
   path_filters:
     - "!vendor/**"
     - "!**/*.lock"
+    - "!build/**"
+    - "!.phpdoc/**"
   path_instructions:
     - path: "**/*.php"
       instructions: |
-        Follow AGENTS.md / CONTRIBUTING.md. Comments explain WHY, not WHAT. PSR-12. No secrets in code.
-        Flag SQL built by string concatenation, unvalidated input, and missing type hints/return types.
+        PHP 8.1+ library. declare(strict_types=1). PSR-12. Typed properties, parameters, and return types. PHPDoc on public methods explains why, not what.
+        Do not introduce API keys, OAuth secrets, or tokens. Flag error suppression with @ and behavior changes that have no matching PHPUnit test.
+        This SDK does not use a database. Do not suggest SQL or an ORM.
+    - path: "src/Api/**"
+      instructions: |
+        Active Record resources: static create/find/get/update and instance save/delete. Direct get() and find() take the resource id and a query-params array, not a context id.
+        Resources that live in more than one context default to Config::getAccountId() on direct calls. Course or user scope belongs on an instance method or fetchByContext().
+        Files default to /users/self/files (Canvas has no account-level files). Calendar events use context_codes such as account_1 or course_123.
+        A resource with its own Canvas API page gets its own namespace under src/Api. Read-only payloads with no endpoint belong in src/Objects.
+    - path: "src/Dto/**"
+      instructions: |
+        Request DTOs extend AbstractBaseDto and send Canvas multipart through toApiArray(). The API accepts a caller array and converts it to a DTO internally.
+        Booleans must stay the strings 'true' and 'false'. Guzzle turns a boolean false into an empty multipart field. Do not put credentials in the body.
+    - path: "src/Http/**"
+      instructions: |
+        HTTP goes through HttpClientInterface and must keep working on guzzlehttp/guzzle ^7.4.5 and ^8. Guzzle 8 moved response accessors onto BadResponseException.
+        Do not log Authorization headers, API keys, OAuth client secrets, or refresh tokens. Middleware must not drop credentials or disable retry and rate limiting.
+    - path: "src/Auth/**"
+      instructions: |
+        Do not log OAuth client secrets or tokens, and do not copy them into exception messages beyond the Canvas error code. A caller-set Authorization header must not be replaced by the configured credential.
+    - path: "src/Cache/**"
+      instructions: |
+        Cached Canvas responses can contain personal data. Filesystem cache entries stay owner-only (0700 directories, 0600 files). Do not log response bodies.
+    - path: "src/Objects/**"
+      instructions: |
+        Read-only response objects. No HTTP calls and no Canvas endpoints. Fields Canvas omits must be nullable so they are not read before initialization.
+    - path: "tests/**"
+      instructions: |
+        PHPUnit 10. Mirror the src/ layout. Mock HttpClientInterface. Tests must not call Canvas or the network. Cover the failure path when request or error handling changes.
+    - path: ".github/workflows/**"
+      instructions: |
+        Keep GITHUB_TOKEN permissions minimal and do not print secrets. CodeRabbit is the only automated pull request reviewer. .github/workflows/claude.yml runs only when a maintainer mentions @claude; do not add another review workflow on pull_request.
 knowledge_base:
   code_guidelines:
     enabled: true
+    filePatterns:
+      - "CONTRIBUTING.md"
